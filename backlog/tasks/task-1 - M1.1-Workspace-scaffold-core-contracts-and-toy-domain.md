@@ -4,7 +4,7 @@ title: M1.1 Workspace scaffold, core contracts and toy domain
 status: In Review
 assignee: []
 created_date: '2026-11-23T08:02:41Z'
-updated_date: '2026-11-23T08:19:21Z'
+updated_date: '2026-11-23T08:24:15Z'
 labels:
   - core
   - contracts
@@ -197,7 +197,8 @@ Worker: dispatch ctx_7f85090a0f4c, worktree task-1
 ## Final Summary
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
-Worker (Sonnet, dispatch ctx_7f85090a0f4c, branch boom/task-1, 4 commits 81ff0a8..682ef24): uv workspace scaffold; lensgraph types/node/plan/hashing/executor.base/store.base+memory; toy strain domain S1-S3. ACs 1-5 met. Coordinator re-ran checks: pytest 27 passed, ruff clean, pyright 0 errors.
-Coordinator review: interfaces match the spec. One fix round applied: content_hash no longer falls back to repr (it handles Series/ndarray/date/bytes and raises TypeError otherwise); validate_output no longer leaks AttributeError; InMemoryRunIndex.finish_run tolerates an unknown run; pytest uses importlib mode with pythonpath for toy.
-Open points (spec-dictated or deferred): (1) memo_key uses the literal 'fetch' when hash_source=False, so a version bump on a non-source-hashed memoized node does not invalidate it. (2) RunResult/ExecutionPlan dicts keyed by NodeKey are not JSON-serialisable. (3) memo_key uses node.model_dump_json(), which is unstable for set/frozenset params. (4) InMemoryBlobStore stores references, not copies. (5) Object-dtype ndarrays and the unframed raw bytes in the bytes branch are weak spots in hashing. (6) Commit 427478b has a broken hashing.py that 32356fe fixes; squash on landing. (7) Worker rulings: 1 and 1.0 hash differently; an output=float node rejects int.
+Worker (Sonnet, dispatch ctx_7f85090a0f4c, branch boom/task-1, 6 commits 81ff0a8..7a42458): uv workspace scaffold; lensgraph types/node/plan/hashing/executor.base/store.base+memory; toy strain domain S1-S3. ACs 1-5 met. Coordinator re-ran checks: pytest 28 passed, ruff clean, pyright 0 errors.
+Coordinator review: interfaces match the spec. Fix round 1: content_hash no longer falls back to repr (it handles Series/ndarray/date/bytes and raises TypeError otherwise); validate_output no longer leaks AttributeError; InMemoryRunIndex.finish_run tolerates an unknown run; pytest uses importlib mode with pythonpath for toy.
+Fix round 2 (asked for by the human): BaseModel hashing feeds fields in sorted order instead of model_dump_json, so set/frozenset fields hash stably across processes (proved by a subprocess test with PYTHONHASHSEED 1 vs 2). memo_key feeds a dict of the node's param fields instead of model_dump_json. This deviates from the task spec's memo_key rule; core.md line 30 is updated to match. Worker ruling: memo_key hashes params without the class identity, so a FetchNode subclass with a different body keeps its key; node.name and code_version are already in the key.
+Open points: (1) memo_key uses the literal 'fetch' when hash_source=False, so a version bump on a non-source-hashed memoized node does not invalidate it (spec-dictated). (2) RunResult/ExecutionPlan dicts keyed by NodeKey are not JSON-serialisable (spec-dictated). (3) InMemoryBlobStore stores references, not copies. (4) Object-dtype ndarrays and the unframed raw bytes in the bytes branch are weak spots in hashing. (5) Commits 427478b and b39a3da are not green on their own; squash on landing. (6) Worker rulings: 1 and 1.0 hash differently; an output=float node rejects int.
 <!-- SECTION:FINAL_SUMMARY:END -->
