@@ -1,10 +1,10 @@
 ---
 id: TASK-8
 title: M2.3 AI lens with citation guard rail and model profiles
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-23T08:02:58Z'
-updated_date: '2026-11-23T10:40:21Z'
+updated_date: '2026-11-23T10:47:40Z'
 labels:
   - core
 milestone: m-1
@@ -125,3 +125,12 @@ Semantics:
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_0aee45aac7a5, worktree task-8
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker (Sonnet, dispatch ctx_0aee45aac7a5, branch boom/task-8, 2 commits b8db94c..1213b0c): llm.py (ModelProfile, DEFAULT_PROFILES dev/quality/local, ProfileRegistry with fingerprint and test overrides), context.py (render_context, unavailable_inputs), ai.py (AIAssessmentOut, guard_rail, AINode with memo_salt, one model call per run), toy SafetyLens with two prompt variants, conftest (autouse ALLOW_MODEL_REQUESTS=False, scripted_model); pydantic-ai-slim[anthropic,openai]==2.71.0 and jinja2 added; core.md updated. ACs 1-4 met (test_first_answer_bad_citation_retried_then_ok, test_unknown_flag_code_rejected, test_ok_without_stance_or_conviction_retried, test_retries_exhausted_fails_node, test_citation_case_variant_rejected (Review Focus 4); test_dev_profile_is_default_and_cheapest, test_quality_profile_*, test_local_profile_requires_env; test_profile_change_invalidates_ai_memo_only, test_variant_changes_prompt_hash; test_no_real_model_requests_allowed). Coordinator re-ran checks: pytest 186 passed, ruff clean, pyright 0 errors; merges cleanly with boom/task-7. Checked that 'thinking' is a valid unified ModelSettings key in pydantic-ai 2.71.
+Coordinator review, one fix round: an undeclared prompt variant is now a ParamsError at plan time (it used to fall back silently to the default prompt). Reviewed by hand (ai, llm, context in full); the code-review skill was not run.
+Worker rulings: (1) core.md edited (DoD). (2) The local profile model is the sentinel 'env:LENSGRAPH_LOCAL_MODEL', resolved in ProfileRegistry.get with os.environ. (3) When retries run out, UnexpectedModelBehavior is re-raised with the last rejection appended. (4) Empty lists and Absent inputs render NOT AVAILABLE and are removed from the citable set, so a legitimately empty list is uncitable. (5) Small helpers describe_model() and unavailable_inputs(). (7) The guard rail's no-cites check is unreachable (the schema already requires min_length=1) and is kept as a safety net.
+Open points: an unknown profile name fails per candidate at run time, not at plan time (the registry is a run-time service). Input text (e.g. news) goes into prompts unescaped; the citation guard rail limits damage, but prompt injection should be reviewed when real text sources arrive (M6).
+<!-- SECTION:FINAL_SUMMARY:END -->
