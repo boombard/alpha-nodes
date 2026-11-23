@@ -39,6 +39,7 @@ Deferred from TASK-9 (human decision, 2026-11-23): TASK-9 ships the simple Shrun
    - Manual `overlap_overrides: [[lens_a, lens_b, value]]` for dependencies the graph can't see (same vendor, same news feed).
    - The dossier records each lens's discount and its source (structural, measured, override).
 2. **Configurable veto caps** replacing VetoAggregator's fixed -2: rules by flag code, or by lens + stance + conviction, each with a `cap` on overall stance. The dossier records which rule applied and the citing verdict.
+2a. **Bayesian k-shrink as an alternative policy:** `overall = Σw·s / (Σw + k)`, the M2 original. It was replaced as the default because a fixed k over-shrinks small panels; if revived, scale k with the panel (`k = κ·W_max`) and fit κ in calibration.
 3. **Subjective-logic aggregator** as an optional, pluggable alternative: map (stance_mean, conviction, coverage) to evidence counts; weighted or averaging fusion; report expected value, uncertainty and conflict alongside the default. Compare both on the toy panel and the worked examples before promoting either.
 4. **Calibration (needs outcomes, M8):** per-lens mapping from stance to realised outcome; a combiner shrunk toward equal weights; recalibrated output; always validated against the equal-weight baseline out of sample.
 

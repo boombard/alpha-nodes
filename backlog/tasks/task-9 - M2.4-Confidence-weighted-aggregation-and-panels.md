@@ -1,10 +1,10 @@
 ---
 id: TASK-9
 title: M2.4 Confidence-weighted aggregation and panels
-status: In Review
+status: In Progress
 assignee: []
 created_date: '2026-11-23T08:02:59Z'
-updated_date: '2026-11-23T23:29:04Z'
+updated_date: '2026-11-23T23:43:32Z'
 labels:
   - core
 milestone: m-1
@@ -54,7 +54,9 @@ def panel_registry(panel: Panel, registry: NodeRegistry,
 def dossiers(result: RunResult) -> list[Dossier]     # in candidate order
 # run.py: RunSpec.panel: Panel | None = None; when set and targets empty -> targets = [panel.aggregator]
 ```
-Formula, applied to ok verdicts only:
+**Formula changed 2026-11-24 (human decision): evidence share replaces the k-shrink**, because a fixed k over-shrank small panels and made results depend on panel size. `overall = direction × evidence_share`, with `evidence_share = Σw / W_max`. See core.md, Verdicts and dossiers. The k version below is kept for history; TASK-16 may offer it as an alternative policy.
+
+Original formula, applied to ok verdicts only:
 - weight: `w_i = lens_weights.get(lens, 1) * coverage_i * conviction_factors[conviction_i]`
 - overall stance: `overall = Σ w_i·s_i / (Σ w_i + k)`, or `None` if there are no ok verdicts
 - `s_i` is the verdict's `stance_mean` (added by TASK-6's follow-up; the LensNode template sets it to `float(stance)` when a lens doesn't supply one, so the worked example below is unchanged).
@@ -91,7 +93,7 @@ Formula, applied to ok verdicts only:
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 ShrunkMeanAggregator matches the worked example exactly
+- [ ] #1 ShrunkMeanAggregator matches the worked example exactly (evidence-share formula, decided 2026-11-24: direction 1.181818, evidence_share 0.6875, overall 0.8125)
 - [ ] #2 All-failed/abstained candidates give overall None, confidence 0 without error
 - [ ] #3 Thin coverage lowers confidence; VetoAggregator forces -2 on veto flags
 - [ ] #4 Toy panel e2e (growth + safety lens) produces correct dossiers and caches on rerun
@@ -109,6 +111,8 @@ Formula, applied to ok verdicts only:
 
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_e5b1bf3221d6, worktree task-9
+
+Back to In Progress (human decision, 2026-11-24): default aggregation switched to evidence share (overall = direction x evidence_share); Dossier gains direction and evidence_share; k removed. Sent to the worker.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
