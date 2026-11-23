@@ -1,10 +1,10 @@
 ---
 id: TASK-7
 title: M2.2 Deterministic lens with scored components
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-23T08:02:58Z'
-updated_date: '2026-11-23T10:42:55Z'
+updated_date: '2026-11-23T23:24:15Z'
 labels:
   - core
 milestone: m-1
@@ -77,17 +77,17 @@ Semantics of `assess`:
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 LinearScorer, Component and DeterministicLens behave per thresholds and conviction margins; stance_mean is the monotone interpolation of the score
-- [ ] #2 Missing components skipped with renormalised weights; none available abstains
-- [ ] #3 Toy GrowthLens produces ok verdicts citing growth_rate and a failed verdict for S3
+- [x] #1 LinearScorer, Component and DeterministicLens behave per thresholds and conviction margins; stance_mean is the monotone interpolation of the score
+- [x] #2 Missing components skipped with renormalised weights; none available abstains
+- [x] #3 Toy GrowthLens produces ok verdicts citing growth_rate and a failed verdict for S3
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -103,4 +103,5 @@ Worker (Sonnet, dispatch ctx_8b27405c0ca8, branch boom/task-7, 2 commits ff51744
 Coordinator review, one fix round: unknown or negative weight_overrides keys raise ParamsError at build_plan (no silent typos); zero total weight abstains instead of dividing by zero; LinearScorer rejects hi == lo; GrowthLens docstring corrected.
 Rulings: (1) round(stance_mean) == stance fails at exact threshold ties (e.g. score -0.6 gives stance -1 and mean -1.5; Python rounds to -2). The coordinator's spec claim was wrong there, so the monotonicity test skips exact half-integer means. (2) Bools and non-numeric values are unusable and skipped; an 'input.field' source resolves only on model inputs. (3) GrowthLens uses LinearScorer(lo=-0.1, hi=0.3). (4) The worker edited core.md (not in the Files list; the DoD requires it). (5) A total weight <= 0 abstains.
 Open points: Component.weight itself may still be negative (only overrides are checked); low impact, since components are code, not config.
+Landed da62391..da62391 on main (worker commits squashed into one).
 <!-- SECTION:FINAL_SUMMARY:END -->
