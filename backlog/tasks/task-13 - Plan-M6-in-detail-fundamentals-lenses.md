@@ -21,6 +21,8 @@ ordinal: 13000
 <!-- SECTION:DESCRIPTION:BEGIN -->
 **Note from the scoring research (2026-11-23):** LLMs drift toward analyst ratings placed in their context (reported herding; weak evidence, but cheap to guard). Don't feed analyst consensus or price targets into an AI lens's context unless that is the lens's deliberate purpose, and record the choice in the lens's docstring.
 
+**Provider resilience (noted 2026-11-24):** real runs will hit provider outages; we saw repeated 529 Overloaded responses during M2. Consider pydantic-ai's `FallbackModel` per profile, e.g. Haiku via the Anthropic API, then via another provider. If adopted: provenance must record the model that actually answered (not the first in the chain), the profile fingerprint must cover the whole chain, and a run must be able to forbid fallback when comparability across candidates matters.
+
 Sketched tasks:
 - M6.1 contracts: canonical `fundamentals`, `filings_text`, `news` schemas with field kinds; money/currency calc helpers that refuse mixed currencies without fx.
 - M6.2 `EdgarProvider` (companyfacts XBRL, ticker->CIK map, curated tag map, filing dates, 10-K sections; SEC User-Agent from settings). [parallel]

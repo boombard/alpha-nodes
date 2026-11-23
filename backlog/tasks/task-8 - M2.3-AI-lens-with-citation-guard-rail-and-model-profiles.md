@@ -1,10 +1,10 @@
 ---
 id: TASK-8
 title: M2.3 AI lens with citation guard rail and model profiles
-status: In Review
+status: In Progress
 assignee: []
 created_date: '2026-11-23T08:02:58Z'
-updated_date: '2026-11-23T10:47:40Z'
+updated_date: '2026-11-23T23:07:29Z'
 labels:
   - core
 milestone: m-1
@@ -34,18 +34,18 @@ Consumes (task-6): `LensNode`, `LensAssessment`, `Claim`, `Flag`, `Stance`, `Con
 Produces:
 ```python
 # llm.py
-class ModelProfile(BaseModel):
+class LLMProfile(BaseModel):   # renamed from ModelProfile 2026-11-24 (clashes with pydantic_ai.profiles.ModelProfile)
     name: str; model: str; settings: dict[str, Any] = {}
     output_mode: Literal["tool", "native", "prompted"] = "tool"; max_retries: int = 2
-DEFAULT_PROFILES: dict[str, ModelProfile]
+DEFAULT_PROFILES: dict[str, LLMProfile]
 #   dev     -> model="anthropic:claude-haiku-5-5", settings={"thinking": "low"}
 #   quality -> model="anthropic:claude-sonnet-5-5", settings={"thinking": "medium"}
 #   local   -> model from settings env LENSGRAPH_LOCAL_MODEL (e.g. "ollama:qwen3:8b"), output_mode="prompted";
 #              resolving it when unset raises ValueError naming the env var
 class ProfileRegistry:
-    def __init__(self, profiles: Mapping[str, ModelProfile] | None = None,
+    def __init__(self, profiles: Mapping[str, LLMProfile] | None = None,
                  model_overrides: Mapping[str, Any] | None = None) -> None   # override: profile name -> pydantic-ai Model instance
-    def get(self, name: str) -> ModelProfile
+    def get(self, name: str) -> LLMProfile
     def model_for(self, name: str) -> Any               # override instance, else the profile's model string
     def fingerprint(self, name: str) -> str             # content_hash of model id/override type + settings + output_mode
 # context.py
@@ -124,6 +124,8 @@ Semantics:
 
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_0aee45aac7a5, worktree task-8
+
+Back to In Progress (human request, 2026-11-24): rename ModelProfile to LLMProfile (clash with pydantic_ai.profiles.ModelProfile) and add per-profile UsageLimits. Cost via genai-prices noted in TASK-10; FallbackModel noted in TASK-13.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
