@@ -1,10 +1,10 @@
 ---
 id: TASK-3
 title: M1.3 Asyncio executor with failure semantics and memoization
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-23T08:02:42Z'
-updated_date: '2026-11-23T08:38:12Z'
+updated_date: '2026-11-23T08:42:33Z'
 labels:
   - core
 milestone: m-0
@@ -100,3 +100,12 @@ Semantics (per planned node, one asyncio task awaiting its deps' completion even
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_2989043fe59e, worktree task-3
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker (Sonnet, dispatch ctx_2989043fe59e, branch boom/task-3, 2 commits c4a32a4..8c7965b): AsyncioExecutor (one asyncio task per node instance; assemble, check, memo, run, record) plus ResourceLimit and ResourceLimiter. ACs 1-5 met (failure_skips_dependents, output_contract_violation, optional_failed_input, check_inputs, recovery_hook, memo_hit, early_cutoff, failures_not_memoized, bypass_memo, sync_nodes_concurrently, resource_limit_concurrency_one, global_failure_aborts, test_limits::test_per_second_rate). Coordinator re-ran checks: pytest 45 passed, ruff clean, pyright 0 errors.
+Coordinator review: the pipeline order and failure semantics match the spec. A probe found a race: a GlobalFailure in a node with dependents raised KeyError instead of RunAborted in 12 of 200 runs. Fixed in one round: the done event is set only after the result is recorded, and GlobalFailure is preferred when choosing the error. A regression test runs the case 100 times, and the probe now gives 200 of 200 RunAborted. Reviewed by hand plus the probe; the code-review skill was not run.
+Worker rulings: (1) the rate limit is even pacing (starts spaced 1/per_second apart), not a burst bucket; there is no aiolimiter dependency. (2) The limiter and semaphores are built per execute(), because asyncio primitives are loop-bound. (3) The resource slot is taken before the global max_concurrency semaphore, to avoid hold-and-wait. (4) check_inputs runs before the memo lookup; input hashes reuse the upstream output hashes. (5) Recovered values are blob-stored but never memoized. (6) Non-Global exceptions escaping a node task (executor bugs) are re-raised after cancelling the rest.
+Open points: sync nodes in threads keep running after an abort (threads can't be cancelled). NodeContext.as_of is not set by the executor yet (no as_of in the plan until M8). If record_node or save_memo raises, the error escapes as an executor error, not a node failure.
+<!-- SECTION:FINAL_SUMMARY:END -->
