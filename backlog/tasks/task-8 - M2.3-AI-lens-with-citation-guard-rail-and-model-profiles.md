@@ -1,10 +1,10 @@
 ---
 id: TASK-8
 title: M2.3 AI lens with citation guard rail and model profiles
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-23T08:02:58Z'
-updated_date: '2026-11-23T23:08:16Z'
+updated_date: '2026-11-23T23:24:16Z'
 labels:
   - core
 milestone: m-1
@@ -106,18 +106,18 @@ Semantics:
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Invalid citations, unknown flag codes and incomplete ok answers trigger ModelRetry; exhausted retries fail the node
-- [ ] #2 dev profile is the default (anthropic:claude-haiku-5-5, thinking low); local (Ollama) and quality profiles exist
-- [ ] #3 Profile fingerprint and prompt hash are part of the AI memo key and provenance
-- [ ] #4 No test can make a real model request (ALLOW_MODEL_REQUESTS=False)
+- [x] #1 Invalid citations, unknown flag codes and incomplete ok answers trigger ModelRetry; exhausted retries fail the node
+- [x] #2 dev profile is the default (anthropic:claude-haiku-5-5, thinking low); local (Ollama) and quality profiles exist
+- [x] #3 Profile fingerprint and prompt hash are part of the AI memo key and provenance
+- [x] #4 No test can make a real model request (ALLOW_MODEL_REQUESTS=False)
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -136,4 +136,5 @@ Coordinator review, one fix round: an undeclared prompt variant is now a ParamsE
 Round 2 (asked for by the human after a pydantic-ai feature check): ModelProfile renamed to LLMProfile (it clashed with pydantic_ai.profiles.ModelProfile). Profiles carry usage_limits (UsageCaps, converted to pydantic-ai UsageLimits per call): dev and quality get 4 requests and 50k tokens, local 4 requests. Exceeding a limit fails the node with no fallback; the limits are in the fingerprint. Tests cover the defaults, fingerprint sensitivity and a node failing after 2 calls with request_limit=2 despite max_retries=5. Round-2 rulings: UsageCaps is a small frozen pydantic model rather than UsageLimits itself (keeps profiles hashable). Limits are not in provenance (no field; model_settings is for model settings). Default request_limit is the literal 4 (2 retries + 2), so a custom max_retries on a default profile doesn't move it; core.md's 'max_retries + 2' describes the defaults.
 Worker rulings: (1) core.md edited (DoD). (2) The local profile model is the sentinel 'env:LENSGRAPH_LOCAL_MODEL', resolved in ProfileRegistry.get with os.environ. (3) When retries run out, UnexpectedModelBehavior is re-raised with the last rejection appended. (4) Empty lists and Absent inputs render NOT AVAILABLE and are removed from the citable set, so a legitimately empty list is uncitable. (5) Small helpers describe_model() and unavailable_inputs(). (7) The guard rail's no-cites check is unreachable (the schema already requires min_length=1) and is kept as a safety net.
 Open points: an unknown profile name fails per candidate at run time, not at plan time (the registry is a run-time service). Input text (e.g. news) goes into prompts unescaped; the citation guard rail limits damage, but prompt injection should be reviewed when real text sources arrive (M6).
+Landed d1de69d..d1de69d on main (worker commits squashed into one).
 <!-- SECTION:FINAL_SUMMARY:END -->
