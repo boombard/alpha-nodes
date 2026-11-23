@@ -1,10 +1,10 @@
 ---
 id: TASK-6
 title: M2.1 Verdict models, LensNode template, coverage and citations
-status: In Review
+status: In Progress
 assignee: []
 created_date: '2026-11-23T08:02:58Z'
-updated_date: '2026-11-23T09:11:17Z'
+updated_date: '2026-11-23T09:39:43Z'
 labels:
   - core
   - contracts
@@ -137,6 +137,8 @@ Semantics:
 
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_4946200e3cf6, worktree task-6
+
+Back to In Progress (human approved 2026-11-23): add stance_mean, stance_spread and Provenance.stance_samples before landing, so AI sampling (TASK-8) and interpolated thresholds (TASK-7) have somewhere to record them, and the aggregator uses stance_mean. Sent to the worker.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

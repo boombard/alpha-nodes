@@ -269,6 +269,38 @@ in config and are selected per run (`llm_profile: dev`) or per lens.
 - Conviction comes from the distance of the score to the nearest threshold (configurable).
 - Claims are generated from templates per component, citing the calc fields used.
 
+### Possible future: fuzzy rule bases (not decided)
+
+Recorded 2026-11-23 after a research pass; see TASK-16 for the related aggregation work.
+
+- **What we'd already have isn't really fuzzy logic.** Smoothing stance thresholds with
+  overlapping triangular memberships whose degrees sum to 1, and taking the weighted average,
+  is a one-input, zero-order Takagi-Sugeno system. Its arithmetic collapses to piecewise-linear
+  interpolation between threshold centres (`numpy.interp`). If we adopt it, call it
+  "interpolated thresholds"; it needs no fuzzy library or vocabulary.
+- **Where real fuzzy logic could earn its place:** combining components *inside* a
+  deterministic lens when they interact, which a weighted sum can't express. Example:
+  ```
+  IF margin_trend is falling AND leverage is high THEN stance is very negative
+  IF margin_trend is falling AND leverage is low  THEN stance is mildly negative
+  ```
+  This means "leverage only matters when margins are falling". Domains where experts can
+  state such rules are the likeliest first users; the strain domain is a better candidate
+  than finance.
+- **Not as the cross-lens aggregator.** Membership degrees aren't probabilities, there is no
+  standard treatment of missing inputs, and rule bases grow combinatorially with the number
+  of lenses. Coverage, abstention and conflict are better handled by the aggregation work in
+  TASK-16.
+- **Costs and evidence.** Rule bases and membership shapes are hand-tuned, which adds
+  arbitrary parameters. We found no out-of-sample evidence that fuzzy MCDM or fuzzy inference
+  beats simple baselines for stock rating; most papers validate by rank correlation or on demo
+  data. Hüllermeier's critique ("From knowledge-based to data-driven modeling of fuzzy
+  rule-based systems", arXiv 1712.00646) covers rule explosion and tuning.
+- **If tried:** keep it inside one deterministic lens behind its `assess`, so the verdict
+  contract doesn't change. Use `simpful` (AFL licence; Mamdani and Sugeno), not `pyFUME`
+  (reported GPL-3.0). Compare it against the weighted-sum version of the same lens on
+  historical data before keeping it, and property-test monotonicity where the rules imply it.
+
 ## Run configuration
 
 - A pydantic `RunConfig` loaded from YAML (`runs/<name>.yaml`). It contains:

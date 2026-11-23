@@ -56,6 +56,7 @@ def dossiers(result: RunResult) -> list[Dossier]     # in candidate order
 Formula, applied to ok verdicts only:
 - weight: `w_i = lens_weights.get(lens, 1) * coverage_i * conviction_factors[conviction_i]`
 - overall stance: `overall = Σ w_i·s_i / (Σ w_i + k)`, or `None` if there are no ok verdicts
+- `s_i` is the verdict's `stance_mean` (added by TASK-6's follow-up; the LensNode template sets it to `float(stance)` when a lens doesn't supply one, so the worked example below is unchanged).
 - confidence: `Σ w_i / (Σ w_i + k)`, or `0.0` if there are no ok verdicts
 - agreement: the weighted std dev `sqrt(Σ w_i (s_i − m)² / Σ w_i)`, where `m = Σ w_i s_i / Σ w_i`. It is `None` if there are fewer than 2 ok verdicts.
 - **Other fields:**
