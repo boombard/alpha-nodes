@@ -163,6 +163,10 @@ class LensVerdict(BaseModel):
     status: Literal["ok", "abstained", "failed"]
     stance: Literal[-2, -1, 0, 1, 2] | None        # domain supplies labels
     conviction: Literal["low", "medium", "high"] | None
+    stance_mean: float | None                      # continuous stance in [-2, 2] that aggregators
+                                                   # use; framework-computed (mean of AI samples,
+                                                   # or interpolated score); float(stance) by default
+    stance_spread: float | None                    # instability of the stance; None = not measured
     coverage: float                                # computed by framework, never by LLM
     score: float | None                            # deterministic lenses only
     components: dict[str, float] = {}              # deterministic sub-scores
@@ -170,14 +174,14 @@ class LensVerdict(BaseModel):
     flags: list[Flag]
     error: str | None
     provenance: Provenance                         # model, prompt hash/variant, input hashes,
-                                                   # attempts, tokens/cost, as_of, backtest_valid
+                                                   # attempts, tokens/cost, as_of, backtest_valid,
+                                                   # stance_samples (AI lenses: one per sampled run)
 
 class Dossier(BaseModel):
     candidate: CandidateRef
-    run_id: str
     verdicts: list[LensVerdict]
     overall_stance: float | None                   # from the aggregator policy
-    confidence: float | None                       # computed evidence weight in [0, 1)
+    confidence: float                              # computed evidence weight in [0, 1); 0.0 if no ok lens
     weights: dict[str, float]                      # lens -> effective weight used
     agreement: float | None                        # dispersion of ok stances
     coverage: dict[str, str]                       # lens -> status

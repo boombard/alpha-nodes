@@ -58,7 +58,25 @@ def _check_scope(classes: Mapping[str, type[Node]]) -> None:
                 raise ScopeError(f"shared node {name!r} depends on candidate node {dep!r}")
 
 
-GRAPH_RULES: list[GraphRule] = [_check_scope]
+class LensDependencyError(GraphError):
+    """A lens depends on another lens's verdict without being a `consumes_verdicts` node."""
+
+
+def lens_dependency_rule(classes: Mapping[str, type[Node]]) -> None:
+    """Rule: only `consumes_verdicts` nodes may take a LensNode as input (lenses never chain)."""
+    from .lens import LensNode  # local import: keeps graph.py free of an import cycle
+
+    for name, cls in classes.items():
+        if cls.consumes_verdicts:
+            continue
+        for dep in cls.all_inputs().values():
+            if issubclass(classes[dep], LensNode):
+                raise LensDependencyError(
+                    f"{name!r} depends on lens {dep!r} but does not consume verdicts"
+                )
+
+
+GRAPH_RULES: list[GraphRule] = [_check_scope, lens_dependency_rule]
 """Rules run by `build_plan` on the resolved classes; later milestones append to it."""
 
 
