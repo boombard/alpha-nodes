@@ -1,9 +1,10 @@
 ---
 id: TASK-8
 title: M2.3 AI lens with citation guard rail and model profiles
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-23T08:02:58Z'
+updated_date: '2026-11-23T10:40:21Z'
 labels:
   - core
 milestone: m-1
@@ -118,3 +119,9 @@ Semantics:
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_0aee45aac7a5, worktree task-8
+<!-- SECTION:NOTES:END -->

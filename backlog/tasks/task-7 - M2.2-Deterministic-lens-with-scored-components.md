@@ -1,9 +1,10 @@
 ---
 id: TASK-7
 title: M2.2 Deterministic lens with scored components
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-23T08:02:58Z'
+updated_date: '2026-11-23T10:40:20Z'
 labels:
   - core
 milestone: m-1
@@ -88,3 +89,9 @@ Semantics of `assess`:
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_8b27405c0ca8, worktree task-7
+<!-- SECTION:NOTES:END -->
