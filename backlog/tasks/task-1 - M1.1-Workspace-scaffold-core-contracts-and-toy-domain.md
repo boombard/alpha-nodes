@@ -1,10 +1,10 @@
 ---
 id: TASK-1
 title: M1.1 Workspace scaffold, core contracts and toy domain
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-23T08:02:41Z'
-updated_date: '2026-11-23T08:24:15Z'
+updated_date: '2026-11-23T08:37:02Z'
 labels:
   - core
   - contracts
@@ -173,19 +173,19 @@ Out of scope: graph building, executor, persistent stores.
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 uv workspace with packages/lensgraph syncs on Python 3.13 and pytest/ruff/pyright run
-- [ ] #2 types, node, plan, hashing, executor/base and store/base+memory expose exactly the names in Interfaces
-- [ ] #3 Node params are pydantic fields; unknown params rejected; output contracts raise ContractViolation
-- [ ] #4 content_hash and memo_key are stable and sensitive to params, inputs, candidate and salt; fetch keys ignore source
-- [ ] #5 Toy strain domain (S1-S3) with fake counted source available to all later tests
+- [x] #1 uv workspace with packages/lensgraph syncs on Python 3.13 and pytest/ruff/pyright run
+- [x] #2 types, node, plan, hashing, executor/base and store/base+memory expose exactly the names in Interfaces
+- [x] #3 Node params are pydantic fields; unknown params rejected; output contracts raise ContractViolation
+- [x] #4 content_hash and memo_key are stable and sensitive to params, inputs, candidate and salt; fetch keys ignore source
+- [x] #5 Toy strain domain (S1-S3) with fake counted source available to all later tests
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -202,4 +202,5 @@ Coordinator review: interfaces match the spec. Fix round 1: content_hash no long
 Fix round 2 (asked for by the human): BaseModel hashing feeds fields in sorted order instead of model_dump_json, so set/frozenset fields hash stably across processes (proved by a subprocess test with PYTHONHASHSEED 1 vs 2). memo_key feeds a dict of the node's param fields instead of model_dump_json. This deviates from the task spec's memo_key rule; core.md line 30 is updated to match. Worker ruling: memo_key hashes params without the class identity, so a FetchNode subclass with a different body keeps its key; node.name and code_version are already in the key.
 Fix round 3 (asked for by the human, after the new CLAUDE.md code-documentation rule, d966089 on main): docstrings on every module, class and public function in lensgraph and the toy domain, with ClassVar and field comments and design-section pointers (all checked to exist in core.md). Behaviour unchanged.
 Open points: (1) memo_key uses the literal 'fetch' when hash_source=False, so a version bump on a non-source-hashed memoized node does not invalidate it (spec-dictated). (2) RunResult/ExecutionPlan dicts keyed by NodeKey are not JSON-serialisable (spec-dictated). (3) InMemoryBlobStore stores references, not copies. (4) Object-dtype ndarrays and the unframed raw bytes in the bytes branch are weak spots in hashing. (5) Commits 427478b and b39a3da are not green on their own; squash on landing. (6) Worker rulings: 1 and 1.0 hash differently; an output=float node rejects int.
+Landed 8169f8b..8169f8b on main (7 worker commits squashed into one at the human's request).
 <!-- SECTION:FINAL_SUMMARY:END -->
