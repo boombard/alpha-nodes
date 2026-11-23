@@ -19,6 +19,8 @@ ordinal: 13000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
+**Note from the scoring research (2026-11-23):** LLMs drift toward analyst ratings placed in their context (reported herding; weak evidence, but cheap to guard). Don't feed analyst consensus or price targets into an AI lens's context unless that is the lens's deliberate purpose, and record the choice in the lens's docstring.
+
 Sketched tasks:
 - M6.1 contracts: canonical `fundamentals`, `filings_text`, `news` schemas with field kinds; money/currency calc helpers that refuse mixed currencies without fx.
 - M6.2 `EdgarProvider` (companyfacts XBRL, ticker->CIK map, curated tag map, filing dates, 10-K sections; SEC User-Agent from settings). [parallel]

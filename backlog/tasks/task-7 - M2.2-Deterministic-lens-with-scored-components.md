@@ -50,6 +50,10 @@ Semantics of `assess`:
 3. **Score** = the weighted mean of the scored component values. Weights are `weight_overrides.get(name, component.weight)`, renormalised over the components present. `components` holds the scored values by name.
 4. **Stance** from `t = thresholds`: `s < t0` gives -2; `s < t1` gives -1; `s <= t2` gives 0; `s <= t3` gives 1; otherwise 2.
 5. **Conviction** from `d`, the distance to the nearest threshold: `d < m0` is low, `d < m1` is medium, otherwise high.
+5a. **`stance_mean`** (interpolated thresholds; added 2026-11-23 after the scoring discussion): `stance_mean = float(numpy.interp(s, centres, [-2, -1, 0, 1, 2]))`.
+   - Centres: `[t0 - (t1 - t0)/2, (t0 + t1)/2, (t1 + t2)/2, (t2 + t3)/2, t3 + (t3 - t2)/2]`. The defaults give `[-0.8, -0.4, 0, 0.4, 0.8]`. Beyond the outer centres it clamps to ±2.
+   - Set it on the `LensAssessment` (`stance_spread` stays None). The integer stance still comes from step 4, so with evenly spaced thresholds `round(stance_mean)` equals the stance.
+   - This is plain interpolation: no fuzzy library or vocabulary (see core.md, Deterministic lenses, "Possible future: fuzzy rule bases").
 6. **Claims:** one per scored component, with text from `claim_template.format(name=..., value=<raw value>)`, direction +1 if the scored value is at least 0 (else -1), and `cites=[source]`.
 
 ## Steps
@@ -57,6 +61,8 @@ Semantics of `assess`:
   - `test_linear_scorer`, parametrized over `LinearScorer(lo=0, hi=1)`: 0 gives -1, 0.5 gives 0, 1 gives 1, 2 gives 1 (clipped), -1 gives -1. With `higher_is_better=False`, 0 gives 1.
   - `test_stance_thresholds`, parametrized: -0.7 gives -2, -0.3 gives -1, 0.0 gives 0, 0.3 gives 1, 0.7 gives 2.
   - `test_conviction_from_margin`: 0.25 gives low, 0.45 gives medium, 0.95 gives high.
+  - `test_stance_mean_interpolated`, parametrized: 0.19 gives ≈ 0.475 (stance 0), 0.21 gives ≈ 0.525 (stance 1), 0.75 gives ≈ 1.875, 0.95 gives 2.0, 0.0 gives 0.0.
+  - `test_stance_mean_monotone`: over 201 evenly spaced scores in [-1, 1], `stance_mean` never decreases, and with the default thresholds `round(stance_mean) == stance`.
   - `test_missing_component_skipped_and_weights_renormalised`
   - `test_all_components_missing_abstains`
   - `test_weight_override_param`: `node_params` set via `build_plan`.
@@ -70,7 +76,7 @@ Semantics of `assess`:
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 LinearScorer, Component and DeterministicLens behave per thresholds and conviction margins
+- [ ] #1 LinearScorer, Component and DeterministicLens behave per thresholds and conviction margins; stance_mean is the monotone interpolation of the score
 - [ ] #2 Missing components skipped with renormalised weights; none available abstains
 - [ ] #3 Toy GrowthLens produces ok verdicts citing growth_rate and a failed verdict for S3
 <!-- AC:END -->

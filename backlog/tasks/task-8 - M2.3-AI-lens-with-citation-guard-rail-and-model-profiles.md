@@ -80,6 +80,7 @@ Semantics:
   - the status is ok but stance or conviction is missing
   - a claim has no citations
 - **Exhausted retries:** pydantic-ai raises; let it propagate, so the executor marks the node `failed`.
+- **One sample per call.** The verdict's `stance_mean` comes from the LensNode template default (`float(stance)`), and `stance_spread` stays None. Repeated sampling (N runs, mode/mean/spread, `stance_samples`) is deferred to TASK-17 (human decision, 2026-11-23). Keep `assess` structured so one run is one function call that TASK-17 can repeat.
 - **`provenance_extra`:** `{model, model_settings, prompt_hash, variant, attempts, input_tokens, output_tokens}`. Attempts is the number of model requests made. Tokens come from `result.usage()`.
 
 ## Steps

@@ -19,7 +19,9 @@ ordinal: 15000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-Also detail TASK-16 (aggregation v2: overlap discount, veto caps, subjective logic, calibration) as part of M8, using the campaign and backtest data this milestone provides.
+Also detail TASK-16 (aggregation v2: overlap discount, veto caps, subjective logic, calibration) and TASK-17 (AI lens repeated sampling) as part of M8, using the campaign and backtest data this milestone provides.
+
+**From the scoring research (2026-11-23):** evaluate lenses by rank IC on `stance_mean` as well as by stance bucket. Before trusting an AI lens, measure its test-retest repeatability: run identical inputs several times and report agreement (e.g. ICC or share of identical stances). LLM-judge studies find run-to-run noise comparable to the signal.
 
 Sketched tasks:
 - M8.1 as-of mode end to end: `RunConfig.as_of`, store queries filtered by known_at, AI nodes disabled by default / `backtest_valid=false`, `pit_reliable` and `level_based` warnings or refusal.
