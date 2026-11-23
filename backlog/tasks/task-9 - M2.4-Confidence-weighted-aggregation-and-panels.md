@@ -21,6 +21,8 @@ ordinal: 9000
 <!-- SECTION:DESCRIPTION:BEGIN -->
 Integration task closing M2. Spec: `documentation/design/core.md`, section Verdicts and dossiers (aggregation formula, D18).
 
+**Scope kept simple on purpose (human decision, 2026-11-23).** Implement only the baseline below. Overlap discounts between lenses that share data, configurable veto caps, a subjective-logic aggregator and calibration are deferred to TASK-16. Keep `Aggregator.combine` pure and the aggregator pluggable (`panel_registry(..., aggregator_cls=...)`), so TASK-16 can add policies without changing this interface.
+
 ## Files
 - Create: `packages/lensgraph/src/lensgraph/{aggregate,panel}.py`
 - Modify: `packages/lensgraph/src/lensgraph/run.py` (`RunSpec.panel`), `packages/lensgraph/src/lensgraph/__init__.py`

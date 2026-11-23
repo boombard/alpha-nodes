@@ -19,6 +19,8 @@ ordinal: 15000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
+Also detail TASK-16 (aggregation v2: overlap discount, veto caps, subjective logic, calibration) as part of M8, using the campaign and backtest data this milestone provides.
+
 Sketched tasks:
 - M8.1 as-of mode end to end: `RunConfig.as_of`, store queries filtered by known_at, AI nodes disabled by default / `backtest_valid=false`, `pit_reliable` and `level_based` warnings or refusal.
 - M8.2 evaluation module: monthly as-of schedule, forward returns (1m/3m/12m vs benchmark) computed outside the graph, rank IC, stance-bucket returns, hit rate. [after M8.1 contracts]
