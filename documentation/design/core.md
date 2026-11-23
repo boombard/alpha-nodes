@@ -138,7 +138,7 @@ Rules:
     query, not a memo key.
 - Content-addressed blobs: an unchanged output stops the rerun cascade ("early cutoff";
   observed in all three spike implementations).
-- Code-version rule (Claude's call): explicit `version` + the node class's source hash.
+- Code-version rule (Claude's call): explicit `version` + the source hash of the node class and all its `Node` base classes (so editing a shared lens template or aggregator invalidates subclasses' caches).
   The hash doesn't see helper functions, so there is an escape hatch:
   `--invalidate <node>` (that node and descendants) and `--no-cache`.
 - AI nodes: the key includes model id, prompt template hash, prompt variant, and the
@@ -181,7 +181,9 @@ class Dossier(BaseModel):
     candidate: CandidateRef
     verdicts: list[LensVerdict]
     overall_stance: float | None                   # from the aggregator policy
-    confidence: float                              # computed evidence weight in [0, 1); 0.0 if no ok lens
+    direction: float | None                        # plain weighted average of ok stances
+    evidence_share: float                          # share of the panel's possible evidence that arrived
+    confidence: float                              # computed, in [0, 1]; equals evidence_share; 0.0 if no ok lens
     weights: dict[str, float]                      # lens -> effective weight used
     agreement: float | None                        # dispersion of ok stances
     coverage: dict[str, str]                       # lens -> status
@@ -214,10 +216,16 @@ Principles:
 - **Lens weight** (per verdict, computed, shown in the dossier):
   `weight = lens_weight(config) × coverage × conviction_factor`, with conviction factors
   low/medium/high = 0.5 / 0.75 / 1.0 by default (params). Abstained/failed lenses have weight 0.
-- **Aggregation** is a pluggable `Aggregator`. Default policy is a **confidence-weighted,
-  shrunk mean**:
-  `overall_stance = Σ wᵢ·stanceᵢ / (Σ wᵢ + k)` and `confidence = Σ wᵢ / (Σ wᵢ + k)`,
-  where `k` (prior strength, param) pulls thin evidence toward neutral.
+- **Aggregation** is a pluggable `Aggregator`. Default policy is an **evidence-share**
+  weighted mean (`ShrunkMeanAggregator`), over ok verdicts with weights `wᵢ` as above:
+  - `W_max = Σ lens_weightᵢ × max(conviction_factor)` over *every* panel lens, ok or not:
+    the most weight the panel could deliver.
+  - `direction = Σ wᵢ·stanceᵢ / Σ wᵢ` (plain weighted average; None if `Σ wᵢ = 0`).
+  - `evidence_share = Σ wᵢ / W_max`, and `confidence = evidence_share`.
+  - `overall_stance = direction × evidence_share`.
+  - Why not a fixed prior `k` (`Σ wᵢ·sᵢ / (Σ wᵢ + k)`)? It biased small panels: two perfect +2
+    lenses could never exceed 1.33, so results depended on panel size. The Bayesian k-shrink
+    remains a TASK-16 alternative policy.
   - A candidate whose lenses all ran on thin data gets a stance closer to 0 and a low
     confidence, so it is less likely to clear an acceptance floor. That is the intended
     effect: thin evidence weakens the recommendation rather than being hidden.

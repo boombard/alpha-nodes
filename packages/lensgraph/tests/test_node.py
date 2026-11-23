@@ -1,7 +1,8 @@
+import inspect
 from typing import ClassVar
 
 import pytest
-from lensgraph.node import FetchNode, GlobalFailure, NodeContext
+from lensgraph.node import FetchNode, GlobalFailure, Node, NodeContext
 from lensgraph.types import ContractViolation, Failed, UpstreamFailed
 from pydantic import ValidationError
 from toy.nodes import AssayClean, GrowthRate
@@ -84,3 +85,36 @@ def test_non_plain_type_output_raises_contract_violation():
 
     with pytest.raises(ContractViolation, match="union_out"):
         UnionOut().validate_output(1.5)
+
+
+def _make_a():
+    class Base(Node):
+        name: ClassVar[str] = "n"
+
+        def run(self, ctx):
+            return 1
+
+    class Sub(Base):
+        pass
+
+    return Sub
+
+
+def _make_b():
+    class Base(Node):
+        name: ClassVar[str] = "n"
+
+        def run(self, ctx):
+            return 2
+
+    class Sub(Base):
+        pass
+
+    return Sub
+
+
+def test_code_version_covers_node_base_class_source():
+    """Editing a base's logic must invalidate subclasses' memoized outputs."""
+    a, b = _make_a(), _make_b()
+    assert inspect.getsource(a) == inspect.getsource(b)
+    assert a.code_version() != b.code_version()

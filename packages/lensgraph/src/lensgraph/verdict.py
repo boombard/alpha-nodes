@@ -99,9 +99,15 @@ class Dossier(_Model):
     candidate: CandidateRef
     verdicts: list[LensVerdict]
     overall_stance: float | None
-    confidence: float  # computed evidence weight, never LLM-reported
+    confidence: float  # computed, never LLM-reported; equals `evidence_share`
     weights: dict[str, float]  # lens -> effective weight used
     agreement: float | None
+    # Plain weighted average of the ok stances (None if no ok verdict): which way the panel
+    # leans, regardless of how much evidence arrived.
+    direction: float | None = None
+    # Share of the panel's possible evidence weight that arrived, in [0, 1]; overall_stance
+    # is `direction * evidence_share` under the default aggregator.
+    evidence_share: float = 0.0
     coverage: dict[str, LensStatus]  # lens -> status
     flags: list[Flag]
     summary: str | None = None

@@ -103,10 +103,16 @@ class Node(BaseModel):
 
     @classmethod
     def code_version(cls) -> str:
-        """Short hash of `version` (plus the class source if `hash_source`); a memo key part."""
+        """Short hash of `version` (plus source if `hash_source`); a memo key part.
+
+        The source covers the class and every `Node` base class in its MRO, so editing
+        inherited logic (e.g. a lens template or aggregator formula) invalidates caches.
+        """
         material = cls.version
         if cls.hash_source:
-            material += inspect.getsource(cls)
+            material += "".join(
+                inspect.getsource(c) for c in cls.__mro__ if issubclass(c, Node)
+            )
         return hashlib.sha256(material.encode()).hexdigest()[:16]
 
     @classmethod
