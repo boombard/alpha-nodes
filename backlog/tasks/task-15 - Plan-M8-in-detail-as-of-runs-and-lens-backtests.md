@@ -23,6 +23,8 @@ Also detail TASK-16 (aggregation v2: overlap discount, veto caps, subjective log
 
 **From the scoring research (2026-11-23):** evaluate lenses by rank IC on `stance_mean` as well as by stance bucket. Before trusting an AI lens, measure its test-retest repeatability: run identical inputs several times and report agreement (e.g. ICC or share of identical stances). LLM-judge studies find run-to-run noise comparable to the signal.
 
+**Does the reviewer earn its place? (noted 2026-11-24):** compare forward returns of review-vetoed and referred candidates against accepted ones (their dossiers are kept). If vetoes don't predict anything, drop or narrow the reviewer.
+
 Sketched tasks:
 - M8.1 as-of mode end to end: `RunConfig.as_of`, store queries filtered by known_at, AI nodes disabled by default / `backtest_valid=false`, `pit_reliable` and `level_based` warnings or refusal.
 - M8.2 evaluation module: monthly as-of schedule, forward returns (1m/3m/12m vs benchmark) computed outside the graph, rank IC, stance-bucket returns, hit rate. [after M8.1 contracts]

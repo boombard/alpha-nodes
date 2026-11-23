@@ -186,7 +186,8 @@ class Dossier(BaseModel):
     agreement: float | None                        # dispersion of ok stances
     coverage: dict[str, str]                       # lens -> status
     flags: list[Flag]                              # union, for convenience
-    summary: str | None                            # optional AI summary citing verdicts only
+    summary: str | None                            # to be dropped: superseded by DossierReview
+                                                   # (see Assessment brief and post-panel review)
 ```
 
 Principles:
@@ -392,6 +393,43 @@ Everything a report or a future frontend needs:
   the same everywhere (Parquet, JSON envelopes, no pickle). The run index is DuckDB;
   Postgres is later. The memo cache *is* the blob store plus an index lookup by memo_key.
 
+## Assessment brief and post-panel review
+
+Decided 2026-11-24 (design only; built in M3, used by campaigns in M7).
+
+- **Assessment brief.** A run-level `AssessmentBrief` states what the assessment is for: purpose,
+  horizon, priorities, out-of-scope. It is stated as facts, not a persona ("you are advising...").
+  The core model is generic; domains supply fields or templates.
+  ```yaml
+  brief:
+    purpose: "Screen listed equities for a long-only private portfolio"
+    horizon: "3–5 years"
+    priorities: ["capital preservation", "balance-sheet resilience", "avoid heavy dilution"]
+    out_of_scope: ["short-term trading signals", "tax considerations"]
+  ```
+- **Lenses never see the brief.** Panel lenses assess the *candidate*; the brief judges *fit*.
+  This keeps lenses independent evidence (no shared nudge moving every AI lens together) and
+  makes panel verdicts reusable across briefs. If a priority needs measuring (e.g. dilution),
+  add a component to a deterministic lens rather than putting the brief in a prompt.
+- **Where the brief applies**, cheapest first: campaign population filters and strata;
+  the acceptance policy (floors, veto rules); and the post-panel reviewer, for fit judgements
+  that need reading rather than arithmetic.
+- **Post-panel reviewer (`DossierReviewer`).** A separate tier, not a `LensNode` and never in a
+  panel. It is a `consumes_verdicts` node that reads the finished dossier plus the brief (and
+  optional macro context).
+  - Output is a `DossierReview`: a narrative summary, fit to the brief, gaps ("what evidence
+    would change this"), and flags from a closed list (e.g. `brief_conflict`). It has **no stance
+    and no score**, and every statement cites verdict claims, flags or context ids under the
+    same citation guard rail.
+  - **It can demote, never promote.** It never changes `overall_stance`. Its flags act only
+    through explicit acceptance rules, which the dossier records when they fire.
+  - Anchoring risk: a reviewer shown the lens stances tends to echo them. For a summary that's
+    fine; any independent fit judgement should be given the evidence and claims, not the stances.
+  - Its memo key is the dossier hash plus the brief hash. Dossiers carry no `run_id`, so reviews
+    rerun only when either changes.
+- **Caching:** anything the brief is rendered into must include the brief's hash in its memo key
+  and provenance. A template-only prompt hash would serve stale results under a new brief.
+
 ## Reporting
 
 - `lensgraph` provides the generic HTML report builder:
@@ -437,6 +475,14 @@ Loop:
 4. Output: accepted set, all dossiers, per-stratum stats (drawn / rejected at which stage /
    accepted / pass rate), and a **shortfall report**. Quotas are never relaxed silently.
    Optional explicit relaxation policies (e.g. borrow from other strata) are opt-in.
+
+**Acceptance is deterministic; review only demotes** (decided 2026-11-24). The acceptance
+policy decides. The post-panel reviewer (see Assessment brief and post-panel review) runs only
+on candidates that already passed it, and its flags can turn an acceptance into **reject** or
+**refer** (a "needs human review" outcome), never the reverse. Quotas count only accepted
+candidates. Per-stratum stats add "rejected by review" and "referred", with reasons, and the
+shortfall report lists referrals. Vetoed and referred candidates keep their dossiers, so
+backtests can check whether review vetoes predict anything.
 
 Memoization makes re-running a campaign with changed quotas cheap: previously evaluated
 candidates are cache hits.

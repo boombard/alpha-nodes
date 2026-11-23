@@ -27,6 +27,12 @@ Sketched tasks (expected parallelism in brackets):
 
 Design refs: core.md (Run configuration, Artifact store and run index, Reporting).
 
+**Assessment brief and post-panel reviewer (decided 2026-11-24; see core.md, Assessment brief and post-panel review):**
+- `AssessmentBrief` (generic core model; domain templates) in `RunConfig`, recorded with the run; its hash goes into the memo key and provenance of anything it is rendered into.
+- `DossierReviewer`: a `consumes_verdicts` node, not a `LensNode`, reading the dossier plus the brief (and optional context). It outputs a `DossierReview` (summary, fit to brief, gaps, closed-list flags; no stance or score; citations guard-railed). It never changes `overall_stance`. Drop `Dossier.summary` when it lands.
+- Panel lenses never receive the brief.
+- The HTML report shows the review beside the dossier.
+
 **Cost per LLM call (noted 2026-11-24):** pydantic-ai already depends on `genai-prices`, which prices a call from its usage (model, input/output and cache tokens). Use it to record cost alongside tokens in the planned `llm_calls` table, aggregable per run and campaign, and show it in the run summary. Don't hand-maintain a price table. Unknown models record cost as None, not 0.
 
 **Decided 2026-11-23:** `Dossier` has no `run_id` (node outputs must not carry run identity; see core.md, Verdicts and dossiers, Principles). Exports, reports and lineage views that hand a dossier out on its own wrap it at the edge in `DossierRecord(run_id, created_at, dossier)`, built outside the graph. Include that model in M3.1's contracts.
