@@ -18,15 +18,7 @@ from lensgraph.graph import (
 from lensgraph.node import CalcNode, FetchNode, Node
 from lensgraph.registry import NodeRegistry
 from lensgraph.types import CandidateRef
-from toy.nodes import AssayClean, AssayRaw, GrowthRate, ReferencePanel, ToxNotes
-
-
-@pytest.fixture
-def toy_registry() -> NodeRegistry:
-    registry = NodeRegistry()
-    for cls in (ReferencePanel, AssayRaw, AssayClean, GrowthRate, ToxNotes):
-        registry.register(cls)
-    return registry
+from toy.nodes import ToxNotes
 
 
 def _node(
