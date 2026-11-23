@@ -1,9 +1,10 @@
 ---
 id: TASK-4
 title: M1.4 File blob store and DuckDB run index
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-23T08:02:42Z'
+updated_date: '2026-11-23T08:38:13Z'
 labels:
   - core
 milestone: m-0
@@ -85,3 +86,9 @@ DuckDB tables:
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_e583b32596d6, worktree task-4
+<!-- SECTION:NOTES:END -->

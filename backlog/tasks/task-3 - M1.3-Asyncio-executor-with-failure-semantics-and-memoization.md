@@ -1,9 +1,10 @@
 ---
 id: TASK-3
 title: M1.3 Asyncio executor with failure semantics and memoization
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-23T08:02:42Z'
+updated_date: '2026-11-23T08:38:12Z'
 labels:
   - core
 milestone: m-0
@@ -93,3 +94,9 @@ Semantics (per planned node, one asyncio task awaiting its deps' completion even
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_2989043fe59e, worktree task-3
+<!-- SECTION:NOTES:END -->

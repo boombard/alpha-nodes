@@ -1,9 +1,10 @@
 ---
 id: TASK-2
 title: M1.2 Node registry and plan building
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-23T08:02:41Z'
+updated_date: '2026-11-23T08:38:11Z'
 labels:
   - core
 milestone: m-0
@@ -101,3 +102,9 @@ Semantics:
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_e30c980acf6a, worktree task-2
+<!-- SECTION:NOTES:END -->
