@@ -230,7 +230,8 @@ Principles:
 ## AI nodes (guard rails)
 
 - `AINode` subclasses declare: inputs (as for any node), `prompt` (template file
-  path), `variants` (optional named alternative prompts), `max_retries`. The model
+  path), `variants` (optional named alternative prompts), `flag_codes` (optional closed list of
+  flag codes). Retries are per profile (`max_retries`). The model
   comes from a **model profile** (below), overridable per lens in run config.
 
 ### Model profiles (user decision: cheapest by default; local and API both supported)
@@ -250,7 +251,19 @@ in config and are selected per run (`llm_profile: dev`) or per lens.
   Reports show the model per verdict.
 - Small and local models will fail the citation and schema checks more often. That's
   intended: the retry-then-fail rail makes it visible rather than producing junk.
-  Per-profile `max_retries` is configurable.
+  Per-profile `max_retries` is configurable. When retries run out, the node fails and its
+  error carries the last rejection (e.g. the unknown citation ids).
+- Profiles are `LLMProfile`s held in a `ProfileRegistry` (`services["profiles"]`, default
+  `ProfileRegistry()`). The `local` profile reads its model string from the environment
+  variable `LENSGRAPH_LOCAL_MODEL`; resolving it when unset raises a `ValueError` naming the
+  variable. Tests plug a `FunctionModel` in through `model_overrides`.
+- Each profile may carry `usage_limits` (request and token ceilings for one call, retries
+  included; defaults `request_limit = max_retries + 2`, plus `total_tokens_limit = 50_000` for
+  `dev` and `quality`). Exceeding one raises pydantic-ai's `UsageLimitExceeded`, which fails the
+  node like exhausted retries; there is no fallback. The limits are part of the fingerprint.
+- One model call per lens run. Repeated sampling (stance mean/spread) is deferred to TASK-17.
+- Inputs with nothing to show (an `Absent`, or an empty list) are rendered as
+  `NOT AVAILABLE` and are not citable, even though `citable_ids` lists their node-level id.
 - Dossiers from different profiles shouldn't be mixed when comparing runs. The run records its profile(s).
 - **Context assembly**: every input is rendered into the prompt under a **citable id**:
   - node-level (`momentum`, `fundamentals`)
@@ -267,7 +280,8 @@ in config and are selected per run (`llm_profile: dev`) or per lens.
 - Static content (rubric, instructions) goes first in the prompt so provider prompt caching
   applies across candidates.
 - **Variants** let you A/B prompts via config (e.g. `quality_value: {variant: buffett_persona}`).
-  The variant is part of the memo key and the provenance.
+  The variant is part of the memo key and the provenance. An undeclared variant name is a
+  `ParamsError` at plan time, never a silent fallback to the default prompt.
 - In as-of runs, AI nodes are skipped by default (`ai_in_backtests: false`). If enabled,
   `provenance.backtest_valid = false`.
 - Token usage and cost are recorded per call, and are aggregable per run and per campaign.

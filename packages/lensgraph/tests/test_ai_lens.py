@@ -1,0 +1,232 @@
+"""AINode: prompt assembly, the citation guard rail, retries, memoization and provenance."""
+
+from typing import Any
+
+import pytest
+from lensgraph import RunSpec, run
+from lensgraph.ai import AIAssessmentOut
+from lensgraph.plan import NodeKey, RunResult
+from lensgraph.verdict import LensVerdict
+from pydantic_ai.messages import ModelRequest, SystemPromptPart, ToolReturnPart, UserPromptPart
+
+GOOD: dict[str, Any] = {
+    "status": "ok",
+    "stance": 1,
+    "conviction": "medium",
+    "claims": [
+        {"text": "grows steadily", "direction": 1, "cites": ["growth_rate", "tox_notes[S1-n1]"]}
+    ],
+    "flags": [],
+}
+
+
+def _with(**changes: Any) -> dict[str, Any]:
+    return {**GOOD, **changes}
+
+
+def _bad_cite(cite: str) -> dict[str, Any]:
+    return _with(claims=[{"text": "x", "direction": 1, "cites": [cite]}])
+
+
+def _run(registry, candidates, services, profiles, tmp_path, **node_params) -> RunResult:
+    spec = RunSpec(
+        targets=["safety_lens"],
+        candidates=candidates,
+        nodes={"safety_lens": {"profile": "test", **node_params}},
+    )
+    return run(spec, registry, store_root=tmp_path, services={**services, "profiles": profiles})
+
+
+def _key(candidate: str, name: str = "safety_lens") -> NodeKey:
+    return NodeKey(name=name, candidate=candidate)
+
+
+def _text_parts(messages, part_type) -> list[str]:
+    return [
+        str(p.content)  # pyright: ignore[reportAttributeAccessIssue]
+        for m in messages
+        if isinstance(m, ModelRequest)
+        for p in m.parts
+        if isinstance(p, part_type)
+    ]
+
+
+@pytest.fixture
+def s1(toy_candidates):
+    return toy_candidates[:1]
+
+
+def test_ok_answer_becomes_verdict_with_provenance(
+    ai_registry, s1, toy_services, scripted_profiles, tmp_path
+):
+    profiles = scripted_profiles(GOOD, settings={"thinking": "low"})
+    result = _run(ai_registry, s1, toy_services, profiles, tmp_path)
+    verdict = result.values[_key("S1")]
+    assert isinstance(verdict, LensVerdict) and verdict.status == "ok"
+    assert (verdict.stance, verdict.conviction, verdict.stance_mean) == (1, "medium", 1.0)
+    assert verdict.stance_spread is None
+    prov = verdict.provenance
+    assert prov.model  # the model label is recorded
+    assert prov.model_settings == {"thinking": "low"}
+    assert prov.variant == "default" and prov.prompt_hash
+    assert prov.attempts == 1
+    assert prov.input_tokens > 0 and prov.output_tokens > 0
+
+
+def test_system_prompt_is_static_and_user_prompt_carries_context(
+    ai_registry, s1, toy_services, scripted_profiles, tmp_path
+):
+    profiles = scripted_profiles(GOOD)
+    _run(ai_registry, s1, toy_services, profiles, tmp_path)
+    messages = profiles.model_for("test").calls[0]
+    system = "\n".join(_text_parts(messages, SystemPromptPart))
+    user = "\n".join(_text_parts(messages, UserPromptPart))
+    assert "tox_signal" in system and "safety" in system
+    assert "S1" not in system  # candidate-specific content stays out of the cacheable prefix
+    assert "### [growth_rate]" in user and "### [tox_notes[S1-n1]]" in user
+    assert "tox_notes: 1 of 3 desired items" in user
+
+
+def test_first_answer_bad_citation_retried_then_ok(
+    ai_registry, s1, toy_services, scripted_profiles, tmp_path
+):
+    profiles = scripted_profiles(_bad_cite("made_up"), GOOD)
+    result = _run(ai_registry, s1, toy_services, profiles, tmp_path)
+    verdict = result.values[_key("S1")]
+    assert verdict.provenance.attempts == 2
+    valid = {"growth_rate", "tox_notes", "tox_notes[S1-n1]"}
+    assert {c for claim in verdict.claims for c in claim.cites} <= valid
+
+
+def test_retries_exhausted_fails_node(ai_registry, toy_candidates, toy_services, scripted_profiles, tmp_path):
+    profiles = scripted_profiles(_bad_cite("made_up"))
+    result = _run(ai_registry, toy_candidates[:1], toy_services, profiles, tmp_path)
+    node_result = result.results[_key("S1")]
+    assert result.status == "ok"  # the run completes; the failure is data
+    assert node_result.status == "failed"
+    assert node_result.error is not None and "citation" in node_result.error.lower()
+
+
+def test_citation_case_variant_rejected(ai_registry, s1, toy_services, scripted_profiles, tmp_path):
+    profiles = scripted_profiles(_bad_cite("Growth_Rate"), GOOD)
+    result = _run(ai_registry, s1, toy_services, profiles, tmp_path)
+    assert result.values[_key("S1")].provenance.attempts == 2
+    retry_text = "\n".join(_text_parts(profiles.model_for("test").calls[1], ToolReturnPart))
+    assert "Unknown citation ids: ['Growth_Rate']" in retry_text
+    assert "Valid ids:" in retry_text and "growth_rate" in retry_text
+
+
+def test_unknown_flag_code_rejected(ai_registry, s1, toy_services, scripted_profiles, tmp_path):
+    bad_flag = _with(flags=[{"severity": "warn", "code": "bogus", "text": "t", "cites": []}])
+    ok_flag = _with(flags=[{"severity": "warn", "code": "tox_signal", "text": "t", "cites": ["growth_rate"]}])
+    profiles = scripted_profiles(bad_flag, ok_flag)
+    result = _run(ai_registry, s1, toy_services, profiles, tmp_path)
+    verdict = result.values[_key("S1")]
+    assert verdict.provenance.attempts == 2
+    assert [f.code for f in verdict.flags] == ["tox_signal"]
+
+
+def test_ok_without_stance_or_conviction_retried(
+    ai_registry, s1, toy_services, scripted_profiles, tmp_path
+):
+    profiles = scripted_profiles(_with(stance=None), _with(conviction=None), GOOD)
+    result = _run(ai_registry, s1, toy_services, profiles, tmp_path)
+    assert result.values[_key("S1")].provenance.attempts == 3
+
+
+def test_claim_without_cites_retried(ai_registry, s1, toy_services, scripted_profiles, tmp_path):
+    no_cites = _with(claims=[{"text": "x", "direction": 1, "cites": []}])
+    result = _run(ai_registry, s1, toy_services, scripted_profiles(no_cites, GOOD), tmp_path)
+    assert result.values[_key("S1")].provenance.attempts == 2
+
+
+def test_abstain_allowed_maps_to_abstained_verdict(
+    ai_registry, s1, toy_services, scripted_profiles, tmp_path
+):
+    abstain = {"status": "abstained", "abstain_reason": "too little evidence"}
+    result = _run(ai_registry, s1, toy_services, scripted_profiles(abstain), tmp_path)
+    verdict = result.values[_key("S1")]
+    assert verdict.status == "abstained" and verdict.error == "too little evidence"
+    assert verdict.stance is None and verdict.provenance.attempts == 1
+
+
+def test_absent_optional_input_rendered_not_available_and_not_citable(
+    ai_registry, toy_candidates, toy_services, scripted_profiles, tmp_path
+):
+    s2 = toy_candidates[1:2]  # S2 has no tox notes
+    cites_empty = _bad_cite("tox_notes")
+    cites_ok = _with(claims=[{"text": "x", "direction": 1, "cites": ["growth_rate"]}])
+    profiles = scripted_profiles(cites_empty, cites_ok)
+    result = _run(ai_registry, s2, toy_services, profiles, tmp_path)
+    verdict = result.values[_key("S2")]
+    assert verdict.provenance.attempts == 2  # citing the unavailable input was rejected
+    assert verdict.coverage < 1
+    user = "\n".join(_text_parts(profiles.model_for("test").calls[0], UserPromptPart))
+    assert "tox_notes: NOT AVAILABLE" in user
+
+
+def test_profile_change_invalidates_ai_memo_only(
+    ai_registry, s1, toy_services, scripted_profiles, tmp_path
+):
+    _run(ai_registry, s1, toy_services, scripted_profiles(GOOD, settings={"a": 1}), tmp_path)
+    again = _run(ai_registry, s1, toy_services, scripted_profiles(GOOD, settings={"a": 1}), tmp_path)
+    assert again.results[_key("S1")].cache_hit
+    changed = _run(ai_registry, s1, toy_services, scripted_profiles(GOOD, settings={"a": 2}), tmp_path)
+    assert not changed.results[_key("S1")].cache_hit
+    assert changed.results[_key("S1", "growth_rate")].cache_hit
+
+
+def test_variant_changes_prompt_hash(ai_registry, s1, toy_services, scripted_profiles, tmp_path):
+    default = _run(ai_registry, s1, toy_services, scripted_profiles(GOOD), tmp_path)
+    strict = _run(ai_registry, s1, toy_services, scripted_profiles(GOOD), tmp_path, variant="strict")
+    d, s = default.values[_key("S1")].provenance, strict.values[_key("S1")].provenance
+    assert (d.variant, s.variant) == ("default", "strict")
+    assert d.prompt_hash != s.prompt_hash
+    assert not strict.results[_key("S1")].cache_hit
+
+
+def test_prompted_output_mode_works(ai_registry, s1, toy_services, scripted_profiles, tmp_path):
+    profiles = scripted_profiles(GOOD, output_mode="prompted")
+    result = _run(ai_registry, s1, toy_services, profiles, tmp_path)
+    assert result.values[_key("S1")].status == "ok"
+
+
+def test_no_real_model_requests_allowed(
+    ai_registry, s1, toy_services, tmp_path, monkeypatch: pytest.MonkeyPatch
+):
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "not-a-real-key")
+    spec = RunSpec(targets=["safety_lens"], candidates=s1)  # default `dev` profile, no override
+    result = run(spec, ai_registry, store_root=tmp_path, services=toy_services)
+    node_result = result.results[_key("S1")]
+    assert node_result.status == "failed"
+    assert node_result.error is not None and "not allowed" in node_result.error.lower()
+
+
+def test_output_schema_is_subset_of_verdict():
+    assert set(AIAssessmentOut.model_fields) == {
+        "status", "stance", "conviction", "claims", "flags", "abstain_reason"
+    }
+
+
+def test_unknown_variant_rejected_at_build_plan(ai_registry, s1):
+    from lensgraph.graph import ParamsError, build_plan
+
+    with pytest.raises(ParamsError, match="safety_lens"):
+        build_plan(["safety_lens"], ai_registry, s1, node_params={"safety_lens": {"variant": "strcit"}})
+    build_plan(["safety_lens"], ai_registry, s1, node_params={"safety_lens": {"variant": "strict"}})
+
+
+def test_request_limit_below_retries_fails_node_with_usage_limit_error(
+    ai_registry, s1, toy_services, scripted_profiles, tmp_path
+):
+    from lensgraph.llm import UsageCaps
+
+    profiles = scripted_profiles(
+        _bad_cite("made_up"), max_retries=5, usage_limits=UsageCaps(request_limit=2)
+    )
+    result = _run(ai_registry, s1, toy_services, profiles, tmp_path)
+    node_result = result.results[_key("S1")]
+    assert result.status == "ok"
+    assert node_result.status == "failed"
+    assert node_result.error is not None and "request_limit" in node_result.error
+    assert len(profiles.model_for("test").calls) == 2  # stopped by the ceiling, not retries

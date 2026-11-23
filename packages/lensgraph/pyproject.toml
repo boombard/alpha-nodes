@@ -10,6 +10,8 @@ dependencies = [
     "pyarrow",
     "fsspec",
     "duckdb",
+    "pydantic-ai-slim[anthropic,openai]==2.71.0",
+    "jinja2",
 ]
 
 [build-system]
