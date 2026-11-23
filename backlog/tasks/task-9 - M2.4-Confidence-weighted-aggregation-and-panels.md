@@ -1,9 +1,10 @@
 ---
 id: TASK-9
 title: M2.4 Confidence-weighted aggregation and panels
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-23T08:02:59Z'
+updated_date: '2026-11-23T23:24:46Z'
 labels:
   - core
 milestone: m-1
@@ -103,3 +104,9 @@ Formula, applied to ok verdicts only:
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_e5b1bf3221d6, worktree task-9
+<!-- SECTION:NOTES:END -->
