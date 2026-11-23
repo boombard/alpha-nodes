@@ -4,12 +4,13 @@ title: 'Plan M4 in detail: source store and yfinance prices'
 status: To Do
 assignee: []
 created_date: '2026-11-23T08:03:31Z'
+updated_date: '2026-11-23T23:51:20Z'
 labels:
   - plan
   - sketch
 milestone: m-3
 dependencies:
-  - TASK-10
+  - TASK-22
 references:
   - documentation/design/core.md
   - documentation/design/finance.md
