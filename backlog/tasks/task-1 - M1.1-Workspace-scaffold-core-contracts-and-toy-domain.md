@@ -1,9 +1,10 @@
 ---
 id: TASK-1
 title: M1.1 Workspace scaffold, core contracts and toy domain
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-23T08:02:41Z'
+updated_date: '2026-11-23T08:14:58Z'
 labels:
   - core
   - contracts
@@ -186,3 +187,9 @@ Out of scope: graph building, executor, persistent stores.
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_7f85090a0f4c, worktree task-1
+<!-- SECTION:NOTES:END -->
