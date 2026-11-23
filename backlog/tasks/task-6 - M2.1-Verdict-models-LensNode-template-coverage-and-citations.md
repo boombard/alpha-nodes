@@ -1,10 +1,10 @@
 ---
 id: TASK-6
 title: M2.1 Verdict models, LensNode template, coverage and citations
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-23T08:02:58Z'
-updated_date: '2026-11-23T09:43:54Z'
+updated_date: '2026-11-23T09:47:00Z'
 labels:
   - core
   - contracts
@@ -146,8 +146,9 @@ Old session stopped after an API 529 and a cleared context; fresh worker dispatc
 ## Final Summary
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
-Worker (Sonnet, dispatch ctx_4946200e3cf6, branch boom/task-6, 3 commits 677f6c9..980b3ce): verdict.py (Claim, Flag, Provenance, LensVerdict with the status/stance validator, Dossier), lens.py (DepthRequirement, LensAssessment, input_sufficiency, the LensNode template), citations.py (citable_ids), and lens_dependency_rule plus LensDependencyError appended to GRAPH_RULES; public exports added. ACs 1-4 met (test_verdict_*, test_claim_requires_a_cite; test_lens_coverage_weighted, test_citable_ids_*; test_lens_upstream_failure_verdict; test_lens_on_lens_rejected, test_consumes_verdicts_allowed; the toy e2e shows S3 recovered). Coordinator re-ran checks: pytest 142 passed, ruff clean, pyright 0 errors.
+Worker (Sonnet, dispatch ctx_4946200e3cf6, branch boom/task-6, 4 commits 677f6c9..ef3b2b1): verdict.py (Claim, Flag, Provenance, LensVerdict with the status/stance validator, Dossier), lens.py (DepthRequirement, LensAssessment, input_sufficiency, the LensNode template), citations.py (citable_ids), and lens_dependency_rule plus LensDependencyError appended to GRAPH_RULES; public exports added. ACs 1-4 met (test_verdict_*, test_claim_requires_a_cite; test_lens_coverage_weighted, test_citable_ids_*; test_lens_upstream_failure_verdict; test_lens_on_lens_rejected, test_consumes_verdicts_allowed; the toy e2e shows S3 recovered). Coordinator re-ran checks: pytest 150 passed, ruff clean, pyright 0 errors.
 Coordinator review, one fix round: (1) a sync assess now runs via asyncio.to_thread (LensNode.run is async, so a sync assess used to block the event loop and serialize everything); a timing test proves two sync lenses run concurrently. (2) provenance_extra setting lens_version or input_hashes now raises ContractViolation, instead of a raw TypeError or a silent audit override.
+Round 2 (asked for by the human after the aggregation research): LensVerdict gains stance_mean (in [-2, 2]; what aggregators use; framework-computed; the template defaults it to float(stance)) and stance_spread (>= 0; None = not measured). Provenance gains stance_samples. An ok verdict requires stance_mean; non-ok verdicts and assessments carry neither (ContractViolation in the template). core.md LensVerdict block updated. Two worker sessions stopped on API 529 Overloaded before changing anything, so the coordinator implemented this round directly (TDD, commit ef3b2b1, at the human's request). It merges cleanly with main.
 Rulings: (1) The worker edited core.md (outside the Files list) to match the task interface: Dossier has no run_id, and confidence is float (0.0 if no ok lens). The run index can carry run_id alongside each dossier; re-add the field if dossiers travel alone (reports, API). Decide before TASK-9. (2) input_sufficiency treats values without a length (e.g. float) as 1.0 when present, ignoring any depth requirement. (3) Str inputs measure depth in characters. (4) Verdict models are frozen with extra=forbid via a private _Model base. (5) lens_dependency_rule imports LensNode lazily (import cycle). (6) Only the first colliding provenance key is named in the error.
 Open points: commit 677f6c9 is not pyright-clean on its own (squash when landing).
 <!-- SECTION:FINAL_SUMMARY:END -->
