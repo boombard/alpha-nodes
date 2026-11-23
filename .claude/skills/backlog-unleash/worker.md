@@ -19,6 +19,9 @@ you directly.
   cross-task interface.
 - **TDD, as the Steps say:** write the failing tests, watch them fail, implement,
   watch them pass. Invoke `test-driven-development` before writing code.
+- **Document as you go,** per the code-documentation rule in `CLAUDE.md`: docstrings
+  on every module, class and public function, saying what it is and (when not obvious)
+  where it fits in the architecture.
 - **Never edit `backlog/`.** The coordinator owns it, including the checkboxes.
 - **No landing.** Never rebase, merge, push, create other branches, or touch other
   worktrees. Do not run `finishing-a-development-branch`.
@@ -35,8 +38,10 @@ you directly.
 
 1. Run, from the worktree root: `uv run pytest`, `uv run ruff check`, `uv run pyright`.
    All must pass.
-2. `git status --porcelain` is empty, and you have at least one commit ahead of `main`.
-3. Send `worker_done --outcome succeeded` with:
+2. Every module, class and public function you added or changed has a docstring that
+   meets the `CLAUDE.md` code-documentation rule.
+3. `git status --porcelain` is empty, and you have at least one commit ahead of `main`.
+4. Send `worker_done --outcome succeeded` with:
    - **ACs:** each acceptance criterion from the task, marked met or not, with the
      test that proves it.
    - **Commit range** (`main..HEAD`).

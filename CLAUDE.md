@@ -12,6 +12,14 @@ global constraints and review focus are in `backlog/docs/doc-1 - Implementation-
 The coordinator/worker workflow is in `documentation/workflow.md`. If you are implementing
 a task, follow its Steps and stay inside its Files list.
 
+Code documentation: every module, class and public function or method gets a docstring
+that tells a human reader what it is and what it's for. Where its place in the architecture
+isn't obvious from the name and module, say where it fits and point to the design section
+(e.g. "Memo cache key; see documentation/design/core.md, Memoization"). Document params
+and fields whose meaning isn't obvious from name and type. No boilerplate restating the
+signature. Tests and test-only helpers need a docstring only when the test name isn't
+self-explanatory.
+
 Commands: `uv sync`, `uv run pytest`, `uv run ruff check`, `uv run pyright`.
 
 Hard rules (see `documentation/design/overview.md` for why):

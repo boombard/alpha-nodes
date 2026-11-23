@@ -110,7 +110,8 @@ Finish with worker_done as the playbook defines.
   1. Verify that the worktree is clean, has at least 1 commit ahead of `main`, and
      every commit subject carries `(TASK-<n>)`.
   2. Review the diff (`git diff main...task-<n>`) against the task's ACs, Files,
-     Interfaces, the Global Constraints and the Review Focus items it owns. Use the
+     Interfaces, the Global Constraints, the Review Focus items it owns, and the
+     `CLAUDE.md` code-documentation rule (missing or boilerplate docstrings are a finding). Use the
      `code-review` skill at `medium` on that range if the diff is over ~300 lines.
   3. If you find something, send **one** `orchestration send` round with concrete
      fixes, then end your turn. When the worker reports again, do not send a second
