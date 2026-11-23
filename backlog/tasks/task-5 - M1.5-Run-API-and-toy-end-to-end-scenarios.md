@@ -1,10 +1,10 @@
 ---
 id: TASK-5
 title: M1.5 Run API and toy end-to-end scenarios
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-23T08:02:42Z'
-updated_date: '2026-11-23T09:01:30Z'
+updated_date: '2026-11-23T09:04:02Z'
 labels:
   - core
 milestone: m-0
@@ -93,3 +93,26 @@ Semantics:
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_7de4e08bf563, worktree task-5
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker (Sonnet, dispatch ctx_7de4e08bf563, branch boom/task-5, 2 commits 696a92c..118aa0f): RunSpec, arun and run in lensgraph/run.py (FileBlobStore at store_root/blobs, DuckDBRunIndex at store_root/index.duckdb, bypass via descendants/no_cache, start_run/finish_run); public exports in lensgraph/__init__; toy_registry moved to conftest; 10 e2e tests. ACs 1-4 met (test_results_persisted_in_index; test_identical_rerun_all_memoizable_cached and test_param_change_reruns_only_descendants; test_invalidate_* and test_no_cache_*; test_abort_then_resume_from_cache, which is Review Focus 2). Coordinator re-ran checks: pytest 121 passed, ruff clean, pyright 0 errors.
+Coordinator review, one fix round: an unknown name in invalidate now raises ParamsError (it used to be silently ignored and serve stale cache); any non-RunAborted failure after start_run (including cancellation) now marks the run "failed" instead of leaving it "running".
+Worker rulings: fetch nodes never memoize, so the cache tests assert on memoizable nodes only. The index is closed in finally (releases the DuckDB file lock). Default executor is AsyncioExecutor(limits=spec.limits). core.md was not edited, because RunSpec is the core subset of the design RunConfig (YAML, panel, providers and models come later). RunAborted is re-raised untouched, so the executor's "aborted" status stands.
+Open points: finish_run is "ok" even when some nodes failed (spec-dictated; the per-node status carries it).
+
+M1 DEMO GATE
+uv run pytest -q: 121 passed
+to_mermaid(resolve_classes(["growth_rate", "tox_notes"], toy_registry)):
+flowchart LR
+    assay_raw
+    assay_clean
+    assay_raw --> assay_clean
+    reference_panel:::shared
+    growth_rate
+    assay_clean --> growth_rate
+    reference_panel --> growth_rate
+    tox_notes
+    classDef shared stroke-dasharray: 4 2
+<!-- SECTION:FINAL_SUMMARY:END -->
