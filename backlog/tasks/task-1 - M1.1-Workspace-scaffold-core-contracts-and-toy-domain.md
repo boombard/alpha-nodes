@@ -1,10 +1,10 @@
 ---
 id: TASK-1
 title: M1.1 Workspace scaffold, core contracts and toy domain
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-23T08:02:41Z'
-updated_date: '2026-11-23T08:14:58Z'
+updated_date: '2026-11-23T08:19:21Z'
 labels:
   - core
   - contracts
@@ -193,3 +193,11 @@ Out of scope: graph building, executor, persistent stores.
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_7f85090a0f4c, worktree task-1
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker (Sonnet, dispatch ctx_7f85090a0f4c, branch boom/task-1, 4 commits 81ff0a8..682ef24): uv workspace scaffold; lensgraph types/node/plan/hashing/executor.base/store.base+memory; toy strain domain S1-S3. ACs 1-5 met. Coordinator re-ran checks: pytest 27 passed, ruff clean, pyright 0 errors.
+Coordinator review: interfaces match the spec. One fix round applied: content_hash no longer falls back to repr (it handles Series/ndarray/date/bytes and raises TypeError otherwise); validate_output no longer leaks AttributeError; InMemoryRunIndex.finish_run tolerates an unknown run; pytest uses importlib mode with pythonpath for toy.
+Open points (spec-dictated or deferred): (1) memo_key uses the literal 'fetch' when hash_source=False, so a version bump on a non-source-hashed memoized node does not invalidate it. (2) RunResult/ExecutionPlan dicts keyed by NodeKey are not JSON-serialisable. (3) memo_key uses node.model_dump_json(), which is unstable for set/frozenset params. (4) InMemoryBlobStore stores references, not copies. (5) Object-dtype ndarrays and the unframed raw bytes in the bytes branch are weak spots in hashing. (6) Commit 427478b has a broken hashing.py that 32356fe fixes; squash on landing. (7) Worker rulings: 1 and 1.0 hash differently; an output=float node rejects int.
+<!-- SECTION:FINAL_SUMMARY:END -->
