@@ -276,8 +276,12 @@ in config and are selected per run (`llm_profile: dev`) or per lens.
 
 - Built from named **scored components**: `Component(name, calc input, scorer, weight)`.
   This is the good idea kept from alpha-capture's `AnalysisStep`.
-- Score = weighted combination. Stance comes from configurable thresholds (params).
+- Score = weighted mean of the scored components present (weights renormalised; a missing,
+  `Absent` or non-finite component is skipped; none left means abstain). Stance comes from
+  configurable thresholds (params).
 - Conviction comes from the distance of the score to the nearest threshold (configurable).
+- `stance_mean` is the score interpolated between threshold centres (`numpy.interp`), so it is
+  monotone in the score; the integer stance still comes from the thresholds.
 - Claims are generated from templates per component, citing the calc fields used.
 
 ### Possible future: fuzzy rule bases (not decided)
