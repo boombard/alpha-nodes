@@ -1,9 +1,10 @@
 ---
 id: TASK-10
 title: 'Plan M3 in detail: run config, lineage and HTML report'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-23T08:03:31Z'
+updated_date: '2026-11-23T23:47:34Z'
 labels:
   - plan
   - sketch
@@ -55,3 +56,9 @@ Design refs: core.md (Run configuration, Artifact store and run index, Reporting
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Coordinator task (plan): drafting M3 tasks for human approval.
+<!-- SECTION:NOTES:END -->
