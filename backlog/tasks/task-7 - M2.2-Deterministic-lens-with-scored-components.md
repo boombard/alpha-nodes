@@ -1,10 +1,10 @@
 ---
 id: TASK-7
 title: M2.2 Deterministic lens with scored components
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-23T08:02:58Z'
-updated_date: '2026-11-23T10:40:20Z'
+updated_date: '2026-11-23T10:42:55Z'
 labels:
   - core
 milestone: m-1
@@ -95,3 +95,12 @@ Semantics of `assess`:
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_8b27405c0ca8, worktree task-7
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker (Sonnet, dispatch ctx_8b27405c0ca8, branch boom/task-7, 2 commits ff51744..459fc54): LinearScorer, Component and DeterministicLens (weighted mean of present components with renormalised weights; stance from thresholds; conviction from threshold margins; stance_mean interpolated between threshold centres with numpy.interp), toy GrowthLens, core.md Deterministic lenses updated. ACs 1-3 met (test_linear_scorer, test_stance_thresholds, test_conviction_from_margin, test_stance_mean_interpolated, test_stance_mean_monotone; test_missing_component_skipped_and_weights_renormalised, test_all_components_missing_abstains, test_unusable_values_skipped, test_weight_override_param; test_growth_lens_toy_run, test_claims_cite_component_source). Coordinator re-ran checks: pytest 182 passed, ruff clean, pyright 0 errors.
+Coordinator review, one fix round: unknown or negative weight_overrides keys raise ParamsError at build_plan (no silent typos); zero total weight abstains instead of dividing by zero; LinearScorer rejects hi == lo; GrowthLens docstring corrected.
+Rulings: (1) round(stance_mean) == stance fails at exact threshold ties (e.g. score -0.6 gives stance -1 and mean -1.5; Python rounds to -2). The coordinator's spec claim was wrong there, so the monotonicity test skips exact half-integer means. (2) Bools and non-numeric values are unusable and skipped; an 'input.field' source resolves only on model inputs. (3) GrowthLens uses LinearScorer(lo=-0.1, hi=0.3). (4) The worker edited core.md (not in the Files list; the DoD requires it). (5) A total weight <= 0 abstains.
+Open points: Component.weight itself may still be negative (only overrides are checked); low impact, since components are code, not config.
+<!-- SECTION:FINAL_SUMMARY:END -->
