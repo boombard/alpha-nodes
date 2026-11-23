@@ -1,10 +1,10 @@
 ---
 id: TASK-5
 title: M1.5 Run API and toy end-to-end scenarios
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-23T08:02:42Z'
-updated_date: '2026-11-23T09:04:02Z'
+updated_date: '2026-11-23T09:07:11Z'
 labels:
   - core
 milestone: m-0
@@ -74,18 +74,18 @@ Semantics:
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 run(RunSpec) executes on disk-backed stores and records the run in the index
-- [ ] #2 Identical rerun is all cache hits for memoizable nodes; param change reruns only descendants
-- [ ] #3 invalidate and no_cache escape hatches work
-- [ ] #4 An aborted run resumes from cache on the next run
+- [x] #1 run(RunSpec) executes on disk-backed stores and records the run in the index
+- [x] #2 Identical rerun is all cache hits for memoizable nodes; param change reruns only descendants
+- [x] #3 invalidate and no_cache escape hatches work
+- [x] #4 An aborted run resumes from cache on the next run
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -115,4 +115,5 @@ flowchart LR
     reference_panel --> growth_rate
     tox_notes
     classDef shared stroke-dasharray: 4 2
+Landed c81a07b..c81a07b on main (worker commits squashed into one, as for TASK-1 to TASK-4).
 <!-- SECTION:FINAL_SUMMARY:END -->
