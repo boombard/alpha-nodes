@@ -1,10 +1,10 @@
 ---
 id: TASK-9
 title: M2.4 Confidence-weighted aggregation and panels
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-23T08:02:59Z'
-updated_date: '2026-11-23T23:43:32Z'
+updated_date: '2026-11-23T23:44:48Z'
 labels:
   - core
 milestone: m-1
@@ -118,13 +118,14 @@ Back to In Progress (human decision, 2026-11-24): default aggregation switched t
 ## Final Summary
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
-Worker (Sonnet, dispatch ctx_e5b1bf3221d6, branch boom/task-9, 2 commits 730590e..f4e21b8): Aggregator (consumes_verdicts; Absent lens becomes a failed verdict), ShrunkMeanAggregator (default formula using stance_mean), VetoAggregator (forces -2 on qualifying veto flags), Panel, panel_registry, dossiers(), RunSpec.panel. ACs 1-4 met (test_combine_worked_example; test_all_failed_or_abstained, which is Review Focus 5, and test_single_ok_verdict_agreement_none; test_thin_coverage_lowers_confidence, test_veto_forces_minus_two; test_panel_e2e_toy, test_panel_rerun_cached, test_profile_switch_reruns_only_ai_and_dossier). Coordinator re-ran checks: pytest 241 passed, ruff clean, pyright 0 errors; S1's dossier checked by hand against the formula.
+Worker (Sonnet, dispatch ctx_e5b1bf3221d6, branch boom/task-9, 3 commits 730590e..2955ded): Aggregator (consumes_verdicts; Absent lens becomes a failed verdict), ShrunkMeanAggregator (default formula using stance_mean; evidence share since round 2), VetoAggregator (forces -2 on qualifying veto flags), Panel, panel_registry, dossiers(), RunSpec.panel. ACs 1-4 met (test_combine_worked_example; test_all_failed_or_abstained, which is Review Focus 5, and test_single_ok_verdict_agreement_none; test_thin_coverage_lowers_confidence, test_veto_forces_minus_two; test_panel_e2e_toy, test_panel_rerun_cached, test_profile_switch_reruns_only_ai_and_dossier). Coordinator re-ran checks: pytest 245 passed, ruff clean, pyright 0 errors; S1's dossier checked by hand against the formula.
 Coordinator review, one fix round: (1) Node.code_version now hashes the source of every Node class in the MRO. Before, editing a base class (aggregation formula, DeterministicLens, AINode) left subclasses' cached outputs silently stale; this was a latent TASK-1 bug, and core.md Memoization is updated. (2) A failed lens uses its lens_name key, consistent across candidates. (3) arun auto-wraps the registry when RunSpec.panel is set. (4) Empty targets without a panel raise ParamsError.
+Round 2 (human decision after the shrinkage discussion): evidence-share formula. direction = Σw·s/Σw; evidence_share = Σw/W_max (W_max = Σ panel lens_weight × max conviction factor); overall = direction × evidence_share; confidence = evidence_share; k removed. Dossier gains direction and evidence_share; core.md updated. Tests: worked example (direction 1.181818, share 0.6875, overall 0.8125), perfect small panel not shrunk, panel-size independence. Coordinator verified.
 Rulings: RunSpec.targets defaults to []; dossiers() returns candidate (plan) order; lens_names falls back to the node name for a lens without lens_name.
 
-M2 DEMO GATE (toy panel: growth = deterministic, safety = AI on a scripted test model that always answers stance +1, high conviction)
-S1: overall 0.378, confidence 0.538, agreement 0.343. growth ok (stance 0, stance_mean 0.306, low, coverage 1.0, weight 0.5); safety ok (stance 1, high, coverage 0.667 = tox_notes 1 of 3 desired, weight 0.667).
-S2: overall 0.355, confidence 0.500, agreement 0.291. growth ok (stance_mean 0.418); safety ok but coverage 0.5 (no tox notes), weight 0.5.
-S3: overall null, confidence 0.0, agreement null. growth and safety both failed: upstream 'assay_clean' failed: ContractViolation: raw is missing columns ['od600'].
+M2 DEMO GATE (evidence-share formula; toy panel: growth = deterministic, safety = AI on a scripted test model that always answers stance +1, high conviction)
+S1: overall 0.410, confidence (evidence share) 0.583, direction 0.703. growth ok (stance 0, stance_mean 0.306, low, coverage 1.0, weight 0.5); safety ok (stance 1, high, coverage 0.667 = tox_notes 1 of 3, weight 0.667).
+S2: overall 0.355, confidence 0.500, direction 0.709. growth ok (stance_mean 0.418); safety ok but coverage 0.5 (no tox notes), weight 0.5.
+S3: overall null, confidence 0.0, direction null. growth and safety both failed: upstream 'assay_clean' failed: ContractViolation: raw is missing columns ['od600'].
 Full indented JSON: the worker's demo.txt (printed by test_panel_e2e_toy -s).
 <!-- SECTION:FINAL_SUMMARY:END -->
