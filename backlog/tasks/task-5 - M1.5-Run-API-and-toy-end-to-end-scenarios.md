@@ -1,9 +1,10 @@
 ---
 id: TASK-5
 title: M1.5 Run API and toy end-to-end scenarios
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-23T08:02:42Z'
+updated_date: '2026-11-23T09:01:30Z'
 labels:
   - core
 milestone: m-0
@@ -86,3 +87,9 @@ Semantics:
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_7de4e08bf563, worktree task-5
+<!-- SECTION:NOTES:END -->
