@@ -1,10 +1,10 @@
 ---
 id: TASK-4
 title: M1.4 File blob store and DuckDB run index
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-23T08:02:42Z'
-updated_date: '2026-11-23T08:58:20Z'
+updated_date: '2026-11-23T09:00:40Z'
 labels:
   - core
 milestone: m-0
@@ -74,17 +74,17 @@ DuckDB tables:
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 FileBlobStore round-trips frames (parquet), pydantic models and lists of them, JSON primitives; no pickle
-- [ ] #2 Unsupported types raise TypeError at put; put is idempotent and returns content_hash
-- [ ] #3 DuckDBRunIndex persists runs, node results and memo entries across instances
+- [x] #1 FileBlobStore round-trips frames (parquet), pydantic models and lists of them, JSON primitives; no pickle
+- [x] #2 Unsupported types raise TypeError at put; put is idempotent and returns content_hash
+- [x] #3 DuckDBRunIndex persists runs, node results and memo entries across instances
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -103,4 +103,5 @@ Coordinator review, one fix round: start_run on an existing id now also clears t
 Round 2 (asked for by the human): the byte layer moved onto fsspec. FsspecBlobStore(url, **storage_options) works on file://, memory:// or s3:// (with s3fs). FileBlobStore(root) and InMemoryBlobStore() are now thin subclasses, so TASK-5's interface is unchanged. In-memory blobs go through the real encoding and come back as copies, which closes TASK-1's open point about stored references. Local writes stay atomic (temp file then fs.mv); has/get probe the two known paths instead of listing. core.md updated. Blob tests are parametrized over the file and memory backends. Coordinator check: TASK-2, TASK-3 and TASK-4 merged together in a throwaway tree give 111 tests passing with -W error, ruff and pyright clean, and the TASK-3 race probe passes 200 of 200 on the new store.
 Worker rulings: (1) DatetimeIndex.freq is not preserved by parquet. (2) A user dict with exactly the keys {type, data}, where type contains ':', decodes as a model envelope (spec-dictated format; rare misdecode). (3) Tuples, non-str dict keys, Series and ndarray raise TypeError at put. (4) DuckDBRunIndex.close() was added beyond Produces. (5) node_results are ordered by rowid.
 Open points: s3:// is untested (no network in tests). fsspec's memory filesystem is process-global and never freed, so long-lived processes using InMemoryBlobStore grow. The frame TypeError message still says 'FileBlobStore:' (cosmetic). s3fs caches listings, so exists() may be stale across processes. Commit 1e96bd3 is not green alone (squash when landing). meta_json uses plain json.dumps, so non-JSON meta raises at record_node, while config uses default=str.
+Landed 3eadbae..3eadbae on main (worker commits squashed into one at the human's request).
 <!-- SECTION:FINAL_SUMMARY:END -->
