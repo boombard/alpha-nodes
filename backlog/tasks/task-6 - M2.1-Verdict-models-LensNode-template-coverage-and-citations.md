@@ -1,9 +1,10 @@
 ---
 id: TASK-6
 title: M2.1 Verdict models, LensNode template, coverage and citations
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-23T08:02:58Z'
+updated_date: '2026-11-23T09:08:14Z'
 labels:
   - core
   - contracts
@@ -131,3 +132,9 @@ Semantics:
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_4946200e3cf6, worktree task-6
+<!-- SECTION:NOTES:END -->
