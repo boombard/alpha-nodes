@@ -1,10 +1,10 @@
 ---
 id: TASK-4
 title: M1.4 File blob store and DuckDB run index
-status: In Review
+status: In Progress
 assignee: []
 created_date: '2026-11-23T08:02:42Z'
-updated_date: '2026-11-23T08:41:57Z'
+updated_date: '2026-11-23T08:56:57Z'
 labels:
   - core
 milestone: m-0
@@ -91,6 +91,8 @@ DuckDB tables:
 
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_e583b32596d6, worktree task-4
+
+Back to In Progress: the human asked for the blob store's byte layer to move onto fsspec (FsspecBlobStore by URL; FileBlobStore and InMemoryBlobStore become thin subclasses). Sent to the worker.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
