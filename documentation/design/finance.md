@@ -1,0 +1,243 @@
+# `alpha_nodes`: the finance domain
+
+Built on `lensgraph`. Its first use is **equity universe construction**: deciding which
+tickers belong in a universe and why, with filtering and optimisation downstream.
+Stance labels: −2 strong bearish … +2 strong bullish.
+
+## Datasets (canonical schemas)
+
+Each dataset has one canonical schema (pandera or pydantic) in `alpha_nodes.datasets`.
+Every downstream node relies on that schema and never on provider-specific columns.
+
+| Dataset | Coverage axis | Notes |
+|---|---|---|
+| `prices` | trading date | daily OHLCV + adjusted close. ≥10y history needed for 12-1 momentum + 200-day trend + risk |
+| `profile` | none (snapshot) | name, country, exchange, currency, sector, industry, market cap, listing date, business summary |
+| `fundamentals` | fiscal period (annual/quarterly) | income/balance/cash-flow line items with `period_end`, `filed_at` where available |
+| `news` | published time | id, published_at, headline, source, url, summary. Providers may only serve recent items |
+| `filings_text` | filing date | e.g. 10-K "Business" + "Risk factors" sections (US) |
+| `screen` | none | population listing for campaigns (ticker, country, exchange, sector, mcap, volume) |
+| `fx` | date | daily FX rates to USD, for comparable absolute thresholds |
+
+LLM for AI lenses: the `dev` model profile by default (Claude Haiku 5.5, low effort), with
+`local` (Ollama) and `quality` (Sonnet 5.5) profiles available. See core.md, Model profiles.
+
+Sector taxonomy: use one canonical sector list (yfinance's sector names, which are
+GICS-like) mapped in the provider. Treat it as a stratum key.
+
+## Providers
+
+- **`YFinanceProvider`**: prices, profile, fundamentals (no filing dates →
+  `pit_reliable=false`), news (recent only), screen (`yf.screen` + `EquityQuery`, regions
+  e.g. `gb`, `au`).
+  - The only place that knows yfinance column names, quirks, throttling, retry and
+    error classification.
+  - Must classify: rate-limit → backoff/retry; unknown ticker → `empty`; repeated
+    connection failure → `GlobalFailure`.
+- **`EdgarProvider`**: US fundamentals from SEC XBRL "company facts" (has filing dates →
+  `pit_reliable=true`), and 10-K text sections. It must send a descriptive User-Agent as
+  SEC requires. That value comes from local config/env, not committed.
+- Provider per dataset is chosen in run config:
+  `providers: {prices: yfinance, fundamentals: [edgar, yfinance]}`. A list means fallback
+  order, and the provider used is recorded per fact.
+- Adding a provider = one adapter class + one mapping per dataset it supports.
+- Fetch nodes are **generic**: one `DatasetFetch(dataset="prices")` node type
+  parameterised by dataset, not a node class per provider × dataset.
+
+### Data quality: yfinance quirks and how we handle them
+
+Researched 2026-11-23: the old repo's fixtures and code, plus yfinance issues and changelog.
+Five principles:
+
+1. **Don't ingest Yahoo's derived ratios.** `.info` ratios (debt/equity, dividendYield,
+   P/E, P/B, margins) are where most unit and currency bugs live. Ingest raw ingredients
+   instead: statement line items, prices, dividends, share counts. Compute every ratio in
+   our own calc nodes. This is the guard-rail principle applied to data.
+2. **Units and currency are data, not convention.**
+   - Each canonical field declares its kind: `money`, `per_share`, `shares`, `ratio`
+     (always a fraction), `count`.
+   - Monetary columns are stored in **major units** with an explicit `currency` column.
+   - Every instrument carries **two currencies**: `trading_currency` (prices, market cap)
+     and `reporting_currency` (statements; Yahoo's `financialCurrency`). Examples: BP.L
+     trades in GBp and reports in USD; many ASX miners report in USD.
+   - Calc helpers that combine price-side and statement-side money **must convert through
+     `fx` as of the date**. Mixing currencies raises rather than silently dividing.
+3. **Repair what's certain, flag what isn't** (core source-store repairs/checks). Every
+   repair is recorded per row.
+4. **Keep raw responses**, so a newly found quirk is fixed by `renormalise`, not by
+   re-downloading.
+5. **Pin the yfinance version.** Contract tests run on recorded fixtures of awkward tickers.
+   A separate live *canary* script (not part of the test suite) re-fetches the canaries and
+   diffs invariants, to catch format changes like the `dividendYield` switch.
+   - Canary set: AAPL, BP.L (GBp vs USD), HSBA.L, VOD.L, BHP.AX (USD reporting), one
+     small-cap UK and AU each.
+
+| Quirk | Evidence | Handling |
+|---|---|---|
+| Ratios silently in percent vs fraction: `debt_to_equity` 102.63 (= 1.03×) next to fractional margins; `dividendYield` now a percent while `trailingAnnualDividendYield` is a fraction | alpha-capture fixture `metrics_aapl.json`; its `fundamentals.py`/`growth.py` scored raw 102.63 as extreme leverage; yfinance reports (2025–26) | principle 1: compute ratios ourselves. If a Yahoo ratio is ever ingested, it needs a declared source unit + a cross-check against our own computation |
+| GBp/GBX (pence) vs GBP: 100× errors in prices, market cap, dividends (dividends often in pounds while prices are in pence) | yfinance #280, #2866, #2924; `fast_info.market_cap` 100× bug (PR #3047, Nov 2026); alpha-capture fixture HSBA.L | repair: normalise GBp/GBX/ZAc/ILA → major unit using `history_metadata['currency']`. Check: day-over-day close ratio ≈100 or ≈0.01; dividend/price yield > 25% ⇒ suspect |
+| Reporting currency ≠ trading currency; Yahoo's own P/B etc. mix them | yfinance #1976 (maintainer: use `financialCurrency`), PR #2632 (open) | principle 2: two currencies per instrument + fx conversion in calc helpers |
+| Price history errors: missing split/dividend adjustment, bad ticks, missing days | yfinance price-repair docs; #2621, #2964 | fetch with `repair=True`; record the `Repaired?` column as a repair; check trading-day count against an exchange calendar; widen ranges when repairing |
+| Statement columns misaligned / oldest period sparse | yfinance #2584 | check: drop period columns >70% NaN (recorded); check Assets ≈ Liabilities + Equity per period ⇒ suspect |
+| Only ~4 annual / ~5 quarterly periods | yfinance #1747 (weak) | depth-aware coverage (see Known data limitations) |
+| Empty statement frames (transient) | yfinance #2790/#2791 | classify as `error` (retry), not `empty` |
+| Capex reported negative | convention, unverified | canonical schema fixes the sign (capex stored positive = cash spent); adapter maps it explicitly; contract test on a canary |
+| Share counts: multi-class / dual-listed (`sharesOutstanding` vs `impliedSharesOutstanding`) | Yahoo AU feedback (weak) | check: price × shares vs reported market cap within tolerance ⇒ else suspect |
+| `.info` staleness | yfinance #2042 (weak) | profile TTL; check `currentPrice` vs latest close |
+| Screener omits sector | alpha-capture `universe/AGENTS.md` | sector from `profile` dataset (cached), joined before stratification |
+| No scale flag for thousands/millions | none found, either in alpha-capture history or yfinance issues | check anyway: statements net income vs `.info` net income; ratio ≈1e3/1e6 ⇒ rejected |
+
+alpha-capture bugs **not** to port (the logic behind them): a truthiness check turning
+a real 0 into "missing"; `date.today()` as a fallback period date; a positional concat
+when `period_ending` is missing; first-writer-wins alias collisions.
+
+### Provider fallback (Claude's call)
+
+- Fallback is **per entity per dataset**. The primary provider is tried. If it reports the
+  entity unsupported or `empty` (e.g. EDGAR for a non-US ticker), the next one is tried.
+- There is no per-field or per-period mixing within one entity's dataset slice, so
+  `pit_reliable` is unambiguous per slice.
+- Ticker→CIK uses SEC's published ticker map. The XBRL-tag→canonical-line-item mapping
+  is left to the builder (start with a curated map for the line items the v1 calcs need).
+
+### Prices and point-in-time (Claude's call)
+
+- `known_at` for a price row = that trading date's close. A price is public when it prints,
+  so historical backfills are point-in-time for as-of purposes.
+- Store **both** the provider's close and adjusted close. Backward adjustment applies a
+  constant factor to all earlier prices, so **returns, trend ratios, volatility and drawdown
+  over windows ending at `as_of` are unaffected by later splits/dividends**. The v1 price
+  lens is ratio-based, so as-of runs are clean.
+- Calcs that use price *levels* (absolute price filters, market cap = price × shares) must
+  declare `level_based = True`. In as-of runs they warn: yfinance's "close" is already
+  split-adjusted.
+- `prices` is therefore `pit_reliable = true` for ratio-based use.
+
+### Currency (Claude's call)
+
+- Providers normalise units (e.g. GBp → GBP).
+- Absolute thresholds (market cap, traded value) are expressed in **USD**, using an `fx`
+  dataset (daily FX rates from yfinance) converted point-in-time.
+- Cross-region campaigns (UK + AU) need comparable thresholds; local-currency thresholds
+  would make "balanced" meaningless.
+
+### Known data limitations (documented, not solved in v1)
+
+- **UK/AU fundamentals have no free point-in-time source** equivalent to EDGAR, and
+  yfinance typically returns only ~4 annual periods (`pit_reliable=false`).
+  - **Decision (user):** run on what's available. `quality_value` declares
+    `desired_periods=8, min_periods=3` on fundamentals. Thin history lowers coverage, and
+    so the lens's weight and the dossier's confidence (see core.md, aggregation).
+  - A paid deep-history provider can be added later as one adapter.
+  - Fundamentals-based *backtests* are US-only. Price-based backtests work for all regions.
+- **Survivorship bias**: `screen` lists only currently trading securities. As-of
+  universes are biased until a delisted-securities source is added (typically paid).
+- yfinance news covers only recent items. News-dependent lenses can't be backtested (they're AI anyway).
+
+## v1 lenses
+
+All three share calc nodes where they overlap. No lens reads another lens's verdict.
+
+### 1. `price_behaviour` (deterministic)
+
+Components (each a calc node output, scored and weighted; weights and thresholds are params):
+
+| Component | Calc | Direction |
+|---|---|---|
+| momentum | 12-1 month total return (12m excluding most recent month) | higher is better |
+| trend | price vs 200-day moving average (% above/below), plus slope | above/rising is better |
+| risk | realised volatility (e.g. 1y daily, annualised) and max drawdown (e.g. 3y) | penalty |
+
+Claims are templated per component and cite calc fields. This is the lens used for
+as-of backtests first.
+
+Default thresholds and weights are left to the builder. They are absolute (no
+cross-candidate ranking in v1) and exposed as params. The backtest is how they get calibrated.
+
+### Lens backtests (Claude's call; milestone 8)
+
+- This is a separate **evaluation module** outside the lens graph. Forward returns
+  necessarily use post-`as_of` data, which no run may see.
+- Procedure: run the panel (deterministic lenses only) at monthly `as_of` dates over N
+  years, for a fixed universe (survivorship-biased, documented). Then compute forward
+  returns (1m / 3m / 12m, vs. a benchmark index) from the source store.
+- Metrics: rank IC of score vs. forward return, mean forward return by stance bucket, hit
+  rate. A small HTML report.
+- Not in scope: transaction costs, portfolio simulation.
+
+### 2. `quality_value` (AI)
+
+- **Calc inputs** (deterministic, citable fields):
+  - ROE (level and consistency over ~5–10y)
+  - operating margin level and stability
+  - debt/equity and interest cover
+  - owner earnings (net income + D&A − maintenance capex proxy)
+  - FCF conversion
+  - share-count trend
+  - earnings consistency (no losses / volatility)
+  - a valuation range: owner-earnings yield vs. a hurdle, plus a simple intrinsic-value band
+- **Text inputs**: profile business summary; 10-K business section where available (US); recent news.
+- **Default prompt**: a rubric that states Buffett's principles faithfully, grounded in
+  primary sources.
+  - Berkshire's published acquisition criteria (consistent earning power; good returns on
+    equity with little or no debt; management in place; simple, understandable businesses;
+    a sensible price).
+  - The shareholder letters' concepts: durable competitive advantage ("moat"), circle of
+    competence, owner earnings, margin of safety.
+  - The rubric file lists each principle with its source (letter/year), so it can be
+    checked. It sits at the start of the prompt for prompt caching.
+- **Variant `buffett_persona`**: "assess as Warren Buffett would", plus instructions not
+  to caricature and not to use knowledge of his actual holdings or comments about this
+  company. It's there to compare against the rubric (stance agreement, citation patterns).
+  It is not the default.
+- The LLM judges moat/management/understandability from text and interprets the calc
+  numbers. It never computes them.
+
+### 3. `price_vs_fundamentals` (AI, hybrid)
+
+- Framed as a **divergence check**, so momentum isn't double-counted: does the price action
+  agree with the fundamental trend?
+- **Calc inputs**:
+  - the momentum and trend calcs (shared with lens 1)
+  - fundamental trend calcs: revenue growth, margin change, EPS growth, FCF trend
+    over recent periods (shared with lens 2 where they overlap)
+  - valuation change (e.g. P/E or EV/EBIT now vs. 1y ago)
+- **Output**: stance on whether fundamentals support the price. Flags such as
+  `price_up_fundamentals_down` (warn) and `derating_despite_improvement` (info).
+
+### Optional later lens: `investability` (deterministic)
+
+Liquidity, market cap, listing age, data coverage. It is likely to be more useful as a
+campaign stage-0 gate than as a lens.
+
+## Universe campaign (finance instantiation of core campaigns)
+
+Example (user's motivating case): equities listed in the UK and Australia, balanced
+across sectors, at least 50 accepted, with a cap on candidates evaluated.
+
+```yaml
+campaign:
+  population: {source: yfinance_screen, regions: [gb, au], min_mcap: 300e6, min_volume: 50e3}
+  strata: sector
+  quotas: {total_min: 50, mode: equal}          # per-sector min derived from total and strata count
+  stages:
+    - targets: [screen_filters]                 # stage 0: metadata only, no fetches beyond screen
+    - targets: [price_behaviour]                # stage 1: prices only
+      gate: {reject_if: "stance <= -1 or status == 'failed'"}
+    - targets: [quality_value, price_vs_fundamentals]
+  acceptance: {policy: overall_stance_floor, floor: 0.5, reject_on_flags: [veto]}
+  budget: {max_evaluated: 400, max_llm_cost_usd: 20}
+  batch_size: 20
+  seed: 7
+```
+
+Requirements carried over from alpha-capture's failures:
+- The population is the **full screened set** (paginated), not the top-N by volume.
+  Liquidity is a filter, not an accidental bias.
+- Strata attributes come from `profile` through the source store (cached, TTL'd). Sector
+  filtering happens *after* sector is known. alpha-capture's sector filter was a no-op
+  because enrichment happened later.
+- Exhausting a stratum is reported, never papered over.
+
+Gate expressions above are illustrative. Policies are registered Python callables with
+params. A string expression language is not required.
