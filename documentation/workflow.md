@@ -55,6 +55,14 @@ worktrees. The backlog lives in the repo (Backlog.md). There is no Linear.
 Start the coordinator as a Claude (Opus) chat in the Orca workspace on `main`, after this
 branch has been merged to `main`.
 
+**Shortcut skills** (project skills in `.claude/skills/`; they implement the loop above):
+- `/backlog-unleash [task-ids]`: dispatch ready tasks (WIP cap 3), give one review round,
+  and leave them `In Review`.
+- `/backlog-converge [task-ids]`: land approved `In Review` tasks onto `main` (rebase,
+  checks, ff-only, remove worktree, mark Done), then offer to unleash what's newly unblocked.
+
+The longer prompts below do the same things by hand.
+
 **Start or continue a tranche**
 ```text
 /orchestration
