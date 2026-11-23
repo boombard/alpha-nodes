@@ -27,7 +27,7 @@ toy non-finance domain (e.g. "strains" with fake assay data) to prove it.
   - Graph building instantiates each node from run config
     (`Momentum.model_validate(cfg.nodes.get("momentum", {}))`), so typos and bad types
     fail at load time.
-  - The memo key uses `node.model_dump_json()`.
+  - The memo key hashes the node's params field by field through `content_hash`, with sets sorted, so the key is stable across processes.
   - Structural metadata (`name`, `inputs`, `scope`, `version`, …) are `ClassVar`s.
 - **Dataframes stay pandas**, validated by pandera `DataFrameModel` schemas (pydantic-style
   declarations, usable as pydantic field types). Row-wise pydantic models for time series
