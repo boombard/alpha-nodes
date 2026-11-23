@@ -1,10 +1,10 @@
 ---
 id: TASK-2
 title: M1.2 Node registry and plan building
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-23T08:02:41Z'
-updated_date: '2026-11-23T08:38:11Z'
+updated_date: '2026-11-23T08:41:57Z'
 labels:
   - core
 milestone: m-0
@@ -108,3 +108,12 @@ Semantics:
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_e30c980acf6a, worktree task-2
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker (Sonnet, dispatch ctx_e30c980acf6a, branch boom/task-2, 2 commits 12c86c9..7a7796e): NodeRegistry (registry.py), and build_plan, resolve_classes, to_mermaid, GRAPH_RULES and the GraphError family (graph.py). ACs 1-4 met (test_resolves_transitive_deps_only_for_targets, cycle/scope/unknown/duplicate/params tests, test_topological_order, test_descendants, test_to_mermaid_edges, test_graph_rule_invoked). Coordinator re-ran checks: pytest 52 passed, ruff clean, pyright 0 errors.
+Coordinator review: the semantics match the spec (Kahn order with ties broken by name, then candidate order; one instance per class; stray params rejected). One fix round: UnknownNodeError for an input now names the referring node and input. Reviewed by hand; the source is about 225 lines, so the code-review skill was not run.
+Worker rulings: registry.py imports the errors from graph.py, and graph.py imports NodeRegistry only under TYPE_CHECKING, so NodeRegistry is imported from lensgraph.registry. The scope check is the default GRAPH_RULES entry, so replacing the list wholesale drops it.
+Open points: GRAPH_RULES is mutable module state, so tests must monkeypatch it (test_graph does).
+<!-- SECTION:FINAL_SUMMARY:END -->
