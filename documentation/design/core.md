@@ -190,6 +190,12 @@ class Dossier(BaseModel):
 ```
 
 Principles:
+- **No run ids inside node outputs, dossiers included.** Memoized outputs must depend only on
+  their inputs. A dossier stamped with `ctx.run_id` would come back from the cache carrying the
+  previous run's id, and its content hash would change every run, so downstream nodes (reports)
+  would never cache-hit. Run identity lives *around* outputs: the run index (`dossiers` keyed by
+  run_id and candidate), `RunResult.run_id`, and at export time a wrapper
+  `DossierRecord(run_id, created_at, dossier)` built outside the graph.
 - "abstained" ≠ "neutral stance 0".
 - No 0–100 confidence from LLMs. Use 3-level conviction, plus the framework-computed coverage.
 - The domain layer supplies stance labels (bearish…bullish; reject…advance).

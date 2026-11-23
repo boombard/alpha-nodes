@@ -27,6 +27,8 @@ Sketched tasks (expected parallelism in brackets):
 
 Design refs: core.md (Run configuration, Artifact store and run index, Reporting).
 
+**Decided 2026-11-23:** `Dossier` has no `run_id` (node outputs must not carry run identity; see core.md, Verdicts and dossiers, Principles). Exports, reports and lineage views that hand a dossier out on its own wrap it at the edge in `DossierRecord(run_id, created_at, dossier)`, built outside the graph. Include that model in M3.1's contracts.
+
 ## How to do this task (coordinator/Opus, not a worker)
 1. Re-read the milestone file, the design sections listed, and the code as it now stands.
 2. Create this milestone's tasks with `backlog task create` in the format of task-1 to task-9:
