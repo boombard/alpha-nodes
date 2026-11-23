@@ -1,10 +1,10 @@
 ---
 id: TASK-6
 title: M2.1 Verdict models, LensNode template, coverage and citations
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-23T08:02:58Z'
-updated_date: '2026-11-23T09:47:00Z'
+updated_date: '2026-11-23T09:51:32Z'
 labels:
   - core
   - contracts
@@ -119,18 +119,18 @@ Semantics:
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Claim, Flag, Provenance, LensVerdict, Dossier match Interfaces with validators
-- [ ] #2 LensNode computes depth-aware coverage and citable ids; assess() is the only extension point
-- [ ] #3 Upstream failure yields a failed verdict naming the origin
-- [ ] #4 Lens-on-lens dependencies rejected at graph build unless consumes_verdicts
+- [x] #1 Claim, Flag, Provenance, LensVerdict, Dossier match Interfaces with validators
+- [x] #2 LensNode computes depth-aware coverage and citable ids; assess() is the only extension point
+- [x] #3 Upstream failure yields a failed verdict naming the origin
+- [x] #4 Lens-on-lens dependencies rejected at graph build unless consumes_verdicts
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -151,4 +151,5 @@ Coordinator review, one fix round: (1) a sync assess now runs via asyncio.to_thr
 Round 2 (asked for by the human after the aggregation research): LensVerdict gains stance_mean (in [-2, 2]; what aggregators use; framework-computed; the template defaults it to float(stance)) and stance_spread (>= 0; None = not measured). Provenance gains stance_samples. An ok verdict requires stance_mean; non-ok verdicts and assessments carry neither (ContractViolation in the template). core.md LensVerdict block updated. Two worker sessions stopped on API 529 Overloaded before changing anything, so the coordinator implemented this round directly (TDD, commit ef3b2b1, at the human's request). It merges cleanly with main.
 Rulings: (1) The worker edited core.md (outside the Files list) to match the task interface: Dossier has no run_id, and confidence is float (0.0 if no ok lens). The run index can carry run_id alongside each dossier; re-add the field if dossiers travel alone (reports, API). Decide before TASK-9. (2) input_sufficiency treats values without a length (e.g. float) as 1.0 when present, ignoring any depth requirement. (3) Str inputs measure depth in characters. (4) Verdict models are frozen with extra=forbid via a private _Model base. (5) lens_dependency_rule imports LensNode lazily (import cycle). (6) Only the first colliding provenance key is named in the error.
 Open points: commit 677f6c9 is not pyright-clean on its own (squash when landing).
+Landed 6f25b46..6f25b46 on main (4 commits squashed into one at the human's request).
 <!-- SECTION:FINAL_SUMMARY:END -->
