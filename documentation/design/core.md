@@ -344,8 +344,11 @@ Everything a report or a future frontend needs:
   - `campaigns` / `campaign_draws`
 - Any citable id resolves to a stored output: `(run_id, candidate, node[, field/item])` → blob.
   That is the drill-down path for "show me the prices behind this claim".
-- Interfaces `BlobStore` and `RunIndex`. Local impls: filesystem + DuckDB. Later:
-  S3 + Postgres. The memo cache *is* the blob store plus an index lookup by memo_key.
+- Interfaces `BlobStore` and `RunIndex`. The blob store is a single fsspec-backed
+  implementation (`FsspecBlobStore`) selected by URL: `file://` locally (`FileBlobStore`),
+  `memory://` in tests (`InMemoryBlobStore`), `s3://` with `s3fs` installed. Encoding is
+  the same everywhere (Parquet, JSON envelopes, no pickle). The run index is DuckDB;
+  Postgres is later. The memo cache *is* the blob store plus an index lookup by memo_key.
 
 ## Reporting
 

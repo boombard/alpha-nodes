@@ -8,6 +8,7 @@ dependencies = [
     "pandera[pandas]>=0.36",
     "numpy",
     "pyarrow",
+    "fsspec",
     "duckdb",
 ]
 

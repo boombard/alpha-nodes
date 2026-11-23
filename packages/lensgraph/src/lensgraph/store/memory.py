@@ -1,29 +1,23 @@
 """In-memory store backends for tests and ephemeral runs (nothing persists)."""
 
+import uuid
 from collections.abc import Mapping
 from typing import Any
 
-from ..hashing import content_hash
 from ..plan import NodeResult
-from .base import BlobStore, RunIndex
+from .base import RunIndex
+from .files import FsspecBlobStore
 
 
-class InMemoryBlobStore(BlobStore):
-    """Dict-backed BlobStore holding live objects (no serialization)."""
+class InMemoryBlobStore(FsspecBlobStore):
+    """FsspecBlobStore on fsspec's `memory://` filesystem, for tests and ephemeral runs.
+
+    Values go through the real encoding, so `get` returns a decoded copy, never the caller's
+    object. fsspec's memory filesystem is process-global, so each instance gets a unique root.
+    """
 
     def __init__(self) -> None:
-        self._blobs: dict[str, Any] = {}
-
-    def put(self, value: Any) -> str:
-        h = content_hash(value)
-        self._blobs.setdefault(h, value)
-        return h
-
-    def get(self, h: str) -> Any:
-        return self._blobs[h]
-
-    def has(self, h: str) -> bool:
-        return h in self._blobs
+        super().__init__(f"memory://lensgraph-{uuid.uuid4().hex}")
 
 
 class InMemoryRunIndex(RunIndex):
