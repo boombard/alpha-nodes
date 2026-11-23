@@ -1,10 +1,10 @@
 ---
 id: TASK-9
 title: M2.4 Confidence-weighted aggregation and panels
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-23T08:02:59Z'
-updated_date: '2026-11-23T23:44:48Z'
+updated_date: '2026-11-23T23:47:04Z'
 labels:
   - core
 milestone: m-1
@@ -93,18 +93,18 @@ Original formula, applied to ok verdicts only:
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 ShrunkMeanAggregator matches the worked example exactly (evidence-share formula, decided 2026-11-24: direction 1.181818, evidence_share 0.6875, overall 0.8125)
-- [ ] #2 All-failed/abstained candidates give overall None, confidence 0 without error
-- [ ] #3 Thin coverage lowers confidence; VetoAggregator forces -2 on veto flags
-- [ ] #4 Toy panel e2e (growth + safety lens) produces correct dossiers and caches on rerun
+- [x] #1 ShrunkMeanAggregator matches the worked example exactly (evidence-share formula, decided 2026-11-24: direction 1.181818, evidence_share 0.6875, overall 0.8125)
+- [x] #2 All-failed/abstained candidates give overall None, confidence 0 without error
+- [x] #3 Thin coverage lowers confidence; VetoAggregator forces -2 on veto flags
+- [x] #4 Toy panel e2e (growth + safety lens) produces correct dossiers and caches on rerun
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -128,4 +128,5 @@ S1: overall 0.410, confidence (evidence share) 0.583, direction 0.703. growth ok
 S2: overall 0.355, confidence 0.500, direction 0.709. growth ok (stance_mean 0.418); safety ok but coverage 0.5 (no tox notes), weight 0.5.
 S3: overall null, confidence 0.0, direction null. growth and safety both failed: upstream 'assay_clean' failed: ContractViolation: raw is missing columns ['od600'].
 Full indented JSON: the worker's demo.txt (printed by test_panel_e2e_toy -s).
+Landed ea148d8..ea148d8 on main (worker commits squashed into one).
 <!-- SECTION:FINAL_SUMMARY:END -->
