@@ -164,13 +164,16 @@ spikes/                   # throwaway experiments (not product code)
 - CLI framework (Typer/click) and command names.
 - Logging/observability (logfire integrates with pydantic-ai; optional).
 
-## Suggested milestone order
+## Milestones
 
-1. Core graph + executor + failure semantics + memoization, tested on a **toy non-finance
-   domain** (this keeps the core honest about being generic).
-2. Verdict/dossier models, deterministic lens base, aggregator, AI node with citation guard rail.
-3. Artifact store + run index + minimal HTML report.
-4. Finance: point-in-time source store, yfinance provider, prices dataset.
+These are tracked in `backlog/` (see `backlog/docs/doc-1 - Implementation-plan.md`).
+
+1. Core graph, executor, failure semantics, memoization, blob store + run index. Tested
+   on a **toy non-finance domain**, which keeps the core honest about being generic.
+2. Verdict/dossier models, deterministic lens base, AI lens with citation guard rail and
+   model profiles, confidence-weighted aggregation.
+3. Run config (YAML) + CLI, lineage resolution, static HTML report.
+4. Point-in-time source store (generic) + finance package, yfinance provider, prices/profile/fx.
 5. Price-behaviour lens end-to-end (100 tickers → HTML report).
 6. Fundamentals (EDGAR + yfinance) → quality & value lens → price-vs-fundamentals lens.
 7. Campaigns (generic) → universe campaign (finance).

@@ -20,7 +20,12 @@ Read in this order:
 4. [design/lessons.md](design/lessons.md): what we learned from alpha-capture and from
    the engine-comparison spike. It explains *why* several decisions were made.
 
+## Workflow and plan
+
+- [workflow.md](workflow.md): coordinator/worker loop, task rules, backlog usage.
+- `backlog/`: Backlog.md tasks and milestones. The plan overview is `backlog/docs/doc-1 - Implementation-plan.md`.
+
 ## Status
 
-- 2026-11-23: design brainstormed and written. Nothing implemented yet.
+- 2026-11-23: design written; M1–M2 planned in detail, M3–M8 sketched. Nothing implemented yet.
   The engine-comparison spike lives in `spikes/engine-comparison/` (throwaway, reference only).
