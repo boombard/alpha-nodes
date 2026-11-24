@@ -467,19 +467,31 @@ Decided 2026-11-24 (design only; built in M3, used by campaigns in M7).
 - **Caching:** anything the brief is rendered into must include the brief's hash in its memo key
   and provenance. A template-only prompt hash would serve stale results under a new brief.
 
-## Reporting
+## Reporting: run view (one app, one contract)
 
-- `lensgraph` provides the generic HTML report builder:
-  - run summary
-  - per-candidate dossier page
-  - verdicts with claims
-  - each citation links to a rendered view of the cited output (table, small chart, JSON)
-  - flags and failures visible
-  - graph diagram
-- Output is static and self-contained (one folder per run, openable from disk). Embedded
-  data is limited to what's cited plus summaries, so the size stays sane.
-- Domains can register renderers for their output types (e.g. a price-series chart).
-- Future frontend: a FastAPI over `RunIndex` + `BlobStore`. No extra data model needed.
+Decided 2026-11-24. The end-of-run report and the future live view are **the same React app**
+reading **the same data contract**.
+
+- **Contract:** `RunView`, a pydantic model (run summary, plan graph, per-candidate `DossierRecord`
+  and review, claim-to-citation refs, deduplicated cited values with frames as capped tables,
+  LLM calls). Python owns it. A JSON Schema and **generated TypeScript types** come from it, with a
+  drift test, so the UI can never silently disagree with the data.
+- **Source of truth:** `run.json` (`RunView`), built from the run index and blobs alone, deterministic
+  and diffable. A database or API later serves the same shape; nothing else is a second model.
+- **App:** `packages/lensgraph-ui` (React + TypeScript, Vite). Pages: run summary with a sortable
+  candidate table, the plan graph (React Flow with a dagre layout, coloured by node status), and
+  candidate pages with claim-to-cited-data drill-down. LLM text is always rendered as text.
+- **Data sources:** the app reads through a `DataSource` interface. `EmbeddedSource` reads
+  `window.__RUN__` from `data/run.js` (so the report opens from `file://`, where browsers block
+  `fetch`). `FetchSource` reads `run.json` over HTTP. A later `LiveSource` subscribes to run events.
+- **Static report:** a folder with the single-file app `index.html`, `run.json` and `data/run.js`;
+  no server, works offline, archivable.
+- **Live view (later):** run events folded over an empty `RunView` give exactly the final `run.json`,
+  so the live view is the report watched as it fills in. See the live-view sketch task.
+- **Python users never need Node:** the built bundle is committed into the Python package, with an
+  up-to-date check in the Python tests. Only UI development needs Node (pnpm).
+- **Domain renderers:** cited values carry a `kind` and table/JSON payloads; domains add renderers
+  by kind in the app (e.g. a price chart) in later milestones.
 
 ## Campaigns
 

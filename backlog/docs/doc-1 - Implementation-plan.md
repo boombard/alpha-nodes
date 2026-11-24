@@ -43,6 +43,7 @@ pandera, DuckDB, pyarrow, pydantic-ai-slim 2.71, Jinja2; pytest + pytest-asyncio
   - No network and no real LLM calls: fake providers, pydantic-ai `FunctionModel`/`TestModel`, `ALLOW_MODEL_REQUESTS = False`.
 - No pickle in persistent stores.
 - Every task passes: `uv run pytest`, `uv run ruff check`, `uv run pyright` (basic).
+- UI tasks (`packages/lensgraph-ui`, pnpm) also pass `pnpm -C packages/lensgraph-ui test` and `typecheck`. The built bundle is committed into the Python package; Python tests check it is up to date, so Python-only work never needs Node.
 - Docs: if behaviour differs from `documentation/design/*`, update the doc in the same change.
 
 ## Review Focus

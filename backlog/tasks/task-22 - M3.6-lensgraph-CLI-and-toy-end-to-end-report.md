@@ -1,14 +1,15 @@
 ---
 id: TASK-22
-title: M3.5 lensgraph CLI and toy end-to-end report
+title: M3.6 lensgraph CLI and toy end-to-end report
 status: To Do
 assignee: []
 created_date: '2026-11-23T23:51:15Z'
+updated_date: '2026-11-24T01:36:51Z'
 labels:
   - core
 milestone: m-2
 dependencies:
-  - TASK-21
+  - TASK-24
 references:
   - documentation/design/core.md
 type: feature
@@ -30,7 +31,9 @@ CLI and toy end-to-end. Closes M3. Spec: `documentation/design/core.md`, Run con
 - Test: `packages/lensgraph/tests/test_cli.py`
 
 ## Interfaces
-Consumes: `RunConfig`, `Settings`, `load_object` (M3.1), `build_report` (M3.4), `arun`, `RunAborted`.
+Consumes: `RunConfig`, `Settings`, `load_object` (M3.1), `build_run_view` and `write_run_view` (TASK-21), `install_app` (TASK-24), `arun`, `RunAborted`.
+
+**Report = app + data (changed 2026-11-24):** writing a report means `install_app(out_dir)` plus `write_run_view(build_run_view(...), out_dir)`, giving `index.html`, `run.json` and `data/run.js`. There is no Jinja report.
 
 Produces:
 ```python
@@ -50,7 +53,7 @@ Semantics:
 
 ## Steps
 - [ ] Write the failing tests (call `main([...])` in-process with `tmp_path` stores; no subprocess needed):
-  - `test_cli_run_toy_writes_report`: `run toy_run.yaml --path <tests dir> --store <tmp>` returns 0; the report index exists; stdout names the run id.
+  - `test_cli_run_toy_writes_report`: `run toy_run.yaml --path <tests dir> --store <tmp>` returns 0; the report folder has `index.html`, `run.json` and `data/run.js`; `run.json` validates as `RunView`; stdout names the run id.
   - `test_cli_rerun_all_cache_hits`: a second run's node results are cache hits for every memoizable node.
   - `test_cli_invalidate_and_no_cache`
   - `test_cli_profile_override_applies_to_ai_nodes`: `--profile test2` (a second scripted profile) changes AI node memo keys only.
@@ -62,7 +65,7 @@ Semantics:
 - [ ] Run `uv run pytest -q`, then the DoD checks. Expected: PASS.
 - [ ] Commit: `feat(lensgraph): lensgraph CLI and toy end-to-end report`.
 
-**M3 demo gate (for the human):** run `uv run lensgraph run packages/lensgraph/tests/toy/toy_run.yaml --path packages/lensgraph/tests` and paste its output (run id, report path) into the final summary. The human opens the report and drills from a claim to its cited data.
+**M3 demo gate (for the human):** run `uv run lensgraph run packages/lensgraph/tests/toy/toy_run.yaml --path packages/lensgraph/tests` and paste its output (run id, report path) into the final summary. The human opens `index.html` from disk (no server) and drills from a claim to its cited data, and views the plan graph.
 
 **Notes from the TASK-18 review:**
 - **How the brief reaches the reviewer:** `RunConfig.brief` is run-level, but the reviewer takes it as a node param (so it is in the memo key). When the config has a brief and a reviewer, `arun` sets `nodes[review].brief` from it, unless the config already sets that param explicitly (then raise ParamsError if they differ). Test: changing `brief` in YAML reruns only the review.

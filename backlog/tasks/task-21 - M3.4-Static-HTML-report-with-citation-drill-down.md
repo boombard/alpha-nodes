@@ -1,6 +1,6 @@
 ---
 id: TASK-21
-title: M3.4 Static HTML report with citation drill-down
+title: M3.4 RunView contract, run.json export and generated TS types
 status: To Do
 assignee: []
 created_date: '2026-11-23T23:51:15Z'
@@ -19,69 +19,81 @@ ordinal: 21000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-Static HTML report. Spec: `documentation/design/core.md`, Reporting (static, self-contained, one folder per run, citations link to rendered views, domain renderers).
+Python side of the run view. Decided 2026-11-24 (human): the end-of-run report and the future live view are **one React app** reading **one data contract**. `run.json` is the source of truth now; a DB/API serves the same shape later. This task builds the contract and the data export; TASK-24 builds the app. Spec: `documentation/design/core.md`, Reporting, and "Run view: one app, one contract".
 
 ## Files
-- Create: `packages/lensgraph/src/lensgraph/report/{__init__,builder,renderers}.py`, `packages/lensgraph/src/lensgraph/report/templates/{base,index,candidate,cited}.html.j2`, `packages/lensgraph/src/lensgraph/report/static/report.css`
-- Modify: `packages/lensgraph/src/lensgraph/__init__.py` (export `build_report`), `packages/lensgraph/pyproject.toml` (package data for templates/static, if hatch needs it)
-- Test: `packages/lensgraph/tests/test_report.py`
+- Create: `packages/lensgraph/src/lensgraph/view/{__init__,models,build,schema}.py`, `packages/lensgraph-ui/src/types/run-view.ts` (generated), `packages/lensgraph-ui/fixtures/toy-run.json` (generated)
+- Modify: `packages/lensgraph/src/lensgraph/plangraph.py` (map `DossierReviewer` to kind "reviewer"), `packages/lensgraph/src/lensgraph/__init__.py` (exports), `documentation/design/core.md` (Reporting)
+- Test: `packages/lensgraph/tests/{test_view,test_view_schema}.py`
 
 ## Interfaces
-Consumes: `DossierRecord`, `DossierReview`, `LLMCall`, `RunIndex` (`run_config`, `node_result`, `llm_calls`, `node_results`), `BlobStore`, `resolve_all`/`CitedValue`/`UnresolvedCitation` (M3.2), `to_mermaid`, `resolve_classes`, `NodeRegistry`, `Panel`.
+Consumes: `DossierRecord`, `DossierReview`, `LLMCall`, `PlanGraph`, `RunIndex` (`run_config`, `node_results`, `node_result`, `llm_calls`, `plan_graph`), `BlobStore`, `resolve_all`/`CitedValue`/`UnresolvedCitation`.
 
 Produces:
 ```python
-# renderers.py
-Renderer = Callable[[Any, int], str]                 # (value, max_rows) -> HTML fragment (escaped)
-class RendererRegistry:
-    def register(self, type_: type, renderer: Renderer) -> None    # most specific type wins (MRO order)
-    def render(self, value: Any, max_rows: int = 200) -> str
-DEFAULT_RENDERERS: RendererRegistry                  # DataFrame -> table (last max_rows rows + note), BaseModel -> JSON <pre>,
-                                                     # list of models -> table of model fields, scalar -> text
-# builder.py
-def load_records(run_id: str, index: RunIndex, blobs: BlobStore) -> list[DossierRecord]
-    # panel/aggregator from run_config; per candidate: aggregator node_result -> blob -> Dossier; "review" node -> DossierReview if present
-def build_report(run_id: str, index: RunIndex, blobs: BlobStore, out_dir: Path, *,
-                 registry: NodeRegistry | None = None, renderers: RendererRegistry = DEFAULT_RENDERERS,
-                 max_rows: int = 200) -> Path        # returns out_dir / "index.html"
+# view/models.py  (frozen, extra="forbid"; the contract the UI is typed against)
+class TableData(BaseModel): columns: list[str]; rows: list[list[Any]]; total_rows: int; truncated: bool
+class CitedView(BaseModel):
+    id: str                                   # stable: f"{source_hash[:16]}:{cite}"
+    cite: str; source_hash: str
+    kind: Literal["frame", "model", "field", "item", "value"]
+    table: TableData | None = None            # frames, lists of models
+    json_value: Any = None                    # models, fields, items, scalars (JSON-safe)
+class ClaimRef(BaseModel): lens: str; claim_index: int; cites: dict[str, str | None]   # cite -> CitedView.id, None if unresolved
+class CandidateView(BaseModel):
+    id: str; record: DossierRecord; claims: list[ClaimRef]
+    node_status: dict[str, NodeStatus]        # node name -> status for this candidate (and shared nodes)
+class RunSummary(BaseModel):
+    run_id: str; status: str; started_at: datetime | None; finished_at: datetime | None
+    config: dict[str, Any]; node_counts: dict[NodeStatus, int]; cache_hits: int
+    llm_input_tokens: int; llm_output_tokens: int; llm_cost_usd: float | None   # None if any call's cost is unknown
+class RunView(BaseModel):
+    schema_version: Literal[1] = 1
+    summary: RunSummary; plan: PlanGraph; candidates: list[CandidateView]
+    cited: dict[str, CitedView]               # by CitedView.id, deduplicated
+    llm_calls: list[LLMCall]
+# view/build.py
+def build_run_view(run_id: str, index: RunIndex, blobs: BlobStore, *, max_rows: int = 200) -> RunView
+def write_run_view(view: RunView, out_dir: Path) -> Path
+    # writes out_dir/run.json (the contract) and out_dir/data/run.js ("window.__RUN__ = <same JSON>;"), returns run.json
+# view/schema.py
+def run_view_schema() -> dict[str, Any]       # RunView.model_json_schema()
 ```
 Semantics:
-- **Layout:** `index.html` (run summary), `candidates/<id>.html` (one per candidate), `cited/<source_hash>.html` (one per distinct cited blob, deduplicated), `dossiers/<id>.json` (`DossierRecord`, indented), `report.css`.
-- **Run summary:** run id, status, started/finished, config (pretty YAML or JSON), node counts by status, cache hit rate, LLM calls with total tokens and total cost (shown as "unknown" if any call's cost is None, never a partial total presented as complete), and the candidate table: id, overall stance, direction, evidence share, agreement, per-lens status, review flags.
-- **Candidate page:** the dossier headline (overall, direction, evidence share, agreement); per verdict: status, stance and stance_mean, conviction, coverage with input sufficiency, components, error, provenance (model, prompt hash, tokens); claims with each cite as a link to its `cited/` page (an `UnresolvedCitation` renders as a visible "unresolved" marker, never a crash); flags; the review (summary, fit, gaps, flags) when present.
-- **Graph:** `to_mermaid` over the panel's resolved classes when `registry` is given, embedded as `<pre class="mermaid">` with Mermaid loaded from a pinned jsDelivr URL; offline, the diagram source text still shows.
-- **Escaping:** everything rendered goes through Jinja2 autoescape; LLM text is untrusted.
-- **Size:** embed only cited data plus summaries (frames capped at `max_rows`).
+- **Data comes only from the index and blobs:** the panel and aggregator from `run_config`, dossiers and reviews via `node_result` and then blobs, citations via `resolve_all` per verdict. An `UnresolvedCitation` maps the cite to None; it never raises.
+- **JSON-safe:** frames become `TableData` (the last `max_rows` rows, `truncated` set); non-finite floats become null; datetimes become ISO strings.
+- **Deterministic:** the same run gives byte-identical `run.json` (sorted keys, stable ordering), so the file can be diffed and snapshotted.
+- **TypeScript types are generated, not hand-written:** `packages/lensgraph-ui/src/types/run-view.ts` comes from `run_view_schema()` via `json-schema-to-typescript`, run through `pnpm dlx` from a small script, `packages/lensgraph-ui/scripts/gen-types.mjs`. Allowed extra file: that script, plus a minimal `packages/lensgraph-ui/package.json` if it doesn't exist yet; TASK-24 owns the rest of the UI package.
+- **Drift test:** `test_view_schema.py` regenerates the schema and fails if the committed `run-view.ts` header hash differs. Embed the schema hash in a comment on the generated file's first line, so the test needs no Node.
+- **Fixture for the UI:** `fixtures/toy-run.json` is the toy panel run (with reviewer) through `build_run_view`, written by a test helper. The test asserts the committed fixture is up to date, and a `--regen` style env var (`LENSGRAPH_REGEN_FIXTURES=1`) rewrites it.
 
 ## Steps
-- [ ] Write the failing tests (run the toy panel with reviewer into a `tmp_path` store first, in a module fixture):
-  - `test_report_layout`: index, one page per candidate, cited pages, dossier JSON files exist.
-  - `test_index_lists_candidates_with_headline_numbers`: S1 to S3 rows; S3 shows no overall stance.
-  - `test_claim_links_to_cited_page`: a growth claim's link target exists and contains the rendered value.
-  - `test_unresolved_citation_marked_not_raised`: delete a cited blob, rebuild, page shows "unresolved".
-  - `test_llm_cost_total_unknown_when_any_none`
-  - `test_html_escapes_llm_text`: a claim text containing `<script>` appears escaped.
-  - `test_renderer_registry_most_specific_wins` and `test_frame_renderer_caps_rows`
-  - `test_dossier_json_is_dossier_record`
-  - Assert structure (element ids/classes, links), not pixels or whole-file snapshots.
-- [ ] Run `uv run pytest packages/lensgraph/tests/test_report.py -q`. Expected: FAIL.
-- [ ] Implement.
+- [ ] Write the failing tests:
+  - `test_view.py`:
+    - `test_run_view_toy_shape`: 3 candidates; S3 has no overall stance; the plan has every node; the reviewer node's kind is "reviewer".
+    - `test_cited_values_resolved_and_deduplicated`: a growth claim's cite maps to a CitedView holding the stored value; the same blob cited twice appears once.
+    - `test_unresolved_cite_is_null_not_error`: delete a blob, rebuild, the cite maps to None.
+    - `test_frame_truncated_to_max_rows`
+    - `test_llm_cost_none_when_any_unknown`
+    - `test_run_json_deterministic`: two builds are byte-identical.
+    - `test_run_js_matches_run_json`: `data/run.js` wraps exactly the run.json content.
+  - `test_view_schema.py`:
+    - `test_ts_types_up_to_date` (schema hash comparison)
+    - `test_ui_fixture_up_to_date`
+- [ ] Run `uv run pytest packages/lensgraph/tests/test_view.py packages/lensgraph/tests/test_view_schema.py -q`. Expected: FAIL.
+- [ ] Implement; generate `run-view.ts` and the fixture.
 - [ ] Run `uv run pytest -q`, then the DoD checks. Expected: PASS.
-- [ ] Commit: `feat(lensgraph): static HTML report with citation drill-down`.
+- [ ] Commit: `feat(lensgraph): RunView contract, run.json export and generated TS types`.
 
-**Added 2026-11-24:** where useful, draw the per-candidate graph from `RunIndex.plan_graph` (TASK-19), coloured by node status, in addition to the class-level Mermaid diagram.
-
-**Note from the TASK-19/20 reviews:** `plangraph.node_kind` (TASK-19) was written before `DossierReviewer` existed, so it maps the reviewer to "other". Map it to "reviewer" (allowed file: `plangraph.py`) and assert it in a test.
-
-Out of scope: CLI wiring (M3.5), domain renderers (finance milestones), charts beyond the renderer hook.
+Out of scope: the React app (TASK-24), CLI wiring (TASK-22), live events and API (TASK-23).
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Report folder has index, candidate pages, deduplicated cited pages and DossierRecord JSON
-- [ ] #2 Every claim citation links to a rendered view of its stored value; unresolved citations are marked, never crash
-- [ ] #3 Run summary shows LLM token totals and cost, 'unknown' when any call's cost is unknown
-- [ ] #4 All rendered text is escaped; renderer registry picks the most specific type
+- [ ] #1 RunView (summary, plan, candidates with DossierRecords and claim refs, deduplicated cited values, LLM calls) is built from the index and blobs alone
+- [ ] #2 run.json is deterministic and JSON-safe; data/run.js embeds the same content for file:// use
+- [ ] #3 Unresolved citations map to null, never raise; frames are truncated with a flag
+- [ ] #4 TS types and the UI fixture are generated from the Python models, with drift tests that need no Node
 <!-- AC:END -->
 
 ## Definition of Done

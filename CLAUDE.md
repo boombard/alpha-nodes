@@ -21,6 +21,7 @@ signature. Tests and test-only helpers need a docstring only when the test name 
 self-explanatory.
 
 Commands: `uv sync`, `uv run pytest`, `uv run ruff check`, `uv run pyright`.
+UI (`packages/lensgraph-ui`, only when changing it): `pnpm -C packages/lensgraph-ui install|test|typecheck|bundle`.
 
 Hard rules (see `documentation/design/overview.md` for why):
 - `lensgraph` must never import `alpha_nodes` or contain finance concepts.
