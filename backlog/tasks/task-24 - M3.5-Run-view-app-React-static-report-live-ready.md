@@ -1,9 +1,10 @@
 ---
 id: TASK-24
 title: 'M3.5 Run view app (React): static report, live-ready'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-24T01:36:50Z'
+updated_date: '2026-11-24T01:56:14Z'
 labels:
   - core
   - ui
@@ -88,3 +89,9 @@ Out of scope: live events, API and the live DataSource (TASK-23); domain-specifi
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_57b91c39b205, worktree task-24
+<!-- SECTION:NOTES:END -->
