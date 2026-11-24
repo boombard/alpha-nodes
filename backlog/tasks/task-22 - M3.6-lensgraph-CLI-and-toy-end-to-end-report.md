@@ -1,10 +1,10 @@
 ---
 id: TASK-22
 title: M3.6 lensgraph CLI and toy end-to-end report
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-23T23:51:15Z'
-updated_date: '2026-11-24T01:36:51Z'
+updated_date: '2026-11-24T08:10:59Z'
 labels:
   - core
 milestone: m-2
@@ -92,3 +92,9 @@ Out of scope: campaigns (M7), as-of runs (M8), a web frontend.
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_bf67e82883d5, worktree task-22
+<!-- SECTION:NOTES:END -->
