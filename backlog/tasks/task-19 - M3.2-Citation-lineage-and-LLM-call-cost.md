@@ -1,10 +1,10 @@
 ---
 id: TASK-19
 title: M3.2 Citation lineage and LLM call cost
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-23T23:51:14Z'
-updated_date: '2026-11-24T01:24:12Z'
+updated_date: '2026-11-24T01:29:56Z'
 labels:
   - core
 milestone: m-2
@@ -80,18 +80,18 @@ Out of scope: rendering (M3.4); verdicts/dossiers tables (derivable from node_re
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Every cite in a verdict resolves via provenance input hashes to a stored value, or raises UnresolvedCitation naming it
-- [ ] #2 LLM calls are recorded per run with tokens and genai-prices cost (None when unknown); cache hits record no call
-- [ ] #3 DuckDB implements llm_calls, run_config and node_result
-- [ ] #4 The plan graph (nodes, edges, kinds) is recorded at run start and readable from both index implementations
+- [x] #1 Every cite in a verdict resolves via provenance input hashes to a stored value, or raises UnresolvedCitation naming it
+- [x] #2 LLM calls are recorded per run with tokens and genai-prices cost (None when unknown); cache hits record no call
+- [x] #3 DuckDB implements llm_calls, run_config and node_result
+- [x] #4 The plan graph (nodes, edges, kinds) is recorded at run start and readable from both index implementations
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -107,4 +107,5 @@ Worker (Sonnet, dispatch ctx_cfc637929a54, branch boom/task-19, 2 commits dd7138
 Coordinator review, one fix round: the plan-graph models moved out of plan.py into plangraph.py (plan.py imports only node and types again, avoiding an inverted layering and future cycles); genai-prices declared as a direct dependency (>=0.2.5,<0.3).
 Rulings: extra files touched (conftest toy_panel_runner fixture, test_plan_graph.py, core.md); DuckDB run_config raises KeyError for an unknown run and node_result returns the first match; test_price_known_model uses anthropic:claude-haiku-4-5 (present in the price snapshot).
 Open points: node_kind labels the reviewer 'other' until TASK-21 maps it.
+Landed 93158a0..93158a0 on main (worker commits squashed into one).
 <!-- SECTION:FINAL_SUMMARY:END -->
