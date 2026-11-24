@@ -1,10 +1,10 @@
 ---
 id: TASK-24
 title: 'M3.5 Run view app (React): static report, live-ready'
-status: In Review
+status: In Progress
 assignee: []
 created_date: '2026-11-24T01:36:50Z'
-updated_date: '2026-11-24T02:02:54Z'
+updated_date: '2026-11-24T02:07:34Z'
 labels:
   - core
   - ui
@@ -94,6 +94,8 @@ Out of scope: live events, API and the live DataSource (TASK-23); domain-specifi
 
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_57b91c39b205, worktree task-24
+
+Back to In Progress (human request, 2026-11-24): adopt MUI + MUI X DataGrid with a light/dark theme, and move tests to tests/unit/. The coordinator re-reviews afterwards.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

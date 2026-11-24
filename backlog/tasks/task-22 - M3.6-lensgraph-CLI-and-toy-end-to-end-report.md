@@ -65,6 +65,8 @@ Semantics:
 - [ ] Run `uv run pytest -q`, then the DoD checks. Expected: PASS.
 - [ ] Commit: `feat(lensgraph): lensgraph CLI and toy end-to-end report`.
 
+**E2E smoke test (added 2026-11-24):** add Playwright to `packages/lensgraph-ui` (devDependency, `playwright.config.ts` with `testDir: "tests/e2e"`, a `pnpm e2e` script, Chromium only). One test, `tests/e2e/report.spec.ts`: generate the toy report with the CLI into a temp dir (a Playwright `globalSetup` running `uv run lensgraph run ... --store <tmp>`), open its `index.html` over `file://`, assert the summary lists S1 to S3, open S1, click a claim citation and see the cited value, open the review, and check the plan graph has one rendered node per plan node. `pnpm e2e` is a separate step: not part of `pnpm test` or `uv run pytest`, because it needs a browser download. Document it in the UI README. Allowed extra files: `packages/lensgraph-ui/{package.json,pnpm-lock.yaml,playwright.config.ts,tests/e2e/**,README.md}`.
+
 **M3 demo gate (for the human):** run `uv run lensgraph run packages/lensgraph/tests/toy/toy_run.yaml --path packages/lensgraph/tests` and paste its output (run id, report path) into the final summary. The human opens `index.html` from disk (no server) and drills from a claim to its cited data, and views the plan graph.
 
 **Notes from the TASK-18 review:**
@@ -80,6 +82,7 @@ Out of scope: campaigns (M7), as-of runs (M8), a web frontend.
 - [ ] #2 --invalidate, --no-cache and --profile override the config; config errors exit 2 without a traceback
 - [ ] #3 lensgraph report rebuilds a report from the index and blobs alone
 - [ ] #4 M3 demo gate output recorded
+- [ ] #5 Playwright smoke test opens the generated report from file:// and drills from a claim to its cited value
 <!-- AC:END -->
 
 ## Definition of Done
