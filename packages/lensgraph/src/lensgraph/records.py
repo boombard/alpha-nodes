@@ -39,3 +39,19 @@ class LLMCall(BaseModel):
     input_tokens: int
     output_tokens: int
     cost_usd: float | None
+
+
+class RunInfo(BaseModel):
+    """A run's own record from the run index: its status and (UTC) start and finish times.
+
+    Args:
+        status: "running" until the run finishes, then the status it finished with ("ok", ...).
+        started_at: when the run started; None only for a run the index never saw start.
+        finished_at: None while running.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+    run_id: str
+    status: str
+    started_at: datetime | None
+    finished_at: datetime | None

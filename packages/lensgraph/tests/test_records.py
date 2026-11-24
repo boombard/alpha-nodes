@@ -71,3 +71,19 @@ def test_memory_index_llm_calls_and_config():
     assert index.node_result("r1", "n", "S1") == result
     assert index.node_result("r1", "n", "S2") is None
     assert index.node_result("r1", "missing", None) is None
+
+
+def test_memory_index_run_info_lifecycle():
+    from lensgraph.records import RunInfo
+
+    index = InMemoryRunIndex()
+    index.start_run("r1", {})
+    running = index.run_info("r1")
+    assert isinstance(running, RunInfo) and running.status == "running"
+    assert running.started_at is not None and running.started_at.utcoffset() is not None
+    assert running.finished_at is None
+    index.finish_run("r1", "ok")
+    done = index.run_info("r1")
+    assert done.status == "ok" and done.finished_at is not None
+    with pytest.raises(KeyError):
+        index.run_info("nope")

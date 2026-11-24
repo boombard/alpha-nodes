@@ -478,6 +478,25 @@ reading **the same data contract**.
   drift test, so the UI can never silently disagree with the data.
 - **Source of truth:** `run.json` (`RunView`), built from the run index and blobs alone, deterministic
   and diffable. A database or API later serves the same shape; nothing else is a second model.
+- **Implementation (`lensgraph.view`):** `build_run_view(run_id, index, blobs, max_rows=200)`
+  builds the `RunView` from the panel and aggregator named in `run_config`, dossiers and reviews
+  via `node_result` and then blobs, and each verdict's cites via `resolve_citation`. A cite that
+  cannot be resolved maps to `None`; it never raises. `write_run_view` writes `run.json` and
+  `data/run.js` (`window.__RUN__ = <same JSON>;`).
+  - Cited values are deduplicated under `CitedView.id` (`<source_hash[:16]>:<cite>`). Frames and
+    lists of models become `TableData` (the last `max_rows` rows, `truncated` set); everything
+    else is `json_value`. Non-finite floats become null and datetimes ISO strings.
+  - `run.json` is byte-deterministic (sorted keys). `RunSummary.llm_cost_usd` is `None` if any
+    call's cost is unknown. `RunSummary` status and UTC times come from `RunIndex.run_info`
+    (`RunInfo`); each `DossierRecord.created_at` is the run's `finished_at`, else `started_at`,
+    and a run with neither is an error (times are never invented). Wall-clock times are the only
+    volatile fields, so tests pin them in the index before comparing views.
+  - Claim and flag cites are resolved into `cited` (`ClaimRef`, `FlagRef`); a review's cites name
+    verdicts, claims and flags rather than stored values, so they are left unresolved.
+  - Types: `scripts/gen-types.mjs` (Node, `pnpm dlx json-schema-to-typescript`) writes
+    `src/types/run-view.ts` with the schema hash on its first line; `test_view_schema.py`
+    compares that hash with `lensgraph.view.schema.schema_hash()` and checks the committed
+    `fixtures/toy-run.json` (`LENSGRAPH_REGEN_FIXTURES=1` rewrites it), so Python tests need no Node.
 - **App:** `packages/lensgraph-ui` (React + TypeScript, Vite). Pages: run summary with a sortable
   candidate table, the plan graph (React Flow with a dagre layout, coloured by node status), and
   candidate pages with claim-to-cited-data drill-down. LLM text is always rendered as text.

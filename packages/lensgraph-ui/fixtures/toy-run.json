@@ -1,0 +1,1146 @@
+{
+  "candidates": [
+    {
+      "claims": [
+        {
+          "cites": {
+            "growth_rate": "2ffde053d982db22:growth_rate"
+          },
+          "claim_index": 0,
+          "lens": "growth"
+        },
+        {
+          "cites": {
+            "growth_rate": "2ffde053d982db22:growth_rate"
+          },
+          "claim_index": 0,
+          "lens": "safety"
+        }
+      ],
+      "flags": [],
+      "id": "S1",
+      "node_status": {
+        "assay_clean": "ok",
+        "assay_raw": "ok",
+        "dossier": "ok",
+        "growth_lens": "ok",
+        "growth_rate": "ok",
+        "reference_panel": "ok",
+        "review": "ok",
+        "safety_lens": "ok",
+        "tox_notes": "ok"
+      },
+      "record": {
+        "created_at": "2026-01-01T00:00:05Z",
+        "dossier": {
+          "agreement": 0.34348802834271513,
+          "candidate": {
+            "attrs": {},
+            "id": "S1"
+          },
+          "confidence": 0.5833333333333333,
+          "coverage": {
+            "growth": "ok",
+            "safety": "ok"
+          },
+          "direction": 0.7025306415593794,
+          "evidence_share": 0.5833333333333333,
+          "flags": [],
+          "overall_stance": 0.40980954090963795,
+          "verdicts": [
+            {
+              "claims": [
+                {
+                  "cites": [
+                    "growth_rate"
+                  ],
+                  "direction": 1,
+                  "text": "growth: 0.124"
+                }
+              ],
+              "components": {
+                "growth": 0.12236193212208746
+              },
+              "conviction": "low",
+              "coverage": 1.0,
+              "error": null,
+              "flags": [],
+              "input_sufficiency": {
+                "growth_rate": 1.0
+              },
+              "lens": "growth",
+              "provenance": {
+                "as_of": null,
+                "attempts": 0,
+                "backtest_valid": true,
+                "input_hashes": {
+                  "growth_rate": "2ffde053d982db220b1c7b5881cc79d08ce963330f02dda2b19e4922f6ab2cfe"
+                },
+                "input_tokens": 0,
+                "lens_version": "362096961ca9446a",
+                "model": null,
+                "model_settings": {},
+                "output_tokens": 0,
+                "prompt_hash": null,
+                "stance_samples": [],
+                "variant": null
+              },
+              "score": 0.12236193212208746,
+              "stance": 0,
+              "stance_mean": 0.30590483030521864,
+              "stance_spread": null,
+              "status": "ok"
+            },
+            {
+              "claims": [
+                {
+                  "cites": [
+                    "growth_rate"
+                  ],
+                  "direction": 1,
+                  "text": "grows"
+                }
+              ],
+              "components": {},
+              "conviction": "high",
+              "coverage": 0.6666666666666666,
+              "error": null,
+              "flags": [],
+              "input_sufficiency": {
+                "growth_rate": 1.0,
+                "tox_notes": 0.3333333333333333
+              },
+              "lens": "safety",
+              "provenance": {
+                "as_of": null,
+                "attempts": 1,
+                "backtest_valid": true,
+                "input_hashes": {
+                  "growth_rate": "2ffde053d982db220b1c7b5881cc79d08ce963330f02dda2b19e4922f6ab2cfe",
+                  "tox_notes": "60290af994e9abf7f8bed9a787b481324432bb09c54d7af5dbdf61804fdbd282"
+                },
+                "input_tokens": 153,
+                "lens_version": "dc43a48cfb7a5a0d",
+                "model": "function:_scripted:",
+                "model_settings": {},
+                "output_tokens": 20,
+                "prompt_hash": "0685ca927655926aadb2cea2a17a652569c190e79b566d5f12b047073d5827e2",
+                "stance_samples": [],
+                "variant": "default"
+              },
+              "score": null,
+              "stance": 1,
+              "stance_mean": 1.0,
+              "stance_spread": null,
+              "status": "ok"
+            }
+          ],
+          "weights": {
+            "growth": 0.5,
+            "safety": 0.6666666666666666
+          }
+        },
+        "review": {
+          "fit": [
+            {
+              "cites": [
+                "verdict.growth"
+              ],
+              "priority": "speed",
+              "text": "grows quickly"
+            }
+          ],
+          "flags": [],
+          "gaps": [],
+          "provenance": {
+            "as_of": null,
+            "attempts": 1,
+            "backtest_valid": true,
+            "input_hashes": {
+              "dossier": "639492defa7cf6da74e1117bcbb5ab4b0304bef7959ee37ed7c40bce8bacf8b7"
+            },
+            "input_tokens": 219,
+            "lens_version": "31fce35c12840f3a",
+            "model": "function:_scripted:",
+            "model_settings": {},
+            "output_tokens": 26,
+            "prompt_hash": "6119e576f48b553a539d13a8bdb1da83529115d6f4b3e38689c8637267580cd1",
+            "stance_samples": [],
+            "variant": null
+          },
+          "summary": "Grows well; safety evidence is thin."
+        },
+        "run_id": "toy-run"
+      }
+    },
+    {
+      "claims": [
+        {
+          "cites": {
+            "growth_rate": "ba11a289db070b30:growth_rate"
+          },
+          "claim_index": 0,
+          "lens": "growth"
+        },
+        {
+          "cites": {
+            "growth_rate": "ba11a289db070b30:growth_rate"
+          },
+          "claim_index": 0,
+          "lens": "safety"
+        }
+      ],
+      "flags": [],
+      "id": "S2",
+      "node_status": {
+        "assay_clean": "ok",
+        "assay_raw": "ok",
+        "dossier": "ok",
+        "growth_lens": "ok",
+        "growth_rate": "ok",
+        "reference_panel": "ok",
+        "review": "ok",
+        "safety_lens": "ok",
+        "tox_notes": "ok"
+      },
+      "record": {
+        "created_at": "2026-01-01T00:00:05Z",
+        "dossier": {
+          "agreement": 0.29086206518737706,
+          "candidate": {
+            "attrs": {},
+            "id": "S2"
+          },
+          "confidence": 0.5,
+          "coverage": {
+            "growth": "ok",
+            "safety": "ok"
+          },
+          "direction": 0.709137934812623,
+          "evidence_share": 0.5,
+          "flags": [],
+          "overall_stance": 0.3545689674063115,
+          "verdicts": [
+            {
+              "claims": [
+                {
+                  "cites": [
+                    "growth_rate"
+                  ],
+                  "direction": 1,
+                  "text": "growth: 0.133"
+                }
+              ],
+              "components": {
+                "growth": 0.16731034785009835
+              },
+              "conviction": "low",
+              "coverage": 1.0,
+              "error": null,
+              "flags": [],
+              "input_sufficiency": {
+                "growth_rate": 1.0
+              },
+              "lens": "growth",
+              "provenance": {
+                "as_of": null,
+                "attempts": 0,
+                "backtest_valid": true,
+                "input_hashes": {
+                  "growth_rate": "ba11a289db070b309f4bbdd7151cf2af50703deacbc236f1fd34310fe369a312"
+                },
+                "input_tokens": 0,
+                "lens_version": "362096961ca9446a",
+                "model": null,
+                "model_settings": {},
+                "output_tokens": 0,
+                "prompt_hash": null,
+                "stance_samples": [],
+                "variant": null
+              },
+              "score": 0.16731034785009835,
+              "stance": 0,
+              "stance_mean": 0.4182758696252459,
+              "stance_spread": null,
+              "status": "ok"
+            },
+            {
+              "claims": [
+                {
+                  "cites": [
+                    "growth_rate"
+                  ],
+                  "direction": 1,
+                  "text": "grows"
+                }
+              ],
+              "components": {},
+              "conviction": "high",
+              "coverage": 0.5,
+              "error": null,
+              "flags": [],
+              "input_sufficiency": {
+                "growth_rate": 1.0,
+                "tox_notes": 0.0
+              },
+              "lens": "safety",
+              "provenance": {
+                "as_of": null,
+                "attempts": 1,
+                "backtest_valid": true,
+                "input_hashes": {
+                  "growth_rate": "ba11a289db070b309f4bbdd7151cf2af50703deacbc236f1fd34310fe369a312",
+                  "tox_notes": "5c28d529a964745c7ba2651b5591b0935543c054e7b00d25ed2139686c4a8ede"
+                },
+                "input_tokens": 144,
+                "lens_version": "dc43a48cfb7a5a0d",
+                "model": "function:_scripted:",
+                "model_settings": {},
+                "output_tokens": 20,
+                "prompt_hash": "0685ca927655926aadb2cea2a17a652569c190e79b566d5f12b047073d5827e2",
+                "stance_samples": [],
+                "variant": "default"
+              },
+              "score": null,
+              "stance": 1,
+              "stance_mean": 1.0,
+              "stance_spread": null,
+              "status": "ok"
+            }
+          ],
+          "weights": {
+            "growth": 0.5,
+            "safety": 0.5
+          }
+        },
+        "review": {
+          "fit": [
+            {
+              "cites": [
+                "verdict.growth"
+              ],
+              "priority": "speed",
+              "text": "grows quickly"
+            }
+          ],
+          "flags": [],
+          "gaps": [],
+          "provenance": {
+            "as_of": null,
+            "attempts": 1,
+            "backtest_valid": true,
+            "input_hashes": {
+              "dossier": "6bd5ae334c127615db639b78b154a6a0f13dc73dc1e4410e27584a1c864abdf9"
+            },
+            "input_tokens": 219,
+            "lens_version": "31fce35c12840f3a",
+            "model": "function:_scripted:",
+            "model_settings": {},
+            "output_tokens": 26,
+            "prompt_hash": "6119e576f48b553a539d13a8bdb1da83529115d6f4b3e38689c8637267580cd1",
+            "stance_samples": [],
+            "variant": null
+          },
+          "summary": "Grows well; safety evidence is thin."
+        },
+        "run_id": "toy-run"
+      }
+    },
+    {
+      "claims": [],
+      "flags": [],
+      "id": "S3",
+      "node_status": {
+        "assay_clean": "failed",
+        "assay_raw": "ok",
+        "dossier": "ok",
+        "growth_lens": "recovered",
+        "growth_rate": "skipped",
+        "reference_panel": "ok",
+        "review": "ok",
+        "safety_lens": "recovered",
+        "tox_notes": "ok"
+      },
+      "record": {
+        "created_at": "2026-01-01T00:00:05Z",
+        "dossier": {
+          "agreement": null,
+          "candidate": {
+            "attrs": {},
+            "id": "S3"
+          },
+          "confidence": 0.0,
+          "coverage": {
+            "growth": "failed",
+            "safety": "failed"
+          },
+          "direction": null,
+          "evidence_share": 0.0,
+          "flags": [],
+          "overall_stance": null,
+          "verdicts": [
+            {
+              "claims": [],
+              "components": {},
+              "conviction": null,
+              "coverage": 0.0,
+              "error": "upstream 'assay_clean' failed: ContractViolation: assay_clean: raw is missing columns ['od600']",
+              "flags": [],
+              "input_sufficiency": {},
+              "lens": "growth",
+              "provenance": {
+                "as_of": null,
+                "attempts": 0,
+                "backtest_valid": true,
+                "input_hashes": {},
+                "input_tokens": 0,
+                "lens_version": "362096961ca9446a",
+                "model": null,
+                "model_settings": {},
+                "output_tokens": 0,
+                "prompt_hash": null,
+                "stance_samples": [],
+                "variant": null
+              },
+              "score": null,
+              "stance": null,
+              "stance_mean": null,
+              "stance_spread": null,
+              "status": "failed"
+            },
+            {
+              "claims": [],
+              "components": {},
+              "conviction": null,
+              "coverage": 0.0,
+              "error": "upstream 'assay_clean' failed: ContractViolation: assay_clean: raw is missing columns ['od600']",
+              "flags": [],
+              "input_sufficiency": {},
+              "lens": "safety",
+              "provenance": {
+                "as_of": null,
+                "attempts": 0,
+                "backtest_valid": true,
+                "input_hashes": {},
+                "input_tokens": 0,
+                "lens_version": "dc43a48cfb7a5a0d",
+                "model": null,
+                "model_settings": {},
+                "output_tokens": 0,
+                "prompt_hash": null,
+                "stance_samples": [],
+                "variant": null
+              },
+              "score": null,
+              "stance": null,
+              "stance_mean": null,
+              "stance_spread": null,
+              "status": "failed"
+            }
+          ],
+          "weights": {
+            "growth": 0.0,
+            "safety": 0.0
+          }
+        },
+        "review": {
+          "fit": [
+            {
+              "cites": [
+                "verdict.growth"
+              ],
+              "priority": "speed",
+              "text": "grows quickly"
+            }
+          ],
+          "flags": [],
+          "gaps": [],
+          "provenance": {
+            "as_of": null,
+            "attempts": 1,
+            "backtest_valid": true,
+            "input_hashes": {
+              "dossier": "e12df55cbf685f09ad9d0454e0ef2cdf55b51b42652832eaa8a3044f569f529b"
+            },
+            "input_tokens": 208,
+            "lens_version": "31fce35c12840f3a",
+            "model": "function:_scripted:",
+            "model_settings": {},
+            "output_tokens": 26,
+            "prompt_hash": "6119e576f48b553a539d13a8bdb1da83529115d6f4b3e38689c8637267580cd1",
+            "stance_samples": [],
+            "variant": null
+          },
+          "summary": "Grows well; safety evidence is thin."
+        },
+        "run_id": "toy-run"
+      }
+    }
+  ],
+  "cited": {
+    "2ffde053d982db22:growth_rate": {
+      "cite": "growth_rate",
+      "id": "2ffde053d982db22:growth_rate",
+      "json_value": 0.1244723864244175,
+      "kind": "value",
+      "source_hash": "2ffde053d982db220b1c7b5881cc79d08ce963330f02dda2b19e4922f6ab2cfe",
+      "table": null
+    },
+    "ba11a289db070b30:growth_rate": {
+      "cite": "growth_rate",
+      "id": "ba11a289db070b30:growth_rate",
+      "json_value": 0.13346206957001966,
+      "kind": "value",
+      "source_hash": "ba11a289db070b309f4bbdd7151cf2af50703deacbc236f1fd34310fe369a312",
+      "table": null
+    }
+  },
+  "llm_calls": [
+    {
+      "attempts": 1,
+      "candidate": "S1",
+      "cost_usd": null,
+      "input_tokens": 219,
+      "model": "function:_scripted:",
+      "node": "review",
+      "output_tokens": 26,
+      "run_id": "toy-run"
+    },
+    {
+      "attempts": 1,
+      "candidate": "S2",
+      "cost_usd": null,
+      "input_tokens": 219,
+      "model": "function:_scripted:",
+      "node": "review",
+      "output_tokens": 26,
+      "run_id": "toy-run"
+    },
+    {
+      "attempts": 1,
+      "candidate": "S3",
+      "cost_usd": null,
+      "input_tokens": 208,
+      "model": "function:_scripted:",
+      "node": "review",
+      "output_tokens": 26,
+      "run_id": "toy-run"
+    },
+    {
+      "attempts": 1,
+      "candidate": "S1",
+      "cost_usd": null,
+      "input_tokens": 153,
+      "model": "function:_scripted:",
+      "node": "safety_lens",
+      "output_tokens": 20,
+      "run_id": "toy-run"
+    },
+    {
+      "attempts": 1,
+      "candidate": "S2",
+      "cost_usd": null,
+      "input_tokens": 144,
+      "model": "function:_scripted:",
+      "node": "safety_lens",
+      "output_tokens": 20,
+      "run_id": "toy-run"
+    }
+  ],
+  "plan": {
+    "edges": [
+      {
+        "kwarg": "raw",
+        "optional": false,
+        "source": {
+          "candidate": "S1",
+          "name": "assay_raw"
+        },
+        "target": {
+          "candidate": "S1",
+          "name": "assay_clean"
+        }
+      },
+      {
+        "kwarg": "raw",
+        "optional": false,
+        "source": {
+          "candidate": "S2",
+          "name": "assay_raw"
+        },
+        "target": {
+          "candidate": "S2",
+          "name": "assay_clean"
+        }
+      },
+      {
+        "kwarg": "raw",
+        "optional": false,
+        "source": {
+          "candidate": "S3",
+          "name": "assay_raw"
+        },
+        "target": {
+          "candidate": "S3",
+          "name": "assay_clean"
+        }
+      },
+      {
+        "kwarg": "assay",
+        "optional": false,
+        "source": {
+          "candidate": "S1",
+          "name": "assay_clean"
+        },
+        "target": {
+          "candidate": "S1",
+          "name": "growth_rate"
+        }
+      },
+      {
+        "kwarg": "reference",
+        "optional": false,
+        "source": {
+          "candidate": null,
+          "name": "reference_panel"
+        },
+        "target": {
+          "candidate": "S1",
+          "name": "growth_rate"
+        }
+      },
+      {
+        "kwarg": "assay",
+        "optional": false,
+        "source": {
+          "candidate": "S2",
+          "name": "assay_clean"
+        },
+        "target": {
+          "candidate": "S2",
+          "name": "growth_rate"
+        }
+      },
+      {
+        "kwarg": "reference",
+        "optional": false,
+        "source": {
+          "candidate": null,
+          "name": "reference_panel"
+        },
+        "target": {
+          "candidate": "S2",
+          "name": "growth_rate"
+        }
+      },
+      {
+        "kwarg": "assay",
+        "optional": false,
+        "source": {
+          "candidate": "S3",
+          "name": "assay_clean"
+        },
+        "target": {
+          "candidate": "S3",
+          "name": "growth_rate"
+        }
+      },
+      {
+        "kwarg": "reference",
+        "optional": false,
+        "source": {
+          "candidate": null,
+          "name": "reference_panel"
+        },
+        "target": {
+          "candidate": "S3",
+          "name": "growth_rate"
+        }
+      },
+      {
+        "kwarg": "growth_rate",
+        "optional": false,
+        "source": {
+          "candidate": "S1",
+          "name": "growth_rate"
+        },
+        "target": {
+          "candidate": "S1",
+          "name": "growth_lens"
+        }
+      },
+      {
+        "kwarg": "growth_rate",
+        "optional": false,
+        "source": {
+          "candidate": "S2",
+          "name": "growth_rate"
+        },
+        "target": {
+          "candidate": "S2",
+          "name": "growth_lens"
+        }
+      },
+      {
+        "kwarg": "growth_rate",
+        "optional": false,
+        "source": {
+          "candidate": "S3",
+          "name": "growth_rate"
+        },
+        "target": {
+          "candidate": "S3",
+          "name": "growth_lens"
+        }
+      },
+      {
+        "kwarg": "growth_rate",
+        "optional": false,
+        "source": {
+          "candidate": "S1",
+          "name": "growth_rate"
+        },
+        "target": {
+          "candidate": "S1",
+          "name": "safety_lens"
+        }
+      },
+      {
+        "kwarg": "tox_notes",
+        "optional": true,
+        "source": {
+          "candidate": "S1",
+          "name": "tox_notes"
+        },
+        "target": {
+          "candidate": "S1",
+          "name": "safety_lens"
+        }
+      },
+      {
+        "kwarg": "growth_rate",
+        "optional": false,
+        "source": {
+          "candidate": "S2",
+          "name": "growth_rate"
+        },
+        "target": {
+          "candidate": "S2",
+          "name": "safety_lens"
+        }
+      },
+      {
+        "kwarg": "tox_notes",
+        "optional": true,
+        "source": {
+          "candidate": "S2",
+          "name": "tox_notes"
+        },
+        "target": {
+          "candidate": "S2",
+          "name": "safety_lens"
+        }
+      },
+      {
+        "kwarg": "growth_rate",
+        "optional": false,
+        "source": {
+          "candidate": "S3",
+          "name": "growth_rate"
+        },
+        "target": {
+          "candidate": "S3",
+          "name": "safety_lens"
+        }
+      },
+      {
+        "kwarg": "tox_notes",
+        "optional": true,
+        "source": {
+          "candidate": "S3",
+          "name": "tox_notes"
+        },
+        "target": {
+          "candidate": "S3",
+          "name": "safety_lens"
+        }
+      },
+      {
+        "kwarg": "growth_lens",
+        "optional": true,
+        "source": {
+          "candidate": "S1",
+          "name": "growth_lens"
+        },
+        "target": {
+          "candidate": "S1",
+          "name": "dossier"
+        }
+      },
+      {
+        "kwarg": "safety_lens",
+        "optional": true,
+        "source": {
+          "candidate": "S1",
+          "name": "safety_lens"
+        },
+        "target": {
+          "candidate": "S1",
+          "name": "dossier"
+        }
+      },
+      {
+        "kwarg": "growth_lens",
+        "optional": true,
+        "source": {
+          "candidate": "S2",
+          "name": "growth_lens"
+        },
+        "target": {
+          "candidate": "S2",
+          "name": "dossier"
+        }
+      },
+      {
+        "kwarg": "safety_lens",
+        "optional": true,
+        "source": {
+          "candidate": "S2",
+          "name": "safety_lens"
+        },
+        "target": {
+          "candidate": "S2",
+          "name": "dossier"
+        }
+      },
+      {
+        "kwarg": "growth_lens",
+        "optional": true,
+        "source": {
+          "candidate": "S3",
+          "name": "growth_lens"
+        },
+        "target": {
+          "candidate": "S3",
+          "name": "dossier"
+        }
+      },
+      {
+        "kwarg": "safety_lens",
+        "optional": true,
+        "source": {
+          "candidate": "S3",
+          "name": "safety_lens"
+        },
+        "target": {
+          "candidate": "S3",
+          "name": "dossier"
+        }
+      },
+      {
+        "kwarg": "dossier",
+        "optional": false,
+        "source": {
+          "candidate": "S1",
+          "name": "dossier"
+        },
+        "target": {
+          "candidate": "S1",
+          "name": "review"
+        }
+      },
+      {
+        "kwarg": "dossier",
+        "optional": false,
+        "source": {
+          "candidate": "S2",
+          "name": "dossier"
+        },
+        "target": {
+          "candidate": "S2",
+          "name": "review"
+        }
+      },
+      {
+        "kwarg": "dossier",
+        "optional": false,
+        "source": {
+          "candidate": "S3",
+          "name": "dossier"
+        },
+        "target": {
+          "candidate": "S3",
+          "name": "review"
+        }
+      }
+    ],
+    "nodes": [
+      {
+        "key": {
+          "candidate": "S1",
+          "name": "assay_raw"
+        },
+        "kind": "fetch",
+        "scope": "candidate"
+      },
+      {
+        "key": {
+          "candidate": "S2",
+          "name": "assay_raw"
+        },
+        "kind": "fetch",
+        "scope": "candidate"
+      },
+      {
+        "key": {
+          "candidate": "S3",
+          "name": "assay_raw"
+        },
+        "kind": "fetch",
+        "scope": "candidate"
+      },
+      {
+        "key": {
+          "candidate": "S1",
+          "name": "assay_clean"
+        },
+        "kind": "transform",
+        "scope": "candidate"
+      },
+      {
+        "key": {
+          "candidate": "S2",
+          "name": "assay_clean"
+        },
+        "kind": "transform",
+        "scope": "candidate"
+      },
+      {
+        "key": {
+          "candidate": "S3",
+          "name": "assay_clean"
+        },
+        "kind": "transform",
+        "scope": "candidate"
+      },
+      {
+        "key": {
+          "candidate": null,
+          "name": "reference_panel"
+        },
+        "kind": "fetch",
+        "scope": "shared"
+      },
+      {
+        "key": {
+          "candidate": "S1",
+          "name": "growth_rate"
+        },
+        "kind": "calc",
+        "scope": "candidate"
+      },
+      {
+        "key": {
+          "candidate": "S2",
+          "name": "growth_rate"
+        },
+        "kind": "calc",
+        "scope": "candidate"
+      },
+      {
+        "key": {
+          "candidate": "S3",
+          "name": "growth_rate"
+        },
+        "kind": "calc",
+        "scope": "candidate"
+      },
+      {
+        "key": {
+          "candidate": "S1",
+          "name": "growth_lens"
+        },
+        "kind": "lens",
+        "scope": "candidate"
+      },
+      {
+        "key": {
+          "candidate": "S2",
+          "name": "growth_lens"
+        },
+        "kind": "lens",
+        "scope": "candidate"
+      },
+      {
+        "key": {
+          "candidate": "S3",
+          "name": "growth_lens"
+        },
+        "kind": "lens",
+        "scope": "candidate"
+      },
+      {
+        "key": {
+          "candidate": "S1",
+          "name": "tox_notes"
+        },
+        "kind": "fetch",
+        "scope": "candidate"
+      },
+      {
+        "key": {
+          "candidate": "S2",
+          "name": "tox_notes"
+        },
+        "kind": "fetch",
+        "scope": "candidate"
+      },
+      {
+        "key": {
+          "candidate": "S3",
+          "name": "tox_notes"
+        },
+        "kind": "fetch",
+        "scope": "candidate"
+      },
+      {
+        "key": {
+          "candidate": "S1",
+          "name": "safety_lens"
+        },
+        "kind": "lens",
+        "scope": "candidate"
+      },
+      {
+        "key": {
+          "candidate": "S2",
+          "name": "safety_lens"
+        },
+        "kind": "lens",
+        "scope": "candidate"
+      },
+      {
+        "key": {
+          "candidate": "S3",
+          "name": "safety_lens"
+        },
+        "kind": "lens",
+        "scope": "candidate"
+      },
+      {
+        "key": {
+          "candidate": "S1",
+          "name": "dossier"
+        },
+        "kind": "aggregator",
+        "scope": "candidate"
+      },
+      {
+        "key": {
+          "candidate": "S2",
+          "name": "dossier"
+        },
+        "kind": "aggregator",
+        "scope": "candidate"
+      },
+      {
+        "key": {
+          "candidate": "S3",
+          "name": "dossier"
+        },
+        "kind": "aggregator",
+        "scope": "candidate"
+      },
+      {
+        "key": {
+          "candidate": "S1",
+          "name": "review"
+        },
+        "kind": "reviewer",
+        "scope": "candidate"
+      },
+      {
+        "key": {
+          "candidate": "S2",
+          "name": "review"
+        },
+        "kind": "reviewer",
+        "scope": "candidate"
+      },
+      {
+        "key": {
+          "candidate": "S3",
+          "name": "review"
+        },
+        "kind": "reviewer",
+        "scope": "candidate"
+      }
+    ]
+  },
+  "schema_version": 1,
+  "summary": {
+    "cache_hits": 0,
+    "config": {
+      "candidates": [
+        {
+          "attrs": {},
+          "id": "S1"
+        },
+        {
+          "attrs": {},
+          "id": "S2"
+        },
+        {
+          "attrs": {},
+          "id": "S3"
+        }
+      ],
+      "invalidate": [],
+      "limits": {},
+      "no_cache": false,
+      "nodes": {
+        "review": {
+          "brief": {
+            "extra": {},
+            "horizon": null,
+            "out_of_scope": [],
+            "priorities": [
+              "speed",
+              "safety"
+            ],
+            "purpose": "Pick strains for a pilot"
+          },
+          "profile": "test"
+        },
+        "safety_lens": {
+          "profile": "test"
+        }
+      },
+      "panel": {
+        "aggregator": "dossier",
+        "lenses": [
+          "growth_lens",
+          "safety_lens"
+        ],
+        "reviewer": "toy_reviewer"
+      },
+      "targets": [
+        "dossier",
+        "review"
+      ]
+    },
+    "finished_at": "2026-01-01T00:00:05Z",
+    "llm_cost_usd": null,
+    "llm_input_tokens": 943,
+    "llm_output_tokens": 118,
+    "node_counts": {
+      "failed": 1,
+      "ok": 21,
+      "recovered": 2,
+      "skipped": 1
+    },
+    "run_id": "toy-run",
+    "started_at": "2026-01-01T00:00:00Z",
+    "status": "ok"
+  }
+}

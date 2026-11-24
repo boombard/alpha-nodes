@@ -5,6 +5,7 @@ See documentation/design/core.md, Artifact store and run index.
 
 import json
 from collections.abc import Mapping
+from datetime import UTC
 from pathlib import Path
 from typing import Any
 
@@ -12,7 +13,7 @@ import duckdb
 
 from ..plan import ExecutionPlan, NodeKey, NodeResult
 from ..plangraph import PlanEdge, PlanGraph, PlanNode
-from ..records import LLMCall
+from ..records import LLMCall, RunInfo
 from ..types import Failed
 from .base import RunIndex
 
@@ -58,14 +59,14 @@ class DuckDBRunIndex(RunIndex):
         self._con.execute("DELETE FROM runs WHERE run_id = ?", [run_id])
         self._con.execute("DELETE FROM node_results WHERE run_id = ?", [run_id])
         self._con.execute(
-            "INSERT INTO runs VALUES (?, ?, now()::TIMESTAMP, NULL, 'running')",
+            "INSERT INTO runs VALUES (?, ?, now() AT TIME ZONE 'UTC', NULL, 'running')",
             [run_id, json.dumps(dict(config), default=str)],
         )
 
     def finish_run(self, run_id: str, status: str) -> None:
         """Stamp the run's finish time and final status."""
         self._con.execute(
-            "UPDATE runs SET finished_at = now()::TIMESTAMP, status = ? WHERE run_id = ?",
+            "UPDATE runs SET finished_at = now() AT TIME ZONE 'UTC', status = ? WHERE run_id = ?",
             [status, run_id],
         )
 
@@ -154,6 +155,21 @@ class DuckDBRunIndex(RunIndex):
         if row is None:
             raise KeyError(run_id)
         return json.loads(row[0])
+
+    def run_info(self, run_id: str) -> RunInfo:
+        """The run's status and UTC start/finish times; KeyError for an unknown run."""
+        row = self._con.execute(
+            "SELECT status, started_at, finished_at FROM runs WHERE run_id = ?", [run_id]
+        ).fetchone()
+        if row is None:
+            raise KeyError(run_id)
+        status, started, finished = row
+        return RunInfo(
+            run_id=run_id,
+            status=status,
+            started_at=started.replace(tzinfo=UTC) if started else None,
+            finished_at=finished.replace(tzinfo=UTC) if finished else None,
+        )
 
     def node_result(self, run_id: str, node: str, candidate: str | None) -> NodeResult | None:
         """The first recorded result for a node instance in the run, or None."""

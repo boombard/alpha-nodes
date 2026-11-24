@@ -2,11 +2,12 @@
 
 import uuid
 from collections.abc import Mapping
+from datetime import UTC, datetime
 from typing import Any
 
 from ..plan import ExecutionPlan, NodeResult
 from ..plangraph import PlanGraph
-from ..records import LLMCall
+from ..records import LLMCall, RunInfo
 from .base import RunIndex
 from .files import FsspecBlobStore
 
@@ -33,11 +34,18 @@ class InMemoryRunIndex(RunIndex):
         self._plans: dict[str, PlanGraph] = {}
 
     def start_run(self, run_id: str, config: Mapping[str, Any]) -> None:
-        self.runs[run_id] = {"config": dict(config), "status": "running"}
+        self.runs[run_id] = {
+            "config": dict(config),
+            "status": "running",
+            "started_at": datetime.now(UTC),
+            "finished_at": None,
+        }
         self._results[run_id] = []
 
     def finish_run(self, run_id: str, status: str) -> None:
-        self.runs.setdefault(run_id, {"config": {}})["status"] = status
+        run = self.runs.setdefault(run_id, {"config": {}, "started_at": None})
+        run["status"] = status
+        run["finished_at"] = datetime.now(UTC)
 
     def record_node(self, run_id: str, result: NodeResult) -> None:
         self._results.setdefault(run_id, []).append(result)
@@ -72,3 +80,12 @@ class InMemoryRunIndex(RunIndex):
 
     def plan_graph(self, run_id: str) -> PlanGraph:
         return self._plans[run_id]
+
+    def run_info(self, run_id: str) -> RunInfo:
+        run = self.runs[run_id]
+        return RunInfo(
+            run_id=run_id,
+            status=run["status"],
+            started_at=run.get("started_at"),
+            finished_at=run.get("finished_at"),
+        )

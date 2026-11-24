@@ -6,6 +6,7 @@ dependencies = []
 
 [tool.uv.workspace]
 members = ["packages/*"]
+exclude = ["packages/lensgraph-ui"]  # the Node UI package, not a Python member
 
 [tool.uv.sources]
 lensgraph = { workspace = true }

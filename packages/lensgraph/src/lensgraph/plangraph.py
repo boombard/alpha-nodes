@@ -13,17 +13,18 @@ from .aggregate import Aggregator
 from .lens import LensNode
 from .node import CalcNode, FetchNode, Node, TransformNode
 from .plan import ExecutionPlan, NodeKey
+from .review import DossierReviewer
 from .types import Scope
 
 PlanNodeKind = Literal["fetch", "transform", "calc", "lens", "aggregator", "reviewer", "other"]
-"""A node's base kind, for reports and run views. "reviewer" is reserved for the post-panel
-reviewer node (M3.3); until it exists such nodes fall under "other"."""
+"""A node's base kind, for reports and run views ("reviewer" is the post-panel `DossierReviewer`)."""
 
 
 def node_kind(node: Node) -> PlanNodeKind:
     """The base kind of `node`; the most specific base class wins ("other" if none matches)."""
     for cls, kind in (
         (Aggregator, "aggregator"),
+        (DossierReviewer, "reviewer"),
         (LensNode, "lens"),
         (FetchNode, "fetch"),
         (TransformNode, "transform"),

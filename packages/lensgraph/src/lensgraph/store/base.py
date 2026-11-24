@@ -7,7 +7,7 @@ from typing import Any, Protocol
 
 from ..plan import ExecutionPlan, NodeResult
 from ..plangraph import PlanGraph
-from ..records import LLMCall
+from ..records import LLMCall, RunInfo
 
 
 class BlobStore(Protocol):
@@ -33,3 +33,4 @@ class RunIndex(Protocol):
     def node_result(self, run_id: str, node: str, candidate: str | None) -> NodeResult | None: ...
     def record_plan(self, run_id: str, plan: ExecutionPlan) -> None: ...
     def plan_graph(self, run_id: str) -> PlanGraph: ...
+    def run_info(self, run_id: str) -> RunInfo: ...

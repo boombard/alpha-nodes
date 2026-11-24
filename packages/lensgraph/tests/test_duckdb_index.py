@@ -104,3 +104,21 @@ def test_node_result_lookup(db_path: Path) -> None:
     assert index.node_result("r1", "a", None) == _ok("a", None)
     assert index.node_result("r1", "a", "S2") is None
     assert index.node_result("r2", "a", "S1") is None
+
+
+def test_run_info_lifecycle(db_path: Path) -> None:
+    from lensgraph.records import RunInfo
+
+    index = DuckDBRunIndex(db_path)
+    index.start_run("r1", {})
+    running = index.run_info("r1")
+    assert isinstance(running, RunInfo) and running.status == "running"
+    assert running.started_at is not None and running.started_at.utcoffset() is not None
+    assert running.finished_at is None
+    index.finish_run("r1", "ok")
+    done = index.run_info("r1")
+    assert done.status == "ok" and done.started_at == running.started_at
+    assert done.finished_at is not None and done.started_at is not None
+    assert done.finished_at >= done.started_at
+    with pytest.raises(KeyError):
+        index.run_info("nope")
