@@ -24,6 +24,8 @@ ordinal: 14000
 
 **Acceptance and review (decided 2026-11-24; see core.md, Campaigns, and Assessment brief and post-panel review):** the acceptance policy is deterministic. The `DossierReviewer` runs only on candidates that passed acceptance and can turn them into reject or **refer** (needs human review), never promote. Quotas count accepted only. Per-stratum stats add "rejected by review" and "referred" with reasons, and the shortfall report lists referrals. Apply the brief through population filters, strata and acceptance rules first; the reviewer handles fit judgements that need reading.
 
+**Live view (noted 2026-11-24):** TASK-23 sketches a live run/campaign screen (observer hook, event log, d3 graph). Decide whether it lands in M7.
+
 Sketched tasks:
 - M7.1 contracts (lensgraph): `CampaignSpec`, `Quotas`, `Stage`, `Budget`, `Population` protocol, stratum key and policy registries, campaign record models.
 - M7.2 allocation (deficit / Beta-prior pass rate, budget caps, seeded draws) as pure, property-tested logic. [parallel]

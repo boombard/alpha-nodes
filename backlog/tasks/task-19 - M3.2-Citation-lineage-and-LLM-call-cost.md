@@ -68,6 +68,12 @@ Semantics:
 - [ ] Run `uv run pytest -q`, then the DoD checks. Expected: PASS.
 - [ ] Commit: `feat(lensgraph): citation lineage and LLM call cost`.
 
+**Added 2026-11-24 (for reports now and a live run view later):** persist the plan graph at run start.
+- `RunIndex` gains `record_plan(run_id: str, plan: ExecutionPlan) -> None` and `plan_graph(run_id: str) -> PlanGraph`, where `PlanGraph(BaseModel)` has `nodes: list[PlanNode]` (`key: NodeKey`, `scope`, `kind`: the node's base kind fetch/transform/calc/lens/aggregator/reviewer/other) and `edges: list[PlanEdge]` (`source: NodeKey`, `target: NodeKey`, `kwarg: str`, `optional: bool`). Put the models in plan.py and the protocol methods in store/base.py; implement both in memory.py and duckdb_index.py (tables `plan_nodes`, `plan_edges`).
+- `arun` calls `record_plan` right after `start_run`, before executing.
+- Allowed extra files: `plan.py`, `store/base.py`, `store/memory.py`.
+- Tests: `test_plan_graph_roundtrip` (memory and DuckDB): node and edge counts match the plan, optional edges flagged, shared nodes once.
+
 Out of scope: rendering (M3.4); verdicts/dossiers tables (derivable from node_results + blobs; add when campaigns need queries).
 <!-- SECTION:DESCRIPTION:END -->
 
@@ -76,6 +82,7 @@ Out of scope: rendering (M3.4); verdicts/dossiers tables (derivable from node_re
 - [ ] #1 Every cite in a verdict resolves via provenance input hashes to a stored value, or raises UnresolvedCitation naming it
 - [ ] #2 LLM calls are recorded per run with tokens and genai-prices cost (None when unknown); cache hits record no call
 - [ ] #3 DuckDB implements llm_calls, run_config and node_result
+- [ ] #4 The plan graph (nodes, edges, kinds) is recorded at run start and readable from both index implementations
 <!-- AC:END -->
 
 ## Definition of Done

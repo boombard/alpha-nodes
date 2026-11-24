@@ -69,6 +69,8 @@ Semantics:
 - [ ] Run `uv run pytest -q`, then the DoD checks. Expected: PASS.
 - [ ] Commit: `feat(lensgraph): static HTML report with citation drill-down`.
 
+**Added 2026-11-24:** where useful, draw the per-candidate graph from `RunIndex.plan_graph` (TASK-19), coloured by node status, in addition to the class-level Mermaid diagram.
+
 Out of scope: CLI wiring (M3.5), domain renderers (finance milestones), charts beyond the renderer hook.
 <!-- SECTION:DESCRIPTION:END -->
 
