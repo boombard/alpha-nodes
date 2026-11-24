@@ -1,10 +1,10 @@
 ---
 id: TASK-24
 title: 'M3.5 Run view app (React): static report, live-ready'
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-24T01:36:50Z'
-updated_date: '2026-11-24T02:07:34Z'
+updated_date: '2026-11-24T02:15:08Z'
 labels:
   - core
   - ui
@@ -106,4 +106,8 @@ Coordinator verification in a real browser: built a toy report (panel + reviewer
 One fix round: review points render text, priority badge and cite chips separately (they used to run together).
 Rulings: the graph colours each node by its own candidate's status and dims other candidates' nodes (not filtered); the bundle source hash also covers index.html, vite.config.ts and tsconfig.json; extra UI files (store.tsx, router.ts, format.ts, scripts/bundle.mjs) and the @types/node devDependency.
 Note for TASK-22: the toy scripted reviewer always returns fit points, so reviews fail unless the brief reaches the reviewer. TASK-22's brief injection is required for the demo.
+Round 2 (human request): MUI (@mui/material, emotion, MUI X DataGrid community) with a light/dark theme following the system (src/theme.ts; status colours in one place); DataGrids for the candidate table and cited tables; Cards and Chips for verdicts and the review; AppBar with Summary/Plan graph tabs. Tests moved out of src/ into tests/unit/ (mirroring src/, with setup and helpers); the bundle hash excludes tests. Bundle 1.26 MB (388 KB gzipped).
+Round 3 (coordinator review in a real browser): the plan graph drew no edges (the custom node had no React Flow Handles); fixed, and in a real browser 27 of 27 plan edges now render. Also: review-flag count shown as an integer; null-last sorting in both directions; per-candidate tabs replaced by an Autocomplete picker (scales to campaigns); provenance shows model and tokens only for AI lenses; CitedValue/Cites moved to components/. pnpm test 27 passed, typecheck clean, pytest 313 passed, ruff and pyright clean.
+Round-2/3 rulings: Tabs plus an app-bar picker rather than a Drawer; DataGrid virtualisation is off only in tests (jsdom has no layout); '@' alias for tests; React Flow Controls aren't themed by @xyflow/react 13 colorMode; review flags are an integer count, not Chips (sortable and filterable).
+Note: unit tests can't see rendering bugs like the missing edges; TASK-22's Playwright smoke test now asserts rendered edges.
 <!-- SECTION:FINAL_SUMMARY:END -->
