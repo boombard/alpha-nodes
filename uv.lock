@@ -307,6 +307,7 @@ source = { editable = "packages/lensgraph" }
 dependencies = [
     { name = "duckdb" },
     { name = "fsspec" },
+    { name = "genai-prices" },
     { name = "jinja2" },
     { name = "numpy" },
     { name = "pandas" },
@@ -322,6 +323,7 @@ dependencies = [
 requires-dist = [
     { name = "duckdb" },
     { name = "fsspec" },
+    { name = "genai-prices", specifier = ">=0.2.5,<0.3" },
     { name = "jinja2" },
     { name = "numpy" },
     { name = "pandas", specifier = ">=3.1" },

@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 from lensgraph.plan import NodeKey, NodeResult
+from lensgraph.records import LLMCall
 from lensgraph.store.duckdb_index import DuckDBRunIndex
 from lensgraph.types import Failed
 
@@ -71,3 +72,35 @@ def test_restarting_run_discards_old_node_results(db_path: Path) -> None:
     index.start_run("r1", {})
     index.record_node("r1", _ok("second"))
     assert index.node_results("r1") == [_ok("second")]
+
+
+def test_llm_calls_roundtrip(db_path: Path) -> None:
+    index = DuckDBRunIndex(db_path)
+    a = LLMCall(run_id="r1", candidate="S1", node="x", model="m:n", attempts=2,
+                input_tokens=10, output_tokens=5, cost_usd=0.01)
+    b = LLMCall(run_id="r1", candidate=None, node="y", model="m:n", attempts=1,
+                input_tokens=1, output_tokens=1, cost_usd=None)
+    other = a.model_copy(update={"run_id": "r2"})
+    for call in (a, b, other):
+        index.record_llm_call(call)
+    assert index.llm_calls("r1") == [a, b]
+    assert index.llm_calls("none") == []
+
+
+def test_run_config_roundtrip(db_path: Path) -> None:
+    index = DuckDBRunIndex(db_path)
+    index.start_run("r1", {"targets": ["a"], "nested": {"x": [1, 2]}})
+    assert index.run_config("r1") == {"targets": ["a"], "nested": {"x": [1, 2]}}
+    with pytest.raises(KeyError):
+        index.run_config("missing")
+
+
+def test_node_result_lookup(db_path: Path) -> None:
+    index = DuckDBRunIndex(db_path)
+    index.start_run("r1", {})
+    index.record_node("r1", _ok("a", "S1"))
+    index.record_node("r1", _ok("a", None))
+    assert index.node_result("r1", "a", "S1") == _ok("a", "S1")
+    assert index.node_result("r1", "a", None) == _ok("a", None)
+    assert index.node_result("r1", "a", "S2") is None
+    assert index.node_result("r2", "a", "S1") is None

@@ -4,7 +4,8 @@ import uuid
 from collections.abc import Mapping
 from typing import Any
 
-from ..plan import NodeResult
+from ..plan import ExecutionPlan, NodeResult
+from ..plangraph import PlanGraph
 from ..records import LLMCall
 from .base import RunIndex
 from .files import FsspecBlobStore
@@ -29,6 +30,7 @@ class InMemoryRunIndex(RunIndex):
         self._memo: dict[str, str] = {}
         self._results: dict[str, list[NodeResult]] = {}
         self._llm_calls: dict[str, list[LLMCall]] = {}
+        self._plans: dict[str, PlanGraph] = {}
 
     def start_run(self, run_id: str, config: Mapping[str, Any]) -> None:
         self.runs[run_id] = {"config": dict(config), "status": "running"}
@@ -64,3 +66,9 @@ class InMemoryRunIndex(RunIndex):
              if r.key.name == node and r.key.candidate == candidate),
             None,
         )
+
+    def record_plan(self, run_id: str, plan: ExecutionPlan) -> None:
+        self._plans[run_id] = PlanGraph.from_plan(plan)
+
+    def plan_graph(self, run_id: str) -> PlanGraph:
+        return self._plans[run_id]

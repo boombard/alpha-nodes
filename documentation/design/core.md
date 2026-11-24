@@ -409,10 +409,16 @@ Everything a report or a future frontend needs:
     duration, cache_hit)
   - `verdicts` (flattened LensVerdict per run/candidate/lens)
   - `dossiers`
-  - `llm_calls` (tokens, cost, attempts)
+  - `llm_calls` (tokens, cost, attempts): one row per model call made this run (cache hits
+    record none); cost from the bundled genai-prices snapshot, NULL for unknown models
+  - `plan_nodes`, `plan_edges`: the plan graph (node kind and scope; edge kwarg and optionality),
+    written at run start so reports and live views can draw the DAG
   - `campaigns` / `campaign_draws`
 - Any citable id resolves to a stored output: `(run_id, candidate, node[, field/item])` → blob.
-  That is the drill-down path for "show me the prices behind this claim".
+  That is the drill-down path for "show me the prices behind this claim". Implemented in
+  `lineage.resolve_citation`: it needs no table, because a verdict's provenance `input_hashes`
+  name the blob behind each cite (`n`, `n.field`, `n[id]`); unresolvable cites raise
+  `UnresolvedCitation`.
 - Interfaces `BlobStore` and `RunIndex`. The blob store is a single fsspec-backed
   implementation (`FsspecBlobStore`) selected by URL: `file://` locally (`FileBlobStore`),
   `memory://` in tests (`InMemoryBlobStore`), `s3://` with `s3fs` installed. Encoding is

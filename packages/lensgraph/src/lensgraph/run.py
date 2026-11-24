@@ -11,6 +11,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
+from .cost import llm_calls_from_result
 from .executor.asyncio_executor import AsyncioExecutor
 from .executor.base import Executor, RunAborted
 from .executor.limits import ResourceLimit
@@ -79,17 +80,26 @@ async def arun(
     index = DuckDBRunIndex(store_root / "index.duckdb")
     try:
         index.start_run(plan.run_id, spec.model_dump(mode="json"))
+        index.record_plan(plan.run_id, plan)
         runner = executor or AsyncioExecutor(limits=spec.limits)
         result = await runner.execute(plan, blobs, index, services=services, bypass_memo=bypass)
+        _record_llm_calls(index, result)
         index.finish_run(plan.run_id, "ok")
         return result
-    except RunAborted:
-        raise  # the executor already recorded "aborted"
+    except RunAborted as exc:
+        _record_llm_calls(index, exc.result)  # the executor already recorded "aborted"
+        raise
     except BaseException:  # includes cancellation / KeyboardInterrupt: never leave "running"
         index.finish_run(plan.run_id, "failed")
         raise
     finally:
         index.close()
+
+
+def _record_llm_calls(index: DuckDBRunIndex, result: RunResult) -> None:
+    """Write the run's model calls (cache hits excluded) to the index's `llm_calls` ledger."""
+    for call in llm_calls_from_result(result.run_id, result):
+        index.record_llm_call(call)
 
 
 def run(spec: RunSpec, registry: NodeRegistry, **kwargs: Any) -> RunResult:

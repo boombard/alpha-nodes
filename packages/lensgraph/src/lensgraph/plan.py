@@ -77,3 +77,4 @@ class RunResult(BaseModel):
     status: Literal["ok", "aborted"]  # aborted: a GlobalFailure stopped the run
     results: dict[NodeKey, NodeResult]
     values: dict[NodeKey, Any] = Field(default_factory=dict, exclude=True)  # not serialized
+

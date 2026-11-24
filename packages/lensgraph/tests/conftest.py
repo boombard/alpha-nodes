@@ -85,3 +85,48 @@ def toy_registry() -> NodeRegistry:
 def ai_registry() -> NodeRegistry:
     """Toy data nodes plus the AI `SafetyLens`."""
     return build_registry(lenses=(SafetyLens,))
+
+
+SAFETY_OK = {
+    "status": "ok",
+    "stance": 1,
+    "conviction": "high",
+    "claims": [
+        {"text": "grows", "direction": 1, "cites": ["growth_rate"]},
+        {"text": "benign note", "direction": 1, "cites": ["tox_notes[S1-n1]"]},
+    ],
+    "flags": [],
+}
+
+
+@pytest.fixture
+def toy_panel_runner(
+    ai_registry: NodeRegistry,
+    toy_candidates: list[CandidateRef],
+    toy_services: dict[str, Any],
+    scripted_profiles: Callable[..., ProfileRegistry],
+    tmp_path: Any,
+) -> Callable[..., Any]:
+    """Factory: run the toy growth+safety panel into `tmp_path`; repeat calls share the store.
+
+    Safety answers cite `growth_rate` and `tox_notes[S1-n1]` (the latter only valid for S1;
+    other candidates simply fail their safety lens on citation validation).
+    """
+    from lensgraph import RunSpec, run
+    from lensgraph.panel import Panel, panel_registry
+    from toy.growth_lens import GrowthLens
+
+    ai_registry.register(GrowthLens)
+    panel = Panel(lenses=["growth_lens", "safety_lens"])
+    registry = panel_registry(panel, ai_registry)
+
+    def go(candidates: list[CandidateRef] | None = None, **kwargs: Any) -> Any:
+        spec = RunSpec(
+            panel=panel,
+            candidates=candidates or toy_candidates,
+            nodes={"safety_lens": {"profile": "test"}},
+        )
+        services = {**toy_services, "profiles": scripted_profiles(SAFETY_OK)}
+        return run(spec, registry, store_root=tmp_path, services=services, **kwargs)
+
+    return go
