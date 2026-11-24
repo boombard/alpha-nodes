@@ -501,9 +501,39 @@ reading **the same data contract**.
     `src/types/run-view.ts` with the schema hash on its first line; `test_view_schema.py`
     compares that hash with `lensgraph.view.schema.schema_hash()` and checks the committed
     `fixtures/toy-run.json` (`LENSGRAPH_REGEN_FIXTURES=1` rewrites it), so Python tests need no Node.
-- **App:** `packages/lensgraph-ui` (React + TypeScript, Vite). Pages: run summary with a sortable
+- **App:** `packages/lensgraph-ui` (React + TypeScript, Vite). UI components are **MUI** (Material UI)
+  with **MUI X DataGrid, community edition** (MIT; no Pro features) for tables, and one theme
+  (`src/theme.ts`) with light and dark palettes that follow `prefers-color-scheme`; status colours
+  (verdict chips, plan nodes) are defined once there. Pages: run summary with a sortable, filterable
   candidate table, the plan graph (React Flow with a dagre layout, coloured by node status), and
-  candidate pages with claim-to-cited-data drill-down. LLM text is always rendered as text.
+  candidate pages (verdict and review cards) with claim-to-cited-data drill-down; cited tables are
+  read-only DataGrids and JSON is a monospace block. LLM text is always rendered as text.
+  - **List-first navigation (scales to hundreds of candidates):** the summary's candidate grid is the main
+    list: quick search, column filters, sorting, and preset chips ("Failures", "Review flags",
+    "Contested", "Thin evidence"; thresholds are named constants in `src/presets.ts`; chips combine with
+    AND). Rows are virtualised; the community grid pages at 100 rows and the footer shows the row count.
+    The list state is kept in the hash query (`#/?sort=share:desc&q=S1&preset=flags&f=field|op|value`),
+    so it survives navigation and can be shared. One pure function, `orderedCandidateIds(view, listState)`
+    (`src/listOrder.ts`), defines the order; the grid runs in server sort/filter mode and shows exactly
+    that order. A candidate page has "Back to list" and Previous/Next (with "12 of 87") that walk the
+    same order and carry the list state. The app-bar Autocomplete is a secondary "jump to id" (id,
+    overall stance, failure/flag icons).
+  - **Two-level plan graph:** the Plan graph tab is the *run level*: one node per node name (edges
+    deduplicated by name), each showing its kind and status mix ("97 ok · 3 failed") with a thin stacked
+    bar in theme status colours; shared nodes are marked; clicking a node opens a panel listing the
+    candidates per status, linking to their pages. Each candidate page has a collapsible *candidate
+    level* "Graph" section with only that candidate's node instances plus the shared nodes, coloured by
+    status. Node cards carry React Flow Handles (without them no edge is drawn).
+  Hash routing (works on `file://`); one store (`src/store.tsx`) fed by the `DataSource`; the plan
+  graph is described below. Cited
+  values render by `kind` through a hook (`renderers`) that domains extend. Built with
+  `pnpm bundle` (Vite single file; emotion injects the styles at runtime); `lensgraph.view.install_app(out_dir)`
+  copies the committed bundle (`view/app/index.html`) into a report folder. `BUILD_INFO.json` holds a
+  hash of the UI sources (`src/**` plus the build config files, not tests), which `test_view_app.py`
+  recomputes, so a UI change without a rebuild fails pytest.
+  - **Layout:** `src/` is app code only. Tests live in `tests/unit/` (vitest, mirroring `src/`'s
+    folders, with `setup.ts` and `helpers/`); `tests/e2e/` (Playwright) arrives with TASK-22.
+    `pnpm typecheck` covers app, build config and tests (`tsconfig.json`, `.node.json`, `.test.json`).
 - **Data sources:** the app reads through a `DataSource` interface. `EmbeddedSource` reads
   `window.__RUN__` from `data/run.js` (so the report opens from `file://`, where browsers block
   `fetch`). `FetchSource` reads `run.json` over HTTP. A later `LiveSource` subscribes to run events.
