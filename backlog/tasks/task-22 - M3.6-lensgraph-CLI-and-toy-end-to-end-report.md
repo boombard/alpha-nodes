@@ -37,7 +37,7 @@ Consumes: `RunConfig`, `Settings`, `load_object` (M3.1), `build_run_view` and `w
 
 Produces:
 ```python
-# cli.py (argparse, no extra dependency)
+# cli.py (click; changed from argparse 2026-11-24 at the human's request)
 def main(argv: Sequence[str] | None = None) -> int
 #   lensgraph run CONFIG.yaml [--store PATH] [--invalidate NODE ...] [--no-cache] [--profile NAME]
 #                             [--no-report] [--path DIR ...]
@@ -52,7 +52,7 @@ Semantics:
 - **`lensgraph report`** rebuilds a report for an existing run from the index and blobs alone.
 
 ## Steps
-- [ ] Write the failing tests (call `main([...])` in-process with `tmp_path` stores; no subprocess needed):
+- [ ] Write the failing tests (use `click.testing.CliRunner` with `tmp_path` stores; no subprocess needed):
   - `test_cli_run_toy_writes_report`: `run toy_run.yaml --path <tests dir> --store <tmp>` returns 0; the report folder has `index.html`, `run.json` and `data/run.js`; `run.json` validates as `RunView`; stdout names the run id.
   - `test_cli_rerun_all_cache_hits`: a second run's node results are cache hits for every memoizable node.
   - `test_cli_invalidate_and_no_cache`
