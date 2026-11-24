@@ -198,6 +198,10 @@ Principles:
   run_id and candidate), `RunResult.run_id`, and at export time a wrapper
   `DossierRecord(run_id, created_at, dossier)` built outside the graph.
 - "abstained" ≠ "neutral stance 0".
+- **Planned (TASK-25): critical inputs and minimum coverage.** A lens may declare inputs it can't judge
+  without, and a minimum coverage. If either isn't met, the framework returns an `abstained` verdict
+  naming the reason *before* calling `assess` (no LLM call), so a lens can't be confident about
+  evidence it doesn't have.
 - No 0–100 confidence from LLMs. Use 3-level conviction, plus the framework-computed coverage.
 - The domain layer supplies stance labels (bearish…bullish; reject…advance).
 - **Coverage** is computed by the framework as the mean over declared inputs of input

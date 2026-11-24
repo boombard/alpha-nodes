@@ -23,6 +23,8 @@ ordinal: 13000
 
 **Provider resilience (noted 2026-11-24):** real runs will hit provider outages; we saw repeated 529 Overloaded responses during M2. Consider pydantic-ai's `FallbackModel` per profile, e.g. Haiku via the Anthropic API, then via another provider. If adopted: provenance must record the model that actually answered (not the first in the chain), the profile fingerprint must cover the whole chain, and a run must be able to forbid fallback when comparability across candidates matters.
 
+**Critical inputs (noted 2026-11-24):** TASK-25 sketches `critical_inputs` / `min_coverage` on LensNode, so a lens abstains (without an LLM call) when its key evidence is missing. Decide each M6 lens's critical inputs (e.g. `quality_value` on fundamentals periods) and land TASK-25 first or alongside.
+
 Sketched tasks:
 - M6.1 contracts: canonical `fundamentals`, `filings_text`, `news` schemas with field kinds; money/currency calc helpers that refuse mixed currencies without fx.
 - M6.2 `EdgarProvider` (companyfacts XBRL, ticker->CIK map, curated tag map, filing dates, 10-K sections; SEC User-Agent from settings). [parallel]
