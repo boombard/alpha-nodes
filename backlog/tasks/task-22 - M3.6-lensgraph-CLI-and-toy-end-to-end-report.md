@@ -1,10 +1,10 @@
 ---
 id: TASK-22
 title: M3.6 lensgraph CLI and toy end-to-end report
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-23T23:51:15Z'
-updated_date: '2026-11-24T08:16:41Z'
+updated_date: '2026-11-24T08:18:44Z'
 labels:
   - core
 milestone: m-2
@@ -78,19 +78,19 @@ Out of scope: campaigns (M7), as-of runs (M8), a web frontend.
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 lensgraph run <yaml> runs the toy panel with reviewer and writes the report; rerun is all cache hits
-- [ ] #2 --invalidate, --no-cache and --profile override the config; config errors exit 2 without a traceback
-- [ ] #3 lensgraph report rebuilds a report from the index and blobs alone
-- [ ] #4 M3 demo gate output recorded
-- [ ] #5 Playwright smoke test opens the generated report from file:// and drills from a claim to its cited value
+- [x] #1 lensgraph run <yaml> runs the toy panel with reviewer and writes the report; rerun is all cache hits
+- [x] #2 --invalidate, --no-cache and --profile override the config; config errors exit 2 without a traceback
+- [x] #3 lensgraph report rebuilds a report from the index and blobs alone
+- [x] #4 M3 demo gate output recorded
+- [x] #5 Playwright smoke test opens the generated report from file:// and drills from a claim to its cited value
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -109,4 +109,5 @@ Rulings: --profile beats an explicit profile in the config (CLI flags override c
 M3 DEMO GATE
 Worker: uv run lensgraph run packages/lensgraph/tests/toy/toy_run.yaml --path packages/lensgraph/tests gave run id 20261124T081543-7c1e2c and report .lensgraph/reports/20261124T081543-7c1e2c/index.html (in the task-22 worktree).
 Coordinator rerun: run id 20261124T081625-a8f8a1, exit 0, report index.html written; the Playwright e2e drills from S1's claim to its cited value, opens the review, and counts graph nodes and edges in a real browser.
+Landed cd6d49d..cd6d49d on main.
 <!-- SECTION:FINAL_SUMMARY:END -->
