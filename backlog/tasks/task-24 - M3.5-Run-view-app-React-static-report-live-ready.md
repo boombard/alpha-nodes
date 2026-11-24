@@ -1,10 +1,10 @@
 ---
 id: TASK-24
 title: 'M3.5 Run view app (React): static report, live-ready'
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-24T01:36:50Z'
-updated_date: '2026-11-24T01:56:14Z'
+updated_date: '2026-11-24T02:02:54Z'
 labels:
   - core
   - ui
@@ -95,3 +95,13 @@ Out of scope: live events, API and the live DataSource (TASK-23); domain-specifi
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_57b91c39b205, worktree task-24
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker (Sonnet, dispatch ctx_57b91c39b205, branch boom/task-24, 2 commits bfaf542..5e656e0): packages/lensgraph-ui (React 18 + TS, Vite single-file build, vitest, React Flow + dagre): run summary with a sortable candidate table, plan graph coloured by node status, candidate pages with claim-to-cited-value drill-down and the review (text, priority badge, cite chips); DataSource, EmbeddedSource, FetchSource and pickSource feeding one RunStore; hash routing for file://; no dangerouslySetInnerHTML (guarded by a test). lensgraph.view.install_app; the bundle is committed at lensgraph/view/app/index.html (465 KB) with BUILD_INFO.json and a Node-free up-to-date test; core.md updated. ACs 1-4 met. Coordinator re-ran checks: pnpm test 18 passed, typecheck clean, pytest 313 passed, ruff clean, pyright 0 errors.
+Coordinator verification in a real browser: built a toy report (panel + reviewer, run.json + data/run.js + install_app) and opened index.html from file:// in Orca's browser. Summary, sortable table, plan graph (zoom), S1 page, citation drill-down (growth_rate -> 0.1245 with source hash) and the review section all render.
+One fix round: review points render text, priority badge and cite chips separately (they used to run together).
+Rulings: the graph colours each node by its own candidate's status and dims other candidates' nodes (not filtered); the bundle source hash also covers index.html, vite.config.ts and tsconfig.json; extra UI files (store.tsx, router.ts, format.ts, scripts/bundle.mjs) and the @types/node devDependency.
+Note for TASK-22: the toy scripted reviewer always returns fit points, so reviews fail unless the brief reaches the reviewer. TASK-22's brief injection is required for the demo.
+<!-- SECTION:FINAL_SUMMARY:END -->
