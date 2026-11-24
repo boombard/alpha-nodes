@@ -1,9 +1,10 @@
 ---
 id: TASK-20
 title: M3.3 Post-panel dossier reviewer
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-23T23:51:14Z'
+updated_date: '2026-11-24T01:19:40Z'
 labels:
   - core
 milestone: m-2
@@ -104,3 +105,9 @@ Out of scope: acceptance rules using review flags (M7), macro context inputs (la
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_2a72d8e780c6, worktree task-20
+<!-- SECTION:NOTES:END -->

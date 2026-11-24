@@ -1,9 +1,10 @@
 ---
 id: TASK-19
 title: M3.2 Citation lineage and LLM call cost
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-23T23:51:14Z'
+updated_date: '2026-11-24T01:19:39Z'
 labels:
   - core
 milestone: m-2
@@ -92,3 +93,9 @@ Out of scope: rendering (M3.4); verdicts/dossiers tables (derivable from node_re
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_cfc637929a54, worktree task-19
+<!-- SECTION:NOTES:END -->
