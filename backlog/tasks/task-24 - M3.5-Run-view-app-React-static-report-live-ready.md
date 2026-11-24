@@ -1,10 +1,10 @@
 ---
 id: TASK-24
 title: 'M3.5 Run view app (React): static report, live-ready'
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-24T01:36:50Z'
-updated_date: '2026-11-24T02:26:02Z'
+updated_date: '2026-11-24T08:10:15Z'
 labels:
   - core
   - ui
@@ -76,18 +76,18 @@ Out of scope: live events, API and the live DataSource (TASK-23); domain-specifi
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 One React app renders run summary, sortable candidate table, plan graph (React Flow) and candidate pages with claim-to-cited-data drill-down
-- [ ] #2 Builds to one self-contained index.html that opens from file:// with embedded data/run.js
-- [ ] #3 Data comes through a DataSource interface (EmbeddedSource/FetchSource) into one store, ready for a live source
-- [ ] #4 Bundled app committed into the Python package with an up-to-date check that needs no Node; LLM text never rendered as HTML
+- [x] #1 One React app renders run summary, sortable candidate table, plan graph (React Flow) and candidate pages with claim-to-cited-data drill-down
+- [x] #2 Builds to one self-contained index.html that opens from file:// with embedded data/run.js
+- [x] #3 Data comes through a DataSource interface (EmbeddedSource/FetchSource) into one store, ready for a live source
+- [x] #4 Bundled app committed into the Python package with an up-to-date check that needs no Node; LLM text never rendered as HTML
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -117,4 +117,5 @@ Coordinator verification on a real 123-candidate toy run (run.json 1.1 MB) opene
 Round-4 rulings: the grid runs in server sort/filter mode so it shows exactly orderedCandidateIds' order (own filter operators); the community grid pages at 100 rows ("1-100 of N"); list-state edits use location.replace; the candidate graph mounts only when expanded; shared nodes count once in the status mix; name-level edges are dashed only if all instances are optional; Contested is agreement >= 1.0 (null never matches); quick search matches the displayed text of every column; @mui/icons-material added; tests click graph nodes with fireEvent (userEvent's mousedown crashes d3-zoom in jsdom).
 Open points: graph edges are low-contrast in dark mode (thin grey on dark), cosmetic; the community DataGrid paginates at 100 rows, so a 400-candidate campaign pages through 4 pages (Pro removes the limit; not needed yet); an empty untracked src/test/ directory is left in the worktree (not in git).
 Open point (2026-11-24): the provenance line is cryptic (e.g. "function:_scripted:" and a raw version hash); show a friendly model label and a short version with the full hash on hover. Cosmetic; can be done with TASK-22 or later.
+Landed 3ba1bcc..3ba1bcc on main (worker commits squashed into one).
 <!-- SECTION:FINAL_SUMMARY:END -->
