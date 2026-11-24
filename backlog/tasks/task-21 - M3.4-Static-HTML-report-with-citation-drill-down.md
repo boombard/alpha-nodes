@@ -1,10 +1,10 @@
 ---
 id: TASK-21
 title: M3.4 RunView contract, run.json export and generated TS types
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-23T23:51:15Z'
-updated_date: '2026-11-24T01:45:06Z'
+updated_date: '2026-11-24T01:55:44Z'
 labels:
   - core
 milestone: m-2
@@ -91,18 +91,18 @@ Out of scope: the React app (TASK-24), CLI wiring (TASK-22), live events and API
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 RunView (summary, plan, candidates with DossierRecords and claim refs, deduplicated cited values, LLM calls) is built from the index and blobs alone
-- [ ] #2 run.json is deterministic and JSON-safe; data/run.js embeds the same content for file:// use
-- [ ] #3 Unresolved citations map to null, never raise; frames are truncated with a flag
-- [ ] #4 TS types and the UI fixture are generated from the Python models, with drift tests that need no Node
+- [x] #1 RunView (summary, plan, candidates with DossierRecords and claim refs, deduplicated cited values, LLM calls) is built from the index and blobs alone
+- [x] #2 run.json is deterministic and JSON-safe; data/run.js embeds the same content for file:// use
+- [x] #3 Unresolved citations map to null, never raise; frames are truncated with a flag
+- [x] #4 TS types and the UI fixture are generated from the Python models, with drift tests that need no Node
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -117,4 +117,5 @@ Worker: dispatch ctx_2c47f55bf4ee, worktree task-21
 Worker (Sonnet, dispatch ctx_2c47f55bf4ee, branch boom/task-21, 3 commits 74dc726..0cbaf3d): lensgraph.view (models: RunView, RunSummary, CandidateView with ClaimRef and FlagRef, CitedView, TableData; build_run_view and write_run_view writing run.json and data/run.js; json_safe; schema), reviewer node kind in plangraph, RunInfo and RunIndex.run_info (DuckDB and memory, UTC times), packages/lensgraph-ui/{package.json, scripts/gen-types.mjs, src/types/run-view.ts (generated, schema hash on line 1), fixtures/toy-run.json (generated)}, core.md updated. ACs 1-4 met (test_view.py: shape, resolved and deduplicated cites, null cite, truncation, cost None, determinism, run.js equality, flag cites, created_at fallbacks; test_view_schema.py: TS hash and fixture drift, no Node needed). Coordinator re-ran checks: pytest 310 passed, ruff clean, pyright 0 errors; no 1970 placeholder left in the fixture.
 Coordinator review, one fix round: no placeholder data in the contract. Run status and times come from the new RunIndex.run_info; DossierRecord.created_at is the run's finish (else start) time, and a run with neither raises. Fixed run id and times live only in the test helper. Flag citations are resolved like claims (FlagRef); review cites stay unresolved, as documented.
 Rulings: root pyproject excludes packages/lensgraph-ui from the uv workspace (uv rejects a member without pyproject; TASK-24 relies on it); resolve_citation is called per cite (resolve_all raises on the first failure); candidates are in plan order and LLM calls sorted; test helper tests/toy/toy_view.py; types generated with json-schema-to-typescript@15.0.4 in serialization mode (defaulted fields required); DuckDB times are now UTC (rows in older index files stay local-time naive).
+Landed aaa3b82..aaa3b82 on main (worker commits squashed into one).
 <!-- SECTION:FINAL_SUMMARY:END -->
