@@ -11,6 +11,7 @@ from typing import Any
 import duckdb
 
 from ..plan import NodeKey, NodeResult
+from ..records import LLMCall
 from ..types import Failed
 from .base import RunIndex
 
@@ -114,3 +115,19 @@ class DuckDBRunIndex(RunIndex):
             for (node, candidate, status, output_hash, memo_key, cache_hit, error,
                  failure_json, duration_s, meta_json) in rows
         ]
+
+    def record_llm_call(self, call: LLMCall) -> None:
+        """Not implemented until M3.2."""
+        raise NotImplementedError("DuckDBRunIndex.record_llm_call: implemented in M3.2")
+
+    def llm_calls(self, run_id: str) -> list[LLMCall]:
+        """Not implemented until M3.2."""
+        raise NotImplementedError("DuckDBRunIndex.llm_calls: implemented in M3.2")
+
+    def run_config(self, run_id: str) -> dict[str, Any]:
+        """Not implemented until M3.2."""
+        raise NotImplementedError("DuckDBRunIndex.run_config: implemented in M3.2")
+
+    def node_result(self, run_id: str, node: str, candidate: str | None) -> NodeResult | None:
+        """Not implemented until M3.2."""
+        raise NotImplementedError("DuckDBRunIndex.node_result: implemented in M3.2")

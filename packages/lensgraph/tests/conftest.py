@@ -11,7 +11,7 @@ from lensgraph.registry import NodeRegistry
 from lensgraph.types import CandidateRef
 from pydantic_ai.messages import ModelMessage, ModelResponse, TextPart, ToolCallPart
 from pydantic_ai.models.function import AgentInfo, FunctionModel
-from toy.nodes import AssayClean, AssayRaw, GrowthRate, ReferencePanel, ToxNotes
+from toy.registry import build_registry
 from toy.safety_lens import SafetyLens
 from toy.sources import FakeAssaySource
 
@@ -77,15 +77,11 @@ def toy_services(toy_source: FakeAssaySource) -> dict[str, FakeAssaySource]:
 
 @pytest.fixture
 def toy_registry() -> NodeRegistry:
-    """Registry holding every toy node."""
-    registry = NodeRegistry()
-    for cls in (ReferencePanel, AssayRaw, AssayClean, GrowthRate, ToxNotes):
-        registry.register(cls)
-    return registry
+    """Registry holding every toy data node (tests register the lenses they need)."""
+    return build_registry(lenses=())
 
 
 @pytest.fixture
-def ai_registry(toy_registry: NodeRegistry) -> NodeRegistry:
-    """Toy registry plus the AI `SafetyLens`."""
-    toy_registry.register(SafetyLens)
-    return toy_registry
+def ai_registry() -> NodeRegistry:
+    """Toy data nodes plus the AI `SafetyLens`."""
+    return build_registry(lenses=(SafetyLens,))

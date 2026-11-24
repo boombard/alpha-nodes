@@ -5,6 +5,7 @@ from collections.abc import Mapping
 from typing import Any
 
 from ..plan import NodeResult
+from ..records import LLMCall
 from .base import RunIndex
 from .files import FsspecBlobStore
 
@@ -27,6 +28,7 @@ class InMemoryRunIndex(RunIndex):
         self.runs: dict[str, dict[str, Any]] = {}
         self._memo: dict[str, str] = {}
         self._results: dict[str, list[NodeResult]] = {}
+        self._llm_calls: dict[str, list[LLMCall]] = {}
 
     def start_run(self, run_id: str, config: Mapping[str, Any]) -> None:
         self.runs[run_id] = {"config": dict(config), "status": "running"}
@@ -46,3 +48,19 @@ class InMemoryRunIndex(RunIndex):
 
     def node_results(self, run_id: str) -> list[NodeResult]:
         return list(self._results.get(run_id, []))
+
+    def record_llm_call(self, call: LLMCall) -> None:
+        self._llm_calls.setdefault(call.run_id, []).append(call)
+
+    def llm_calls(self, run_id: str) -> list[LLMCall]:
+        return list(self._llm_calls.get(run_id, []))
+
+    def run_config(self, run_id: str) -> dict[str, Any]:
+        return dict(self.runs[run_id]["config"])
+
+    def node_result(self, run_id: str, node: str, candidate: str | None) -> NodeResult | None:
+        return next(
+            (r for r in self._results.get(run_id, [])
+             if r.key.name == node and r.key.candidate == candidate),
+            None,
+        )

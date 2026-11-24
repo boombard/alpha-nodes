@@ -1,0 +1,16 @@
+registry: toy.registry:build_registry
+services: toy.registry:build_services
+candidates:
+  - id: S1
+  - id: S2
+  - id: S3
+panel:
+  lenses: [growth_lens, safety_lens]
+nodes:
+  safety_lens:
+    profile: test
+brief:
+  purpose: Pick strains for a fast, safe fermentation pilot.
+  horizon: 6 months
+  priorities: [speed, safety]
+  out_of_scope: [cost]

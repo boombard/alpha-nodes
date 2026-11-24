@@ -111,3 +111,53 @@ class Dossier(_Model):
     coverage: dict[str, LensStatus]  # lens -> status
     flags: list[Flag]
     summary: str | None = None
+
+
+class AssessmentBrief(_Model):
+    """What the human wants from an assessment, passed to the post-panel reviewer.
+
+    See documentation/design/core.md, Assessment brief and post-panel review.
+
+    Args:
+        purpose: why the candidates are being assessed.
+        horizon: the time frame the assessment should hold for, if any.
+        priorities: what matters most; `ReviewPoint.priority` must be one of these.
+        out_of_scope: topics the review must not weigh.
+        extra: domain-specific facts (e.g. constraints) as plain strings.
+    """
+
+    purpose: str
+    horizon: str | None = None
+    priorities: list[str] = []
+    out_of_scope: list[str] = []
+    extra: dict[str, str] = {}
+
+
+class ReviewPoint(_Model):
+    """One cited observation in a `DossierReview`.
+
+    `priority`, when set, must be one of the brief's priorities; the reviewer node checks
+    that (the model cannot, since it doesn't know the brief).
+    """
+
+    text: str
+    cites: list[str] = Field(min_length=1)
+    priority: str | None = None
+
+
+class DossierReview(_Model):
+    """The reviewer's read of a dossier against the brief (never a number used in scoring).
+
+    See documentation/design/core.md, Assessment brief and post-panel review.
+
+    Args:
+        fit: how the dossier fits the brief.
+        gaps: what additional evidence would change the view.
+        flags: warnings, restricted by the reviewer node to a closed list of codes.
+    """
+
+    summary: str
+    fit: list[ReviewPoint] = []
+    gaps: list[ReviewPoint] = []
+    flags: list[Flag] = []
+    provenance: Provenance
