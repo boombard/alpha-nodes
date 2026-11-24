@@ -1,10 +1,10 @@
 ---
 id: TASK-18
 title: M3.1 Run config, brief, review and record contracts
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-23T23:51:00Z'
-updated_date: '2026-11-24T00:15:32Z'
+updated_date: '2026-11-24T00:16:05Z'
 labels:
   - core
   - contracts
@@ -133,4 +133,6 @@ Out of scope: DuckDB implementations of the new RunIndex methods (M3.2), the rev
 Worker start failed 2026-11-24 at agent_readiness (dispatch ctx_706e5f4485ba): the launch command was mangled ('zsh: command not found: laude'). Worktree task-18 was created and left in place; no retry yet.
 
 Retry (dispatch ctx_be600a473ee5, human-approved) failed the same way: 'zsh: command not found: laude'. Reproducible, so not a one-off; stopped retrying. Likely the new terminal's shell swallows the first keystroke of the launch command.
+
+Cause of the failed starts: an oh-my-zsh update prompt swallowed the launch keystrokes (per the human). Worker: dispatch ctx_9ae9f39ad41f, worktree task-18.
 <!-- SECTION:NOTES:END -->
