@@ -4,7 +4,7 @@ title: M3.1 Run config, brief, review and record contracts
 status: To Do
 assignee: []
 created_date: '2026-11-23T23:51:00Z'
-updated_date: '2026-11-23T23:51:14Z'
+updated_date: '2026-11-24T00:02:47Z'
 labels:
   - core
   - contracts
@@ -126,3 +126,9 @@ Out of scope: DuckDB implementations of the new RunIndex methods (M3.2), the rev
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker start failed 2026-11-24 at agent_readiness (dispatch ctx_706e5f4485ba): the launch command was mangled ('zsh: command not found: laude'). Worktree task-18 was created and left in place; no retry yet.
+<!-- SECTION:NOTES:END -->

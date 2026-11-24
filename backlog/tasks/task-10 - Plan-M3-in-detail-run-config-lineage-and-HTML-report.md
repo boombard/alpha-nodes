@@ -1,10 +1,10 @@
 ---
 id: TASK-10
 title: 'Plan M3 in detail: run config, lineage and HTML report'
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-11-23T08:03:31Z'
-updated_date: '2026-11-23T23:47:34Z'
+updated_date: '2026-11-24T00:02:24Z'
 labels:
   - plan
   - sketch
@@ -62,3 +62,9 @@ Design refs: core.md (Run configuration, Artifact store and run index, Reporting
 <!-- SECTION:NOTES:BEGIN -->
 Coordinator task (plan): drafting M3 tasks for human approval.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Planned M3 as TASK-18 (contracts) -> TASK-19 (lineage + LLM cost) and TASK-20 (reviewer) in parallel -> TASK-21 (HTML report) -> TASK-22 (CLI + toy e2e, M3 demo gate). Incorporates the AssessmentBrief/DossierReviewer, DossierRecord and genai-prices notes. TASK-11 re-pointed to TASK-22. Approved by the human 2026-11-24.
+<!-- SECTION:FINAL_SUMMARY:END -->
