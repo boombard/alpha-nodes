@@ -1,10 +1,10 @@
 ---
 id: TASK-20
 title: M3.3 Post-panel dossier reviewer
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-23T23:51:14Z'
-updated_date: '2026-11-24T01:19:40Z'
+updated_date: '2026-11-24T01:23:54Z'
 labels:
   - core
 milestone: m-2
@@ -111,3 +111,12 @@ Out of scope: acceptance rules using review flags (M7), macro context inputs (la
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_2a72d8e780c6, worktree task-20
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker (Sonnet, dispatch ctx_2a72d8e780c6, branch boom/task-20, 2 commits a2571f0..e548ad1): review.py (ReviewOut, review_citables, render_review_context with show_stances, DossierReviewer: brief as a node param, guard rail on cites, flag codes, priorities and fit-without-brief), call_structured extracted in ai.py and shared with AINode, Panel.reviewer and Panel.targets(), panel_registry registers the reviewer as node 'review' fed by the aggregator, Dossier.summary removed, ReviewPoint docstring corrected, toy reviewer and prompt, toy registry and toy_run.yaml updated, core.md updated. ACs 1-4 met (test_review_ok_becomes_dossier_review_with_provenance, test_unknown_cite_retried_then_ok, test_unknown_priority_retried, test_unknown_flag_code_rejected, test_fit_without_brief_rejected; test_brief_change_invalidates_review_only; test_show_stances_false_hides_stances; test_ai_lens.py untouched and green, summary removed; also test_reviewer_wired_by_panel covering all-failed S3). Coordinator re-ran checks: pytest 270 passed, ruff clean, pyright 0 errors; merges cleanly with boom/task-19.
+Coordinator review, one fix round: panel_registry raises GraphError when Panel.reviewer isn't a DossierReviewer subclass.
+Rulings: the toy reviewer is registered as 'toy_reviewer' and re-registered as 'review'; call_structured's validate is typed Callable[[Any], Any]; show_stances=False also hides agreement and conviction, and renders claim direction as supports/undermines; review.py imports the private _JINJA/_registry helpers from ai.py; the review sets prompt_hash and leaves variant None.
+Open points: plangraph.node_kind (TASK-19) labels the reviewer 'other' until TASK-21 maps it to 'reviewer' (noted in TASK-21).
+<!-- SECTION:FINAL_SUMMARY:END -->
