@@ -1,10 +1,10 @@
 ---
 id: TASK-22
 title: M3.6 lensgraph CLI and toy end-to-end report
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-23T23:51:15Z'
-updated_date: '2026-11-24T08:10:59Z'
+updated_date: '2026-11-24T08:16:41Z'
 labels:
   - core
 milestone: m-2
@@ -98,3 +98,15 @@ Out of scope: campaigns (M7), as-of runs (M8), a web frontend.
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_bf67e82883d5, worktree task-22
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker (Sonnet, dispatch ctx_bf67e82883d5, branch boom/task-22, 1 commit 238418e): click CLI (lensgraph run CONFIG [--store --invalidate --no-cache --profile --no-report --path], lensgraph report RUN_ID [--store --out]; exit 0/2/3), RunSpec.profile_override, the brief wired from RunConfig into the review node param, local model via Settings, a report written as the React app plus run.json and data/run.js, Playwright e2e (tests/e2e/report.spec.ts on a CLI-generated toy report over file://), core.md and README updated. ACs 1-5 met (test_cli.py: run_toy_writes_report, rerun_all_cache_hits, invalidate_and_no_cache, profile_override, config_error_exit_2, report_rebuilds, local_model_via_settings, brief change reruns only the review, abort exit 3; e2e report.spec.ts).
+Coordinator verification: pytest 330 passed, ruff clean, pyright 0 errors, pnpm test 49 passed, typecheck clean, pnpm e2e 1 passed (run myself). Ran the CLI on toy_run.yaml: exit 0, run id, store and report printed; all three candidates have reviews (the brief reached the reviewer); a rerun gives 14 cache hits (every memoizable node except S3's failed and recovered ones) and 0 LLM calls; a YAML typo ('panle') gives exit 2 with 'Error: invalid config: panle: Extra inputs are not permitted' and no traceback. No fix round needed.
+Rulings: --profile beats an explicit profile in the config (CLI flags override config); a test2 profile was added to the toy registry; the UI fixture was regenerated (the config gained profile_override) and BUILD_INFO rebuilt (index.html unchanged); click and @playwright/test added; the Playwright outputDir is under node_modules/.cache; only LENSGRAPH_LOCAL_MODEL is read via Settings (other env: profile vars still use os.environ); 'lensgraph report' takes max_rows from the stored run config.
+
+M3 DEMO GATE
+Worker: uv run lensgraph run packages/lensgraph/tests/toy/toy_run.yaml --path packages/lensgraph/tests gave run id 20261124T081543-7c1e2c and report .lensgraph/reports/20261124T081543-7c1e2c/index.html (in the task-22 worktree).
+Coordinator rerun: run id 20261124T081625-a8f8a1, exit 0, report index.html written; the Playwright e2e drills from S1's claim to its cited value, opens the review, and counts graph nodes and edges in a real browser.
+<!-- SECTION:FINAL_SUMMARY:END -->
