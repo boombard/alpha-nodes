@@ -71,6 +71,8 @@ Semantics:
 
 **Added 2026-11-24:** where useful, draw the per-candidate graph from `RunIndex.plan_graph` (TASK-19), coloured by node status, in addition to the class-level Mermaid diagram.
 
+**Note from the TASK-19/20 reviews:** `plangraph.node_kind` (TASK-19) was written before `DossierReviewer` existed, so it maps the reviewer to "other". Map it to "reviewer" (allowed file: `plangraph.py`) and assert it in a test.
+
 Out of scope: CLI wiring (M3.5), domain renderers (finance milestones), charts beyond the renderer hook.
 <!-- SECTION:DESCRIPTION:END -->
 
