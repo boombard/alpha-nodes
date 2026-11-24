@@ -84,6 +84,8 @@ Semantics:
 - [ ] Run `uv run pytest -q`, then the DoD checks. Expected: PASS.
 - [ ] Commit: `feat(lensgraph): post-panel dossier reviewer`.
 
+**Note from the TASK-18 review:** fix `ReviewPoint`'s docstring in verdict.py. It says the model can't check `priority` "since it doesn't know the brief", but the reviewer's model does see the brief in its system prompt. The real reason is that the output schema can't validate against run data, so the node checks it.
+
 Out of scope: acceptance rules using review flags (M7), macro context inputs (later), repeated sampling (TASK-17).
 <!-- SECTION:DESCRIPTION:END -->
 

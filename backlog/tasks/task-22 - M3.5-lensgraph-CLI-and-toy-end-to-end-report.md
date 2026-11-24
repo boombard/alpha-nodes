@@ -64,6 +64,10 @@ Semantics:
 
 **M3 demo gate (for the human):** run `uv run lensgraph run packages/lensgraph/tests/toy/toy_run.yaml --path packages/lensgraph/tests` and paste its output (run id, report path) into the final summary. The human opens the report and drills from a claim to its cited data.
 
+**Notes from the TASK-18 review:**
+- **How the brief reaches the reviewer:** `RunConfig.brief` is run-level, but the reviewer takes it as a node param (so it is in the memo key). When the config has a brief and a reviewer, `arun` sets `nodes[review].brief` from it, unless the config already sets that param explicitly (then raise ParamsError if they differ). Test: changing `brief` in YAML reruns only the review.
+- **Import cycle:** `config.py` imports `RunSpec` from `run.py`. Don't import `config` at module level in `run.py`; accept `RunSpec` (RunConfig is a subclass) and read the extra fields with `getattr`/`isinstance` under `TYPE_CHECKING`, or move the RunConfig-specific wiring into `cli.py`.
+
 Out of scope: campaigns (M7), as-of runs (M8), a web frontend.
 <!-- SECTION:DESCRIPTION:END -->
 

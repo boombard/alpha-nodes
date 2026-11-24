@@ -1,10 +1,10 @@
 ---
 id: TASK-18
 title: M3.1 Run config, brief, review and record contracts
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-23T23:51:00Z'
-updated_date: '2026-11-24T00:16:05Z'
+updated_date: '2026-11-24T00:18:21Z'
 labels:
   - core
   - contracts
@@ -136,3 +136,11 @@ Retry (dispatch ctx_be600a473ee5, human-approved) failed the same way: 'zsh: com
 
 Cause of the failed starts: an oh-my-zsh update prompt swallowed the launch keystrokes (per the human). Worker: dispatch ctx_9ae9f39ad41f, worktree task-18.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker (Sonnet, dispatch ctx_9ae9f39ad41f, branch boom/task-18, 1 commit 1f999c2): verdict.py gains AssessmentBrief, ReviewPoint and DossierReview; records.py (DossierRecord, LLMCall); config.py (Settings with LENSGRAPH_ prefix, ReportOptions, RunConfig.from_yaml, load_object); RunIndex gains record_llm_call, llm_calls, run_config and node_result (in-memory implemented; DuckDB stubs raise NotImplementedError until TASK-19); toy registry and services factories (offline scripted test profile) and toy_run.yaml; conftest uses them; pydantic-settings and pyyaml added. ACs 1-4 met (test_run_config_from_yaml_roundtrip, test_unknown_key_rejected_*, test_settings_env_prefix; test_brief_and_review_models_frozen_and_strict, test_review_point_requires_cite, test_dossier_record_roundtrip_json; test_memory_index_llm_calls_and_config; test_toy_registry_and_services_resolve_from_config, test_load_object_factory_and_attr). Coordinator re-ran checks: pytest 256 passed, ruff clean, pyright 0 errors.
+Coordinator review: no fix round needed. Two follow-ups were written into later tasks instead: TASK-20 fixes ReviewPoint's inaccurate docstring. TASK-22 defines how RunConfig.brief reaches the reviewer's node param, and avoids a config/run import cycle.
+Rulings: build_registry takes an optional lenses tuple (default GrowthLens and SafetyLens); load_object calls a callable only when it takes no required args and never calls classes; Settings uses extra=ignore; no design doc change (core.md already covers this).
+<!-- SECTION:FINAL_SUMMARY:END -->
