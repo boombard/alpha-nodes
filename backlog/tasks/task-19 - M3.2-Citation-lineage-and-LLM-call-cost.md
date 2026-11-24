@@ -1,10 +1,10 @@
 ---
 id: TASK-19
 title: M3.2 Citation lineage and LLM call cost
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-23T23:51:14Z'
-updated_date: '2026-11-24T01:19:39Z'
+updated_date: '2026-11-24T01:24:12Z'
 labels:
   - core
 milestone: m-2
@@ -99,3 +99,12 @@ Out of scope: rendering (M3.4); verdicts/dossiers tables (derivable from node_re
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_cfc637929a54, worktree task-19
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker (Sonnet, dispatch ctx_cfc637929a54, branch boom/task-19, 2 commits dd71388..b0b42c3): lineage.py (CitedValue, UnresolvedCitation, resolve_citation and resolve_all via provenance input hashes; no new table, works on cache hits), cost.py (price_usd from the bundled genai-prices snapshot, None when unknown; llm_calls_from_result skipping cache hits), DuckDB llm_calls/run_config/node_result, plan graph persistence (plangraph.py: PlanGraph, PlanNode, PlanEdge, node_kind; record_plan and plan_graph in memory and DuckDB; arun records the plan at start and LLM calls after execute, including on abort), core.md updated. ACs 1-4 met (test_lineage.py: frame, value, model, field, item, unresolved, cache hit; test_cost.py: known and unknown price, cache hits skipped, recorded in index; test_duckdb_index.py roundtrips; test_plan_graph.py on memory and DuckDB). Coordinator re-ran checks: pytest 276 passed, ruff clean, pyright 0 errors; merges cleanly with boom/task-20.
+Coordinator review, one fix round: the plan-graph models moved out of plan.py into plangraph.py (plan.py imports only node and types again, avoiding an inverted layering and future cycles); genai-prices declared as a direct dependency (>=0.2.5,<0.3).
+Rulings: extra files touched (conftest toy_panel_runner fixture, test_plan_graph.py, core.md); DuckDB run_config raises KeyError for an unknown run and node_result returns the first match; test_price_known_model uses anthropic:claude-haiku-4-5 (present in the price snapshot).
+Open points: node_kind labels the reviewer 'other' until TASK-21 maps it.
+<!-- SECTION:FINAL_SUMMARY:END -->
