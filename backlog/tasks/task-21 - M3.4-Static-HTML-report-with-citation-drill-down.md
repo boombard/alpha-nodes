@@ -1,9 +1,10 @@
 ---
 id: TASK-21
 title: M3.4 RunView contract, run.json export and generated TS types
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-23T23:51:15Z'
+updated_date: '2026-11-24T01:38:17Z'
 labels:
   - core
 milestone: m-2
@@ -103,3 +104,9 @@ Out of scope: the React app (TASK-24), CLI wiring (TASK-22), live events and API
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_2c47f55bf4ee, worktree task-21
+<!-- SECTION:NOTES:END -->
