@@ -1,10 +1,10 @@
 ---
 id: TASK-24
 title: 'M3.5 Run view app (React): static report, live-ready'
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-24T01:36:50Z'
-updated_date: '2026-11-24T02:18:15Z'
+updated_date: '2026-11-24T02:26:02Z'
 labels:
   - core
   - ui
@@ -112,4 +112,8 @@ Round 2 (human request): MUI (@mui/material, emotion, MUI X DataGrid community) 
 Round 3 (coordinator review in a real browser): the plan graph drew no edges (the custom node had no React Flow Handles); fixed, and in a real browser 27 of 27 plan edges now render. Also: review-flag count shown as an integer; null-last sorting in both directions; per-candidate tabs replaced by an Autocomplete picker (scales to campaigns); provenance shows model and tokens only for AI lenses; CitedValue/Cites moved to components/. pnpm test 27 passed, typecheck clean, pytest 313 passed, ruff and pyright clean.
 Round-2/3 rulings: Tabs plus an app-bar picker rather than a Drawer; DataGrid virtualisation is off only in tests (jsdom has no layout); '@' alias for tests; React Flow Controls aren't themed by @xyflow/react 13 colorMode; review flags are an integer count, not Chips (sortable and filterable).
 Note: unit tests can't see rendering bugs like the missing edges; TASK-22's Playwright smoke test now asserts rendered edges.
+Round 4 (human request, for 100+ candidates): the summary DataGrid is the main list (quick search, column filters, sort, preset chips Failures / Review flags / Contested / Thin evidence with thresholds in src/presets.ts, state in the hash URL); candidate pages have Back to list and Previous/Next with "k of N" from the shared orderedCandidateIds; the app-bar picker is a secondary "Jump to candidate" with stance and failure/flag icons; the plan graph is two-level (run level: one node per node name with status mix and bar, click lists candidates per status; candidate level: a collapsible graph on each candidate page). Scale tests with N=150 and N=1000 synthetic candidates. The worker also found and fixed a real-browser bug (dagre mutated a shared size object, so every node sat at the same position). pnpm test 49 passed, typecheck clean, pytest 313 passed, ruff and pyright clean; bundle 1.29 MB (402 KB gzipped).
+Coordinator verification on a real 123-candidate toy run (run.json 1.1 MB) opened from file://: the Failures preset narrows to S3 (URL #/?preset=failures) and combines with Thin evidence; sort by direction puts the first candidate at "1 of 123", Next goes to "2 of 123", Back to list keeps the sort in the URL; the run-level graph has 9 nodes at distinct positions and 9 edges with correct status counts (assay_clean 122 ok, 1 failed; growth_rate 122 ok, 1 skipped); S1's candidate graph has 9 nodes and 9 edges.
+Round-4 rulings: the grid runs in server sort/filter mode so it shows exactly orderedCandidateIds' order (own filter operators); the community grid pages at 100 rows ("1-100 of N"); list-state edits use location.replace; the candidate graph mounts only when expanded; shared nodes count once in the status mix; name-level edges are dashed only if all instances are optional; Contested is agreement >= 1.0 (null never matches); quick search matches the displayed text of every column; @mui/icons-material added; tests click graph nodes with fireEvent (userEvent's mousedown crashes d3-zoom in jsdom).
+Open points: graph edges are low-contrast in dark mode (thin grey on dark), cosmetic; the community DataGrid paginates at 100 rows, so a 400-candidate campaign pages through 4 pages (Pro removes the limit; not needed yet); an empty untracked src/test/ directory is left in the worktree (not in git).
 <!-- SECTION:FINAL_SUMMARY:END -->
