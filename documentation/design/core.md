@@ -353,6 +353,25 @@ Recorded 2026-11-23 after a research pass; see TASK-16 for the related aggregati
   - cache flags
 - Unknown keys are an error (no silent typos).
 - The resolved config (after defaults) is stored with the run.
+- Wiring fields of the YAML (`RunConfig`, a `RunSpec` subclass):
+  - `registry`: `"module:attr"` of a `NodeRegistry` or a zero-arg factory. `services`: the same for the
+    services mapping. Both are imported after `--path` directories are prepended to `sys.path`.
+  - `brief`: the run-level `AssessmentBrief`. `arun` copies it into the reviewer's `brief` node param (so it is
+    in the memo key and changing it reruns only the review); an explicit, different `nodes.review.brief` is a
+    `ParamsError`.
+  - `report`: `enabled`, `out_dir` (default `<store>/reports/<run_id>`), `max_rows`.
+  - `profile_override`: a model profile forced on every AI node (`AINode` subclasses and the reviewer),
+    replacing any `profile` in `nodes` (flags beat the config).
+- The stored run config is the resolved dump: `nodes` includes the brief and the profile override.
+  `lensgraph report` relies on it.
+- **CLI** (`lensgraph`, click):
+  - `lensgraph run CONFIG.yaml [--store PATH] [--invalidate NODE]... [--no-cache] [--profile NAME] [--no-report] [--path DIR]...`
+  - `lensgraph report RUN_ID [--store PATH] [--out DIR]` rebuilds the report from the index and blobs alone.
+  - Store root: `--store`, else `LENSGRAPH_STORE_ROOT`, else `.lensgraph`.
+  - Prints `run id:`, `store:` and `report:` (a report is `install_app` + `write_run_view`: `index.html`,
+    `run.json`, `data/run.js`).
+  - Exit codes: 0 ok (failed nodes are data), 2 config or params error (one line on stderr), 3 aborted run
+    (the report is still built from what finished).
 
 ## Source store (layer 1 cache): generic mechanics
 

@@ -15,7 +15,11 @@ dependencies = [
     "jinja2",
     "pydantic-settings",
     "pyyaml",
+    "click",
 ]
+
+[project.scripts]
+lensgraph = "lensgraph.cli:main"
 
 [build-system]
 requires = ["hatchling"]

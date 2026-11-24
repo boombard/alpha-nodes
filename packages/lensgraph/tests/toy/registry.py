@@ -61,12 +61,17 @@ def _scripted(messages: list[ModelMessage], info: AgentInfo) -> ModelResponse:
 
 
 def build_services() -> dict[str, Any]:
-    """Services for an offline toy run: the fake assay source and a scripted `test` profile.
+    """Services for an offline toy run: the fake assay source and scripted `test`/`test2` profiles.
 
 The scripted model answers both the safety lens and the reviewer, by output schema.
 """
     profiles = ProfileRegistry(
-        {"test": LLMProfile(name="test", model="test")},
-        model_overrides={"test": FunctionModel(_scripted)},
+        {
+            "test": LLMProfile(name="test", model="test"),
+            # Same scripted answers, different settings: a distinct fingerprint, so switching
+            # a run to it (`lensgraph run --profile test2`) re-keys the AI nodes.
+            "test2": LLMProfile(name="test2", model="test", settings={"temperature": 0.1}),
+        },
+        model_overrides={"test": FunctionModel(_scripted), "test2": FunctionModel(_scripted)},
     )
     return {"assays": FakeAssaySource(), "profiles": profiles}

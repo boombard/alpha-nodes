@@ -92,6 +92,15 @@ DEFAULT_PROFILES: dict[str, LLMProfile] = {
 """Built-in profiles. `dev` is the cheapest and the default everywhere."""
 
 
+def _env_model(var: str) -> str | None:
+    """The model string named by `var`; the local model is read through `Settings`."""
+    if var == LOCAL_MODEL_ENV:
+        from .config import Settings  # lazy: config imports run, which imports the AI nodes
+
+        return Settings().local_model
+    return os.environ.get(var)
+
+
 def describe_model(model: Any) -> str:
     """A human-readable id for a model string or a pydantic-ai `Model` instance (provenance)."""
     if isinstance(model, str):
@@ -128,7 +137,7 @@ class ProfileRegistry:
             raise KeyError(f"unknown model profile {name!r}; known: {sorted(self._profiles)}") from None
         if profile.model.startswith(_ENV_PREFIX) and name not in self._overrides:
             var = profile.model.removeprefix(_ENV_PREFIX)
-            value = os.environ.get(var)
+            value = _env_model(var)
             if not value:
                 raise ValueError(f"profile {name!r} needs a model: set environment variable {var}")
             return profile.model_copy(update={"model": value})

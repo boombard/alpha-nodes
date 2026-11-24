@@ -9,19 +9,22 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, ValidationError
 
+from .ai import AINode
 from .cost import llm_calls_from_result
 from .executor.asyncio_executor import AsyncioExecutor
 from .executor.base import Executor, RunAborted
 from .executor.limits import ResourceLimit
-from .graph import ParamsError, build_plan
+from .graph import ParamsError, build_plan, resolve_classes
 from .panel import Panel, panel_registry
 from .plan import RunResult
 from .registry import NodeRegistry
+from .review import DossierReviewer
 from .store.duckdb_index import DuckDBRunIndex
 from .store.files import FileBlobStore
 from .types import CandidateRef
+from .verdict import AssessmentBrief
 
 
 class RunSpec(BaseModel):
@@ -35,6 +38,9 @@ class RunSpec(BaseModel):
         limits: per-resource concurrency/rate limits (used when no executor is passed).
         invalidate: node names whose cached outputs, and their descendants', are ignored.
         no_cache: ignore every cached output (results are still saved for later runs).
+        profile_override: model profile name forced onto every AI node in the plan (`AINode`
+            subclasses and `DossierReviewer`), replacing any `profile` the config sets; the
+            CLI's `--profile`.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -45,6 +51,7 @@ class RunSpec(BaseModel):
     limits: dict[str, ResourceLimit] = {}
     invalidate: list[str] = []
     no_cache: bool = False
+    profile_override: str | None = None
 
 
 async def arun(
@@ -58,9 +65,15 @@ async def arun(
 ) -> RunResult:
     """Plan and execute `spec`, recording the run in `store_root/index.duckdb`.
 
-    Blobs live in `store_root/blobs`. Raises `ParamsError` if `spec.invalidate` names a node
-    not in the plan; any other failure after the run starts marks it "failed" in the index. `RunAborted` (a `GlobalFailure` in a node) propagates;
-    the aborted run is still recorded, and cached results let the next run resume.
+    Blobs live in `store_root/blobs`. `spec` may be a `RunConfig`: its `brief` is wired into the
+    reviewer's `brief` param, and its resolved dump (with that wiring and `profile_override`
+    applied to `nodes`) is stored as the run config, which is what `lensgraph report` rebuilds from.
+    Targets default to `spec.panel.targets()` (the aggregator, plus the review when set).
+
+    Raises `ParamsError` if `spec.invalidate` names a node not in the plan, or if `brief`
+    conflicts with an explicit `nodes.review.brief`; any other failure after the run starts marks
+    it "failed" in the index. `RunAborted` (a `GlobalFailure` in a node) propagates; the aborted
+    run is still recorded, and cached results let the next run resume.
     """
     store_root = Path(store_root)
     store_root.mkdir(parents=True, exist_ok=True)
@@ -68,10 +81,9 @@ async def arun(
         raise ParamsError("RunSpec needs targets or a panel")
     if spec.panel is not None and spec.panel.aggregator not in registry.names():
         registry = panel_registry(spec.panel, registry)
-    targets = spec.targets or ([spec.panel.aggregator] if spec.panel else [])
-    plan = build_plan(
-        targets, registry, spec.candidates, node_params=spec.nodes, run_id=run_id
-    )
+    targets = spec.targets or (spec.panel.targets() if spec.panel else [])
+    node_params = _resolve_node_params(spec, targets, registry)
+    plan = build_plan(targets, registry, spec.candidates, node_params=node_params, run_id=run_id)
     unknown = sorted({n for n in spec.invalidate if not any(k.name == n for k in plan.nodes)})
     if unknown:
         raise ParamsError(f"invalidate names not in the plan: {unknown}")
@@ -79,7 +91,7 @@ async def arun(
     blobs = FileBlobStore(store_root / "blobs")
     index = DuckDBRunIndex(store_root / "index.duckdb")
     try:
-        index.start_run(plan.run_id, spec.model_dump(mode="json"))
+        index.start_run(plan.run_id, {**spec.model_dump(mode="json"), "nodes": node_params})
         index.record_plan(plan.run_id, plan)
         runner = executor or AsyncioExecutor(limits=spec.limits)
         result = await runner.execute(plan, blobs, index, services=services, bypass_memo=bypass)
@@ -94,6 +106,45 @@ async def arun(
         raise
     finally:
         index.close()
+
+
+def _resolve_node_params(
+    spec: RunSpec, targets: list[str], registry: NodeRegistry
+) -> dict[str, dict[str, Any]]:
+    """`spec.nodes` plus the run-level wiring: the brief for the reviewer, the profile override.
+
+    The brief (only a `RunConfig` has one; read with `getattr` because `config.py` imports this
+    module) goes to the reviewer as the `brief` node param, so it is part of the memo key. An
+    explicit `nodes.<review>.brief` that differs raises `ParamsError`. `profile_override` replaces
+    the `profile` param of every AI node in the plan (flags beat the config).
+    """
+    params = {name: dict(p) for name, p in spec.nodes.items()}
+    classes = resolve_classes(targets, registry)
+    brief = getattr(spec, "brief", None)
+    if isinstance(brief, AssessmentBrief):
+        for name, cls in classes.items():
+            if not issubclass(cls, DossierReviewer):
+                continue
+            node = params.setdefault(name, {})
+            wanted = brief.model_dump(mode="json")
+            if "brief" in node and _as_brief(node["brief"], name) != brief:
+                raise ParamsError(
+                    f"brief conflicts with nodes.{name}.brief; set it in one place only"
+                )
+            node["brief"] = wanted
+    if spec.profile_override:
+        for name, cls in classes.items():
+            if issubclass(cls, AINode | DossierReviewer):
+                params.setdefault(name, {})["profile"] = spec.profile_override
+    return params
+
+
+def _as_brief(value: Any, node: str) -> AssessmentBrief:
+    """Validate an explicit `brief` param of `node`; `ParamsError` if it is not a brief."""
+    try:
+        return AssessmentBrief.model_validate(value)
+    except ValidationError as exc:
+        raise ParamsError(f"invalid params for node {node!r}: {exc}") from exc
 
 
 def _record_llm_calls(index: DuckDBRunIndex, result: RunResult) -> None:
