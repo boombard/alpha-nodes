@@ -9,6 +9,7 @@ from .node import CalcNode, FetchNode, Node, TransformNode
 from .panel import Panel, dossiers, panel_registry
 from .records import DossierRecord, LLMCall
 from .registry import NodeRegistry
+from .review import DossierReviewer, ReviewOut, render_review_context, review_citables
 from .run import RunSpec, arun, run
 from .types import Absent, CandidateRef, GlobalFailure
 from .verdict import (
@@ -33,6 +34,7 @@ __all__ = [
     "Dossier",
     "DossierRecord",
     "DossierReview",
+    "DossierReviewer",
     "FetchNode",
     "Flag",
     "GlobalFailure",
@@ -45,6 +47,7 @@ __all__ = [
     "Panel",
     "Provenance",
     "ReportOptions",
+    "ReviewOut",
     "ReviewPoint",
     "RunConfig",
     "RunSpec",
@@ -59,5 +62,7 @@ __all__ = [
     "input_sufficiency",
     "load_object",
     "panel_registry",
+    "render_review_context",
+    "review_citables",
     "run",
 ]

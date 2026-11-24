@@ -188,8 +188,6 @@ class Dossier(BaseModel):
     agreement: float | None                        # dispersion of ok stances
     coverage: dict[str, str]                       # lens -> status
     flags: list[Flag]                              # union, for convenience
-    summary: str | None                            # to be dropped: superseded by DossierReview
-                                                   # (see Assessment brief and post-panel review)
 ```
 
 Principles:
@@ -457,6 +455,13 @@ Decided 2026-11-24 (design only; built in M3, used by campaigns in M7).
     through explicit acceptance rules, which the dossier records when they fire.
   - Anchoring risk: a reviewer shown the lens stances tends to echo them. For a summary that's
     fine; any independent fit judgement should be given the evidence and claims, not the stances.
+  - Node name `review` (`Panel.reviewer` names the registered class; `panel_registry` wires it
+    to the aggregator, and `Panel.targets()` adds it to the run targets). Citable ids:
+    `verdict.<lens>`, `verdict.<lens>.claim[<i>]` (0-based) and `flag.<lens>.<code>`. Guard
+    rails: unknown cites, flag codes outside the closed list, priorities outside the brief's,
+    and any `fit` when there is no brief are retried, then the node fails (no fallback). The
+    brief goes in the system prompt, the dossier in the user message; `show_stances=False`
+    leaves stances out of the rendered dossier.
   - Its memo key is the dossier hash plus the brief hash. Dossiers carry no `run_id`, so reviews
     rerun only when either changes.
 - **Caching:** anything the brief is rendered into must include the brief's hash in its memo key

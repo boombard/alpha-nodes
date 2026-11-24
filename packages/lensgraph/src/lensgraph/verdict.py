@@ -110,7 +110,6 @@ class Dossier(_Model):
     evidence_share: float = 0.0
     coverage: dict[str, LensStatus]  # lens -> status
     flags: list[Flag]
-    summary: str | None = None
 
 
 class AssessmentBrief(_Model):
@@ -137,7 +136,7 @@ class ReviewPoint(_Model):
     """One cited observation in a `DossierReview`.
 
     `priority`, when set, must be one of the brief's priorities; the reviewer node checks
-    that (the model cannot, since it doesn't know the brief).
+    that: the output schema cannot validate against run data.
     """
 
     text: str

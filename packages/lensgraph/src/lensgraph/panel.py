@@ -18,6 +18,11 @@ class Panel(BaseModel):
 
     lenses: list[str]  # registered lens node names
     aggregator: str = "dossier"  # node name of the aggregator; the run target
+    reviewer: str | None = None  # registered `DossierReviewer` class name, or None for no review
+
+    def targets(self) -> list[str]:
+        """Run targets: the aggregator, plus the `review` node when a reviewer is set."""
+        return [self.aggregator, *(["review"] if self.reviewer else [])]
 
 
 def panel_registry(
@@ -26,6 +31,9 @@ def panel_registry(
     aggregator_cls: type[Aggregator] = ShrunkMeanAggregator,
 ) -> NodeRegistry:
     """Copy `registry` and add an `aggregator_cls` subclass named `panel.aggregator`.
+
+    If `panel.reviewer` is set, also register that reviewer class (looked up in `registry`)
+    under the name `review`, reading the aggregator's dossier.
 
     Each lens is an optional input (kwarg = lens node name), so one failed lens becomes a
     failed verdict instead of skipping the dossier.
@@ -42,6 +50,22 @@ def panel_registry(
     for node_name in registry.names():
         copy.register(registry.get(node_name))
     copy.register(PanelAggregator)
+    if panel.reviewer:
+        from .graph import GraphError  # lazy: avoid import cycles
+        from .review import DossierReviewer
+
+        reviewer_cls = registry.get(panel.reviewer)
+        if not issubclass(reviewer_cls, DossierReviewer):
+            raise GraphError(
+                f"Panel.reviewer {panel.reviewer!r} is a {reviewer_cls.__name__}, "
+                "not a DossierReviewer subclass"
+            )
+
+        class PanelReviewer(reviewer_cls):  # type: ignore[valid-type, misc]
+            name: ClassVar[str] = "review"
+            inputs: ClassVar[dict[str, str]] = {"dossier": panel.aggregator}
+
+        copy.register(PanelReviewer)
     return copy
 
 

@@ -6,8 +6,11 @@ candidates:
   - id: S3
 panel:
   lenses: [growth_lens, safety_lens]
+  reviewer: toy_reviewer
 nodes:
   safety_lens:
+    profile: test
+  review:
     profile: test
 brief:
   purpose: Pick strains for a fast, safe fermentation pilot.

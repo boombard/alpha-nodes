@@ -5,7 +5,7 @@ used in scoring; its structured answer is validated against the closed set of ci
 retried by pydantic-ai, or the node fails (no placeholder fallback).
 """
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import Any, ClassVar, Literal, Self
 
@@ -18,7 +18,7 @@ from pydantic_ai.settings import ModelSettings
 from .context import render_context, unavailable_inputs
 from .hashing import content_hash
 from .lens import LensAssessment, LensNode
-from .llm import LLMProfile, ProfileRegistry, describe_model
+from .llm import ProfileRegistry, describe_model
 from .node import NodeContext
 from .types import Absent
 from .verdict import Claim, Conviction, Flag, Stance
@@ -40,10 +40,58 @@ class AIAssessmentOut(BaseModel):
     abstain_reason: str | None = None
 
 
-def _output_spec(mode: str) -> Any:
-    """Wrap `AIAssessmentOut` for the profile's output mode."""
+def _output_spec(mode: str, output_type: type[BaseModel]) -> Any:
+    """Wrap `output_type` for the profile's output mode."""
     wrapper = {"tool": ToolOutput, "native": NativeOutput, "prompted": PromptedOutput}[mode]
-    return wrapper(AIAssessmentOut)
+    return wrapper(output_type)
+
+
+async def call_structured(
+    *,
+    registry: ProfileRegistry,
+    profile_name: str,
+    output_type: type[BaseModel],
+    system_prompt: str,
+    user_message: str,
+    validate: Callable[[Any], Any],
+) -> tuple[Any, dict[str, Any]]:
+    """One guard-railed structured model call, shared by `AINode` and the dossier reviewer.
+
+    Builds the agent from the named profile (output mode, retries, settings, usage limits),
+    runs `validate` as the output validator (it raises `ModelRetry` to ask the model again) and
+    returns the validated output plus provenance fields (model, settings, attempts, tokens).
+    Callers add their own `prompt_hash` and `variant`. Exhausted retries raise
+    `UnexpectedModelBehavior` naming the last rejection; there is no fallback.
+    See documentation/design/core.md, AI nodes (guard rails).
+    """
+    profile = registry.get(profile_name)
+    model = registry.model_for(profile_name)
+    agent: Agent[None, Any] = Agent(
+        model,
+        output_type=_output_spec(profile.output_mode, output_type),
+        system_prompt=system_prompt,
+        retries=profile.max_retries,
+        model_settings=ModelSettings(**profile.settings),  # type: ignore[typeddict-item]
+    )
+    agent.output_validator(validate)
+    try:
+        result = await agent.run(
+            user_message,
+            usage_limits=profile.usage_limits.to_limits() if profile.usage_limits else None,
+        )
+    except UnexpectedModelBehavior as exc:
+        if exc.__cause__ is None:
+            raise
+        # Keep the last rejection (e.g. the unknown citation ids) in the node's error.
+        raise UnexpectedModelBehavior(f"{exc.message}; last rejection: {exc.__cause__}") from exc
+    usage = result.usage
+    return result.output, {
+        "model": describe_model(model),
+        "model_settings": profile.settings,
+        "attempts": usage.requests,
+        "input_tokens": usage.input_tokens,
+        "output_tokens": usage.output_tokens,
+    }
 
 
 def guard_rail(
@@ -127,39 +175,22 @@ class AINode(LensNode):
     ) -> LensAssessment:
         """One sampled model run, guard-railed; exhausted retries propagate and fail the node."""
         registry = _registry(ctx.services)
-        profile = registry.get(self.profile)
         usable = citables - unavailable_inputs(inputs)
         user_message = render_context(inputs, self._depth_notes(inputs))
-        return await self._sample(registry, profile, usable, user_message)
+        return await self._sample(registry, usable, user_message)
 
     async def _sample(
-        self,
-        registry: ProfileRegistry,
-        profile: LLMProfile,
-        citables: frozenset[str],
-        user_message: str,
+        self, registry: ProfileRegistry, citables: frozenset[str], user_message: str
     ) -> LensAssessment:
         """A single model call: one run is one call, so repeated sampling can wrap it."""
-        model = registry.model_for(self.profile)
-        agent: Agent[None, AIAssessmentOut] = Agent(
-            model,
-            output_type=_output_spec(profile.output_mode),
+        out, extra = await call_structured(
+            registry=registry,
+            profile_name=self.profile,
+            output_type=AIAssessmentOut,
             system_prompt=self._system_prompt(),
-            retries=profile.max_retries,
-            model_settings=ModelSettings(**profile.settings),  # type: ignore[typeddict-item]
+            user_message=user_message,
+            validate=lambda out: guard_rail(out, citables, self.flag_codes),
         )
-        agent.output_validator(lambda out: guard_rail(out, citables, self.flag_codes))
-        try:
-            result = await agent.run(
-                user_message,
-                usage_limits=profile.usage_limits.to_limits() if profile.usage_limits else None,
-            )
-        except UnexpectedModelBehavior as exc:
-            if exc.__cause__ is None:
-                raise
-            # Keep the last rejection (e.g. the unknown citation ids) in the node's error.
-            raise UnexpectedModelBehavior(f"{exc.message}; last rejection: {exc.__cause__}") from exc
-        out, usage = result.output, result.usage
         return LensAssessment(
             status=out.status,
             stance=out.stance,
@@ -168,13 +199,13 @@ class AINode(LensNode):
             flags=out.flags,
             abstain_reason=out.abstain_reason,
             provenance_extra={
-                "model": describe_model(model),
-                "model_settings": profile.settings,
+                "model": extra["model"],
+                "model_settings": extra["model_settings"],
                 "prompt_hash": self._prompt_hash(),
                 "variant": self.variant,
-                "attempts": usage.requests,
-                "input_tokens": usage.input_tokens,
-                "output_tokens": usage.output_tokens,
+                "attempts": extra["attempts"],
+                "input_tokens": extra["input_tokens"],
+                "output_tokens": extra["output_tokens"],
             },
         )
 

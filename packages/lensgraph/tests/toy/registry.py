@@ -11,6 +11,7 @@ from pydantic_ai.models.function import AgentInfo, FunctionModel
 
 from .growth_lens import GrowthLens
 from .nodes import AssayClean, AssayRaw, GrowthRate, ReferencePanel, ToxNotes
+from .reviewer import toy_reviewer
 from .safety_lens import SafetyLens
 from .sources import FakeAssaySource
 
@@ -21,6 +22,13 @@ _SAFE = {
     "claims": [{"text": "grows", "direction": 1, "cites": ["growth_rate"]}],
     "flags": [],
 }
+_REVIEW = {
+    "summary": "Grows well; safety evidence is thin.",
+    "fit": [{"text": "grows quickly", "cites": ["verdict.growth"], "priority": "speed"}],
+    "gaps": [],
+    "flags": [],
+}
+_REVIEW_FAILED = {"summary": "No lens produced a verdict.", "fit": [], "gaps": [], "flags": []}
 
 
 def build_registry(lenses: tuple[type[Node], ...] = (GrowthLens, SafetyLens)) -> NodeRegistry:
@@ -29,20 +37,34 @@ def build_registry(lenses: tuple[type[Node], ...] = (GrowthLens, SafetyLens)) ->
     Tests that register lenses themselves pass fewer.
     """
     registry = NodeRegistry()
-    for cls in (ReferencePanel, AssayRaw, AssayClean, GrowthRate, ToxNotes, *lenses):
+    for cls in (ReferencePanel, AssayRaw, AssayClean, GrowthRate, ToxNotes, toy_reviewer, *lenses):
         registry.register(cls)
     return registry
 
 
 def _scripted(messages: list[ModelMessage], info: AgentInfo) -> ModelResponse:
-    """Always answer with the canned safe assessment, in whichever output mode is asked for."""
+    """Answer with a canned payload chosen by the output schema: review or safety assessment.
+
+    The reviewer's schema has a `summary` property; the review is also made to cite only
+    ids that exist in the prompt it was shown (so a dossier with no ok verdicts gets a
+    review without claim cites).
+    """
+    schema = info.output_tools[0].parameters_json_schema if info.output_tools else {}
+    if "summary" in schema.get("properties", {}):
+        prompt = "".join(str(getattr(p, "content", "")) for m in messages for p in m.parts)
+        payload = _REVIEW if "### [verdict.growth]" in prompt else _REVIEW_FAILED
+    else:
+        payload = _SAFE
     if info.output_tools:
-        return ModelResponse(parts=[ToolCallPart(info.output_tools[0].name, _SAFE)])
-    return ModelResponse(parts=[TextPart(json.dumps(_SAFE))])
+        return ModelResponse(parts=[ToolCallPart(info.output_tools[0].name, payload)])
+    return ModelResponse(parts=[TextPart(json.dumps(payload))])
 
 
 def build_services() -> dict[str, Any]:
-    """Services for an offline toy run: the fake assay source and a scripted `test` profile."""
+    """Services for an offline toy run: the fake assay source and a scripted `test` profile.
+
+The scripted model answers both the safety lens and the reviewer, by output schema.
+"""
     profiles = ProfileRegistry(
         {"test": LLMProfile(name="test", model="test")},
         model_overrides={"test": FunctionModel(_scripted)},
