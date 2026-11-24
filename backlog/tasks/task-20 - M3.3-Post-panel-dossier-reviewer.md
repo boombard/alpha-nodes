@@ -1,10 +1,10 @@
 ---
 id: TASK-20
 title: M3.3 Post-panel dossier reviewer
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-23T23:51:14Z'
-updated_date: '2026-11-24T01:23:54Z'
+updated_date: '2026-11-24T01:29:57Z'
 labels:
   - core
 milestone: m-2
@@ -92,18 +92,18 @@ Out of scope: acceptance rules using review flags (M7), macro context inputs (la
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 DossierReviewer produces a guard-railed DossierReview (no stance or score; cites, flags and priorities validated)
-- [ ] #2 A brief change reruns only the review; lens and dossier nodes are cache hits
-- [ ] #3 show_stances=False hides stances from the reviewer's context
-- [ ] #4 AINode behaviour unchanged after extracting call_structured; Dossier.summary removed
+- [x] #1 DossierReviewer produces a guard-railed DossierReview (no stance or score; cites, flags and priorities validated)
+- [x] #2 A brief change reruns only the review; lens and dossier nodes are cache hits
+- [x] #3 show_stances=False hides stances from the reviewer's context
+- [x] #4 AINode behaviour unchanged after extracting call_structured; Dossier.summary removed
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -119,4 +119,5 @@ Worker (Sonnet, dispatch ctx_2a72d8e780c6, branch boom/task-20, 2 commits a2571f
 Coordinator review, one fix round: panel_registry raises GraphError when Panel.reviewer isn't a DossierReviewer subclass.
 Rulings: the toy reviewer is registered as 'toy_reviewer' and re-registered as 'review'; call_structured's validate is typed Callable[[Any], Any]; show_stances=False also hides agreement and conviction, and renders claim direction as supports/undermines; review.py imports the private _JINJA/_registry helpers from ai.py; the review sets prompt_hash and leaves variant None.
 Open points: plangraph.node_kind (TASK-19) labels the reviewer 'other' until TASK-21 maps it to 'reviewer' (noted in TASK-21).
+Landed f0cda8f..f0cda8f on main (worker commits squashed into one).
 <!-- SECTION:FINAL_SUMMARY:END -->
