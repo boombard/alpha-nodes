@@ -161,19 +161,30 @@ def test_missing_curl_cffi_raises(
         YFinanceProvider(tmp_path, clock)
 
 
+WEEKDAYS = (date(2026, 11, 20), date(2026, 11, 24))  # Fri..Tue: sessions inside
+WEEKEND = (date(2026, 11, 21), date(2026, 11, 22))  # Sat..Sun: no sessions
+
+
 @pytest.mark.parametrize(
-    ("error", "tz", "kind", "settled"),
+    ("error", "tz", "span", "kind", "settled"),
     [
-        (YFRateLimitError(), None, "rate_limited", False),
-        (YFTzMissingError("X.L"), None, "empty", False),
-        (YFPricesMissingError("X.L", ""), None, "empty", False),
-        (YFPricesMissingError("X.L", ""), "Europe/London", "ok", True),
-        (_http_error(404), None, "empty", False),
-        (_http_error(500), None, "error", False),
-        (CurlConnectionError("down"), None, "unreachable", False),
-        (CurlTimeout("slow"), None, "unreachable", False),
-        (TimeoutError("slow"), None, "unreachable", False),
-        (ValueError("boom"), None, "error", False),
+        (YFRateLimitError(), None, WEEKDAYS, "rate_limited", False),
+        (YFTzMissingError("X.L"), None, WEEKDAYS, "empty", False),
+        (YFPricesMissingError("X.L", ""), None, WEEKDAYS, "empty", False),
+        # known tz: only a range without sessions is an empty interval; otherwise retry
+        (YFPricesMissingError("X.L", ""), "Europe/London", WEEKEND, "ok", True),
+        (YFPricesMissingError("X.L", ""), "Europe/London", WEEKDAYS, "error", False),
+        (_http_error(404), None, WEEKDAYS, "empty", False),
+        (_http_error(404), "Europe/London", WEEKDAYS, "error", False),
+        (_http_error(500), None, WEEKDAYS, "error", False),
+        (_http_error(401), None, WEEKDAYS, "rate_limited", False),
+        (_http_error(403), None, WEEKDAYS, "rate_limited", False),
+        (ValueError("Invalid Crumb"), None, WEEKDAYS, "rate_limited", False),
+        (RuntimeError("401 Unauthorized"), None, WEEKDAYS, "rate_limited", False),
+        (CurlConnectionError("down"), None, WEEKDAYS, "unreachable", False),
+        (CurlTimeout("slow"), None, WEEKDAYS, "unreachable", False),
+        (TimeoutError("slow"), None, WEEKDAYS, "unreachable", False),
+        (ValueError("boom"), None, WEEKDAYS, "error", False),
     ],
 )
 def test_exceptions_classified(
@@ -181,13 +192,14 @@ def test_exceptions_classified(
     stub: YFStub,
     error: Exception,
     tz: str | None,
+    span: tuple[date, date],
     kind: str,
     settled: bool,
 ) -> None:
     stub.answers["X.L"] = error
     if tz:
         stub.known_tz["X.L"] = tz
-    outcome = _fetch(provider, _item("X.L", date(2026, 11, 20), date(2026, 11, 24)))
+    outcome = _fetch(provider, _item("X.L", *span))
     assert outcome.kind == kind
     assert (outcome.settled_through is not None) is settled
     if kind == "error":
@@ -196,6 +208,80 @@ def test_exceptions_classified(
         assert outcome.payload.data == []  # an empty interval, not an empty entity
         frame = provider.normalise(datasets.PRICES, _raw(outcome.item), outcome.payload)
         assert frame.empty
+
+
+def test_unknown_suffix_is_empty_not_raised(provider: YFinanceProvider) -> None:
+    outcome = _fetch(provider, _item("FOO.ZZ", *WEEKDAYS))
+    assert outcome.kind == "empty"
+    assert ".ZZ" in outcome.message
+
+
+def _drop_last_bars(payload: YFHistoryPayload, n: int) -> YFHistoryPayload:
+    """Constructed variant: the last `n` bars removed (Yahoo not yet serving them)."""
+    payload.index, payload.data = payload.index[:-n], payload.data[:-n]
+    return payload
+
+
+def test_missing_tail_caps_settled_through(
+    provider: YFinanceProvider, stub: YFStub, yf_payload: Loader
+) -> None:
+    """Constructed variant: ASML without its last two bars (11-23, 11-24); last is Fri 11-20."""
+    stub.answers["ASML.AS"] = _drop_last_bars(yf_payload("prices_ASML.AS"), 2)
+    outcome = _fetch(provider, _item("ASML.AS", date(2026, 11, 18), date(2026, 11, 24)))
+    assert outcome.kind == "ok"
+    assert outcome.settled_through == date(2026, 11, 20)
+
+
+def test_old_last_bar_does_not_cap_settled_through(
+    provider: YFinanceProvider, stub: YFStub, yf_payload: Loader
+) -> None:
+    """Constructed variant: a suspended name whose last bar is weeks old; no cap."""
+    stub.answers["ASML.AS"] = _drop_last_bars(yf_payload("prices_ASML.AS"), 15)
+    outcome = _fetch(provider, _item("ASML.AS", date(2026, 11, 18), date(2026, 11, 24)))
+    assert outcome.kind == "ok"
+    assert outcome.settled_through == date(2026, 11, 24)
+
+
+def test_fx_missing_tail_caps_settled_through(
+    provider: YFinanceProvider, stub: YFStub, yf_payload: Loader
+) -> None:
+    """Constructed variant: GBPUSD without its last bar; the cap counts calendar days."""
+    payload = yf_payload("fx_GBPUSD=X")
+    last = date.fromisoformat(payload.index[-1][:10])
+    assert last == date(2026, 11, 24)
+    stub.answers["GBPUSD=X"] = _drop_last_bars(payload, 1)
+    prev = date.fromisoformat(payload.index[-1][:10])
+    outcome = _fetch(provider, _item("GBP", date(2026, 11, 1), date(2026, 11, 24), "fx"))
+    assert outcome.settled_through == prev
+
+
+def test_truncated_history_is_error(
+    provider: YFinanceProvider, stub: YFStub, yf_payload: Loader
+) -> None:
+    """Constructed variant: ASML history missing its first 20 bars after the requested start."""
+    payload = yf_payload("prices_ASML.AS")
+    payload.index, payload.data = payload.index[20:], payload.data[20:]
+    stub.answers["ASML.AS"] = payload
+    outcome = _fetch(provider, _item("ASML.AS", date(2024, 11, 25), date(2026, 11, 24)))
+    assert outcome.kind == "error"
+    assert "history truncated" in outcome.message
+
+
+def test_history_starting_at_first_trade_date_not_truncated(
+    provider: YFinanceProvider, stub: YFStub, yf_payload: Loader
+) -> None:
+    """A request reaching before the listing starts at firstTradeDate: not a truncation."""
+    payload = yf_payload("prices_ASML.AS")
+    first = payload.index[0][:10]
+    payload.metadata["firstTradeDate"] = f"{first} 09:00:00+01:00"
+    stub.answers["ASML.AS"] = payload
+    outcome = _fetch(provider, _item("ASML.AS", date(2020, 1, 2), date(2026, 11, 24)))
+    assert outcome.kind == "ok"
+
+
+def test_yf_policy_sets_breakers() -> None:
+    assert YF_POLICY.max_consecutive_errors == 5
+    assert YF_POLICY.max_consecutive_empty == 20
 
 
 def test_live_bar_after_settled_cut_not_a_fact(
@@ -269,10 +355,17 @@ def test_jump_on_first_requested_day_caught(
     assert "jump_x100" in last["quality_reasons"]
 
 
+def _listed_from_first_bar(payload: YFHistoryPayload) -> YFHistoryPayload:
+    """Constructed variant: the short split fixture as if the listing began at its first bar,
+    so the truncated-history check does not see it as a cut-off response."""
+    payload.metadata["firstTradeDate"] = f"{payload.index[0][:10]} 09:30:00-04:00"
+    return payload
+
+
 def test_split_in_top_up_sets_restated_before(
     provider: YFinanceProvider, stub: YFStub, yf_payload: Loader
 ) -> None:
-    stub.answers["AAPL"] = yf_payload("split_AAPL")
+    stub.answers["AAPL"] = _listed_from_first_bar(yf_payload("split_AAPL"))
     outcome = _fetch(provider, _item("AAPL", date(2020, 8, 28), date(2020, 9, 3)))
     assert outcome.restated_before == date(2020, 8, 31)
 
@@ -281,7 +374,7 @@ def test_split_far_after_requested_start_not_a_restatement(
     provider: YFinanceProvider, stub: YFStub, yf_payload: Loader
 ) -> None:
     """A backfill starting over two years before the split already holds nothing to restate."""
-    stub.answers["AAPL"] = yf_payload("split_AAPL")
+    stub.answers["AAPL"] = _listed_from_first_bar(yf_payload("split_AAPL"))
     outcome = _fetch(provider, _item("AAPL", date(2018, 1, 2), date(2020, 9, 3)))
     assert outcome.restated_before is None
 

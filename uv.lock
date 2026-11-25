@@ -27,7 +27,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "curl-cffi" },
+    { name = "curl-cffi", specifier = "==0.17.0" },
     { name = "exchange-calendars", specifier = ">=4.11" },
     { name = "lensgraph", editable = "packages/lensgraph" },
     { name = "yfinance", extras = ["repair"], specifier = "==1.8.0" },

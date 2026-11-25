@@ -74,8 +74,19 @@ YF_POLICY = RateLimitPolicy(
     max_rate_limit_episodes=3,
     max_unreachable=5,
     max_error_retries=2,
+    max_consecutive_errors=5,
+    max_consecutive_empty=20,
 )
-"""Starting limits; Yahoo publishes none, so tune from the attempt log (finance.md)."""
+"""Starting limits; Yahoo publishes none, so tune from the attempt log (finance.md).
+
+The consecutive error/empty limits are the core breakers (core.md, Source store): a run of
+distinct entities all failing or all empty means Yahoo is broken, not that every entity is.
+"""
+
+_SETTLED_TAIL_SESSIONS = 3
+"""Last settled sessions in which a missing bar is treated as Yahoo lag, not a verdict."""
+_TRUNCATION_SESSIONS = 5
+"""First bar later than this many sessions after the expected start means truncated history."""
 
 _SPLIT_RESTATEMENT_WINDOW = timedelta(days=730)
 _TIMEOUT_S = 15
@@ -187,7 +198,7 @@ class YFinanceProvider:
             isin = ticker.isin
             payload = payload_from_ticker(symbol, dict(info), isin)
         except Exception as exc:  # noqa: BLE001 - classified below
-            return _classify(item, exc)
+            return _classify(item, exc, known_tz=_known_timezone(symbol) is not None)
         return FetchOutcome(item=item, kind="ok", payload=payload)
 
     def _fetch_one(self, dataset: str, item: WorkItem) -> FetchOutcome:
@@ -199,10 +210,13 @@ class YFinanceProvider:
         is_fx = dataset == FX.name
         symbol = fx_symbol(item.entity) if is_fx else item.entity
         start = min(interval.start, interval.end - self._min_window)
+        now = self._clock.now()
+        try:
+            mic = None if is_fx else symbol_mic(symbol)
+        except ValueError as exc:  # unknown suffix: nothing to fetch, a verdict on the symbol
+            return FetchOutcome(item=item, kind="empty", message=str(exc))
         settled = (
-            markets.fx_settled_through(self._clock.now())
-            if is_fx
-            else markets.settled_through(symbol_mic(symbol), self._clock.now())
+            markets.fx_settled_through(now) if mic is None else markets.settled_through(mic, now)
         )
         try:
             ticker = yf.Ticker(symbol)
@@ -220,7 +234,11 @@ class YFinanceProvider:
         except YFPricesMissingError as exc:
             if _known_timezone(symbol) is None:
                 return FetchOutcome(item=item, kind="empty", message=str(exc))
-            # A known symbol with no bars in range is an empty interval, never an empty entity.
+            n = _session_count(mic, interval.start, interval.end)
+            if n:  # the store never refetches covered ranges, so a glitch must not be cached
+                return FetchOutcome(
+                    item=item, kind="error", message=f"no bars for a range with {n} sessions: {exc}"
+                )
             payload = YFHistoryPayload(
                 symbol=symbol,
                 metadata={},
@@ -234,7 +252,14 @@ class YFinanceProvider:
                 item=item, kind="ok", payload=payload, settled_through=settled, message=str(exc)
             )
         except Exception as exc:  # noqa: BLE001 - classified below
-            return _classify(item, exc)
+            return _classify(item, exc, known_tz=_known_timezone(symbol) is not None)
+        if mic is not None and _is_truncated(payload, mic, start):
+            return FetchOutcome(
+                item=item,
+                kind="error",
+                message=f"history truncated: first bar {payload.index[0][:10]}",
+            )
+        settled = _cap_settled(payload, mic, settled)
         return FetchOutcome(
             item=item,
             kind="ok",
@@ -244,23 +269,87 @@ class YFinanceProvider:
         )
 
 
-def _classify(item: WorkItem, exc: Exception) -> FetchOutcome:
+_AUTH_MARKERS = ("Invalid Crumb", "Unauthorized")
+
+
+def _classify(item: WorkItem, exc: Exception, *, known_tz: bool) -> FetchOutcome:
     """Map a yfinance/curl_cffi exception to a non-ok outcome; shared by every dataset.
 
-    Rate limit -> `rate_limited`; unknown symbol (missing timezone, HTTP 404) -> `empty`;
-    connection failure or timeout -> `unreachable`; anything else -> retryable `error`.
+    Rate limit, HTTP 401/403 and crumb/unauthorized failures -> `rate_limited` (an auth
+    failure is provider-wide); unknown symbol (missing timezone) -> `empty`; HTTP 404 ->
+    `empty` on first sight (`known_tz` False) but `error` for a symbol Yahoo has served
+    before (a Yahoo problem, not a verdict); connection failure or timeout ->
+    `unreachable`; anything else -> retryable `error`.
     """
-    if isinstance(exc, YFRateLimitError):
+    if isinstance(exc, YFRateLimitError) or any(m in str(exc) for m in _AUTH_MARKERS):
         return FetchOutcome(item=item, kind="rate_limited", message=str(exc))
     if isinstance(exc, YFTzMissingError):
         return FetchOutcome(item=item, kind="empty", message=str(exc))
     if isinstance(exc, CurlHTTPError):
-        if getattr(exc.response, "status_code", None) == 404:  # Yahoo: never heard of it
+        status = getattr(exc.response, "status_code", None)
+        if status in (401, 403):
+            return FetchOutcome(item=item, kind="rate_limited", message=str(exc))
+        if status == 404 and not known_tz:  # Yahoo: never heard of it
             return FetchOutcome(item=item, kind="empty", message=str(exc))
         return FetchOutcome(item=item, kind="error", message=f"{type(exc).__name__}: {exc}")
     if isinstance(exc, _UNREACHABLE):
         return FetchOutcome(item=item, kind="unreachable", message=str(exc))
     return FetchOutcome(item=item, kind="error", message=f"{type(exc).__name__}: {exc}")
+
+
+def _session_count(mic: str | None, start: date, end: date) -> int:
+    """Trading days in [start, end]: exchange sessions, or every calendar day for fx (`mic` None)."""
+    if mic is None:
+        return (end - start).days + 1
+    return len(markets.sessions(mic, start, end))
+
+
+def _bar_days(payload: YFHistoryPayload) -> list[date]:
+    return [date.fromisoformat(ts[:10]) for ts in payload.index]
+
+
+def _is_truncated(payload: YFHistoryPayload, mic: str, start: date) -> bool:
+    """True if the first bar is over `_TRUNCATION_SESSIONS` sessions after the expected start.
+
+    Expected start is the later of the request start and the listing's `firstTradeDate`
+    (from the chart metadata), moved to the first session on or after it. Yahoo sometimes
+    answers a long request with only its recent part, which the store would keep forever.
+    """
+    days = _bar_days(payload)
+    if not days:
+        return False
+    expected = start
+    first_trade = payload.metadata.get("firstTradeDate")
+    if isinstance(first_trade, str):
+        try:
+            expected = max(expected, date.fromisoformat(first_trade[:10]))
+        except ValueError:
+            pass
+    horizon = markets.sessions(mic, expected, days[0])
+    return len(horizon) - 1 > _TRUNCATION_SESSIONS if horizon else False
+
+
+def _cap_settled(payload: YFHistoryPayload, mic: str | None, settled: date | None) -> date | None:
+    """Cap `settled_through` at the last bar when the newest settled sessions lack bars.
+
+    Yahoo lags on small caps and fx; a missing tail stays a gap and is asked again next run
+    (finance.md, Settled tail). A last bar older than the last `_SETTLED_TAIL_SESSIONS`
+    settled sessions (suspended, delisted) does not cap. Fx counts calendar days.
+    """
+    if settled is None or not payload.index:
+        return settled
+    if mic is None:
+        tail = [settled - timedelta(days=i) for i in range(_SETTLED_TAIL_SESSIONS - 1, -1, -1)]
+    else:
+        tail = markets.sessions(mic, settled - timedelta(days=14), settled)[
+            -_SETTLED_TAIL_SESSIONS:
+        ]
+    if not tail:
+        return settled
+    last_bar = max((d for d in _bar_days(payload) if d <= settled), default=None)
+    if last_bar is not None and tail[0] <= last_bar < settled:
+        return last_bar
+    return settled
 
 
 def _restated_before(payload: YFHistoryPayload) -> date | None:

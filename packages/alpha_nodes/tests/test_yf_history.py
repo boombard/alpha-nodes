@@ -8,11 +8,16 @@ import pytest
 from alpha_nodes import markets
 from alpha_nodes.datasets import FxSchema, PriceSchema
 from alpha_nodes.providers.yfinance.history import (
+    FX_NORMALISER_VERSION,
+    PRICES_NORMALISER_VERSION,
     YFHistoryPayload,
     normalise_fx,
     normalise_prices,
 )
+from alpha_nodes.providers.yfinance.provider import symbol_mic as markets_mic
 from lensgraph.sources import NormalisedMeta
+
+from .conftest import YF_FIXTURES
 
 Loader = Callable[[str], YFHistoryPayload]
 
@@ -165,3 +170,157 @@ def test_empty_payload_gives_empty_valid_frame(yf_payload: Loader) -> None:
     frame = normalise_prices(payload, "XNYS")
     assert frame.empty
     assert {"date", "close", "repairs", "quality", "known_at"} <= set(frame.columns)
+
+
+NEW_REASON_PREFIXES = (
+    "duplicate_bar",
+    "split_like_jump",
+    "unadjusted_split",
+    "dividend_yield_lt_0.02pct",
+    "stale",
+    "fx_jump",
+    "missing_sessions",
+)
+
+
+def _reasons(frame: pd.DataFrame, i: int) -> list[str]:
+    return list(frame["quality_reasons"].iloc[i])
+
+
+def test_normaliser_versions_bumped() -> None:
+    assert PRICES_NORMALISER_VERSION == FX_NORMALISER_VERSION == "2"
+
+
+def test_duplicate_bar_collapsed_and_marked(yf_payload: Loader) -> None:
+    """Constructed variant: ASML bar 40 duplicated; the first copy has a NaN close and the
+    dividend, the second the close; the kept row carries both."""
+    payload = yf_payload("prices_ASML.AS")
+    base = payload.data[40]
+    first, second = list(base), list(base)
+    first[_col(payload, "Close")] = None
+    first[_col(payload, "Dividends")] = 0.5
+    second[_col(payload, "Dividends")] = 0.0
+    payload.index.insert(40, payload.index[40])
+    payload.data[40:41] = [first, second]
+    day = date.fromisoformat(payload.index[40][:10])
+    frame = normalise_prices(payload, "XAMS")
+    rows = frame[frame["date"] == pd.Timestamp(day)]
+    assert len(rows) == 1
+    row = rows.iloc[0]
+    assert row["close"] == pytest.approx(base[_col(payload, "Close")])  # type: ignore[arg-type]
+    assert row["dividends"] == pytest.approx(0.5)
+    assert "duplicate_bar" in row["quality_reasons"]
+    assert row["quality"] == "suspect"
+
+
+def test_single_missing_session_marked(yf_payload: Loader) -> None:
+    """Constructed variant: one ASML session removed."""
+    payload = yf_payload("prices_ASML.AS")
+    del payload.index[50], payload.data[50]
+    frame = normalise_prices(payload, "XAMS")
+    assert "missing_sessions:1" in _reasons(frame, 50)
+
+
+@pytest.mark.parametrize(("factor", "split_row"), [(0.5, False), (2.0, False), (0.25, True)])
+def test_split_like_jump_marked(yf_payload: Loader, factor: float, split_row: bool) -> None:
+    """Constructed variant: the closes from bar 100 on are scaled; reason depends on a split row.
+
+    A split-sized jump with a split row that day means the close was not split-adjusted.
+    """
+    payload = yf_payload("prices_ASML.AS")
+    for row in payload.data[100:]:
+        row[_col(payload, "Close")] *= factor  # type: ignore[operator]
+    if split_row:
+        payload.data[100][_col(payload, "Stock Splits")] = 4.0
+    frame = normalise_prices(payload, "XAMS")
+    expected = "unadjusted_split" if split_row else "split_like_jump"
+    other = "split_like_jump" if split_row else "unadjusted_split"
+    assert expected in _reasons(frame, 100)
+    assert other not in _reasons(frame, 100)
+    assert frame["quality"].iloc[100] == "suspect"
+    assert not any(r.startswith(("split_like", "unadjusted")) for r in _reasons(frame, 101))
+
+
+def test_unadjusted_split_marked(yf_payload: Loader) -> None:
+    """Constructed variant: a 1:4 move on a day with a 4.0 split row."""
+    payload = yf_payload("prices_ASML.AS")
+    payload.data[70][_col(payload, "Close")] *= 0.25  # type: ignore[operator]
+    payload.data[70][_col(payload, "Stock Splits")] = 4.0
+    payload.data[71][_col(payload, "Close")] = payload.data[70][_col(payload, "Close")]
+    frame = normalise_prices(payload, "XAMS")
+    assert "unadjusted_split" in _reasons(frame, 70)
+
+
+def test_tiny_dividend_marked(yf_payload: Loader) -> None:
+    """Constructed variant: a dividend 0.01% of the close (a pounds-vs-pence mix-up)."""
+    payload = yf_payload("prices_ASML.AS")
+    close = payload.data[60][_col(payload, "Close")]
+    payload.data[60][_col(payload, "Dividends")] = close * 0.0001  # type: ignore[operator]
+    frame = normalise_prices(payload, "XAMS")
+    assert "dividend_yield_lt_0.02pct" in _reasons(frame, 60)
+    assert "dividend_yield_lt_0.02pct" not in _reasons(frame, 61)
+
+
+def _flat_run(payload: YFHistoryPayload, start: int, length: int, volume: float | None) -> None:
+    close = payload.data[start][_col(payload, "Close")]
+    for row in payload.data[start : start + length]:
+        row[_col(payload, "Close")] = close
+        row[_col(payload, "Volume")] = volume
+
+
+def test_stale_run_marked(yf_payload: Loader) -> None:
+    """Constructed variant: 5 identical closes. With NaN volume every bar of the run is stale;
+    with zero volume (genuine no-trade on illiquid names, finance.md) none is."""
+    payload = yf_payload("prices_ASML.AS")
+    _flat_run(payload, 80, 5, None)
+    frame = normalise_prices(payload, "XAMS")
+    assert all("stale" in _reasons(frame, i) for i in range(80, 85))
+    assert "stale" not in _reasons(frame, 79)
+    assert "stale" not in _reasons(frame, 85)
+
+    zero = yf_payload("prices_ASML.AS")
+    _flat_run(zero, 80, 5, 0.0)
+    frame = normalise_prices(zero, "XAMS")
+    assert not any("stale" in _reasons(frame, i) for i in range(len(frame)))
+
+    short = yf_payload("prices_ASML.AS")
+    _flat_run(short, 80, 4, None)
+    frame = normalise_prices(short, "XAMS")
+    assert not any("stale" in _reasons(frame, i) for i in range(80, 84))
+
+
+def test_fx_jump_and_stale_marked(yf_payload: Loader) -> None:
+    """Constructed variant: one GBP rate up 12%, and five identical consecutive rates."""
+    payload = yf_payload("fx_GBPUSD=X")
+    close = _col(payload, "Close")
+    for row in payload.data[100:]:
+        row[close] *= 1.12  # type: ignore[operator]
+    for row in payload.data[150:155]:
+        row[close] = payload.data[150][close]
+    frame = normalise_fx(payload)
+    assert "fx_jump" in _reasons(frame, 100)
+    assert "fx_jump" not in _reasons(frame, 101)
+    assert all("stale" in _reasons(frame, i) for i in range(150, 155))
+    assert "stale" not in _reasons(frame, 149)
+    assert "stale" not in _reasons(frame, 155)
+
+
+@pytest.mark.parametrize(
+    "name",
+    sorted(
+        p.stem
+        for p in YF_FIXTURES.glob("*.json")
+        if p.stem.startswith(("prices_", "fx_", "split_"))
+    ),
+)
+def test_recorded_fixtures_have_no_new_suspects(yf_payload: Loader, name: str) -> None:
+    """Guards against false positives of the new checks on clean recorded data (BMT.L included)."""
+    payload = yf_payload(name)
+    if name.startswith("fx_"):
+        frame = normalise_fx(payload)
+    else:
+        symbol = payload.symbol
+        mic = PRICE_FIXTURES.get(symbol) or markets_mic(symbol)
+        frame = normalise_prices(payload, mic)
+    for reasons in frame["quality_reasons"]:
+        assert not [r for r in reasons if r.startswith(NEW_REASON_PREFIXES)], reasons

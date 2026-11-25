@@ -83,12 +83,28 @@ Source store).
   of prices). Take trading currency and exchange timezone from each chart response's
   `history_metadata`; fetch `.info` only for sector, shares, `financialCurrency`, ISIN,
   with the 90-day profile TTL.
-- **Exceptions**: `YFRateLimitError` → rate-limit outcome (yfinance has already retried
-  once with a fresh cookie). `YFTzMissingError` → unknown ticker → `empty`.
-  `YFPricesMissingError` is raised both for unknown tickers and for a valid ticker with
-  no bars in the range, so it is `empty` for the entity only when no timezone is known,
-  otherwise an `ok` empty interval. A 404 may cost 2–3 requests (crumb refresh;
+- **Exceptions** (the store is append-only and never refetches a covered range, so a
+  response that is probably a glitch is `error`, never `ok`):
+  `YFRateLimitError`, HTTP 401/403 and any message containing "Invalid Crumb" or
+  "Unauthorized" → `rate_limited` (an auth failure is provider-wide). `YFTzMissingError`
+  → unknown ticker → `empty`. `YFPricesMissingError` is raised both for unknown tickers
+  and for a valid ticker with no bars in the range: `empty` when no timezone is known;
+  with a known timezone, `ok` with an empty payload only if the exchange calendar has no
+  session in the interval (weekend, holiday), else `error` ("no bars for a range with N
+  sessions"). Accepted cost: a delisted ticker topped up past its last bar raises
+  `SourceUnavailable` every run (delisting is M7/M8 work). HTTP 404 is `empty` only for a
+  symbol with no known timezone (first sight), `error` for a known one. An unknown
+  exchange suffix is `empty`, never raised. A 404 may cost 2–3 requests (crumb refresh;
   *unverified*).
+- **Settled tail**: when the requested interval reaches into the last 3 settled sessions
+  and the payload lacks bars for some of them at its end, `settled_through` is capped at
+  the last bar date, so the missing tail stays a gap and is asked again next run. A last
+  bar older than those 3 sessions (suspended, delisted) does not cap. Fx applies the same
+  rule to calendar days.
+- **Truncated history**: if the first bar is more than 5 sessions after the first session
+  on or after `max(request start, metadata firstTradeDate)`, the outcome is `error`
+  ("history truncated"), since Yahoo sometimes answers a long request with only its
+  recent part. Prices only.
 - **Settled cut-off**: Yahoo returns a live bar for today while the market is open.
   Settled = last trading day before today in the exchange's timezone, or today once
   the exchange's close + 30 min has passed.
@@ -97,7 +113,9 @@ Source store).
 - **Starting rate-limit policy** (Yahoo publishes no limits; tune from the attempt log):
   concurrency 4, ~2 requests/s with burst 4, provider-wide pause on rate limit with
   backoff 30/60/120/240 s + jitter, `GlobalFailure` after 3 consecutive rate-limit
-  episodes or 5 consecutive connection failures; `yf.config.network.retries = 2`,
+  episodes, 5 consecutive connection failures, 5 consecutive `error` outcomes
+  (`max_consecutive_errors`) or 20 consecutive `empty` outcomes (`max_consecutive_empty`)
+  across distinct entities; `yf.config.network.retries = 2`,
   15 s timeout. Unknown tickers are `empty` with a ~7-day TTL. Anecdotally Yahoo blocks
   are per IP and last ~1.5–24 h, so stopping beats hammering.
 
@@ -172,6 +190,12 @@ Five principles:
 | Empty statement frames (transient) | yfinance #2790/#2791 | classify as `error` (retry), not `empty` |
 | Capex reported negative | convention, unverified | canonical schema fixes the sign (capex stored positive = cash spent); adapter maps it explicitly; contract test on a canary |
 | Share counts: multi-class / dual-listed (`sharesOutstanding` vs `impliedSharesOutstanding`) | Yahoo AU feedback (weak) | check: price × shares vs reported market cap within tolerance ⇒ else suspect |
+| Duplicate bars (two bars on one local date) | yfinance chart quirk | collapse to one row per date: the last with a non-NaN close, carrying non-zero dividends/splits from any row; reason `duplicate_bar` |
+| Single missing sessions | fixtures have none, even for illiquid BMT.L (Yahoo carries the close forward) | reason `missing_sessions:<n>` for n ≥ 1 (was ≥ 3) |
+| Split not applied to closes (closes are already split-adjusted, so a correct split shows no jump) | yfinance price-repair docs | a close/previous close within 3% of 2, 3, 4, 5, 8, 10 or 20, or their inverses: `unadjusted_split` if that day has a split row, else `split_like_jump` |
+| Dividend in pounds against pence prices (divided by 100) | GBp quirk above | 0 < dividend/close < 0.0002 ⇒ `dividend_yield_lt_0.02pct` |
+| Stale prices: the same close repeated | Yahoo serving a frozen quote | a run of ≥ 5 sessions with an identical close **and missing (NaN) volume** ⇒ `stale` on each bar. Zero volume is not stale: illiquid names (BMT.L: runs of 9 identical zero-volume closes) are genuinely not trading |
+| Fx jumps and frozen rates | rates move little day to day | close/previous > 1.10 or < 1/1.10 ⇒ `fx_jump`; ≥ 5 identical consecutive closes ⇒ `stale` |
 | `.info` staleness | yfinance #2042 (weak) | profile TTL; check `currentPrice` vs latest close |
 | Screener omits sector | alpha-capture `universe/AGENTS.md` | sector from `profile` dataset (cached), joined before stratification |
 | No scale flag for thousands/millions | none found, either in alpha-capture history or yfinance issues | check anyway: statements net income vs `.info` net income; ratio ≈1e3/1e6 ⇒ rejected |
