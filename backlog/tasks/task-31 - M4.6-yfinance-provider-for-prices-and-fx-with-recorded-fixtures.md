@@ -1,10 +1,10 @@
 ---
 id: TASK-31
 title: M4.6 yfinance provider for prices and fx with recorded fixtures
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-25T01:09:28Z'
-updated_date: '2026-11-25T03:45:54Z'
+updated_date: '2026-11-25T04:11:18Z'
 labels:
   - finance
 milestone: m-3
@@ -106,18 +106,18 @@ Out of scope: profile (M4.7), canary script (M4.7), fetch nodes and runs (M4.9).
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Recorded yfinance 1.8.0 fixtures for the listed symbols are committed with a README; tests never touch the network
-- [ ] #2 GBp prices are repaired to GBP with a minor_unit repair; EUR/CHF untouched; outputs validate against PriceSchema/FxSchema
-- [ ] #3 x100 jumps, non-session bars, missing sessions and >25% dividend yields are marked suspect with reasons
-- [ ] #4 yfinance exceptions map to rate_limited/empty/ok-empty/unreachable/error; settled_through excludes live bars; splits in top-ups set restated_before
+- [x] #1 Recorded yfinance 1.8.0 fixtures for the listed symbols are committed with a README; tests never touch the network
+- [x] #2 GBp prices are repaired to GBP with a minor_unit repair; EUR/CHF untouched; outputs validate against PriceSchema/FxSchema
+- [x] #3 x100 jumps, non-session bars, missing sessions and >25% dividend yields are marked suspect with reasons
+- [x] #4 yfinance exceptions map to rate_limited/empty/ok-empty/unreachable/error; settled_through excludes live bars; splits in top-ups set restated_before
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -133,4 +133,6 @@ Worker: YFinanceProvider (prices+fx), history normalisation with repairs/checks,
 Coordinator review: one round sent and applied: (1) normalise runs checks over the padded payload but returns only requested days (padding is outside coverage); (2) HTTP 404 on the chart request is `empty` directly, not error-then-empty via retries. Verdict: approve.
 Verified findings (README + finance.md): cache setter is yfinance.cache.set_cache_location; HAS_CURL_CFFI is in yfinance._http; timeout is a history() arg; unknown symbol answers 404 before YFTzMissingError; LSE rows mostly carry Repaired?=true.
 Open points / rulings to check: outside Files: finance.md verified-notes block, shared yf_payload/yf_frame in tests/conftest.py, uv.lock (sanctioned). Rejected rows (close NaN/<=0) are kept with raw values (store does not pandera-validate on ingest). Non-session bars get known_at NaT (store falls back to first_seen_at). restated_before = latest split in the requested interval. fx entity is the currency code, prices entity the Yahoo symbol. Empty-in-range payload has metadata {}. Imports private yfinance._http.
+
+Landed e21973e..e21973e on main (3 worker commits squashed).
 <!-- SECTION:FINAL_SUMMARY:END -->
