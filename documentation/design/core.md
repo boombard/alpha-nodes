@@ -417,8 +417,15 @@ identity, never by code. The core provides the mechanics. Domains define dataset
 - **Fetch-attempt log**: every attempt with outcome and timestamp. `empty` outcomes are
   cached with their own (shorter) TTL, so a delisted entity isn't re-requested every run.
   Errors are not cached.
-- **TTL per dataset** (e.g. prices 1 day, fundamentals ~1 quarter, profiles 90 days).
-  Freshness is checked *per requested interval*, not as a global "fetched recently" gate.
+- **TTL semantics** (pure logic in `lensgraph.sources.coverage`):
+  - Settled coverage on a date axis **never expires**. Settled history changes only when
+    the provider reports `restated_before` (earlier facts changed; coverage before that day
+    is dropped so it is refetched) or through `renormalise`.
+  - `Dataset.ttl` (e.g. prices 1 day, profiles 90 days) governs the **unsettled tail**
+    (requested days after the last settled day) and **snapshots** (axis "none").
+  - `Dataset.empty_ttl` governs `empty` outcomes. `error`, `rate_limited` and `unreachable`
+    change nothing and are never cached.
+  - Freshness is checked *per requested interval*, not as a global "fetched recently" gate.
 - **As-of queries**: `query(dataset, entity, range, as_of)` returns the latest version of
   each key with `known_at <= as_of`. Datasets whose provider can't supply real publication
   times are marked `pit_reliable = false`. As-of runs warn, or refuse via config, when a
