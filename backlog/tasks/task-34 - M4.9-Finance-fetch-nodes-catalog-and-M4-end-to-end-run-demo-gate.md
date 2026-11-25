@@ -4,7 +4,7 @@ title: M4.9 Finance fetch nodes, catalog and M4 end-to-end run (demo gate)
 status: In Review
 assignee: []
 created_date: '2026-11-25T01:09:40Z'
-updated_date: '2026-11-25T05:29:05Z'
+updated_date: '2026-11-25T05:34:35Z'
 labels:
   - finance
 milestone: m-3
@@ -94,6 +94,8 @@ Worker: dispatch ctx_13aafebdd418, worktree task-34
 Demo commands (network, run by the human): 'uv run lensgraph run runs/m4_prices.yaml' twice, then 'uv run lensgraph sources status --suspect', then 'uv run lensgraph run runs/m4_prices.yaml --offline'.
 
 Demo gate run 2026-11-25 by the worker in task-34 (logs .lensgraph/m4-demo/ in that worktree): PARTIAL. Pass: second run makes no network calls for ok items; GBp normalised (BP.L 5.44 GBP); no live bar stored; suspect = 6 NOK fx_jump rows, no price suspects; no truncation on 10y. Fail: prices for SAP.DE and MC.PA fail in every run with 'normalise: TransactionException: Current transaction is aborted (please ROLLBACK)', so the offline rerun is 21/23 ok; failed items are retried each run. Also: CLI prints ok and exits 0 with failed nodes. Not signed off.
+
+Fix 154c2b9 (human-approved, outside the original Files): DuckDB guessed the list type of the repairs/quality_reasons columns from a sample of rows. On ~2,540-bar histories where only the newest bar is repaired (SAP.DE, MC.PA) the sample held only empty lists, so it picked NULL[] and the insert failed. Unregistering the frame afterwards in the aborted transaction then replaced that error with 'transaction aborted'. Now the columns are typed explicitly as Arrow list<string> and the original error is re-raised. Tests: 2 store tests (toy) and 2 e2e tests with full 10y SAP.DE/MC.PA fixtures (~370KB each). 626 passed, ruff and pyright clean. Demo rerun: 23/23 ok online and offline, exit 0; suspect rows = 6 NOK fx_jump + 5 non_session_bar (SAP.DE German holidays 2017-18, MC.PA 2019-12-25, volume 0). Awaiting human sign-off.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
