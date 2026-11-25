@@ -3,10 +3,10 @@ id: TASK-26
 title: >-
   M4.1 Source store contracts: models, provider and store protocols, toy
   providers
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-25T01:09:15Z'
-updated_date: '2026-11-25T02:33:21Z'
+updated_date: '2026-11-25T02:50:58Z'
 labels:
   - core
   - contracts
@@ -168,18 +168,18 @@ Out of scope: gap planning (M4.2), scheduling and limiting (M4.3), the DuckDB st
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 DateInterval and IntervalSet normalise, merge adjacent days and support union/subtract/intersect/covers
-- [ ] #2 Dataset, RateLimitPolicy, ProviderCapabilities, WorkItem, FetchOutcome, RawResponse, FetchAttempt, NormalisedMeta and SourceSlice match Interfaces
-- [ ] #3 Provider, SourceStore and Clock protocols, SourceUnavailable, SystemClock and FakeClock exist and are exported
-- [ ] #4 Two toy fake providers with different max_batch and policies satisfy Provider; the normaliser marks x100 spikes suspect
+- [x] #1 DateInterval and IntervalSet normalise, merge adjacent days and support union/subtract/intersect/covers
+- [x] #2 Dataset, RateLimitPolicy, ProviderCapabilities, WorkItem, FetchOutcome, RawResponse, FetchAttempt, NormalisedMeta and SourceSlice match Interfaces
+- [x] #3 Provider, SourceStore and Clock protocols, SourceUnavailable, SystemClock and FakeClock exist and are exported
+- [x] #4 Two toy fake providers with different max_batch and policies satisfy Provider; the normaliser marks x100 spikes suspect
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -192,4 +192,6 @@ Worker: dispatch ctx_450a25a0e6f9, worktree task-26
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 Worker: lensgraph.sources contracts (models, Provider/SourceStore/Clock protocols, SourceUnavailable, SystemClock/FakeClock), toy ASSAYS/STRAIN_INFO datasets and FakeAssayProvider/FakeBulkAssayProvider, tests. Branch task-26: 240dbaa, cbd3657. pytest 342 passed, ruff clean, pyright 0 errors. Coordinator review: ACs 1-4 met. One fix round, all applied: SourceSlice and Dataset now frozen via _FROZEN_ARBITRARY; NormalisedMeta.quality derived from Quality; toy fetch returns rows through interval.end and reports settled_through separately; tests use a real RawResponse (make_raw); missing docstring added. Open points: rulings to confirm (toy spike ratio >= 50 is suspect, od600 <= 0 is rejected with reason non_positive; NormalisedMeta non-strict with nullable optional known_at, which M4.5 may tighten; Provider is runtime_checkable). Models were written before the tests, not test-first. The code-review skill was not run; the 806-line diff was reviewed by hand.
+
+Landed 6a8b065..2fb6115 on main (rebased onto e1eefdd; 342 passed, ruff and pyright clean on main).
 <!-- SECTION:FINAL_SUMMARY:END -->
