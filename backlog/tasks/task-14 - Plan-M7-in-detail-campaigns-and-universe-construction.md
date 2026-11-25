@@ -30,7 +30,7 @@ Sketched tasks:
 - M7.1 contracts (lensgraph): `CampaignSpec`, `Quotas`, `Stage`, `Budget`, `Population` protocol, stratum key and policy registries, campaign record models.
 - M7.2 allocation (deficit / Beta-prior pass rate, budget caps, seeded draws) as pure, property-tested logic. [parallel]
 - M7.3 campaign loop over staged partial runs + shortfall report + persistence of draws/decisions. [parallel]
-- M7.4 `yfinance_screen` population (full paginated screen, USD thresholds via fx, sector from profile) + finance universe campaign + report section.
+- M7.4 `yfinance_screen` population (full paginated screen over UK + European regions, USD thresholds via fx, sector from profile, de-duplicate dual listings via profile ISIN/primary listing) + finance universe campaign + report section.
 
 Design refs: core.md (Campaigns), finance.md (Universe campaign).
 

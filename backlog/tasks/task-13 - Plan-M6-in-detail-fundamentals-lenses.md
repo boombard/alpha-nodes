@@ -31,7 +31,7 @@ Sketched tasks:
 - M6.3 yfinance fundamentals/news adapters (statement merge on period_end, sparse-column drop, balance check, capex sign, no `.info` ratios). [parallel]
 - M6.4 quality calc nodes (ROE level/consistency, margins, leverage, owner earnings, FCF conversion, share-count trend, valuation band). [after M6.1]
 - M6.5 `quality_value` AINode: rubric prompt with sourced principles (default) + `buffett_persona` variant; depth `desired_periods=8, min_periods=3`.
-- M6.6 `price_vs_fundamentals` AINode (divergence framing, flag codes) + mixed US/UK/AU demo run.
+- M6.6 `price_vs_fundamentals` AINode (divergence framing, flag codes) + mixed UK/European/US demo run.
 
 Design refs: finance.md (Datasets, Providers, Data quality, v1 lenses 2 and 3, Known data limitations).
 

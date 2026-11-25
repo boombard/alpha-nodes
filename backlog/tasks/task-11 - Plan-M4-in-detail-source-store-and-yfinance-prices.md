@@ -27,7 +27,9 @@ Sketched tasks:
 - M4.3 DuckDB source store: raw responses layer, append-only canonical facts, as-of query, `renormalise`, offline mode. [parallel]
 - M4.4 `alpha_nodes` package scaffold + canonical `prices`, `profile`, `fx` schemas (units/kinds, two currencies) + `DatasetFetch` node. [after M4.1]
 - M4.5 `YFinanceProvider` for prices/profile/fx: pinned yfinance, `repair=True`, GBp/GBX->GBP repair, 100x-jump and calendar checks, error classification; recorded-fixture contract tests for the canary tickers; separate `scripts/canary.py` (not in tests).
-- M4.6 e2e: two runs over 10 mixed tickers, network only on the first; suspect rows surface.
+- M4.6 e2e: two runs over 10 UK/European tickers (+1 US), network only on the first; suspect rows surface.
+
+**Inputs from 2026-11-25 (see core.md Source store, finance.md "yfinance fetching and throttling", D24/D25):** UK + Europe focus (per-exchange calendars, multi-currency, dual listings in profile). M4.1 adds provider capability declaration (max_batch, rate-limit policy, settled cut-off). Core owns scheduling + a shared per-provider limiter (pause on rate limit, GlobalFailure thresholds, persist per work item). Tests use two fake providers with different capabilities to prove the core assumes nothing yfinance-specific.
 
 Design refs: core.md (Source store), finance.md (Datasets, Providers, Data quality, Prices and point-in-time, Currency), lessons.md (caching lessons).
 

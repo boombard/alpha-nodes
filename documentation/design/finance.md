@@ -4,6 +4,20 @@ Built on `lensgraph`. Its first use is **equity universe construction**: decidin
 tickers belong in a universe and why, with filtering and optimisation downstream.
 Stance labels: −2 strong bearish … +2 strong bullish.
 
+**Market focus (user, 2026-11-25): UK and European equities.** Campaigns, demos and
+canaries target LSE plus the main European venues (Euronext Paris/Amsterdam/Brussels/
+Lisbon/Dublin, Xetra, Milan, Madrid, SIX Swiss, Nasdaq Nordic and Oslo). US tickers stay
+supported, mainly so EDGAR can give point-in-time fundamentals backtests. Australia is
+dropped.
+
+- Many venues means many trading calendars and timezones: the trading-day check and the
+  "settled" cut-off are per exchange (e.g. via `exchange_calendars`: XLON, XPAR, XAMS,
+  XETR, XMIL, XMAD, XSWX, XSTO, XCSE, XOSL, XHEL…).
+- Many currencies: GBP/GBp, EUR, CHF, SEK, NOK, DKK, PLN. GBp remains the only
+  minor-unit repair in scope.
+- Dual listings (e.g. Shell, Unilever on `.L` and `.AS`): `profile` records the
+  primary listing / ISIN so universe construction can de-duplicate one company.
+
 ## Datasets (canonical schemas)
 
 Each dataset has one canonical schema (pandera or pydantic) in `alpha_nodes.datasets`.
@@ -29,11 +43,12 @@ GICS-like) mapped in the provider. Treat it as a stratum key.
 
 - **`YFinanceProvider`**: prices, profile, fundamentals (no filing dates →
   `pit_reliable=false`), news (recent only), screen (`yf.screen` + `EquityQuery`, regions
-  e.g. `gb`, `au`).
+  e.g. `gb`, `de`, `fr`, `nl`, `ch`, `se`).
   - The only place that knows yfinance column names, quirks, throttling, retry and
     error classification.
   - Must classify: rate-limit → backoff/retry; unknown ticker → `empty`; repeated
     connection failure → `GlobalFailure`.
+  - See "yfinance fetching and throttling" below for how it declares capabilities.
 - **`EdgarProvider`**: US fundamentals from SEC XBRL "company facts" (has filing dates →
   `pit_reliable=true`), and 10-K text sections. It must send a descriptive User-Agent as
   SEC requires. That value comes from local config/env, not committed.
@@ -43,6 +58,48 @@ GICS-like) mapped in the provider. Treat it as a stratum key.
 - Adding a provider = one adapter class + one mapping per dataset it supports.
 - Fetch nodes are **generic**: one `DatasetFetch(dataset="prices")` node type
   parameterised by dataset, not a node class per provider × dataset.
+
+### yfinance fetching and throttling
+
+Researched 2026-11-25 by reading the yfinance 1.8.0 source (not executed); items marked
+*unverified* are to be confirmed by recorded fixtures or the canary script. All of this
+lives inside `YFinanceProvider`; the core only sees the declared capabilities (core.md,
+Source store).
+
+- **Pin `yfinance==1.8.0`** with the `[repair]` extra. Fail at startup if `curl_cffi` is
+  unavailable (`HAS_CURL_CFFI`); otherwise yfinance silently falls back to plain
+  `requests`, which Yahoo may block. Don't pass a `requests_cache` session (rejected).
+- **No batching: declare `max_batch=1`.** `yf.download`/`yf.Tickers` still make one chart
+  request per ticker in a thread pool, force one date range for all tickers, and toggle
+  global error-hiding state per ticker (racy). Only prices have a chart endpoint;
+  profile, statements and news are per ticker anyway.
+- **Calls**: a fresh `Ticker(sym).history(start=, end=, auto_adjust=False, actions=True,
+  repair=True)` per work item, via `asyncio.to_thread` under the core limiter. Set
+  `yf.config.debug.hide_exceptions = False` once. `auto_adjust=False` is required: the
+  adjusted default rewrites past closes on every dividend, which breaks append-only facts.
+- **Caches**: `yf.set_cache_location(<store dir>/yfinance)` before any fetch (tz, cookie
+  and ISIN caches move together). Sharing it across processes is *unverified*.
+- **Profile cost**: `.info` costs 2 requests and `fast_info` is not cheaper (it pulls 1y
+  of prices). Take trading currency and exchange timezone from each chart response's
+  `history_metadata`; fetch `.info` only for sector, shares, `financialCurrency`, ISIN,
+  with the 90-day profile TTL.
+- **Exceptions**: `YFRateLimitError` → rate-limit outcome (yfinance has already retried
+  once with a fresh cookie). `YFTzMissingError` → unknown ticker → `empty`.
+  `YFPricesMissingError` is raised both for unknown tickers and for a valid ticker with
+  no bars in the range, so it is `empty` for the entity only when no timezone is known,
+  otherwise an `ok` empty interval. A 404 may cost 2–3 requests (crumb refresh;
+  *unverified*).
+- **Settled cut-off**: Yahoo returns a live bar for today while the market is open.
+  Settled = last trading day before today in the exchange's timezone, or today once
+  the exchange's close + 30 min has passed.
+- **Top-ups and repair**: a short top-up window gives `repair=True` little context. When a
+  top-up shows a new split/dividend, refetch a wider window (3–6 months) for that ticker.
+- **Starting rate-limit policy** (Yahoo publishes no limits; tune from the attempt log):
+  concurrency 4, ~2 requests/s with burst 4, provider-wide pause on rate limit with
+  backoff 30/60/120/240 s + jitter, `GlobalFailure` after 3 consecutive rate-limit
+  episodes or 5 consecutive connection failures; `yf.config.network.retries = 2`,
+  15 s timeout. Unknown tickers are `empty` with a ~7-day TTL. Anecdotally Yahoo blocks
+  are per IP and last ~1.5–24 h, so stopping beats hammering.
 
 ### Data quality: yfinance quirks and how we handle them
 
@@ -59,7 +116,8 @@ Five principles:
    - Monetary columns are stored in **major units** with an explicit `currency` column.
    - Every instrument carries **two currencies**: `trading_currency` (prices, market cap)
      and `reporting_currency` (statements; Yahoo's `financialCurrency`). Examples: BP.L
-     trades in GBp and reports in USD; many ASX miners report in USD.
+     trades in GBp and reports in USD; some European listings trade in local currency
+     and report in EUR or USD.
    - Calc helpers that combine price-side and statement-side money **must convert through
      `fx` as of the date**. Mixing currencies raises rather than silently dividing.
 3. **Repair what's certain, flag what isn't** (core source-store repairs/checks). Every
@@ -69,8 +127,9 @@ Five principles:
 5. **Pin the yfinance version.** Contract tests run on recorded fixtures of awkward tickers.
    A separate live *canary* script (not part of the test suite) re-fetches the canaries and
    diffs invariants, to catch format changes like the `dividendYield` switch.
-   - Canary set: AAPL, BP.L (GBp vs USD), HSBA.L, VOD.L, BHP.AX (USD reporting), one
-     small-cap UK and AU each.
+   - Canary set: BP.L (GBp vs USD reporting), HSBA.L, VOD.L, one `.L` line quoted in
+     USD or EUR, ASML.AS, SAP.DE, NESN.SW (CHF), NOVO-B.CO (DKK), AAPL (US/EDGAR path),
+     one small-cap UK and one small-cap European.
 
 | Quirk | Evidence | Handling |
 |---|---|---|
@@ -118,13 +177,17 @@ when `period_ending` is missing; first-writer-wins alias collisions.
 - Providers normalise units (e.g. GBp → GBP).
 - Absolute thresholds (market cap, traded value) are expressed in **USD**, using an `fx`
   dataset (daily FX rates from yfinance) converted point-in-time.
-- Cross-region campaigns (UK + AU) need comparable thresholds; local-currency thresholds
-  would make "balanced" meaningless.
+  USD is kept as the base currency (user, 2026-11-25) even with a UK + Europe focus.
+- Cross-region campaigns (UK + several European currencies) need comparable thresholds;
+  local-currency thresholds would make "balanced" meaningless.
 
 ### Known data limitations (documented, not solved in v1)
 
-- **UK/AU fundamentals have no free point-in-time source** equivalent to EDGAR, and
-  yfinance typically returns only ~4 annual periods (`pit_reliable=false`).
+- **UK/European fundamentals have no free point-in-time source wired in** equivalent to
+  EDGAR, and yfinance typically returns only ~4 annual periods (`pit_reliable=false`).
+  - Lead for M6 (*unverified*): listed UK/EU companies file ESEF iXBRL annual reports;
+    filings.xbrl.org may provide them with filing dates for free, i.e. a possible
+    point-in-time provider for this region.
   - **Decision (user):** run on what's available. `quality_value` declares
     `desired_periods=8, min_periods=3` on fundamentals. Thin history lowers coverage, and
     so the lens's weight and the dossier's confidence (see core.md, aggregation).
@@ -212,12 +275,12 @@ campaign stage-0 gate than as a lens.
 
 ## Universe campaign (finance instantiation of core campaigns)
 
-Example (user's motivating case): equities listed in the UK and Australia, balanced
+Example (user's motivating case): equities listed in the UK and Europe, balanced
 across sectors, at least 50 accepted, with a cap on candidates evaluated.
 
 ```yaml
 campaign:
-  population: {source: yfinance_screen, regions: [gb, au], min_mcap: 300e6, min_volume: 50e3}
+  population: {source: yfinance_screen, regions: [gb, de, fr, nl, ch, se], min_mcap: 300e6, min_volume: 50e3}
   strata: sector
   quotas: {total_min: 50, mode: equal}          # per-sector min derived from total and strata count
   stages:

@@ -133,11 +133,13 @@ provider-agnostic, test models). The spike's `custom/core` is a *reference*, not
 | D16 | Storage: DuckDB + Parquet locally, behind interfaces (Postgres/S3 later) | Claude's call |
 | D17 | Code-version rule for memo keys: explicit `version` + node class source hash; escape hatch to invalidate from a node | Claude's call |
 | D18 | Thin evidence lowers the recommendation: coverage includes data depth; default aggregator is a confidence-weighted, shrunk mean; dossier carries a computed `confidence` | user (principle), formula by Claude |
-| D19 | UK/AU fundamentals: free yfinance with depth-aware coverage; paid provider possible later | user |
+| D19 | UK/European fundamentals: free yfinance with depth-aware coverage; paid (or ESEF) provider possible later | user |
 | D20 | Fetch nodes not memoized (always read the store); price `known_at` = trading date; per-entity provider fallback; USD thresholds via `fx`; backtests in a separate evaluation module | Claude's calls (after builder check) |
 | D21 | Data quality: compute ratios ourselves (never ingest Yahoo ratios); units and two currencies explicit; repair-certain/flag-uncertain with per-row records; keep raw responses + `renormalise`; pinned yfinance + canary tickers | Claude, after quirk research; user agreed |
 | D22 | Model profiles: `dev` default = Claude Haiku 5.5 at low effort; `local` = Ollama via pydantic-ai; `quality` = Sonnet 5.5; `test` = pydantic-ai test models. Profile is part of memo key + provenance | user (cheapest default, local + API), profile mechanism by Claude |
 | D23 | Pydantic-first: all data structures are pydantic models, no dataclasses; nodes are pydantic models whose fields are their params; frames stay pandas + pandera | user (pydantic-first), node-as-model by Claude |
+| D24 | Market focus UK + Europe (AU dropped; US kept for EDGAR fundamentals backtests); thresholds stay in USD | user (2026-11-25) |
+| D25 | Providers stay swappable: they declare capabilities (batch size, rate-limit policy, settled cut-off, `pit_reliable`); the core schedules and throttles; yfinance quirks stay in its adapter | user (principle), mechanism by Claude after yfinance research |
 
 ## Repository layout (Claude's call)
 

@@ -383,6 +383,20 @@ identity, never by code. The core provides the mechanics. Domains define dataset
 - **Provider**: an adapter that fetches a dataset slice and maps it to the canonical
   schema. It classifies outcomes as `ok`, `empty` (legitimately nothing), `error`
   (transient → retry/backoff, never cached), or `GlobalFailure`.
+  - Providers are swappable (e.g. a free feed now, a paid one later). The core knows a
+    provider only through what it **declares**: entities per request (`max_batch`, 1 =
+    no batching), a rate-limit policy (max concurrency, requests/s, burst, backoff
+    schedule, give-up thresholds), and per dataset whether it is `pit_reliable`.
+  - The core does the scheduling: gap-fill produces (entity, interval) work items, groups
+    them up to `max_batch`, and runs them through one shared limiter per provider. On a
+    rate-limit outcome the whole provider pauses (not just one request). After the
+    declared number of consecutive rate-limit episodes or connection failures the
+    provider raises `GlobalFailure`. Each work item is persisted as soon as it finishes,
+    so a re-run after a stop resumes from the gaps.
+  - **Settled data only.** For time-axis datasets the provider reports, per entity, the
+    latest *settled* point (e.g. the last completed trading day in the exchange's
+    timezone). Rows after it are not stored as facts and coverage stops there, so a live,
+    still-changing bar never becomes an append-only version.
 - **Facts are append-only.** Each row carries `provider`, `fetch_id`, `first_seen_at`, and
   `known_at`: the provider-reported publication time (e.g. filing date) when available,
   else `first_seen_at`. Re-fetches that change a value add a new version (restatements are kept).
