@@ -4,7 +4,7 @@ title: M4.7 yfinance profile and live canary script
 status: To Do
 assignee: []
 created_date: '2026-11-25T01:09:29Z'
-updated_date: '2026-11-25T01:09:39Z'
+updated_date: '2026-11-25T04:07:08Z'
 labels:
   - finance
 milestone: m-3
@@ -32,6 +32,7 @@ Network: as in M4.6, the recorder and the canary are the only live code; tests u
   - `packages/alpha_nodes/src/alpha_nodes/providers/yfinance/provider.py`: `profile` in capabilities and `fetch`/`normalise`
   - `packages/alpha_nodes/scripts/record_yfinance_fixtures.py`: also records profiles
   - `packages/alpha_nodes/tests/fixtures/yfinance/` (+ README)
+  - `documentation/design/finance.md`: "Verified by recorded fixtures" notes from the canary probes below
 - Test: `packages/alpha_nodes/tests/test_yf_profile.py`
 
 ## Interfaces
@@ -57,6 +58,12 @@ Semantics:
 - Profile fetch outcome classification reuses M4.6's.
 - Canary set (finance.md): BP.L, HSBA.L, VOD.L, ASML.AS, SAP.DE, NESN.SW, NOVO-B.CO, AAPL, plus one `.L` line quoted in USD or EUR, one UK small-cap and one European small-cap. Choose the last three with the recorder, confirm their currencies from the recorded payload, and list them in the README.
 
+**Added 2026-11-25 (defensive review of the yfinance downloads; findings feed TASK-37):**
+- Recorder: also record 2-year **prices** for the three new canaries (the USD/EUR `.L` line and the two small caps). Add an `--only <names>` option and record only the new files; never re-record the existing TASK-31 price/fx fixtures (their tests depend on them). For every prices fixture the README lists the counts of missing sessions, zero-volume days, duplicate dates and non-session bars (computed by the recorder), so TASK-37 can set its gap threshold from real illiquid-name data.
+- Canary health check: before the canary set, fetch AAPL over the last 5 days. A 404, empty answer or error prints `yahoo unhealthy: ...` and exits **2** (distinct from drift, exit 1).
+- Canary request count: count the HTTP requests each `history()` call makes (first sight of a symbol vs a cached one) by wrapping the request method of yfinance's shared curl_cffi session (find the hook; say which in the README), and print them. The limiter assumes one request per item; record the real numbers in the README and finance.md, and say whether `repair=True` triggers extra downloads.
+- Canary concurrency: `--concurrency N` (default 4) runs the fetches through a thread pool as the scheduler does; report any errors such as SQLite "database is locked" from yfinance's tz cache or crumb errors, and record the result in the README.
+
 ## Steps
 - [ ] Extend the recorder; record profiles for the canary set; commit.
 - [ ] Write the failing tests:
@@ -68,7 +75,7 @@ Semantics:
   - `test_profile_in_capabilities_and_fetch_outcomes_classified`
   - `test_canary_compare_flags_unit_drift`: the canary's pure comparison function, given a fixture frame and a ×100 copy, reports drift (the script's network part is not tested).
 - [ ] Run `uv run pytest packages/alpha_nodes -q`. Expected: FAIL.
-- [ ] Implement; run the canary once live and paste its output into the task notes.
+- [ ] Implement; run the canary once live (with `--concurrency 4`) and paste its output, including the request counts and the health check line, into the task notes.
 - [ ] Run `uv run pytest -q`, then the DoD checks. Expected: PASS.
 - [ ] Commit: `feat(alpha_nodes): yfinance profile and live canary script`.
 
@@ -81,6 +88,7 @@ Out of scope: fundamentals/news/screen (M6/M7); the store and runs (M4.9).
 - [ ] #2 normalise_profile maps trading (major unit) and reporting currencies, ISIN and shares; no Yahoo ratios or market cap ingested
 - [ ] #3 Missing shares marked suspect; missing name rejected; profile in capabilities with outcome classification reused
 - [ ] #4 canary.py compares live data with fixtures and exits 1 on drift; its comparison function is unit-tested
+- [ ] #5 Recorder adds small-cap/.L-line price fixtures without re-recording existing ones; README lists gap/zero-volume/duplicate/non-session counts; canary has a health check (exit 2), HTTP request counts per history() call and a concurrency mode, with results in README and finance.md
 <!-- AC:END -->
 
 ## Definition of Done

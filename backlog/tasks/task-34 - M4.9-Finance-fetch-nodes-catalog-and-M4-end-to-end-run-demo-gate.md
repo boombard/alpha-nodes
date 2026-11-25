@@ -4,12 +4,14 @@ title: M4.9 Finance fetch nodes, catalog and M4 end-to-end run (demo gate)
 status: To Do
 assignee: []
 created_date: '2026-11-25T01:09:40Z'
+updated_date: '2026-11-25T04:07:08Z'
 labels:
   - finance
 milestone: m-3
 dependencies:
   - TASK-32
   - TASK-33
+  - TASK-37
 references:
   - documentation/design/finance.md
 type: feature
