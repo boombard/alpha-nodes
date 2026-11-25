@@ -4,12 +4,13 @@ title: 'Plan M6 in detail: fundamentals lenses'
 status: To Do
 assignee: []
 created_date: '2026-11-23T08:03:32Z'
+updated_date: '2026-11-25T06:37:35Z'
 labels:
   - plan
   - sketch
 milestone: m-5
 dependencies:
-  - TASK-12
+  - TASK-48
 references:
   - documentation/design/finance.md
 type: task

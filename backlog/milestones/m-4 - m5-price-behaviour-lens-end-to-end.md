@@ -5,6 +5,8 @@ title: "M5 Price-behaviour lens end-to-end"
 
 ## Description
 
-Sketch. Momentum (12-1), trend (200d), risk (vol, max drawdown) calc nodes; price_behaviour deterministic lens; finance report renderers; run over ~100 tickers.
+Detailed 2026-11-25 (TASK-12). Calculation layers per finance.md: numpy kernels -> frame adapters -> calc nodes.
 
-**Demo gate:** 100-ticker run -> HTML report with dossiers; rerun after a threshold change recomputes only lens + aggregator.
+TASK-43 M5.1 contracts -> {TASK-45 M5.3 adapters + calc nodes (also after TASK-44 M5.2 kernels), TASK-46 M5.4 price_behaviour lens, TASK-47 M5.5 run-view charts} -> TASK-48 M5.6 registry, 100-ticker run, e2e. TASK-44 has no dependencies and runs alongside TASK-43.
+
+**Demo gate:** a live 100-ticker run gives an HTML report with a dossier per candidate, where claims drill down to the metrics and the price chart. Rerunning after a threshold change recomputes only the lens and the aggregator.

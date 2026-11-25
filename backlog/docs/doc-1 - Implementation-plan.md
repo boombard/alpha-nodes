@@ -77,7 +77,7 @@ test in the owning task:
 | M2 Lenses and dossiers | task-6 → {task-7, task-8} → task-9 | detailed |
 | M3 Run config, lineage and HTML report | task-10 (plan) | sketched |
 | M4 Source store and yfinance prices | task-11 (plan) | sketched |
-| M5 Price-behaviour lens end-to-end | task-12 (plan) | sketched |
+| M5 Price-behaviour lens end-to-end | {task-43, task-44} → {task-45, task-46, task-47} → task-48 | detailed |
 | M6 Fundamentals lenses | task-13 (plan) | sketched |
 | M7 Campaigns and universe construction | task-14 (plan) | sketched |
 | M8 As-of runs and lens backtests | task-15 (plan) | sketched |

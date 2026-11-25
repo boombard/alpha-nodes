@@ -1,10 +1,10 @@
 ---
 id: TASK-12
 title: 'Plan M5 in detail: price-behaviour lens end-to-end'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-11-23T08:03:32Z'
-updated_date: '2026-11-25T06:03:36Z'
+updated_date: '2026-11-25T06:42:50Z'
 labels:
   - plan
   - sketch
@@ -42,8 +42,14 @@ Design refs: finance.md (v1 lenses: price_behaviour).
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Planned M5 as TASK-43..48 (approved by the user 2026-11-25): {43 contracts, 44 numpy kernels} -> {45 adapters + calc nodes, 46 price_behaviour lens, 47 run-view charts} -> 48 registry, 100-ticker run, e2e (demo gate). finance.md gains Calculation layers (kernels -> series adapters -> calc nodes, user preference) and pinned price conventions. TASK-13 re-pointed at TASK-48.
+<!-- SECTION:FINAL_SUMMARY:END -->

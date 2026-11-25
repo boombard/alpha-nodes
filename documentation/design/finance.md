@@ -275,6 +275,34 @@ as-of backtests first.
 Default thresholds and weights are left to the builder. They are absolute (no
 cross-candidate ranking in v1) and exposed as params. The backtest is how they get calibrated.
 
+**Pinned conventions (Claude's call, M5 plan 2026-11-25).** The kernels named here are in
+`alpha_nodes.kernels` (see Calculation layers).
+
+- **Windows count bars (sessions), not calendar days:** 1 month = 21, 12 months = 252,
+  3 years = 756. Annualisation uses 252 for every venue.
+- **Total-return index** (`total_return_index`): `TR_0 = 1`,
+  `TR_t = TR_{t-1} × (close_t + dividend_t) / close_{t-1}`, with the dividend on its ex-date
+  row. `split_ratio` is **not** applied, because yfinance closes are already split-adjusted.
+  Dividends are assumed to be on the same split basis as the closes (*unverified*; M5.3
+  checks it on the AAPL split fixture).
+- **Momentum 12-1** (`skip_return`): `TR[-1-21] / TR[-1-252] - 1`. It needs ≥ 253 bars, else
+  None.
+- **Trend:** MA = `sma(close, 200)` on split-adjusted closes (price, not TR, by convention).
+  `pct_above_ma = close[-1] / MA[-1] - 1`. `ma_slope` = `linreg_slope(ln MA, 20)[-1] × 252`,
+  the annualised log growth of the MA. It needs ≥ 219 bars, else None.
+- **Realised volatility** (`realised_volatility`): std of daily log TR returns over the last
+  252 returns, `ddof=1`, × √252. TA-Lib `STDDEV` is the population std (`ddof=0`), so its
+  oracle test rescales by √(n/(n−1)). It needs ≥ 63 returns, else None.
+- **Max drawdown** (`max_drawdown`): over the last ≤ 756 bars of TR,
+  `min_t(TR_t / max_{s≤t} TR_s) − 1`, a non-positive fraction. It needs ≥ 252 bars, else
+  None. The number of bars actually used is reported.
+- **Data quality:** rows labelled `suspect` are used, and each metric reports how many
+  were in its window (`suspect_bars`). Rows labelled `rejected` never reach calcs (the fetch
+  node's default). The lens raises a `data_quality` warn flag when any window had suspect
+  bars.
+- Too little history means the field is None and its component is skipped. The lens's
+  coverage does not drop yet; that is TASK-25 (critical inputs and minimum coverage).
+
 ### Lens backtests (Claude's call; milestone 8)
 
 - This is a separate **evaluation module** outside the lens graph. Forward returns
@@ -331,6 +359,33 @@ cross-candidate ranking in v1) and exposed as params. The backtest is how they g
 Liquidity, market cap, listing age, data coverage. It is likely to be more useful as a
 campaign stage-0 gate than as a lens.
 
+## Calculation layers (user, 2026-11-25)
+
+Financial maths is written as **small, atomic numpy functions with their own tests**, and
+then applied to pandas frames. There are three layers, each depending only on the one below:
+
+1. **Kernels** (`alpha_nodes.kernels`, modules by topic: `returns`, `rolling`, `risk`, …):
+   - Pure functions on 1-D `float64` numpy arrays. Params are plain ints and floats.
+   - No pandas, dates, I/O, quality labels or pydantic.
+   - **NaN policy:** non-finite input raises `ValueError`; gaps are handled above, never
+     silently inside a kernel. Rolling kernels return an array of the input's length with
+     a leading-NaN warm-up (TA-Lib's lookback convention). Scalar kernels return `nan` when
+     the input is shorter than they need.
+   - Each kernel has its own unit tests: hand-computed values on tiny arrays, edge cases
+     (too short, constant, a single bar, non-finite input), and a TA-Lib oracle test where
+     an equivalent exists.
+   - A kernel's docstring states its formula and conventions (ddof, window, annualisation).
+2. **Frame adapters** (`alpha_nodes.series`): thin pandas glue. They take canonical frames
+   (e.g. `PriceSchema`), check date order and uniqueness, choose trailing windows in bars,
+   call kernels on `.to_numpy()`, and return date-indexed Series, or scalars plus window
+   facts (bars used, dates, suspect bars). They hold no maths of their own.
+3. **Calc nodes** (`alpha_nodes.nodes`): `CalcNode`/`TransformNode` subclasses. They expose
+   windows as params, call adapters, and return pydantic result models whose fields are
+   what lenses cite. They declare the kernels and adapters they use in `code_deps`, so
+   editing a kernel invalidates their memo entries (core.md, Memoization).
+
+Lenses never call kernels or adapters directly. They read calc node outputs only.
+
 ## Technical analysis and TA-Lib (user, 2026-11-25)
 
 The v1 price calcs are an MVP. Much more technical analysis is expected later.
@@ -338,8 +393,9 @@ The v1 price calcs are an MVP. Much more technical analysis is expected later.
 [ta-lib-python](https://github.com/TA-Lib/ta-lib-python) are the reference implementations
 for named technical indicators. They're used in two ways:
 
-1. **Test oracle.** Our calcs are our own code (pandas), with conventions pinned in this
-   doc. Where a calc has a TA-Lib equivalent, its tests also compare it against TA-Lib
+1. **Test oracle.** Our calcs are our own code (numpy kernels, see Calculation layers), with
+   conventions pinned in this doc. Where a kernel has a TA-Lib equivalent, its tests also
+   compare it against TA-Lib
    on the same series (e.g. `SMA`, `LINEARREG_SLOPE`, `STDDEV` with the ddof difference
    made explicit). TA-Lib is a **dev dependency** only, until a production calc needs it.
    - Calcs TA-Lib doesn't cover (12-1 total-return momentum, max drawdown, total-return
@@ -352,7 +408,7 @@ for named technical indicators. They're used in two ways:
 
 When a production calc is a convention-heavy indicator (Wilder smoothing in RSI/ATR/ADX,
 MACD, stochastics, candlestick patterns), calling TA-Lib directly is an option. It goes
-behind the finance indicator module, never in lenses, the same way providers sit behind
+behind a kernel in `alpha_nodes.kernels` (same signature and tests as any kernel), never in lenses, the same way providers sit behind
 adapters. Watch for TA-Lib's NaN behaviour: a gap can turn the rest of a smoothed output
 into NaN, so inputs need explicit gap handling.
 
