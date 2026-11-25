@@ -1,9 +1,10 @@
 ---
 id: TASK-44
 title: 'M5.2 Numpy kernels: returns, rolling statistics, risk'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-25T06:37:17Z'
+updated_date: '2026-11-25T06:44:29Z'
 labels:
   - finance
 milestone: m-4
@@ -83,3 +84,9 @@ Out of scope: pandas adapters and calc nodes (M5.3); any kernel the price_behavi
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_00e73ddd91c0, worktree task-44
+<!-- SECTION:NOTES:END -->
