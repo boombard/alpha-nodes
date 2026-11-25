@@ -53,4 +53,9 @@ you directly.
 If you're blocked and can't fix it, send `worker_done --outcome failed`: what blocks
 you, and what you tried. Then idle. Stay open: the human may message you about your diff.
 When the coordinator or the human sends fixes, apply them, re-run the Finish checks,
-and send `worker_done` again.
+and send `worker_done` again. There may be several rounds. In each `worker_done`,
+answer every numbered finding: fixed (with the commit), or disagreed (with your
+reasoning). Never skip a finding silently, and never half-apply one. If you disagree,
+say so once with evidence; the coordinator decides whether it escalates. If the
+coordinator or the human commits a fix in your worktree, check `git log` before continuing
+and don't revert it.

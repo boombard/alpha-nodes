@@ -72,7 +72,7 @@ find the ready set (To Do tasks whose dependencies are all Done), and dispatch u
 workers (agent claude, model sonnet, --worktree new-child --name task-<id>, --keep-open), one
 task each, mirroring backlog dependencies with --deps. Mark each In Progress. When a worker
 finishes, review its diff against the task's ACs, Interfaces, Global Constraints and Review
-Focus, send at most one round of feedback, then mark it In Review and tell me which worktree
+Focus, send feedback rounds until its findings are resolved (ask me before escalating a stubborn one to Opus), then mark it In Review and tell me which worktree
 to look at. Do not merge until I approve.
 ```
 
