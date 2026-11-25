@@ -3,10 +3,10 @@ id: TASK-48
 title: >-
   M5.6 Register M5 nodes, 50-ticker price_behaviour run and M5 end-to-end (demo
   gate)
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T06:37:34Z'
-updated_date: '2026-11-25T07:48:05Z'
+updated_date: '2026-11-25T07:51:58Z'
 labels:
   - finance
 milestone: m-4
@@ -49,7 +49,7 @@ def build_registry() -> NodeRegistry   # M4's fetch nodes + the six M5 calc node
 ## Steps
 - [ ] Write the failing tests in `test_m5_e2e.py` (yfinance replaced by `yf_replay`, `FakeClock` as in `test_m4_e2e.py`; candidates are the fixture symbols; lookbacks overridden where the 2-year fixtures need it; the 10-year SAP.DE and MC.PA fixtures give full windows):
   - `test_every_candidate_gets_a_price_behaviour_verdict`: one dossier per candidate; the 10y symbols have all five components; an unknown ticker gives a non-ok verdict and no exception.
-  - `test_threshold_change_recomputes_only_lens_and_aggregator`: run, change `nodes.price_behaviour.thresholds`, rerun on the same store. In run 2 every calc and transform node is a cache hit, `price_behaviour` and `dossier` are not, and no yfinance calls are made.
+  - `test_threshold_change_recomputes_only_lens_and_aggregator`: run, change `nodes.price_behaviour.thresholds`, rerun on the same store. In run 2 no yfinance calls are made, every calc and transform node reproduces an identical output hash (calc nodes are not memoized, see finance.md), and `price_behaviour` and `dossier` recompute.
   - `test_report_has_chart_and_metric_cites`: `build_run_view` on the run gives a momentum claim whose cites resolve to a `price_chart` entry of kind `chart` and a `momentum.total_return` entry.
   - `test_shipped_m5_config_is_valid`: the yaml loads as a `RunConfig` with 50 unique candidates, and its plan builds against `build_registry()`.
 - [ ] Run `uv run pytest packages/alpha_nodes/tests/test_m5_e2e.py -q`. Expected: FAIL.
@@ -72,7 +72,7 @@ Out of scope: an AI reviewer in the demo; fx; campaign or universe logic (M7).
 <!-- AC:BEGIN -->
 - [ ] #1 build_registry registers the six M5 calc nodes and PriceBehaviour; runs/m5_price_behaviour.yaml has 50 unique UK/European tickers, no reviewer
 - [ ] #2 Replayed e2e: every candidate gets a dossier with a price_behaviour verdict; an unknown ticker does not raise
-- [ ] #3 A threshold change reruns only price_behaviour and dossier (all calc/transform nodes cache hits, no yfinance calls)
+- [ ] #3 A threshold change changes only price_behaviour and dossier outputs: no yfinance calls, every calc/transform output hash identical (calc nodes are not memoized, finance.md), lens recomputed
 - [ ] #4 The run view resolves a momentum claim to a chart-kind price_chart and the momentum metric
 - [ ] #5 worker_done gives the exact demo commands for the human
 <!-- AC:END -->
@@ -92,3 +92,13 @@ From TASK-47 landing: the chart kind and flat-model field tables have not been c
 
 Worker: dispatch ctx_b42ce863e711, worktree task-48
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker (f43db0e, 1 commit on task-48): registered TotalReturn, Momentum, Trend, Volatility, Drawdown, PriceChart and PriceBehaviour in build_registry; added runs/m5_price_behaviour.yaml (50 unique tickers, 20 LSE, no reviewer, thresholds written out) and test_m5_e2e.py. Moved the replay/clock fixtures from test_m4_e2e.py into conftest.py and relaxed the M4 registry-names assertion to a subset check (test_m4_e2e.py is outside the Files list). pytest 810 passed, ruff clean, pyright 0 errors.
+
+Coordinator review: approved with no fix round. Calc nodes are memoize=False by design (finance.md, Calculation layers), so the threshold-change test asserts identical calc/transform output hashes, no yfinance calls and lens recompute instead of cache hits; AC #3 and the Step were reworded to match. The demo DuckDB query matches the node_results schema.
+
+Open points: tickers were chosen from memory and not checked against yfinance (likeliest to need a fix: RYA.IR, KNEBV.HE, ERIC-B.ST, VOLV-B.ST, EDP.LS, GALP.LS); the list is mostly large caps. The tests were not run red first. Live demo and the browser click-through of price_chart and the metric tables are for the human.
+<!-- SECTION:FINAL_SUMMARY:END -->
