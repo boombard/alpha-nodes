@@ -4,7 +4,7 @@ title: M6.4 EDGAR company-facts provider for point-in-time US fundamentals
 status: In Progress
 assignee: []
 created_date: '2026-11-25T08:17:58Z'
-updated_date: '2026-11-25T23:54:41Z'
+updated_date: '2026-11-25T23:56:02Z'
 labels:
   - finance
 milestone: m-5
@@ -111,6 +111,8 @@ Worker: dispatch ctx_8c455556e912, worktree task-51 (Orca run run_09eee9a7786f)
 Review round 1 sent (HEAD 379aa4e): total_debt excludes short-term borrowings and its LongTermDebtNoncurrent fallback changes meaning.
 
 Round 2 sent after human review (HEAD 8bddc0f): tag synonyms vs fallbacks, fallbacks recorded in repairs, plus a 25-filer measurement (human approved the extra network use; summary only committed).
+
+Round 2 addendum (human-approved): derive total_liabilities (L&SE - NCI-inclusive equity) and shares_outstanding (issued - treasury, else single dei cover count), recorded in repairs; null-rate measurement.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
