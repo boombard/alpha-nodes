@@ -65,7 +65,7 @@ agents, one file per persona; financialdatasets.ai + diskcache; langchain LLM ca
 
 ## Engine-comparison spike
 
-Code: `spikes/engine-comparison/` (throwaway). Each implementation has a `NOTES.md`.
+The spike code (`spikes/engine-comparison/`) was throwaway and has since been deleted; its findings are recorded here.
 
 The scenario was identical across all three:
 - a shared index fetch

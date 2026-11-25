@@ -154,7 +154,6 @@ packages/
     tests/
 runs/                     # run/campaign YAML files
 documentation/
-spikes/                   # throwaway experiments (not product code)
 ```
 
 ## Left to the builder

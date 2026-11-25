@@ -28,4 +28,3 @@ Read in this order:
 ## Status
 
 - 2026-11-23: design written; M1–M2 planned in detail, M3–M8 sketched. Nothing implemented yet.
-  The engine-comparison spike lives in `spikes/engine-comparison/` (throwaway, reference only).

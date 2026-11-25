@@ -1,10 +1,10 @@
 ---
 id: TASK-11
 title: 'Plan M4 in detail: source store and yfinance prices'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-11-23T08:03:31Z'
-updated_date: '2026-11-23T23:51:20Z'
+updated_date: '2026-11-25T02:27:01Z'
 labels:
   - plan
   - sketch
@@ -46,8 +46,14 @@ Design refs: core.md (Source store), finance.md (Datasets, Providers, Data quali
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Planned M4 as TASK-26 (contracts) -> {TASK-27 coverage planning, TASK-28 scheduler + limiter, TASK-29 alpha_nodes datasets/markets} -> {TASK-30 DuckDB source store, TASK-31 yfinance prices+fx} -> {TASK-32 yfinance profile + canary, TASK-33 DatasetFetch + sources run config + CLI} -> TASK-34 finance e2e (M4 demo gate). Throttle defaults confirmed (concurrency 4, ~2 req/s burst 4, provider-wide pause 30/60/120/240 s, GlobalFailure after 3 rate-limit episodes or 5 unreachable). Planning decisions approved by the human 2026-11-25: no adjusted close stored (computed in M5), no market cap in profile, settled history never expires (TTL covers the unsettled tail, snapshots and empty outcomes), providers report restated_before (e.g. new splits), sources: section in run config with a domain SourceCatalog, batching only within one ensure call. Docs are updated by the implementing tasks. TASK-12 re-pointed to TASK-34.
+<!-- SECTION:FINAL_SUMMARY:END -->

@@ -33,4 +33,3 @@ Hard rules (see `documentation/design/overview.md` for why):
   No `@dataclass`, `TypedDict` or `NamedTuple`.
 - The default LLM profile is the cheapest (`dev`: Claude Haiku 5.5, low effort). Don't
   change defaults to pricier models.
-- `spikes/` is throwaway reference code. Don't import from it.

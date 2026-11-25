@@ -4,12 +4,13 @@ title: 'Plan M5 in detail: price-behaviour lens end-to-end'
 status: To Do
 assignee: []
 created_date: '2026-11-23T08:03:32Z'
+updated_date: '2026-11-25T01:09:40Z'
 labels:
   - plan
   - sketch
 milestone: m-4
 dependencies:
-  - TASK-11
+  - TASK-34
 references:
   - documentation/design/finance.md
 type: task
