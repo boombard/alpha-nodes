@@ -387,7 +387,9 @@ identity, never by code. The core provides the mechanics. Domains define dataset
     delisted ticker). A known entity whose requested range simply has no rows (weekend,
     holiday, today before the close, a week without news) is `ok` with an empty frame and
     `settled_through`, so coverage records the range like any other. This is why coverage
-    keeps one `empty_at` per (dataset, entity, provider, params), not per interval.
+    keeps one `empty_at` per (dataset, entity, provider, params), not per interval. While
+    a cached `empty` is fresh the store fetches nothing for the entity but still serves any
+    facts it already holds (a delisted ticker keeps its history).
   - Providers are swappable (e.g. a free feed now, a paid one later). The core knows a
     provider only through what it **declares**: entities per request (`max_batch`, 1 =
     no batching), a rate-limit policy (max concurrency, requests/s, burst, backoff
@@ -414,8 +416,7 @@ identity, never by code. The core provides the mechanics. Domains define dataset
   holes in the middle.
 - **Fetch-attempt log**: every attempt with outcome and timestamp. `empty` outcomes are
   cached with their own (shorter) TTL, so a delisted entity isn't re-requested every run.
-  While that cache is fresh the store fetches nothing for the entity but still serves any
-  facts it already holds (a delisted ticker keeps its history). Errors are not cached.
+  Errors are not cached.
 - **TTL per dataset** (e.g. prices 1 day, fundamentals ~1 quarter, profiles 90 days).
   Freshness is checked *per requested interval*, not as a global "fetched recently" gate.
 - **As-of queries**: `query(dataset, entity, range, as_of)` returns the latest version of
