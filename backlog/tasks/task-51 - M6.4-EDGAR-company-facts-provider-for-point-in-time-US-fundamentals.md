@@ -1,9 +1,10 @@
 ---
 id: TASK-51
 title: M6.4 EDGAR company-facts provider for point-in-time US fundamentals
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-25T08:17:58Z'
+updated_date: '2026-11-25T23:25:43Z'
 labels:
   - finance
 milestone: m-5
@@ -101,3 +102,9 @@ Out of scope: quarterly periods; 10-K text (`filings_text`, deferred); `ifrs-ful
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_8c455556e912, worktree task-51 (Orca run run_09eee9a7786f)
+<!-- SECTION:NOTES:END -->
