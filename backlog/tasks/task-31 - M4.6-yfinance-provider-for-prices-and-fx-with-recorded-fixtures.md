@@ -65,7 +65,7 @@ class YFinanceProvider:      # Provider
     capabilities: ProviderCapabilities   # datasets {prices, fx}, max_batch 1, YF_POLICY, pit_reliable {prices: True, fx: True}
 ```
 Semantics:
-- `fetch`: one fresh `yf.Ticker(sym).history(start, end + 1 day, auto_adjust=False, actions=True, repair=True)` per item. The request is padded back to `min_window_days` before `interval.end` (repair context); coverage still records the requested interval.
+- `fetch`: one fresh `yf.Ticker(sym).history(start, end + 1 day, auto_adjust=False, actions=True, repair=True)` per item. The request is padded back to `min_window_days` before `interval.end` (repair context); coverage still records the requested interval. The padding is also check context: the day-over-day and missing-session checks run over the whole padded payload, so the first requested day is compared with the session before it, never treated as a series start.
 - Outcomes: `YFRateLimitError` → `rate_limited`; `YFTzMissingError` → `empty`; `YFPricesMissingError` → `empty` when no timezone is known for the symbol, else `ok` with an empty payload; connection/timeout errors → `unreachable`; anything else → `error` with the message.
 - `settled_through`: `markets.settled_through(symbol_mic(sym), clock.now())` for prices, `fx_settled_through` for fx. A live bar for today is therefore never a fact.
 - `restated_before`: a split (non-zero `Stock Splits`) inside a request whose requested start is after the split date − 2 years → `restated_before = split date` (earlier closes are now split-adjusted differently).
@@ -91,6 +91,7 @@ Fixtures (recorded live by the script, committed): prices for BP.L, HSBA.L, VOD.
     - `test_exceptions_classified` (parametrised: rate limit, tz missing, prices missing with/without tz, connection error, other)
     - `test_live_bar_after_settled_cut_not_a_fact`: clock during LSE hours → `settled_through` is the previous session.
     - `test_request_padded_for_repair_context`
+    - `test_jump_on_first_requested_day_caught`: a 1-day top-up whose day is ×100 the previous session (constructed copy) is `suspect` with `jump_x100`.
     - `test_split_in_top_up_sets_restated_before`
     - `test_capabilities_declared`
     - `test_missing_curl_cffi_raises` (monkeypatch `HAS_CURL_CFFI`)

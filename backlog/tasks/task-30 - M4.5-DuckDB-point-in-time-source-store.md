@@ -19,7 +19,7 @@ ordinal: 30000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-The point-in-time source store: DuckDB for raw-response records, append-only facts, coverage states and the attempt log; raw payloads in the existing `BlobStore`. It composes coverage planning (M4.2) and the scheduler (M4.3). After M4.2 and M4.3. Spec: `documentation/design/core.md`, Source store (all of it, plus the TTL semantics M4.2 wrote); `documentation/design/lessons.md` (caching lessons). DuckDB table layouts are left to the builder; describe them in the module docstring.
+The point-in-time source store: DuckDB for raw-response records, append-only facts, coverage states and the attempt log; raw payloads in the existing `BlobStore`. It composes coverage planning (M4.2) and the scheduler (M4.3). After M4.2 and M4.3. Spec: `documentation/design/core.md`, Source store (all of it, plus the TTL semantics M4.2 wrote); `documentation/design/lessons.md` (caching lessons). DuckDB table layouts are left to the builder; describe them in the module docstring. One constraint: **facts are stored in one table per dataset, created from `Dataset.frame_schema` with typed columns** (floats as `DOUBLE`, dates as `DATE`/`TIMESTAMP`, ints as `BIGINT`), plus the fact meta columns (`repairs`/`quality_reasons` as `VARCHAR[]`). Never rows as JSON text in a generic table: it is several times larger, must be parsed on every query, and makes the version comparison depend on float formatting. The code stays generic by building the table from the schema.
 
 ## Files
 - Create: `packages/lensgraph/src/lensgraph/sources/duckdb_store.py`
@@ -76,6 +76,7 @@ Semantics (each is pinned by a test below):
   - `test_offline_serves_covered_and_raises_on_gap`
   - `test_renormalise_rebuilds_without_fetch`: bump the fake's normaliser version and its spike threshold; renormalise; facts reflect it (the spike rows' new labels are new versions even though od600 is unchanged); `calls` unchanged; raw responses count unchanged; one `renormalisations` row records the run.
   - `test_policy_override_replaces_declared_policy`
+  - `test_facts_table_columns_are_typed`: the `assays` facts table has `od600` as `DOUBLE` and `day` as a date/timestamp type, not `VARCHAR`.
 - [ ] Run `uv run pytest packages/lensgraph/tests/test_source_store.py -q`. Expected: FAIL.
 - [ ] Implement.
 - [ ] Run `uv run pytest -q`, then the DoD checks. Expected: PASS.
