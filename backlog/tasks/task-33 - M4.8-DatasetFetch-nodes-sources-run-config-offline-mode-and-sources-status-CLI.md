@@ -6,7 +6,7 @@ title: >-
 status: In Review
 assignee: []
 created_date: '2026-11-25T01:09:29Z'
-updated_date: '2026-11-25T04:45:24Z'
+updated_date: '2026-11-25T04:46:14Z'
 labels:
   - core
 milestone: m-3
@@ -122,6 +122,8 @@ Out of scope: finance nodes and config (M4.9).
 
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_595ec695149a, worktree task-33
+
+Second fix round sent at the human's request (empty entities, store-leak test, dtype check, hashing scan cost).
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
