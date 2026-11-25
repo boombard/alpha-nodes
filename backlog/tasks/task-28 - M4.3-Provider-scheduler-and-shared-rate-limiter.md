@@ -1,10 +1,10 @@
 ---
 id: TASK-28
 title: M4.3 Provider scheduler and shared rate limiter
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T01:09:15Z'
-updated_date: '2026-11-25T02:53:28Z'
+updated_date: '2026-11-25T02:58:26Z'
 labels:
   - core
 milestone: m-3
@@ -98,3 +98,12 @@ Out of scope: deciding what to fetch (M4.2), persistence (M4.5).
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_e5b63d0aed7f, worktree task-28
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker: lensgraph/sources/scheduler.py (ProviderLimiter: lazy asyncio primitives, semaphore concurrency, token-bucket pacing, provider-wide pause with backoff+jitter, episode/unreachable counters -> GlobalFailure; run_items: params-pure batches of max_batch, asyncio.to_thread fetch, requeue/retry, on_outcome per final outcome, cancel on abort). 2 commits (7c99705 feat, 8731e9f fix). 26 tests parametrised over both toy fakes. pytest 368 passed, ruff and pyright clean (re-run by coordinator).
+Worker rulings: concurrent rate_limited outcomes during an active pause count as one episode; retries re-run inside the same batch task (a re-fetched batch can be smaller than max_batch); a rate_limited-only round adds no sleep beyond the provider pause.
+Coordinator review: one round sent and done. (1) AC4 gap fixed: the whole batch is classified and final outcomes delivered before limiter.report runs, so a mid-batch GlobalFailure no longer strands later ok outcomes (new test with the failing item in the middle). (2) unreachable retries now sleep backoff_s[0] once per round, shared with error retries (deviation from the spec, which had unreachable re-queued with no delay). Approve.
+Open points: a cancelled batch whose fetch thread is still running is not interrupted (asyncio.to_thread); its outcomes are lost, not persisted. Error/unreachable backoff is fixed at backoff_s[0], not escalating.
+<!-- SECTION:FINAL_SUMMARY:END -->
