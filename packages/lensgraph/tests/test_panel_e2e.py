@@ -41,11 +41,16 @@ def test_panel_e2e_toy(registry, toy_candidates, toy_services, scripted_profiles
     s1, s2, s3 = dossiers(result)
     assert [d.candidate.id for d in (s1, s2, s3)] == ["S1", "S2", "S3"]
     assert [v.status for v in s1.verdicts] == ["ok", "ok"] and s1.overall_stance is not None
-    assert s2.coverage["safety"] == "ok"
+    assert s2.coverage["safety"] == "abstained"  # tox_notes is critical and absent for S2
     safety1 = next(v for v in s1.verdicts if v.lens == "safety")
     safety2 = next(v for v in s2.verdicts if v.lens == "safety")
+    assert safety2.error == "critical input 'tox_notes' unavailable"
     assert safety2.coverage < safety1.coverage < 1.000001
     assert s2.confidence < s1.confidence
+    growth2 = next(v for v in s2.verdicts if v.lens == "growth")
+    assert s2.overall_stance is not None and growth2.stance is not None  # rests on growth alone
+    assert s2.weights["safety"] == 0.0  # the abstention carries no weight
+    assert s2.evidence_share == pytest.approx(0.25)  # growth's share alone
     assert {v.status for v in s3.verdicts} == {"failed"}
     assert s3.overall_stance is None and s3.confidence == 0.0
     print(json.dumps([d.model_dump(mode="json") for d in (s1, s2, s3)], indent=2))

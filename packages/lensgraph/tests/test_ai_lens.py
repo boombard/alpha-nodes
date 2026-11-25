@@ -157,7 +157,7 @@ def test_absent_optional_input_rendered_not_available_and_not_citable(
     cites_empty = _bad_cite("tox_notes")
     cites_ok = _with(claims=[{"text": "x", "direction": 1, "cites": ["growth_rate"]}])
     profiles = scripted_profiles(cites_empty, cites_ok)
-    result = _run(ai_registry, s2, toy_services, profiles, tmp_path)
+    result = _run(ai_registry, s2, toy_services, profiles, tmp_path, critical_inputs=[])
     verdict = result.values[_key("S2")]
     assert verdict.provenance.attempts == 2  # citing the unavailable input was rejected
     assert verdict.coverage < 1
@@ -230,3 +230,20 @@ def test_request_limit_below_retries_fails_node_with_usage_limit_error(
     assert node_result.status == "failed"
     assert node_result.error is not None and "request_limit" in node_result.error
     assert len(profiles.model_for("test").calls) == 2  # stopped by the ceiling, not retries
+
+
+def test_ai_lens_abstains_without_model_call(ai_registry, toy_candidates, toy_services, tmp_path):
+    from lensgraph.llm import LLMProfile, ProfileRegistry
+    from pydantic_ai.models.function import FunctionModel
+
+    def boom(messages, info):
+        pytest.fail("model must not be called when a critical input is absent")
+
+    profile = LLMProfile(name="test", model="test")
+    profiles = ProfileRegistry({"test": profile}, model_overrides={"test": FunctionModel(boom)})
+    result = _run(ai_registry, toy_candidates[1:2], toy_services, profiles, tmp_path)  # S2: no tox notes
+    verdict = result.values[_key("S2")]
+    assert isinstance(verdict, LensVerdict)
+    assert verdict.status == "abstained"
+    assert verdict.error == "critical input 'tox_notes' unavailable"
+    assert verdict.provenance.model is None

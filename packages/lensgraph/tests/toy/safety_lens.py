@@ -10,7 +10,7 @@ _PROMPTS = Path(__file__).parent / "prompts"
 
 
 class SafetyLens(AINode):
-    """Judges strain safety from its growth rate and (optional) toxicity notes."""
+    """Judges strain safety from its growth rate and toxicity notes; abstains without the notes."""
 
     name: ClassVar[str] = "safety_lens"
     lens_name: ClassVar[str] = "safety"
@@ -21,4 +21,5 @@ class SafetyLens(AINode):
     depth: ClassVar[dict[str, DepthRequirement]] = {
         "tox_notes": DepthRequirement(desired=3, minimum=1)
     }
+    critical_inputs: frozenset[str] = frozenset({"tox_notes"})
     flag_codes: ClassVar[frozenset[str] | None] = frozenset({"tox_signal"})

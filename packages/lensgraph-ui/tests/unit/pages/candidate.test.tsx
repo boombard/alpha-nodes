@@ -83,3 +83,21 @@ test("the Graph section is collapsible and shows only this candidate's nodes plu
   expect(container.querySelectorAll(".react-flow__handle-left")).toHaveLength(expected);
   expect(container.querySelectorAll(".react-flow__handle-right")).toHaveLength(expected);
 });
+
+test("an abstained verdict shows its reason as an info alert, a failed one as an error", () => {
+  const run = loadToyRun();
+  const verdicts = run.candidates.find((c) => c.id === "S2")!.record.dossier.verdicts;
+  const safety = verdicts.find((v) => v.lens === "safety")!;
+  expect(safety.status).toBe("abstained");
+  renderWithRun(<CandidatePage id="S2" />, run);
+  const alert = within(screen.getByRole("article", { name: "Verdict safety" })).getByRole("alert");
+  expect(alert).toHaveTextContent("Abstained: critical input 'tox_notes' unavailable");
+  expect(alert).toHaveClass("MuiAlert-colorInfo");
+});
+
+test("a failed verdict still shows Error: in an error alert", () => {
+  renderWithRun(<CandidatePage id="S3" />);
+  const alerts = screen.getAllByRole("alert").filter((a) => /^Error:/.test(a.textContent ?? ""));
+  expect(alerts.length).toBeGreaterThan(0);
+  expect(alerts[0]).toHaveClass("MuiAlert-colorError");
+});

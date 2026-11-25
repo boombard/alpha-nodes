@@ -5,9 +5,9 @@ See documentation/design/core.md, Verdicts and dossiers.
 
 import asyncio
 import inspect
-from typing import Any, ClassVar, Literal
+from typing import Any, ClassVar, Literal, Self
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, model_validator
 
 from .citations import citable_ids
 from .node import Node, NodeContext
@@ -60,7 +60,33 @@ class LensNode(Node):
 
     `run` computes coverage and citable ids, calls `assess`, enforces citations and builds the
     `LensVerdict` (see documentation/design/core.md, Verdicts and dossiers).
+
+    Two params let a lens refuse to judge on thin evidence: `critical_inputs` and `min_coverage`.
+    If either is unmet, `run` returns an `abstained` verdict before `assess` (so an AI lens makes
+    no model call); see core.md, Verdicts and dossiers, "critical inputs and minimum coverage".
     """
+
+    critical_inputs: frozenset[str] = frozenset()  # input names the lens can't judge without
+    min_coverage: float = Field(default=0.0, ge=0.0, le=1.0)  # abstain below this coverage
+
+    @model_validator(mode="after")
+    def _check_critical_inputs(self) -> Self:
+        """Reject critical input names that match no input (typos) at plan time."""
+        known = sorted(type(self).all_inputs())
+        unknown = sorted(self.critical_inputs - set(known))
+        if unknown:
+            raise ValueError(f"critical_inputs names unknown inputs {unknown}; known: {known}")
+        return self
+
+    def _abstain_reason(self, suff: dict[str, float], coverage: float) -> str | None:
+        """Why the lens must not judge (unmet critical input, then low coverage), else None."""
+        missing = sorted(n for n in self.critical_inputs if suff[n] == 0.0)
+        if missing:
+            extra = f" (+{len(missing) - 1} more)" if len(missing) > 1 else ""
+            return f"critical input '{missing[0]}' unavailable{extra}"
+        if coverage < self.min_coverage:
+            return f"coverage {coverage:.2f} below minimum {self.min_coverage:.2f}"
+        return None
 
     lens_name: ClassVar[str]
     output = LensVerdict
@@ -77,6 +103,18 @@ class LensNode(Node):
         weights = {n: self.input_weights.get(n, 1.0) for n in suff}
         total = sum(weights.values())
         coverage = sum(suff[n] * weights[n] for n in suff) / total if total else 0.0
+        reason = self._abstain_reason(suff, coverage)
+        if reason is not None:  # no assess() call, hence no model call for AI lenses
+            return LensVerdict(
+                lens=self.lens_name,
+                status="abstained",
+                coverage=coverage,
+                input_sufficiency=suff,
+                error=reason,
+                provenance=Provenance(
+                    lens_version=self.code_version(), input_hashes=ctx.input_hashes
+                ),
+            )
         citables = citable_ids({n: v for n, v in inputs.items() if not isinstance(v, Absent)})
         if inspect.iscoroutinefunction(self.assess):
             assessment = await self.assess(ctx, citables, **inputs)

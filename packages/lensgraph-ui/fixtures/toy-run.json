@@ -77,7 +77,7 @@
                   "growth_rate": "2ffde053d982db220b1c7b5881cc79d08ce963330f02dda2b19e4922f6ab2cfe"
                 },
                 "input_tokens": 0,
-                "lens_version": "3b1ea2637f718833",
+                "lens_version": "98527bac59210a4e",
                 "model": null,
                 "model_settings": {},
                 "output_tokens": 0,
@@ -120,7 +120,7 @@
                   "tox_notes": "60290af994e9abf7f8bed9a787b481324432bb09c54d7af5dbdf61804fdbd282"
                 },
                 "input_tokens": 153,
-                "lens_version": "1bdc8ab73560312f",
+                "lens_version": "64b020c809f65675",
                 "model": "function:_scripted:",
                 "model_settings": {},
                 "output_tokens": 20,
@@ -157,7 +157,7 @@
             "attempts": 1,
             "backtest_valid": true,
             "input_hashes": {
-              "dossier": "08e35064e2e747c191661165f05ee65286a5a92691783ac2a12afebb801c2283"
+              "dossier": "683901e4286c14c5bab3da90430a6def5651801790998cb139bd7cb9a9e9ba70"
             },
             "input_tokens": 219,
             "lens_version": "086350ab594184ce",
@@ -181,13 +181,6 @@
           },
           "claim_index": 0,
           "lens": "growth"
-        },
-        {
-          "cites": {
-            "growth_rate": "ba11a289db070b30:growth_rate"
-          },
-          "claim_index": 0,
-          "lens": "safety"
         }
       ],
       "flags": [],
@@ -206,20 +199,20 @@
       "record": {
         "created_at": "2026-01-01T00:00:05Z",
         "dossier": {
-          "agreement": 0.29086206518737706,
+          "agreement": null,
           "candidate": {
             "attrs": {},
             "id": "S2"
           },
-          "confidence": 0.5,
+          "confidence": 0.25,
           "coverage": {
             "growth": "ok",
-            "safety": "ok"
+            "safety": "abstained"
           },
-          "direction": 0.709137934812623,
-          "evidence_share": 0.5,
+          "direction": 0.4182758696252459,
+          "evidence_share": 0.25,
           "flags": [],
-          "overall_stance": 0.3545689674063115,
+          "overall_stance": 0.10456896740631147,
           "verdicts": [
             {
               "claims": [
@@ -250,7 +243,7 @@
                   "growth_rate": "ba11a289db070b309f4bbdd7151cf2af50703deacbc236f1fd34310fe369a312"
                 },
                 "input_tokens": 0,
-                "lens_version": "3b1ea2637f718833",
+                "lens_version": "98527bac59210a4e",
                 "model": null,
                 "model_settings": {},
                 "output_tokens": 0,
@@ -265,19 +258,11 @@
               "status": "ok"
             },
             {
-              "claims": [
-                {
-                  "cites": [
-                    "growth_rate"
-                  ],
-                  "direction": 1,
-                  "text": "grows"
-                }
-              ],
+              "claims": [],
               "components": {},
-              "conviction": "high",
+              "conviction": null,
               "coverage": 0.5,
-              "error": null,
+              "error": "critical input 'tox_notes' unavailable",
               "flags": [],
               "input_sufficiency": {
                 "growth_rate": 1.0,
@@ -286,31 +271,31 @@
               "lens": "safety",
               "provenance": {
                 "as_of": null,
-                "attempts": 1,
+                "attempts": 0,
                 "backtest_valid": true,
                 "input_hashes": {
                   "growth_rate": "ba11a289db070b309f4bbdd7151cf2af50703deacbc236f1fd34310fe369a312",
                   "tox_notes": "5c28d529a964745c7ba2651b5591b0935543c054e7b00d25ed2139686c4a8ede"
                 },
-                "input_tokens": 144,
-                "lens_version": "1bdc8ab73560312f",
-                "model": "function:_scripted:",
+                "input_tokens": 0,
+                "lens_version": "64b020c809f65675",
+                "model": null,
                 "model_settings": {},
-                "output_tokens": 20,
-                "prompt_hash": "0685ca927655926aadb2cea2a17a652569c190e79b566d5f12b047073d5827e2",
+                "output_tokens": 0,
+                "prompt_hash": null,
                 "stance_samples": [],
-                "variant": "default"
+                "variant": null
               },
               "score": null,
-              "stance": 1,
-              "stance_mean": 1.0,
+              "stance": null,
+              "stance_mean": null,
               "stance_spread": null,
-              "status": "ok"
+              "status": "abstained"
             }
           ],
           "weights": {
             "growth": 0.5,
-            "safety": 0.5
+            "safety": 0.0
           }
         },
         "review": {
@@ -330,9 +315,9 @@
             "attempts": 1,
             "backtest_valid": true,
             "input_hashes": {
-              "dossier": "4c9eeba95bcd6bb761aa04ae2699a6ca86941035bedaf3717e1197907c8122af"
+              "dossier": "0838eddf3ee76a950034467346b979c5ace9bdffb8c82c4f9f0174214cb032c4"
             },
-            "input_tokens": 219,
+            "input_tokens": 209,
             "lens_version": "086350ab594184ce",
             "model": "function:_scripted:",
             "model_settings": {},
@@ -394,7 +379,7 @@
                 "backtest_valid": true,
                 "input_hashes": {},
                 "input_tokens": 0,
-                "lens_version": "3b1ea2637f718833",
+                "lens_version": "98527bac59210a4e",
                 "model": null,
                 "model_settings": {},
                 "output_tokens": 0,
@@ -423,7 +408,7 @@
                 "backtest_valid": true,
                 "input_hashes": {},
                 "input_tokens": 0,
-                "lens_version": "1bdc8ab73560312f",
+                "lens_version": "64b020c809f65675",
                 "model": null,
                 "model_settings": {},
                 "output_tokens": 0,
@@ -460,7 +445,7 @@
             "attempts": 1,
             "backtest_valid": true,
             "input_hashes": {
-              "dossier": "7d1c4d505396d7ce098abab52df6e5523e66346b701fd8bdd6b1852d3d9e8452"
+              "dossier": "d7cf3cc3e9d8c23f740e407ed3eb1dd1850ec4db9b6122c3b92164ee7a490343"
             },
             "input_tokens": 208,
             "lens_version": "086350ab594184ce",
@@ -512,7 +497,7 @@
       "attempts": 1,
       "candidate": "S2",
       "cost_usd": null,
-      "input_tokens": 219,
+      "input_tokens": 209,
       "model": "function:_scripted:",
       "node": "review",
       "output_tokens": 26,
@@ -533,16 +518,6 @@
       "candidate": "S1",
       "cost_usd": null,
       "input_tokens": 153,
-      "model": "function:_scripted:",
-      "node": "safety_lens",
-      "output_tokens": 20,
-      "run_id": "toy-run"
-    },
-    {
-      "attempts": 1,
-      "candidate": "S2",
-      "cost_usd": null,
-      "input_tokens": 144,
       "model": "function:_scripted:",
       "node": "safety_lens",
       "output_tokens": 20,
@@ -1134,8 +1109,8 @@
     },
     "finished_at": "2026-01-01T00:00:05Z",
     "llm_cost_usd": null,
-    "llm_input_tokens": 943,
-    "llm_output_tokens": 118,
+    "llm_input_tokens": 789,
+    "llm_output_tokens": 98,
     "node_counts": {
       "failed": 1,
       "ok": 21,

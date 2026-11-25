@@ -66,7 +66,11 @@ function VerdictCard({ verdict, candidate }: { verdict: LensVerdict; candidate: 
             { label: "Provenance", value: provenanceText(p) },
           ]}
         />
-        {verdict.error && <Alert severity="error" sx={{ mt: 1 }}>Error: {verdict.error}</Alert>}
+        {verdict.error && (
+          <Alert severity={verdict.status === "abstained" ? "info" : "error"} sx={{ mt: 1 }}>
+            {verdict.status === "abstained" ? "Abstained" : "Error"}: {verdict.error}
+          </Alert>
+        )}
         <Stack spacing={0.75} sx={{ mt: 1 }}>
           {(verdict.claims ?? []).map((claim, i) => (
             <Box key={i}>

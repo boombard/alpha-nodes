@@ -202,10 +202,18 @@ Principles:
   run_id and candidate), `RunResult.run_id`, and at export time a wrapper
   `DossierRecord(run_id, created_at, dossier)` built outside the graph.
 - "abstained" ≠ "neutral stance 0".
-- **Planned (TASK-25): critical inputs and minimum coverage.** A lens may declare inputs it can't judge
-  without, and a minimum coverage. If either isn't met, the framework returns an `abstained` verdict
-  naming the reason *before* calling `assess` (no LLM call), so a lens can't be confident about
-  evidence it doesn't have.
+- **Critical inputs and minimum coverage.** A `LensNode` has two params: `critical_inputs` (a set of
+  input names it can't judge without) and `min_coverage` (0..1, default 0). A name not among the
+  lens's inputs is rejected at plan time (`ParamsError`, like `weight_overrides`). In `run`, after
+  coverage and `input_sufficiency` are computed and *before* `assess`, an unmet threshold gives an
+  `abstained` verdict (not `failed`: missing data is a legitimate outcome, and the aggregator gives
+  abstentions weight 0). A critical input with sufficiency 0 (absent, empty, or below its depth
+  minimum) wins: `critical input '<name>' unavailable` (first in sorted order; more are counted,
+  `(+1 more)`). Otherwise coverage below `min_coverage` gives `coverage 0.40 below minimum 0.60`.
+  The verdict keeps the computed coverage and `input_sufficiency`, has no stance, conviction or
+  claims, and its provenance holds only `lens_version` and `input_hashes`: no model call happened,
+  so an AI lens spends nothing. Both params are part of the node's params, so changing them
+  changes the memo key. Not built: suspect rows lowering sufficiency.
 - No 0–100 confidence from LLMs. Use 3-level conviction, plus the framework-computed coverage.
 - The domain layer supplies stance labels (bearish…bullish; reject…advance).
 - **Coverage** is computed by the framework as the mean over declared inputs of input

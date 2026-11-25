@@ -13,6 +13,7 @@ from lensgraph.plan import NodeKey
 from lensgraph.registry import NodeRegistry
 from lensgraph.types import Absent, ContractViolation, Failed
 from lensgraph.verdict import Claim, LensVerdict
+from pydantic import ValidationError
 from toy.nodes import ToxNote
 
 
@@ -238,3 +239,83 @@ async def test_abstained_assessment_with_stance_mean_violates_contract():
     lens = _Stance(assessment={"status": "abstained", "abstain_reason": "x", "stance_mean": 0.5})
     with pytest.raises(ContractViolation, match="stance_lens"):
         await lens.run(_ctx(), a=[1])
+
+
+class _Critical(LensNode):
+    """Lens whose `assess` must never run when a threshold is unmet."""
+
+    name: ClassVar[str] = "critical"
+    lens_name: ClassVar[str] = "critical"
+    inputs: ClassVar[dict[str, str]] = {"a": "up_a", "b": "up_b"}
+    depth: ClassVar[dict[str, DepthRequirement]] = {"b": DepthRequirement(desired=4, minimum=2)}
+
+    def assess(self, ctx, citables, **inputs: Any) -> LensAssessment:
+        return LensAssessment(status="ok", stance=1, conviction="low")
+
+
+class _MustNotAssess(_Critical):
+    name: ClassVar[str] = "must_not_assess"
+
+    def assess(self, ctx, citables, **inputs: Any) -> LensAssessment:
+        raise AssertionError("assess must not be called")
+
+
+async def test_critical_input_absent_abstains_without_assess():
+    lens = _MustNotAssess(critical_inputs=frozenset({"a"}))
+    verdict = await lens.run(_ctx(), a=Absent(reason="x"), b=[1, 2, 3, 4])
+    assert verdict.status == "abstained"
+    assert verdict.error == "critical input 'a' unavailable"
+    assert verdict.stance is None and verdict.conviction is None and verdict.claims == []
+    assert verdict.input_sufficiency == {"a": 0.0, "b": 1.0}
+    assert verdict.coverage == 0.5
+    assert verdict.provenance.input_hashes == {"a": "h"}
+    assert verdict.provenance.lens_version
+
+
+async def test_critical_input_below_depth_minimum_abstains():
+    lens = _MustNotAssess(critical_inputs=frozenset({"b"}))
+    verdict = await lens.run(_ctx(), a=[1], b=[1])
+    assert verdict.status == "abstained"
+    assert verdict.error == "critical input 'b' unavailable"
+
+
+async def test_several_critical_inputs_unavailable_counts_rest():
+    lens = _MustNotAssess(critical_inputs=frozenset({"b", "a"}))
+    verdict = await lens.run(_ctx(), a=None, b=[])
+    assert verdict.error == "critical input 'a' unavailable (+1 more)"
+
+
+async def test_min_coverage_abstains_with_reason():
+    lens = _MustNotAssess(min_coverage=0.6)
+    verdict = await lens.run(_ctx(), a=[1], b=[1])  # b below minimum -> coverage 0.5
+    assert verdict.status == "abstained"
+    assert verdict.error == "coverage 0.50 below minimum 0.60"
+    assert verdict.coverage == 0.5
+
+
+async def test_above_thresholds_judges_as_before():
+    lens = _Critical(critical_inputs=frozenset({"a"}), min_coverage=0.5)
+    verdict = await lens.run(_ctx(), a=[1], b=[1, 2, 3, 4])
+    assert verdict.status == "ok" and verdict.stance == 1 and verdict.error is None
+
+
+def test_unknown_critical_input_rejected():
+    with pytest.raises(ValidationError, match=r"nope.*known.*\['a', 'b'\]"):
+        _Critical(critical_inputs=frozenset({"nope"}))
+
+
+def test_min_coverage_bounds():
+    with pytest.raises(ValidationError):
+        _Critical(min_coverage=1.5)
+
+
+def test_critical_inputs_settable_per_run(toy_registry: NodeRegistry, toy_candidates, toy_services, tmp_path):
+    toy_registry.register(_ToyLens)
+
+    def memo_key(nodes):
+        spec = RunSpec(targets=["toy_lens"], candidates=toy_candidates[:1], nodes=nodes)
+        result = run(spec, toy_registry, store_root=tmp_path, services=toy_services)
+        return result.results[NodeKey(name="toy_lens", candidate="S1")].memo_key
+
+    base = memo_key({})
+    assert memo_key({"toy_lens": {"critical_inputs": ["tox_notes"]}}) != base
