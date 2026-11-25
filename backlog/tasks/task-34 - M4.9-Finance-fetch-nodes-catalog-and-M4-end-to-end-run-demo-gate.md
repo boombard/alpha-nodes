@@ -1,10 +1,10 @@
 ---
 id: TASK-34
 title: M4.9 Finance fetch nodes, catalog and M4 end-to-end run (demo gate)
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T01:09:40Z'
-updated_date: '2026-11-25T05:21:28Z'
+updated_date: '2026-11-25T05:26:09Z'
 labels:
   - finance
 milestone: m-3
@@ -90,4 +90,12 @@ Out of scope: lenses and calcs on prices (M5), adjusted-close calc (M5), `data_q
 
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_13aafebdd418, worktree task-34
+
+Demo commands (network, run by the human): 'uv run lensgraph run runs/m4_prices.yaml' twice, then 'uv run lensgraph sources status --suspect', then 'uv run lensgraph run runs/m4_prices.yaml --offline'.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker: Prices/Profile/FxRates fetch nodes, build_registry, CATALOG, runs/m4_prices.yaml (11 tickers), yf_replay stand-in and test_m4_e2e.py (9 tests: second run 0 yfinance calls, offline rerun, GBp minor_unit repair, live bar not stored + unsettled attempt, x100 row suspect in output and sources status --suspect, unknown ticker empty and not refetched, fx covers 7 currencies, shipped config pinned). Commits f3990a2 + 9538888; pytest 620 passed, ruff and pyright clean. Coordinator review: ACs met; one fix round (pin shipped yaml in a test, import placement, Attributes docstrings) done. Open points/rulings: e2e overrides lookbacks (prices 700, fx 360) to fit 2-year fixtures, so the 10-year window is only exercised by the live demo; SEK/NOK/PLN fx replay the EUR fixture relabelled (coverage tested, not rate values); finance.md unchanged. Demo gate not yet run.
+<!-- SECTION:FINAL_SUMMARY:END -->
