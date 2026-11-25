@@ -1,10 +1,10 @@
 ---
 id: TASK-42
 title: TA-Lib function reference library and dev dependency
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-25T06:03:29Z'
-updated_date: '2026-11-25T06:12:11Z'
+updated_date: '2026-11-25T06:26:51Z'
 labels:
   - finance
   - docs
@@ -54,18 +54,18 @@ The group should come from the wrapper's `talib.get_function_groups()` where ava
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 documentation/reference/ta-lib/functions holds the verbatim pages and README.md records the source commit SHA and BSD-3 notice
-- [ ] #2 The index lists every snapshotted function with group, description, inputs, params and whether ta-lib-python 0.8.3 exposes it
-- [ ] #3 ta-lib==0.8.3.post1 is in the root dev group and uv sync installs it with no system library
-- [ ] #4 Parser and index tests pass without network; the whole suite is green
+- [x] #1 documentation/reference/ta-lib/functions holds the verbatim pages and README.md records the source commit SHA and BSD-3 notice
+- [x] #2 The index lists every snapshotted function with group, description, inputs, params and whether ta-lib-python 0.8.3 exposes it
+- [x] #3 ta-lib==0.8.3.post1 is in the root dev group and uv sync installs it with no system library
+- [x] #4 Parser and index tests pass without network; the whole suite is green
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -78,4 +78,6 @@ Worker: dispatch ctx_bfef94df016c, worktree task-42
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 Worker: ta-lib==0.8.3.post1 in root dev group; sync_talib_reference.py (pure parse/render + pydantic models, network only in main); 248 verbatim pages at TA-Lib 6435b2a with README (provenance, BSD-3 notice, refresh, index of 246 functions, 237 in wrapper / 9 not); pointer in documentation/README.md. Review: pages spot-checked byte-identical upstream (rsi, alma, adx, cdlhammer); wrapper availability from talib.get_functions/get_function_groups; one round fixed the hard-coded wrapper version (now talib.__version__). pytest 642 passed, ruff and pyright clean. Open points: uv.lock touched outside Files (required); index.md/stability.md prose pages snapshotted but not indexed. Not in wrapper yet: GATOR, MACDV, ALLIGATOR, CE, MAENV, SSF, SHARPE, SKEW, SORTINO.
+
+Landed 19683ec..19683ec on main (squashed from 2 commits).
 <!-- SECTION:FINAL_SUMMARY:END -->
