@@ -100,7 +100,8 @@ Source store).
   and the payload lacks bars for some of them at its end, `settled_through` is capped at
   the last bar date, so the missing tail stays a gap and is asked again next run. A last
   bar older than those 3 sessions (suspended, delisted) does not cap. Fx applies the same
-  rule to calendar days.
+  rule to weekdays (fx does not trade at weekends, and its settled date, the previous UTC
+  day, can land on one); a weekend-only fx range with no bars is an `ok` empty interval.
 - **Truncated history**: if the first bar is more than 5 sessions after the first session
   on or after `max(request start, metadata firstTradeDate)`, the outcome is `error`
   ("history truncated"), since Yahoo sometimes answers a long request with only its

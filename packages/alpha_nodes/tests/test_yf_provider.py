@@ -279,6 +279,52 @@ def test_history_starting_at_first_trade_date_not_truncated(
     assert outcome.kind == "ok"
 
 
+@pytest.mark.parametrize("first_trade", [None, "not a date"])
+def test_truncation_check_skipped_without_first_trade_date(
+    provider: YFinanceProvider, stub: YFStub, yf_payload: Loader, first_trade: str | None
+) -> None:
+    """Constructed variant: first 20 bars missing, but no usable firstTradeDate: fail open."""
+    payload = yf_payload("prices_ASML.AS")
+    payload.index, payload.data = payload.index[20:], payload.data[20:]
+    payload.metadata.pop("firstTradeDate", None)
+    if first_trade:
+        payload.metadata["firstTradeDate"] = first_trade
+    stub.answers["ASML.AS"] = payload
+    outcome = _fetch(provider, _item("ASML.AS", date(2024, 11, 25), date(2026, 11, 24)))
+    assert outcome.kind == "ok"
+
+
+def test_fx_weekend_missing_is_ok_empty(provider: YFinanceProvider, stub: YFStub) -> None:
+    """Fx does not trade at weekends: a weekend-only range with no bars is an empty interval."""
+    stub.answers["GBPUSD=X"] = YFPricesMissingError("GBPUSD=X", "")
+    stub.known_tz["GBPUSD=X"] = "UTC"
+    outcome = _fetch(provider, _item("GBP", date(2026, 11, 21), date(2026, 11, 22), "fx"))
+    assert outcome.kind == "ok"
+    assert outcome.payload.data == []
+
+
+def test_fx_weekday_missing_is_error(provider: YFinanceProvider, stub: YFStub) -> None:
+    stub.answers["GBPUSD=X"] = YFPricesMissingError("GBPUSD=X", "")
+    stub.known_tz["GBPUSD=X"] = "UTC"
+    outcome = _fetch(provider, _item("GBP", date(2026, 11, 20), date(2026, 11, 22), "fx"))
+    assert outcome.kind == "error"
+
+
+def test_fx_settled_on_weekend_with_friday_bar_not_capped(
+    provider: YFinanceProvider, stub: YFStub, clock: FakeClock, yf_payload: Loader
+) -> None:
+    """Constructed variant: GBPUSD ending Fri 11-20 while settled is Sun 11-22."""
+    payload = yf_payload("fx_GBPUSD=X")
+    keep = [i for i, ts in enumerate(payload.index) if ts[:10] <= "2026-11-20"]
+    payload.index = [payload.index[i] for i in keep]
+    payload.data = [payload.data[i] for i in keep]
+    assert payload.index[-1][:10] == "2026-11-20"
+    stub.answers["GBPUSD=X"] = payload
+    clock._now = datetime(2026, 11, 23, 8, 0, tzinfo=UTC)  # Monday: settled = Sunday 11-22
+    outcome = _fetch(provider, _item("GBP", date(2026, 11, 1), date(2026, 11, 22), "fx"))
+    assert outcome.settled_through == date(2026, 11, 22)
+
+
 def test_yf_policy_sets_breakers() -> None:
     assert YF_POLICY.max_consecutive_errors == 5
     assert YF_POLICY.max_consecutive_empty == 20

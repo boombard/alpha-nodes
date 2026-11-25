@@ -297,14 +297,26 @@ def _classify(item: WorkItem, exc: Exception, *, known_tz: bool) -> FetchOutcome
     return FetchOutcome(item=item, kind="error", message=f"{type(exc).__name__}: {exc}")
 
 
+def _trading_days(mic: str | None, start: date, end: date) -> list[date]:
+    """Trading days in [start, end]: exchange sessions, or Mon-Fri for fx (`mic` None).
+
+    Fx quotes do not trade over the weekend, and `markets.fx_settled_through` (the previous
+    UTC day) can itself land on a Saturday or Sunday, so fx weekends must never count as
+    sessions that Yahoo owes us.
+    """
+    if mic is not None:
+        return markets.sessions(mic, start, end)
+    days = (start + timedelta(days=i) for i in range((end - start).days + 1))
+    return [d for d in days if d.weekday() < 5]
+
+
 def _session_count(mic: str | None, start: date, end: date) -> int:
-    """Trading days in [start, end]: exchange sessions, or every calendar day for fx (`mic` None)."""
-    if mic is None:
-        return (end - start).days + 1
-    return len(markets.sessions(mic, start, end))
+    """Number of `_trading_days` in [start, end]."""
+    return len(_trading_days(mic, start, end))
 
 
 def _bar_days(payload: YFHistoryPayload) -> list[date]:
+    """Local dates of the payload bars, parsed from the `index` timestamps."""
     return [date.fromisoformat(ts[:10]) for ts in payload.index]
 
 
@@ -318,13 +330,11 @@ def _is_truncated(payload: YFHistoryPayload, mic: str, start: date) -> bool:
     days = _bar_days(payload)
     if not days:
         return False
-    expected = start
     first_trade = payload.metadata.get("firstTradeDate")
-    if isinstance(first_trade, str):
-        try:
-            expected = max(expected, date.fromisoformat(first_trade[:10]))
-        except ValueError:
-            pass
+    try:
+        expected = max(start, date.fromisoformat(str(first_trade)[:10]))
+    except ValueError:  # missing or unparseable: fail open
+        return False
     horizon = markets.sessions(mic, expected, days[0])
     return len(horizon) - 1 > _TRUNCATION_SESSIONS if horizon else False
 
@@ -334,20 +344,16 @@ def _cap_settled(payload: YFHistoryPayload, mic: str | None, settled: date | Non
 
     Yahoo lags on small caps and fx; a missing tail stays a gap and is asked again next run
     (finance.md, Settled tail). A last bar older than the last `_SETTLED_TAIL_SESSIONS`
-    settled sessions (suspended, delisted) does not cap. Fx counts calendar days.
+    settled sessions (suspended, delisted) does not cap. Fx counts weekdays; a settled date on
+    a weekend is compared with the last weekday, so a Friday bar is complete.
     """
     if settled is None or not payload.index:
         return settled
-    if mic is None:
-        tail = [settled - timedelta(days=i) for i in range(_SETTLED_TAIL_SESSIONS - 1, -1, -1)]
-    else:
-        tail = markets.sessions(mic, settled - timedelta(days=14), settled)[
-            -_SETTLED_TAIL_SESSIONS:
-        ]
+    tail = _trading_days(mic, settled - timedelta(days=14), settled)[-_SETTLED_TAIL_SESSIONS:]
     if not tail:
         return settled
     last_bar = max((d for d in _bar_days(payload) if d <= settled), default=None)
-    if last_bar is not None and tail[0] <= last_bar < settled:
+    if last_bar is not None and tail[0] <= last_bar < tail[-1]:
         return last_bar
     return settled
 
