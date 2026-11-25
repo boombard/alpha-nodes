@@ -3,10 +3,10 @@ id: TASK-29
 title: >-
   M4.4 alpha_nodes scaffold: canonical prices, profile and fx datasets, units
   and exchange calendars
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-25T01:09:16Z'
-updated_date: '2026-11-25T02:57:48Z'
+updated_date: '2026-11-25T03:32:29Z'
 labels:
   - finance
 milestone: m-3
@@ -107,18 +107,18 @@ Out of scope: any provider (M4.6, M4.7), fetch nodes (M4.9).
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 alpha_nodes package is a uv workspace member and its tests run under uv run pytest
-- [ ] #2 PriceSchema, ProfileSchema and FxSchema declare a kind per column and reject minor-unit currencies; PRICES, PROFILE and FX datasets exist
-- [ ] #3 markets.settled_through applies close + 30 min per exchange calendar, weekends and holidays; FX settles at the previous UTC day
-- [ ] #4 finance.md records: no adjusted close in prices, no market cap in profile
+- [x] #1 alpha_nodes package is a uv workspace member and its tests run under uv run pytest
+- [x] #2 PriceSchema, ProfileSchema and FxSchema declare a kind per column and reject minor-unit currencies; PRICES, PROFILE and FX datasets exist
+- [x] #3 markets.settled_through applies close + 30 min per exchange calendar, weekends and holidays; FX settles at the previous UTC day
+- [x] #4 finance.md records: no adjusted close in prices, no market cap in profile
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -134,4 +134,6 @@ Worker: alpha_nodes package (units, datasets PRICES/PROFILE/FX with per-column k
 Worker rulings: reporting_currency checked nullable-aware; FxSchema date typed pandera DateTime; settled_through returns None before any session; is_session returns False outside the calendar's range; exchange_calendars declared >=4.11 (exact version pinned only in uv.lock).
 Coordinator review: one round sent and done. settled_through vectorised via closes.searchsorted (one type: ignore for pandas stubs); _kind typed as FieldKind. Approve.
 Open points: test_markets emits 12 Pandas4Warning deprecation warnings from inside exchange_calendars (Series.values on tz-aware); harmless now, will matter on a future pandas. finance.md now says as-of returns use split-adjusted closes; dividends/total return come from the M5 calc node.
+
+Landed 3840c2d (2 worker commits squashed; tree verified equal) on main.
 <!-- SECTION:FINAL_SUMMARY:END -->
