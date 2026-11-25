@@ -3,10 +3,10 @@ id: TASK-47
 title: >-
   M5.5 Run view: chart kind for cited LineCharts and field tables for cited
   models
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T06:37:27Z'
-updated_date: '2026-11-25T06:57:15Z'
+updated_date: '2026-11-25T07:02:13Z'
 labels:
   - core
   - ui
@@ -87,3 +87,11 @@ Out of scope: finance chart content (M5.3 `price_chart`); new pages; interactive
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_2cf2685fd968, worktree task-47 (run run_3fc22c1f4db5)
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker: CitedValue/CitedView kind 'chart' for any resolved LineChart (whole input or model field), CitedView.chart (ISO dates, null y kept); TS types and toy-run.json fixture regenerated; LineChartView (MUI X Charts 9.18.1, theme palette, legend, tooltip, gaps break lines); flat models (kind model, json_value with only scalars) drawn as a field/value table, nested models stay JSON; bundle rebuilt; core.md Reporting updated. pytest 770 passed, ruff/pyright clean, pnpm test 53/53, typecheck clean.
+Coordinator review: matches ACs 1-4 and Interfaces. One fix round (6c73df9): candidate.test.tsx was already failing on main (TASK-43's fixture regeneration removed the hardcoded lens_version id); I authorised editing it, and it now derives the id from the loaded fixture. Function-local test imports moved to module top.
+Open points: 2 commits, squash on landing. Out-of-Files edits: charts.py module docstring (doc only) and candidate.test.tsx (authorised). Rulings: field table only for kind 'model' with all-scalar json_value (field cites of a flat model still show JSON); numbers shown via String() at full precision; ChartHolder test model is module-level so it round-trips the blob store.
+<!-- SECTION:FINAL_SUMMARY:END -->
