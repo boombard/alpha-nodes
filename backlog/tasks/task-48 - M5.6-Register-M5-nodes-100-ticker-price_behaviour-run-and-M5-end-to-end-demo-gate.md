@@ -3,10 +3,10 @@ id: TASK-48
 title: >-
   M5.6 Register M5 nodes, 50-ticker price_behaviour run and M5 end-to-end (demo
   gate)
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-25T06:37:34Z'
-updated_date: '2026-11-25T07:51:58Z'
+updated_date: '2026-11-25T08:06:28Z'
 labels:
   - finance
 milestone: m-4
@@ -70,19 +70,19 @@ Out of scope: an AI reviewer in the demo; fx; campaign or universe logic (M7).
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 build_registry registers the six M5 calc nodes and PriceBehaviour; runs/m5_price_behaviour.yaml has 50 unique UK/European tickers, no reviewer
-- [ ] #2 Replayed e2e: every candidate gets a dossier with a price_behaviour verdict; an unknown ticker does not raise
-- [ ] #3 A threshold change changes only price_behaviour and dossier outputs: no yfinance calls, every calc/transform output hash identical (calc nodes are not memoized, finance.md), lens recomputed
-- [ ] #4 The run view resolves a momentum claim to a chart-kind price_chart and the momentum metric
-- [ ] #5 worker_done gives the exact demo commands for the human
+- [x] #1 build_registry registers the six M5 calc nodes and PriceBehaviour; runs/m5_price_behaviour.yaml has 50 unique UK/European tickers, no reviewer
+- [x] #2 Replayed e2e: every candidate gets a dossier with a price_behaviour verdict; an unknown ticker does not raise
+- [x] #3 A threshold change changes only price_behaviour and dossier outputs: no yfinance calls, every calc/transform output hash identical (calc nodes are not memoized, finance.md), lens recomputed
+- [x] #4 The run view resolves a momentum claim to a chart-kind price_chart and the momentum metric
+- [x] #5 worker_done gives the exact demo commands for the human
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -102,4 +102,5 @@ Coordinator review: approved with no fix round. Calc nodes are memoize=False by 
 
 Open points: tickers were chosen from memory and not checked against yfinance (likeliest to need a fix: RYA.IR, KNEBV.HE, ERIC-B.ST, VOLV-B.ST, EDP.LS, GALP.LS); the list is mostly large caps. The tests were not run red first. Live demo and the browser click-through of price_chart and the metric tables are for the human.
 Live demo (coordinator, 2026-11-25): first live run had ROG.SW abstain ("no components available"): Yahoo 404s ROG.SW, Roche is RO.SW now. Fixed on the branch (2d94e81). Rerun: 50/50 price_behaviour ok with all five components. Threshold change to [-0.3,-0.1,0.1,0.3] with --offline: price_behaviour and dossier changed for 50/50, prices and all six calc nodes byte-identical, no provider calls. Browser check in Orca: dossier claims show cite chips; price_chart opens a close vs ma200 line chart; momentum.total_return opens the field value (shown as a raw float, cosmetic). Note: a dead ticker yields prices ok with 0 rows and an abstain whose reason is 'no components available', not 'no price data' (TASK-39 territory).
+Landed 4238378 on main (squashed from f43db0e..2d94e81). Demo evidence copied to .lensgraph/m5-demo/.
 <!-- SECTION:FINAL_SUMMARY:END -->
