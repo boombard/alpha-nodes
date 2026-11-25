@@ -1,5 +1,6 @@
 """Provider scheduler and shared limiter: batching, pacing, pauses, thresholds, delivery."""
 
+import asyncio
 import itertools
 import random
 import threading
@@ -8,6 +9,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from datetime import UTC, date, datetime
 
+import pandas as pd
 import pytest
 from lensgraph.sources import (
     Dataset,
@@ -408,3 +410,135 @@ async def test_open_empty_streak_is_reported_when_run_fails(clock: FakeClock) ->
         )
     assert [o.item.entity for o in dropped.seen] == ["S0", "S1"]
     assert got.seen == []
+
+
+def tripping(sink: Collector):
+    """An `on_tripped` callback that appends the dropped outcomes to `sink`."""
+
+    async def on_tripped(held: list[FetchOutcome]) -> None:
+        sink.seen.extend(held)
+
+    return on_tripped
+
+
+def outcome_for(entity: str, kind: OutcomeKind) -> FetchOutcome:
+    item = make_items(1)[0].model_copy(update={"entity": entity})
+    payload = pd.DataFrame({"t": ["2026-01-01"], "value": [1.0]}) if kind == "ok" else None
+    return FetchOutcome(item=item, kind=kind, payload=payload)
+
+
+def breaker_limiter(clock: FakeClock, limit: int = 3) -> ProviderLimiter:
+    provider = FakeAssayProvider()
+    serial(provider, max_consecutive_empty=limit)
+    return make_limiter(provider, clock)
+
+
+async def test_held_empty_goes_to_its_own_call_when_another_call_ends_the_streak(
+    clock: FakeClock,
+) -> None:
+    limiter = breaker_limiter(clock)
+    a_got, b_got = Collector(), Collector()
+    await limiter.settle(outcome_for("A0", "empty"), a_got)  # call A: streak opens
+    await limiter.settle(outcome_for("B0", "ok"), b_got)  # call B's ok ends it
+    assert [o.item.entity for o in a_got.seen] == ["A0"]
+    assert [o.item.entity for o in b_got.seen] == ["B0"]
+
+
+async def test_final_flush_hands_other_calls_empties_to_their_own_callback(
+    clock: FakeClock,
+) -> None:
+    provider = FakeAssayProvider()
+    serial(provider, max_consecutive_empty=3)
+    provider.unknown = {"B0"}
+    limiter = make_limiter(provider, clock)
+    a_got, b_got = Collector(), Collector()
+    await limiter.settle(outcome_for("A0", "empty"), a_got)
+    b_items = [make_items(1)[0].model_copy(update={"entity": "B0"})]
+    await run_items(provider, ASSAYS, b_items, limiter, b_got)  # ends below threshold: flush
+    assert [o.item.entity for o in a_got.seen] == ["A0"]
+    assert [o.item.entity for o in b_got.seen] == ["B0"]
+
+
+async def test_trip_logs_other_calls_empties_through_their_own_on_tripped(
+    clock: FakeClock,
+) -> None:
+    limiter = breaker_limiter(clock)
+    a_got, a_tripped, b_got, b_tripped = Collector(), Collector(), Collector(), Collector()
+    await limiter.settle(outcome_for("A0", "empty"), a_got, tripping(a_tripped))
+    await limiter.settle(outcome_for("B0", "empty"), b_got, tripping(b_tripped))
+    with pytest.raises(GlobalFailure):
+        await limiter.settle(outcome_for("B1", "empty"), b_got, tripping(b_tripped))
+    assert [o.item.entity for o in a_tripped.seen] == ["A0"]
+    assert [o.item.entity for o in b_tripped.seen] == ["B0", "B1"]
+    assert a_got.seen == [] and b_got.seen == []
+
+
+async def test_failed_run_logs_its_own_held_empties_through_its_on_tripped(
+    clock: FakeClock,
+) -> None:
+    provider = FakeAssayProvider()
+    serial(provider, max_consecutive_empty=5)
+    provider.script = {"B1": ["unreachable"] * 10}
+    limiter = make_limiter(provider, clock)
+    b_got, b_tripped = Collector(), Collector()
+    await limiter.settle(outcome_for("B0", "empty"), b_got, tripping(b_tripped))
+    b_items = [make_items(1)[0].model_copy(update={"entity": "B1"})]
+    with pytest.raises(GlobalFailure):
+        await run_items(provider, ASSAYS, b_items, limiter, b_got, on_tripped=tripping(b_tripped))
+    assert [o.item.entity for o in b_tripped.seen] == ["B0"]
+    assert b_got.seen == []
+
+
+class WrongCountProvider(FakeAssayProvider):
+    """Returns no outcomes, so `run_items` raises `ValueError`."""
+
+    def fetch(self, dataset: Dataset, items: list[WorkItem]) -> list[FetchOutcome]:
+        return []
+
+
+class BlockingProvider(FakeAssayProvider):
+    """`fetch` blocks until `release` is set, so a call can be cancelled mid-flight."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.started = threading.Event()
+        self.release = threading.Event()
+
+    def fetch(self, dataset: Dataset, items: list[WorkItem]) -> list[FetchOutcome]:
+        self.started.set()
+        self.release.wait(5)
+        return super().fetch(dataset, items)
+
+
+async def test_failing_call_leaves_other_calls_held_empties_for_their_own_flush(
+    clock: FakeClock,
+) -> None:
+    provider = WrongCountProvider()
+    serial(provider, max_consecutive_empty=5)
+    limiter = make_limiter(provider, clock)
+    b_got, b_tripped = Collector(), Collector()
+    await limiter.settle(outcome_for("B0", "empty"), b_got, tripping(b_tripped))
+    with pytest.raises(ValueError):
+        await run_items(provider, ASSAYS, make_items(1), limiter, Collector())
+    await limiter.flush()  # B completes
+    assert [o.item.entity for o in b_got.seen] == ["B0"]
+    assert b_tripped.seen == []
+
+
+async def test_cancelled_call_leaves_other_calls_held_empties_for_their_own_flush(
+    clock: FakeClock,
+) -> None:
+    provider = BlockingProvider()
+    serial(provider, max_consecutive_empty=5)
+    limiter = make_limiter(provider, clock)
+    b_got = Collector()
+    await limiter.settle(outcome_for("B0", "empty"), b_got)
+    task = asyncio.create_task(run_items(provider, ASSAYS, make_items(1), limiter, Collector()))
+    while not provider.started.is_set():
+        await asyncio.sleep(0.01)
+    task.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await task
+    provider.release.set()
+    await limiter.flush()
+    assert [o.item.entity for o in b_got.seen] == ["B0"]

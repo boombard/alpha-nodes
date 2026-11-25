@@ -429,6 +429,10 @@ identity, never by code. The core provides the mechanics. Domains define dataset
     its outcomes are withheld from persistence, handed over when a non-empty outcome breaks the
     streak or the run ends below the threshold, and **not cached** when it trips (the
     attempts are still logged as `empty`, noting the breaker), so the next run asks again.
+    The streak is provider-wide (shared by every dataset's `ensure` call), but each withheld
+    `empty` is handed over, or logged on a trip, through the callbacks of the call that fetched
+    it, so it is persisted under its own dataset. A call that fails for another reason takes back
+    only its own withheld empties (logged, not cached); other calls' stay held.
     `ok` resets both streaks, `empty` the error streak, `error` the empty streak; rate limits
     and `unreachable` keep their own thresholds and leave these streaks alone.
   - **Normalise failures are entity errors.** If `normalise` (or the settled cut or version

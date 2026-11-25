@@ -13,9 +13,29 @@ from collections.abc import Awaitable, Callable, Sequence
 from contextlib import AbstractAsyncContextManager, asynccontextmanager
 from datetime import datetime, timedelta
 
+from pydantic import BaseModel, ConfigDict
+
 from ..types import GlobalFailure
 from .base import Clock, Provider
 from .models import Dataset, FetchOutcome, OutcomeKind, RateLimitPolicy, WorkItem
+
+OnOutcome = Callable[[FetchOutcome], Awaitable[None]]
+OnTripped = Callable[[list[FetchOutcome]], Awaitable[None]]
+
+
+class _Held(BaseModel):
+    """A withheld `empty` outcome with the callbacks of the call that fetched it.
+
+    The limiter is shared by every `ensure` call on a provider, so whichever call ends or trips
+    the streak must not hand another call's outcome to its own callbacks (core.md, Source store,
+    Circuit breakers).
+    """
+
+    model_config = ConfigDict(arbitrary_types_allowed=True, frozen=True)
+
+    outcome: FetchOutcome
+    on_outcome: OnOutcome
+    on_tripped: OnTripped | None = None
 
 
 class ProviderLimiter:
@@ -52,13 +72,13 @@ class ProviderLimiter:
         self._unreachable = 0  # consecutive unreachable outcomes
         self._error_entities: set[str] = set()  # entities in the open error streak
         self._empty_entities: set[str] = set()  # entities in the open empty streak (`_held`)
-        self._held: list[FetchOutcome] = []  # open empty streak, withheld from on_outcome
+        self._held: list[_Held] = []  # open empty streak, withheld from on_outcome
 
     async def settle(
         self,
         outcome: FetchOutcome,
-        on_outcome: Callable[[FetchOutcome], Awaitable[None]],
-        on_tripped: Callable[[list[FetchOutcome]], Awaitable[None]] | None = None,
+        on_outcome: OnOutcome,
+        on_tripped: OnTripped | None = None,
     ) -> None:
         """Hand one *final* outcome over and apply the entity-level circuit breakers.
 
@@ -70,6 +90,10 @@ class ProviderLimiter:
         threshold instead drops them (via `on_tripped`, so the store can log them uncached) and
         raises `GlobalFailure`. `ok` resets both streaks, `empty` the error streak, `error`
         the empty streak. Both breakers are off while their policy field is None.
+
+        The streak is provider-wide, but each withheld `empty` keeps the `on_outcome` and
+        `on_tripped` of the call that fetched it and is handed over through those, whichever call
+        ends the streak.
         """
         kind = outcome.kind
         entity = outcome.item.entity
@@ -79,18 +103,16 @@ class ProviderLimiter:
             if limit is None:
                 await on_outcome(outcome)
                 return
-            self._held.append(outcome)
+            self._held.append(_Held(outcome=outcome, on_outcome=on_outcome, on_tripped=on_tripped))
             self._empty_entities.add(entity)
             if len(self._empty_entities) >= limit:
-                held = self.take_held()
-                if on_tripped is not None:
-                    await on_tripped(held)
+                await self.log_tripped(self.take_held())
                 raise GlobalFailure(
                     f"{self.provider}: {limit} entities in a row answered empty "
                     "(provider incident or throttling?); nothing cached for them"
                 )
             return
-        await self.flush(on_outcome)
+        await self.flush()
         await on_outcome(outcome)
         if kind == "ok":
             self._error_entities.clear()
@@ -103,16 +125,40 @@ class ProviderLimiter:
                     f"(last: {outcome.message or 'error'})"
                 )
 
-    async def flush(self, on_outcome: Callable[[FetchOutcome], Awaitable[None]]) -> None:
-        """Hand over the withheld `empty` outcomes: the streak ended below its threshold."""
-        for outcome in self.take_held():
-            await on_outcome(outcome)
+    async def flush(self) -> None:
+        """Hand over the withheld `empty` outcomes, each to its own call's `on_outcome`: the streak ended below its threshold."""
+        for held in self.take_held():
+            await held.on_outcome(held.outcome)
 
-    def take_held(self) -> list[FetchOutcome]:
-        """Remove and return the withheld `empty` outcomes, ending the empty streak."""
-        held, self._held = self._held, []
-        self._empty_entities.clear()
-        return held
+    def take_held(self, owner: OnOutcome | None = None) -> list[_Held]:
+        """Remove and return withheld `empty` outcomes: all of them, or only `owner`'s.
+
+        Without `owner` the empty streak ends. With it (a failing call taking back its own
+        entries) other calls' entries stay held for their own flush or trip, and the streak keeps
+        the entities they cover.
+        """
+        if owner is None:
+            taken, self._held = self._held, []
+        else:
+            taken = [h for h in self._held if h.on_outcome == owner]
+            self._held = [h for h in self._held if h.on_outcome != owner]
+        self._empty_entities = {h.outcome.item.entity for h in self._held}
+        return taken
+
+    async def log_tripped(self, held: list[_Held]) -> None:
+        """Hand dropped `empty` outcomes to their own call's `on_tripped` (grouped per call; None skips)."""
+        groups: list[tuple[OnTripped, list[FetchOutcome]]] = []
+        for entry in held:
+            if entry.on_tripped is None:
+                continue
+            for callback, outcomes in groups:
+                if callback == entry.on_tripped:
+                    outcomes.append(entry.outcome)
+                    break
+            else:
+                groups.append((entry.on_tripped, [entry.outcome]))
+        for callback, outcomes in groups:
+            await callback(outcomes)
 
     def slot(self) -> AbstractAsyncContextManager[None]:
         """Context manager that waits for a pause to end, a concurrency slot and a pacing token."""
@@ -203,9 +249,9 @@ async def _run_batch(
     dataset: Dataset,
     batch: list[tuple[int, WorkItem]],
     limiter: ProviderLimiter,
-    on_outcome: Callable[[FetchOutcome], Awaitable[None]],
+    on_outcome: OnOutcome,
     results: dict[int, FetchOutcome],
-    on_tripped: Callable[[list[FetchOutcome]], Awaitable[None]] | None = None,
+    on_tripped: OnTripped | None = None,
 ) -> None:
     """Fetch one batch until every item has a final outcome, re-queuing what isn't final."""
     policy = provider.capabilities.rate_limit
@@ -257,8 +303,8 @@ async def run_items(
     dataset: Dataset,
     items: Sequence[WorkItem],
     limiter: ProviderLimiter,
-    on_outcome: Callable[[FetchOutcome], Awaitable[None]],
-    on_tripped: Callable[[list[FetchOutcome]], Awaitable[None]] | None = None,
+    on_outcome: OnOutcome,
+    on_tripped: OnTripped | None = None,
 ) -> list[FetchOutcome]:
     """Run work items through `provider` and return the final outcomes in input order.
 
@@ -285,11 +331,12 @@ async def run_items(
     ]
     try:
         await asyncio.gather(*tasks)
-        await limiter.flush(on_outcome)
+        await limiter.flush()
     except BaseException as exc:
-        held = limiter.take_held()  # an open empty streak: asked, so logged, but never cached
-        if held and on_tripped is not None and not isinstance(exc, asyncio.CancelledError):
-            await on_tripped(held)  # skipped on cancellation: no store calls while unwinding
+        # This call's open empties: asked, so logged, but never cached. Other calls' stay held.
+        held = limiter.take_held(owner=on_outcome)
+        if held and not isinstance(exc, asyncio.CancelledError):
+            await limiter.log_tripped(held)  # each to its own call; skipped on cancellation
         for task in tasks:
             task.cancel()
         await asyncio.gather(*tasks, return_exceptions=True)

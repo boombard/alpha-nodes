@@ -1,5 +1,8 @@
 """DuckDB point-in-time source store: persistence, versions, fallback, resume, offline, renormalise."""
 
+import asyncio
+import threading
+import time
 from collections.abc import Callable, Iterator, Sequence
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
@@ -535,6 +538,49 @@ async def test_tripped_empty_streak_not_cached(
     second = make_store(path=path)
     await second.ensure("assays", entities, march(1, 3))
     assert sorted(c[0].entity for c in fake.calls) == entities
+
+
+class InterleavedProvider(FakeAssayProvider):
+    """Orders two concurrent `ensure` calls: assays `NOSUCH` (empty), then a strain_info fetch,
+    then assays `SLOW`, so the assays call is still running when the info outcome is settled."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.empty_fetched = threading.Event()
+        self.info_fetched = threading.Event()
+
+    def fetch(self, dataset: Dataset, items: list[WorkItem]) -> list[FetchOutcome]:
+        entity = items[0].entity
+        if dataset.name == STRAIN_INFO.name:
+            assert self.empty_fetched.wait(5)
+            time.sleep(0.2)  # the store settles (holds) the empty meanwhile
+        elif entity == "SLOW":
+            assert self.info_fetched.wait(5)
+            time.sleep(0.2)  # the store settles the info outcome meanwhile
+        outcomes = super().fetch(dataset, items)
+        if dataset.name == STRAIN_INFO.name:
+            self.info_fetched.set()
+        elif entity == "NOSUCH":
+            self.empty_fetched.set()
+        return outcomes
+
+
+async def test_concurrent_datasets_persist_a_held_empty_under_its_own_dataset(
+    make_store: MakeStore,
+) -> None:
+    provider = InterleavedProvider()
+    provider.unknown = {"NOSUCH"}
+    policy = {"fake": RateLimitPolicy(concurrency=2, per_second=None, max_consecutive_empty=3)}
+    store = make_store(assays=[provider], info=[provider], policy_overrides=policy)
+    await asyncio.gather(
+        store.ensure("assays", ["NOSUCH", "SLOW"], march(1, 3)),
+        store.ensure("strain_info", ["S1"], None),
+    )
+    empties = [(a.dataset, a.entity) for a in store.attempts() if a.kind == "empty"]
+    assert empties == [("assays", "NOSUCH")]
+    provider.calls.clear()
+    await store.ensure("assays", ["NOSUCH"], march(1, 3))
+    assert provider.calls == []  # cached as empty under assays
 
 
 class BadPayloadProvider(FakeAssayProvider):
