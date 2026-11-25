@@ -6,7 +6,7 @@ title: >-
 status: In Review
 assignee: []
 created_date: '2026-11-25T01:09:29Z'
-updated_date: '2026-11-25T04:46:14Z'
+updated_date: '2026-11-25T04:48:32Z'
 labels:
   - core
 milestone: m-3
@@ -129,13 +129,13 @@ Second fix round sent at the human's request (empty entities, store-leak test, d
 ## Final Summary
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
-Worker: DatasetFetch/DatasetFetchMany (sources/node.py), SourceCatalog/ProviderContext/SourcesConfig/build_source_store (sources/catalog.py), RunConfig.sources wired into arun (built, injected, closed on every path), `lensgraph run --offline`, `lensgraph sources status [--dataset] [--suspect]`, core.md Run configuration updated. Commits c2dde13 + b6dec99 (review fixes). pytest 520 passed, ruff clean, pyright 0 errors.
+Worker: DatasetFetch/DatasetFetchMany (sources/node.py), SourceCatalog/ProviderContext/SourcesConfig/build_source_store (sources/catalog.py), RunConfig.sources wired into arun (built, injected, closed on every path), `lensgraph run --offline`, `lensgraph sources status [--dataset] [--suspect]`, core.md Run configuration updated. Commits c2dde13, b6dec99 (review round 1), db3031d (round 2, requested by the human). pytest 522 passed, ruff clean, pyright 0 errors.
 
-Coordinator review: ACs 1-4 met. One feedback round, all applied: window docstring corrected (lookback_days+1 inclusive days); DatasetFetchMany all-empty result keeps the dataset's columns; source store can no longer leak its file lock if index setup fails; `sources status --dataset <unknown>` is a CliError.
+Coordinator review: ACs 1-4 met. Round 1: window docstring corrected (lookback_days+1 inclusive days); DatasetFetchMany all-empty result keeps the dataset's columns; source store can't leak its file lock if index setup fails; `sources status --dataset <unknown>` is a CliError. Round 2: empty `entities` rejected at construction (ParamsError at plan time); store-leak test (mutation-checked); empty-result test compares dtypes; hashing skips plainly scalar object columns via infer_dtype and short-circuits (100k rows, 3 object string cols: 46 ms -> 21 ms).
 
-Out-of-Files edits (approved mid-task): hashing.py + test_hashing.py (list/ndarray cells hash by canonical sorted-key JSON so a Parquet round trip hashes equal; frames without list cells keep a pinned identical digest); duckdb_store.py read-only `clock` property.
+Out-of-Files edits (approved): hashing.py + test_hashing.py (list/ndarray cells hash by canonical sorted-key JSON; frames without list cells keep a pinned identical digest); duckdb_store.py read-only `clock` property.
 
 Rulings to check: window = [end - lookback_days, end] inclusive; lookback_days None = no interval; build_source_store builds only datasets listed in sources.providers and also rejects unknown limits names, empty provider chains, bad catalog refs; --offline without sources is a CLI error; sources status counts rows over all stored versions, exits 2 when no sources.duckdb; ctx.as_of is never set by the executor today, so live runs use the store clock.
 
-Open points: DatasetFetchMany with an empty `entities` list raises IndexError (entities[0]); no test for the store-leak path; empty-frame test checks columns, not dtypes; hashing scans every object column per hash (Python-level map), a possible cost on big frames.
+Open point: the store's empty query frames carry string columns as object dtype while non-empty reads give str. Round 2 patched this in DatasetFetchMany only (casts non-list object columns to str, with a hard-coded `_LIST_COLUMNS = {repairs, quality_reasons}` duplicating the fact-meta knowledge). Single DatasetFetch still returns the object-dtype empty frame. The proper fix is in DuckDBSourceStore's empty-slice construction (candidate for TASK-36), after which the node cast can go.
 <!-- SECTION:FINAL_SUMMARY:END -->
