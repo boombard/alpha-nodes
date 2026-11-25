@@ -3,10 +3,10 @@ id: TASK-29
 title: >-
   M4.4 alpha_nodes scaffold: canonical prices, profile and fx datasets, units
   and exchange calendars
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T01:09:16Z'
-updated_date: '2026-11-25T02:53:29Z'
+updated_date: '2026-11-25T02:57:48Z'
 labels:
   - finance
 milestone: m-3
@@ -126,3 +126,12 @@ Out of scope: any provider (M4.6, M4.7), fetch nodes (M4.9).
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_8554a93cd1c0, worktree task-29
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker: alpha_nodes package (units, datasets PRICES/PROFILE/FX with per-column kinds, markets with 16 MICs and settled cut-off), tests, workspace wiring (root pyproject, uv.lock), finance.md updated (no adjusted close, no market cap). 2 commits (5dbc4f7 feat, f847301 fix). pytest 379 passed, ruff and pyright clean.
+Worker rulings: reporting_currency checked nullable-aware; FxSchema date typed pandera DateTime; settled_through returns None before any session; is_session returns False outside the calendar's range; exchange_calendars declared >=4.11 (exact version pinned only in uv.lock).
+Coordinator review: one round sent and done. settled_through vectorised via closes.searchsorted (one type: ignore for pandas stubs); _kind typed as FieldKind. Approve.
+Open points: test_markets emits 12 Pandas4Warning deprecation warnings from inside exchange_calendars (Series.values on tz-aware); harmless now, will matter on a future pandas. finance.md now says as-of returns use split-adjusted closes; dividends/total return come from the M5 calc node.
+<!-- SECTION:FINAL_SUMMARY:END -->
