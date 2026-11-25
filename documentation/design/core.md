@@ -418,6 +418,23 @@ identity, never by code. The core provides the mechanics. Domains define dataset
     declared number of consecutive rate-limit episodes or connection failures the
     provider raises `GlobalFailure`. Each work item is persisted as soon as it finishes,
     so a re-run after a stop resumes from the gaps.
+  - **Circuit breakers** (both off by default, per provider, counted in completion order over
+    *distinct entities*: an entity's retries count once). `RateLimitPolicy.max_consecutive_errors`
+    raises `GlobalFailure` (naming provider, streak length and last message) after that many
+    entities in a row whose final outcome is `error`, so a systemic failure isn't retried
+    entity by entity across the universe. `max_consecutive_empty` does the same for `empty`
+    (a provider incident or throttling disguised as "not found"); while an empty streak is open
+    its outcomes are withheld from persistence, handed over when a non-empty outcome breaks the
+    streak or the run ends below the threshold, and **not cached** when it trips (the
+    attempts are still logged as `empty`, noting the breaker), so the next run asks again.
+    `ok` resets both streaks, `empty` the error streak, `error` the empty streak; rate limits
+    and `unreachable` keep their own thresholds and leave these streaks alone.
+  - **Normalise failures are entity errors.** If `normalise` (or the settled cut or version
+    append) raises for an `ok` outcome, the store logs an `error` attempt starting
+    `normalise:` (exception and payload hash), caches nothing for that item (no raw-response
+    row, coverage or facts; the blob may stay) and does not retry it. Other entities are
+    persisted as usual; once the provider level finishes, `SourceUnavailable` names the dataset,
+    entity, provider and message.
   - **Settled data only.** For time-axis datasets the provider reports, per entity, the
     latest *settled* point (e.g. the last completed trading day in the exchange's
     timezone). Rows after it are not stored as facts and coverage stops there, so a live,

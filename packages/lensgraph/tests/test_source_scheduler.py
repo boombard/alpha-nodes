@@ -288,3 +288,77 @@ async def test_wrong_outcome_count_raises(
     provider.fetch = drop_one  # type: ignore[method-assign]
     with pytest.raises(ValueError, match=provider.name):
         await run(provider, make_items(2), make_limiter(provider, clock), Collector())
+
+
+# -- circuit breakers (core.md, Source store) ----------------------------------------------------
+
+
+def serial(provider: Provider, **policy: object) -> None:
+    """One call at a time, no pacing or retries: outcomes complete in input order."""
+    set_policy(provider, concurrency=1, per_second=None, max_error_retries=0, **policy)
+
+
+async def test_consecutive_errors_across_entities_raise_global_failure(clock: FakeClock) -> None:
+    provider = FakeAssayProvider()
+    serial(provider, max_consecutive_errors=3)
+    for i in range(5):
+        provider.script[f"S{i}"] = ["error"]
+    got = Collector()
+    with pytest.raises(GlobalFailure, match=r"fake.*3.*scripted error"):
+        await run(provider, make_items(5), make_limiter(provider, clock), got)
+    assert [o.item.entity for o in got.seen] == ["S0", "S1", "S2"]  # handed over, as before
+
+
+async def test_retries_of_one_entity_count_once(clock: FakeClock) -> None:
+    provider = FakeAssayProvider()
+    set_policy(provider, per_second=None, max_error_retries=2, max_consecutive_errors=2)
+    provider.script["S0"] = ["error", "error", "error"]  # three error answers, one entity
+    outcomes = await run(provider, make_items(1), make_limiter(provider, clock), Collector())
+    assert [o.kind for o in outcomes] == ["error"]
+
+
+async def test_ok_resets_error_streak(clock: FakeClock) -> None:
+    provider = FakeAssayProvider()
+    serial(provider, max_consecutive_errors=3)
+    for i in (0, 1, 3, 4):
+        provider.script[f"S{i}"] = ["error"]
+    outcomes = await run(provider, make_items(5), make_limiter(provider, clock), Collector())
+    assert [o.kind for o in outcomes] == ["error", "error", "ok", "error", "error"]
+
+
+async def test_consecutive_empty_trips_global_failure(clock: FakeClock) -> None:
+    provider = FakeAssayProvider()
+    serial(provider, max_consecutive_empty=3)
+    provider.unknown = {f"S{i}" for i in range(5)}
+    got, tripped = Collector(), Collector()
+
+    async def on_tripped(held: list[FetchOutcome]) -> None:
+        tripped.seen.extend(held)
+
+    with pytest.raises(GlobalFailure, match=r"fake.*3.*empty"):
+        await run_items(
+            provider, ASSAYS, make_items(5), make_limiter(provider, clock), got, on_tripped=on_tripped
+        )
+    assert got.seen == []  # held back, never handed to on_outcome
+    assert [o.item.entity for o in tripped.seen] == ["S0", "S1", "S2"]
+
+
+async def test_empty_streak_below_threshold_is_handed_over(clock: FakeClock) -> None:
+    provider = FakeAssayProvider()
+    serial(provider, max_consecutive_empty=3)
+    provider.unknown = {"S0", "S1", "S3"}  # streak of two, an ok, then one more
+    got = Collector()
+    outcomes = await run(provider, make_items(4), make_limiter(provider, clock), got)
+    assert [o.kind for o in outcomes] == ["empty", "empty", "ok", "empty"]
+    assert sorted(o.item.entity for o in got.seen) == ["S0", "S1", "S2", "S3"]
+
+
+async def test_breakers_off_by_default(clock: FakeClock) -> None:
+    provider = FakeAssayProvider()
+    serial(provider)
+    provider.unknown = {f"S{i}" for i in range(10)}
+    for i in range(10, 20):
+        provider.script[f"S{i}"] = ["error"]
+    got = Collector()
+    outcomes = await run(provider, make_items(20), make_limiter(provider, clock), got)
+    assert len(outcomes) == len(got.seen) == 20

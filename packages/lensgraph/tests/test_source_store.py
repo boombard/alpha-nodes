@@ -470,14 +470,14 @@ async def test_query_does_not_fall_through_when_primary_rows_filtered(
     assert bulk.calls == []
 
 
-async def test_duplicate_keys_from_normalise_raise(make_store: MakeStore) -> None:
+async def test_duplicate_keys_from_normalise_are_an_entity_error(make_store: MakeStore) -> None:
     class Duplicating(FakeAssayProvider):
         def normalise(self, dataset: Dataset, raw: RawResponse, payload: Any) -> pd.DataFrame:
             frame = super().normalise(dataset, raw, payload)
             return pd.concat([frame, frame.iloc[:1]], ignore_index=True)
 
     store = make_store(assays=[Duplicating()])
-    with pytest.raises(ValueError, match=r"assays.*fake|fake.*assays"):
+    with pytest.raises(SourceUnavailable, match=r"normalise: ValueError.*duplicate keys"):
         await get(store)
     assert version_count(store) == 0 and store.coverage("assays", "S1", "fake").is_empty()
 
@@ -517,3 +517,53 @@ async def test_version_seq_survives_reopen(
     await get(second, a=1, b=5)
     assert second.query("assays", "S1", march(2)).frame["od600"].item() > 50
     assert latest_seq(second, 2) > before
+
+
+async def test_tripped_empty_streak_not_cached(
+    make_store: MakeStore, fake: FakeAssayProvider, tmp_path: Path
+) -> None:
+    path = tmp_path / "source.duckdb"
+    entities = [f"S{i}" for i in range(5)]
+    fake.unknown = set(entities)
+    policy = {"fake": RateLimitPolicy(concurrency=1, max_consecutive_empty=3)}
+    first = make_store(path=path, policy_overrides=policy)
+    with pytest.raises(GlobalFailure):
+        await first.ensure("assays", entities, march(1, 3))
+    assert all(a.kind == "empty" for a in first.attempts("assays"))  # logged, not cached
+    first.close()
+    fake.calls.clear()
+    second = make_store(path=path)
+    await second.ensure("assays", entities, march(1, 3))
+    assert sorted(c[0].entity for c in fake.calls) == entities
+
+
+class BadPayloadProvider(FakeAssayProvider):
+    """`normalise` raises for the entity named in `bad`."""
+
+    bad: str | None = None
+
+    def normalise(self, dataset: Dataset, raw: RawResponse, payload: Any) -> pd.DataFrame:
+        if raw.entity == self.bad:
+            raise KeyError("Close")
+        return super().normalise(dataset, raw, payload)
+
+
+async def test_normalise_failure_is_entity_error_not_crash(make_store: MakeStore) -> None:
+    provider = BadPayloadProvider()
+    provider.bad = "S2"
+    store = make_store(assays=[provider])
+    with pytest.raises(SourceUnavailable, match=r"assays.*S2.*fake.*normalise: KeyError"):
+        await store.ensure("assays", ["S1", "S2", "S3"], march(1, 3))
+    assert len(provider.calls) == 3  # not retried
+    assert store.coverage("assays", "S1", "fake").covers(march(1, 3))
+    assert store.coverage("assays", "S3", "fake").covers(march(1, 3))
+    assert store.coverage("assays", "S2", "fake").is_empty()
+    assert store.raw_responses("assays", "fake") and all(
+        r.entity != "S2" for r in store.raw_responses("assays", "fake")
+    )
+    logged = [a for a in store.attempts("assays", "S2") if a.kind == "error"]
+    assert len(logged) == 1 and logged[0].message.startswith("normalise: KeyError")
+    provider.bad = None
+    provider.calls.clear()
+    assert days_of(await get(store, "S2")) == [1, 2, 3]  # a later get refetches it
+    assert len(provider.calls) == 1

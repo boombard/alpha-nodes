@@ -151,6 +151,8 @@ class RateLimitPolicy(BaseModel):
     max_rate_limit_episodes: int = 3  # consecutive episodes before GlobalFailure
     max_unreachable: int = 5  # consecutive unreachable outcomes before GlobalFailure
     max_error_retries: int = 2  # retries of a transient `error` item before giving up on it
+    max_consecutive_errors: int | None = None  # distinct entities ending in `error`, in a row, before GlobalFailure
+    max_consecutive_empty: int | None = None  # distinct entities answering `empty`, in a row, before GlobalFailure
 
 
 class ProviderCapabilities(BaseModel):

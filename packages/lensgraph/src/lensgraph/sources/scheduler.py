@@ -50,6 +50,64 @@ class ProviderLimiter:
         self._paused_until: datetime | None = None
         self._episodes = 0  # consecutive rate-limit episodes
         self._unreachable = 0  # consecutive unreachable outcomes
+        self._errors = 0  # consecutive entities whose final outcome is `error`
+        self._held: list[FetchOutcome] = []  # open empty streak, withheld from on_outcome
+
+    async def settle(
+        self,
+        outcome: FetchOutcome,
+        on_outcome: Callable[[FetchOutcome], Awaitable[None]],
+        on_tripped: Callable[[list[FetchOutcome]], Awaitable[None]] | None = None,
+    ) -> None:
+        """Hand one *final* outcome over and apply the entity-level circuit breakers.
+
+        Unlike `report` (every provider answer, retries included) this sees each entity once.
+        `max_consecutive_errors`: reaching it after the outcome was handed over raises
+        `GlobalFailure`. `max_consecutive_empty`: `empty` outcomes are withheld while the streak
+        is open and handed over when a non-empty outcome breaks it (or by `flush`); reaching the
+        threshold instead drops them (via `on_tripped`, so the store can log them uncached) and
+        raises `GlobalFailure`. `ok` resets both streaks, `empty` the error streak, `error`
+        the empty streak. Both breakers are off while their policy field is None.
+        """
+        kind = outcome.kind
+        if kind == "empty":
+            self._errors = 0
+            limit = self.policy.max_consecutive_empty
+            if limit is None:
+                await on_outcome(outcome)
+                return
+            self._held.append(outcome)
+            if len(self._held) >= limit:
+                held, self._held = self._held, []
+                if on_tripped is not None:
+                    await on_tripped(held)
+                raise GlobalFailure(
+                    f"{self.provider}: {len(held)} entities in a row answered empty "
+                    "(provider incident or throttling?); nothing cached for them"
+                )
+            return
+        await self.flush(on_outcome)
+        await on_outcome(outcome)
+        if kind == "ok":
+            self._errors = 0
+        elif kind == "error":
+            self._errors += 1
+            limit = self.policy.max_consecutive_errors
+            if limit is not None and self._errors >= limit:
+                raise GlobalFailure(
+                    f"{self.provider}: {self._errors} entities in a row ended in error "
+                    f"(last: {outcome.message or 'error'})"
+                )
+
+    async def flush(self, on_outcome: Callable[[FetchOutcome], Awaitable[None]]) -> None:
+        """Hand over the withheld `empty` outcomes: the streak ended below its threshold."""
+        held, self._held = self._held, []
+        for outcome in held:
+            await on_outcome(outcome)
+
+    def discard_held(self) -> None:
+        """Forget a withheld empty streak (the run is failing); those entities stay unknown."""
+        self._held = []
 
     def slot(self) -> AbstractAsyncContextManager[None]:
         """Context manager that waits for a pause to end, a concurrency slot and a pacing token."""
@@ -142,6 +200,7 @@ async def _run_batch(
     limiter: ProviderLimiter,
     on_outcome: Callable[[FetchOutcome], Awaitable[None]],
     results: dict[int, FetchOutcome],
+    on_tripped: Callable[[list[FetchOutcome]], Awaitable[None]] | None = None,
 ) -> None:
     """Fetch one batch until every item has a final outcome, re-queuing what isn't final."""
     policy = provider.capabilities.rate_limit
@@ -158,6 +217,7 @@ async def _run_batch(
         # raised while reporting an earlier outcome cannot strand later final ones.
         requeue: list[tuple[int, WorkItem]] = []
         needs_delay = False  # an unreachable or error item is being retried this round
+        failure: GlobalFailure | None = None  # first breaker trip; raised after the round
         for (index, item), outcome in zip(pending, outcomes, strict=True):
             if outcome.kind == "rate_limited":
                 requeue.append((index, item))
@@ -170,7 +230,12 @@ async def _run_batch(
                 needs_delay = True
             else:
                 results[index] = outcome
-                await on_outcome(outcome)
+                try:
+                    await limiter.settle(outcome, on_outcome, on_tripped)
+                except GlobalFailure as exc:
+                    failure = failure or exc
+        if failure is not None:
+            raise failure
         for outcome in outcomes:
             await limiter.report(outcome.kind)
         if needs_delay:
@@ -184,6 +249,7 @@ async def run_items(
     items: Sequence[WorkItem],
     limiter: ProviderLimiter,
     on_outcome: Callable[[FetchOutcome], Awaitable[None]],
+    on_tripped: Callable[[list[FetchOutcome]], Awaitable[None]] | None = None,
 ) -> list[FetchOutcome]:
     """Run work items through `provider` and return the final outcomes in input order.
 
@@ -197,18 +263,22 @@ async def run_items(
     outcomes already handed over stay handed over.
 
     Raises:
-        GlobalFailure: from the limiter's thresholds or from `provider.fetch`.
+        GlobalFailure: from the limiter's thresholds and circuit breakers or from `provider.fetch`.
         ValueError: if the provider returns the wrong number of outcomes.
     """
     results: dict[int, FetchOutcome] = {}
     batches = _batches(items, provider.capabilities.max_batch)
     tasks = [
-        asyncio.create_task(_run_batch(provider, dataset, b, limiter, on_outcome, results))
+        asyncio.create_task(
+            _run_batch(provider, dataset, b, limiter, on_outcome, results, on_tripped)
+        )
         for b in batches
     ]
     try:
         await asyncio.gather(*tasks)
+        await limiter.flush(on_outcome)
     except BaseException:
+        limiter.discard_held()
         for task in tasks:
             task.cancel()
         await asyncio.gather(*tasks, return_exceptions=True)

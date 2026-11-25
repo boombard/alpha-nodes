@@ -554,50 +554,76 @@ class DuckDBSourceStore(SourceStore):
         days = pd.to_datetime(frame[ds.axis_column]).dt.date
         return pd.DataFrame(frame.loc[days <= settled_through])
 
-    def _persist(self, provider: Provider, ds: Dataset, outcome: FetchOutcome) -> None:
-        """Persist one final outcome atomically: raw response, attempt(s), coverage, facts."""
+    def _persist(self, provider: Provider, ds: Dataset, outcome: FetchOutcome) -> str | None:
+        """Persist one final outcome atomically: raw response, attempt(s), coverage, facts.
+
+        An `ok` outcome whose normalisation (or settled cut, or version append) raises is not
+        a crash: nothing is cached for it (no raw-response row, coverage or facts; the blob
+        may stay), an `error` attempt `normalise: <type>: <message> (payload <hash>)` is
+        logged, and that message is returned so `_pass` can raise `SourceUnavailable` once the
+        provider level is done. Returns None otherwise.
+        """
         item, now = outcome.item, self._clock.now()
         params_key = _params_key(item.params)
         state = self._state(ds.name, item.entity, provider.name, params_key)
         new_state = apply_outcome(ds, state, outcome, now)
-        raw: RawResponse | None = None
-        frame: pd.DataFrame | None = None
-        if outcome.kind == "ok":
-            raw = RawResponse(
-                raw_id=uuid.uuid4().hex,
-                provider=provider.name,
-                dataset=ds.name,
-                entity=item.entity,
-                interval=item.interval,
-                params=item.params,
-                payload_hash=self._blobs.put(outcome.payload),
-                fetched_at=now,
-                library_version=provider.library_version,
-            )
-            frame = self._settled_only(
-                ds, provider.normalise(ds, raw, outcome.payload), outcome.settled_through
-            )
-        with self._txn():
-            attempts: list[tuple[AttemptKind, DateInterval | None, str]] = [
-                (outcome.kind, item.interval, outcome.message)
-            ]
-            interval, through = item.interval, outcome.settled_through
-            if raw and frame is not None:
-                self._insert_raw(raw, through)
-                self._append_versions(
-                    ds, provider.name, item.entity, params_key, frame, raw.raw_id,
-                    provider.normaliser_version(ds.name), now,
-                )  # fmt: skip
-                if interval and through and interval.end > through:
-                    tail = DateInterval(start=max(interval.start, through + _ONE_DAY), end=interval.end)
-                    attempts.append(("unsettled", tail, "after settled_through"))
-            for kind, span, message in attempts:
-                self._log_attempt(provider.name, ds.name, item, kind, span, now, message)
-            if new_state != state:
-                self._con.execute(
-                    "INSERT OR REPLACE INTO coverage VALUES (?, ?, ?, ?, ?)",
-                    [ds.name, item.entity, provider.name, params_key, new_state.model_dump_json()],
+        payload_hash = ""
+        try:
+            raw: RawResponse | None = None
+            frame: pd.DataFrame | None = None
+            if outcome.kind == "ok":
+                payload_hash = self._blobs.put(outcome.payload)
+                raw = RawResponse(
+                    raw_id=uuid.uuid4().hex,
+                    provider=provider.name,
+                    dataset=ds.name,
+                    entity=item.entity,
+                    interval=item.interval,
+                    params=item.params,
+                    payload_hash=payload_hash,
+                    fetched_at=now,
+                    library_version=provider.library_version,
                 )
+                frame = self._settled_only(
+                    ds, provider.normalise(ds, raw, outcome.payload), outcome.settled_through
+                )
+            with self._txn():
+                attempts: list[tuple[AttemptKind, DateInterval | None, str]] = [
+                    (outcome.kind, item.interval, outcome.message)
+                ]
+                interval, through = item.interval, outcome.settled_through
+                if raw and frame is not None:
+                    self._insert_raw(raw, through)
+                    self._append_versions(
+                        ds, provider.name, item.entity, params_key, frame, raw.raw_id,
+                        provider.normaliser_version(ds.name), now,
+                    )  # fmt: skip
+                    if interval and through and interval.end > through:
+                        tail = DateInterval(start=max(interval.start, through + _ONE_DAY), end=interval.end)
+                        attempts.append(("unsettled", tail, "after settled_through"))
+                for kind, span, message in attempts:
+                    self._log_attempt(provider.name, ds.name, item, kind, span, now, message)
+                if new_state != state:
+                    self._con.execute(
+                        "INSERT OR REPLACE INTO coverage VALUES (?, ?, ?, ?, ?)",
+                        [ds.name, item.entity, provider.name, params_key, new_state.model_dump_json()],
+                    )
+        except Exception as exc:
+            if outcome.kind != "ok":
+                raise
+            message = f"normalise: {type(exc).__name__}: {exc} (payload {payload_hash or 'unstored'})"
+            self._log_attempt(provider.name, ds.name, item, "error", item.interval, now, message)
+            return message
+        return None
+
+    def _log_tripped_empties(self, provider: Provider, ds: Dataset, held: list[FetchOutcome]) -> None:
+        """Log the `empty` attempts of a tripped streak without caching them (entities stay unknown)."""
+        now = self._clock.now()
+        for outcome in held:
+            self._log_attempt(
+                provider.name, ds.name, outcome.item, "empty", outcome.item.interval, now,
+                "not cached: empty-streak circuit breaker tripped",
+            )  # fmt: skip
 
     def _insert_raw(self, raw: RawResponse, settled_through: date | None) -> None:
         iv = raw.interval
@@ -652,8 +678,10 @@ class DuckDBSourceStore(SourceStore):
         this same call.
 
         Raises:
-            SourceUnavailable: an offline gap, or an `error` outcome after retries (nothing cached).
-            GlobalFailure: from the provider's limiter or `fetch`; finished items stay persisted.
+            SourceUnavailable: an offline gap, an `error` outcome after retries, or a `normalise`
+                failure (nothing cached; the other entities are persisted).
+            GlobalFailure: from the provider's limiter (incl. the error/empty circuit breakers) or
+                `fetch`; finished items stay persisted. A tripped empty streak is logged, not cached.
         """
         ds = self._dataset(dataset)
         for _ in range(_MAX_PASSES):
@@ -690,12 +718,28 @@ class DuckDBSourceStore(SourceStore):
                         f"(requested {interval})"
                     )
 
-                async def persist(outcome: FetchOutcome, provider: Provider = provider) -> None:
-                    self._persist(provider, ds, outcome)
+                normalise_failures: list[tuple[str, str]] = []
+
+                async def persist(
+                    outcome: FetchOutcome,
+                    provider: Provider = provider,
+                    failures: list[tuple[str, str]] = normalise_failures,
+                ) -> None:
+                    if failed := self._persist(provider, ds, outcome):
+                        failures.append((outcome.item.entity, failed))
+
+                async def tripped(held: list[FetchOutcome], provider: Provider = provider) -> None:
+                    self._log_tripped_empties(provider, ds, held)
 
                 outcomes = await run_items(
-                    provider, ds, work, self._limiters[provider.name], persist
+                    provider, ds, work, self._limiters[provider.name], persist, tripped
                 )
+                if normalise_failures:
+                    entity, message = normalise_failures[0]
+                    raise SourceUnavailable(
+                        f"{ds.name} for {entity} from {provider.name} failed: {message}"
+                        + (f" (+{len(normalise_failures) - 1} more)" if len(normalise_failures) > 1 else "")
+                    )
                 for outcome in outcomes:
                     if outcome.kind == "error":
                         raise SourceUnavailable(
