@@ -1,10 +1,10 @@
 ---
 id: TASK-32
 title: M4.7 yfinance profile and live canary script
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T01:09:29Z'
-updated_date: '2026-11-25T04:38:09Z'
+updated_date: '2026-11-25T04:50:58Z'
 labels:
   - finance
 milestone: m-3
@@ -103,4 +103,20 @@ Out of scope: fundamentals/news/screen (M6/M7); the store and runs (M4.9).
 
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_479cd1dcb02e, worktree task-32
+
+Canary live run (2026-11-25, --concurrency 4, worker-reported): yahoo healthy; all 11 symbols ok; exit 0. First-sight requests prices/profile: BP.L 4/4, HSBA.L 4/4, VOD.L 5/4, ASML.AS 4/4, SAP.DE 4/4, NESN.SW 3/4, NOVO-B.CO 4/3, AAPL 2/4, VUSD.L 4/4, BOOT.L 4/4, ALCLS.PA 4/4. Warm concurrent pass: prices 2 (NESN.SW 1), profile 2 each. History requests BP.L, HSBA.L: repair=True 3, repair=False 1. Second live run after review fixes: cold and warm concurrent passes, all 11 ok, no lock/crumb/rate-limit errors, exit 0.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker: `profile` added to YFinanceProvider (YFProfilePayload, payload_from_ticker, normalise_profile, shared `_classify` for fetch outcomes); canary.py (health check exit 2, drift exit 1, per-call HTTP request counts via curl_cffi Session.request wrap, cold + warm --concurrency passes, repair request probe); recorder --only (default records only missing files; TASK-31 fixtures untouched) and price stats; profiles for 11 canaries; prices for VUSD.L, BOOT.L, ALCLS.PA and illiquid BMT.L. Commits 87c6a7f, 6889704, 5f8ab9d, 6a90365 (review fixes). pytest 536 passed, ruff clean, pyright 0 errors. Canary live: 11/11 ok, exit 0.
+
+Coordinator review: ACs 1-5 met. One feedback round, all applied: stub `.info` without currency -> `empty` at fetch (an unrecognised currency -> `error`), so normalise can't raise inside the store's ensure; ISIN shape + ISO 6166 check digit, invalid -> None + suspect `bad_isin`; cold concurrent canary pass; price_stats moved to providers/yfinance/stats.py with a constructed-payload test; illiquid AIM fixture BMT.L (213/506 zero-volume bars, 0 missing sessions: Yahoo carries closes forward, so zero volume, not gaps, is the no-trade signal - input for TASK-37); RequestCounter.install docstring.
+
+Findings recorded in finance.md / README: `.info` has `firstTradeDateMilliseconds`, not `firstTradeDateEpochUtc`; Ticker.isin is "-" for most non-US symbols and wrong-but-well-formed for ASML.AS (AR...); history costs 3-5 requests first sight, 1-2 warm; repair=True adds 2 for GBp; profile 3-4 first sight, 2 warm; limiter's one-request-per-item assumption undercounts (TASK-37 should weight).
+
+Rulings to check: (1) DESIGN CHANGE: finance.md now says the profile ISIN is a hint, never a join key - the market-focus plan to de-duplicate dual listings by ISIN needs another source (M7). (2) test_yf_provider.py edited outside Files (capabilities assertions). (3) listing_date from firstTradeDateMilliseconds (EpochUtc kept as fallback). (4) Canaries: VUSD.L (USD ETF - no shares, so suspect no_shares), BOOT.L, ALCLS.PA (EUR quote, USD reporting). (5) Missing trading currency raises in normalise (backstop); bad financialCurrency -> reporting None + suspect; profile pit_reliable=False; known_at NaT. (6) test_dual_listing_has_isin uses AAPL (only well-formed ISIN fixture). (7) Recorder default now skips existing files. (8) Canary windows = fixture end - 30 days.
+
+Open points: "cold" concurrency only relocates tz/cookie cache files; the in-memory crumb survives, so a brand-new process's first concurrent requests aren't covered. Exit-2 health path not exercised live. Rejected (no-name) profile rows store name "".
+<!-- SECTION:FINAL_SUMMARY:END -->
