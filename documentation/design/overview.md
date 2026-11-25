@@ -175,7 +175,7 @@ These are tracked in `backlog/` (see `backlog/docs/doc-1 - Implementation-plan.m
    model profiles, confidence-weighted aggregation.
 3. Run config (YAML) + CLI, lineage resolution, static HTML report.
 4. Point-in-time source store (generic) + finance package, yfinance provider, prices/profile/fx.
-5. Price-behaviour lens end-to-end (100 tickers → HTML report).
+5. Price-behaviour lens end-to-end (50 tickers → HTML report).
 6. Fundamentals (EDGAR + yfinance) → quality & value lens → price-vs-fundamentals lens.
 7. Campaigns (generic) → universe campaign (finance).
 8. As-of runs + backtest of the price-behaviour lens.
