@@ -1,9 +1,10 @@
 ---
 id: TASK-40
 title: lensgraph run reports failed nodes
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-25T05:31:05Z'
+updated_date: '2026-11-25T05:40:36Z'
 labels:
   - lensgraph
 dependencies: []
@@ -53,3 +54,9 @@ Out of scope: changing exit codes, `sources status` output.
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_ff0a1c773ece, worktree task-40
+<!-- SECTION:NOTES:END -->
