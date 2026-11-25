@@ -1,10 +1,10 @@
 ---
 id: TASK-41
 title: 'Source store: held empty outcomes are persisted under another call''s dataset'
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T05:45:08Z'
-updated_date: '2026-11-25T05:52:42Z'
+updated_date: '2026-11-25T05:58:34Z'
 labels:
   - lensgraph
 dependencies: []
@@ -62,3 +62,9 @@ Out of scope: changing breaker thresholds or streak semantics.
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_9a326584f5c7, worktree task-41
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker: ProviderLimiter holds (outcome, on_outcome, on_tripped) entries; a streak end, the final flush and a breaker trip hand each held empty to the call that fetched it (streak still provider-wide). Review round: a failing or cancelled call now takes back only its own held empties (take_held(owner=on_outcome)); other calls' stay held. core.md Circuit breakers updated. Commits ef79107, 1fd6b80; tests: 6 scheduler tests (streak end, final flush, trip, own-failure, other call failing, other call cancelled) and a concurrent two-dataset store test that failed before the fix; pytest 637 passed, ruff and pyright clean; test_m4_e2e -k unknown 30/30. Coordinator review: ACs met after one fix round, nothing open. Rulings: limiter.flush() takes no argument (module-internal); call ownership is the identity of the call's on_outcome closure (one per ensure pass and provider); the old failed-run scheduler test was rewritten because it encoded the cross-call behaviour.
+<!-- SECTION:FINAL_SUMMARY:END -->
