@@ -3,9 +3,10 @@ id: TASK-29
 title: >-
   M4.4 alpha_nodes scaffold: canonical prices, profile and fx datasets, units
   and exchange calendars
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-25T01:09:16Z'
+updated_date: '2026-11-25T02:53:29Z'
 labels:
   - finance
 milestone: m-3
@@ -119,3 +120,9 @@ Out of scope: any provider (M4.6, M4.7), fetch nodes (M4.9).
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_8554a93cd1c0, worktree task-29
+<!-- SECTION:NOTES:END -->

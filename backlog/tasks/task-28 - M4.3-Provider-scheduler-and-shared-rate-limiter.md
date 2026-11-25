@@ -1,9 +1,10 @@
 ---
 id: TASK-28
 title: M4.3 Provider scheduler and shared rate limiter
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-25T01:09:15Z'
+updated_date: '2026-11-25T02:53:28Z'
 labels:
   - core
 milestone: m-3
@@ -91,3 +92,9 @@ Out of scope: deciding what to fetch (M4.2), persistence (M4.5).
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_e5b63d0aed7f, worktree task-28
+<!-- SECTION:NOTES:END -->

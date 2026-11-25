@@ -1,9 +1,10 @@
 ---
 id: TASK-27
 title: 'M4.2 Source coverage planning: gaps, settled tail, TTL and empty caching'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-25T01:09:15Z'
+updated_date: '2026-11-25T02:53:28Z'
 labels:
   - core
 milestone: m-3
@@ -95,3 +96,9 @@ Out of scope: storage of states and attempts (M4.5), scheduling (M4.3).
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_576944040993, worktree task-27
+<!-- SECTION:NOTES:END -->
