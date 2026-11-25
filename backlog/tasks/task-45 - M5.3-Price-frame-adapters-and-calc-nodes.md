@@ -1,10 +1,10 @@
 ---
 id: TASK-45
 title: M5.3 Price frame adapters and calc nodes
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-25T06:37:26Z'
-updated_date: '2026-11-25T07:39:39Z'
+updated_date: '2026-11-25T07:41:56Z'
 labels:
   - finance
 milestone: m-4
@@ -84,18 +84,18 @@ Out of scope: registering the nodes (M5.6); the lens (M5.4); fx conversion (rati
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 alpha_nodes.series adapters and the six calc nodes exist with the exact names, params and outputs; no maths outside kernels
-- [ ] #2 Hand-value and short-history tests pass for momentum, trend, volatility, drawdown; suspect bars counted per window
-- [ ] #3 Each calc node declares its kernels in code_deps; empty prices give None results, not failures
-- [ ] #4 Dividend split basis checked on the AAPL fixture and the finance.md note resolved
+- [x] #1 alpha_nodes.series adapters and the six calc nodes exist with the exact names, params and outputs; no maths outside kernels
+- [x] #2 Hand-value and short-history tests pass for momentum, trend, volatility, drawdown; suspect bars counted per window
+- [x] #3 Each calc node declares its kernels in code_deps; empty prices give None results, not failures
+- [x] #4 Dividend split basis checked on the AAPL fixture and the finance.md note resolved
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -112,4 +112,6 @@ Coordinator review: matches ACs 1-4 and the Pinned conventions; code-review (med
 Open points: 2 commits, squash on landing. Not fixed (from code review): no param validation (e.g. skip >= lookback), PriceChart computes the SMA over full history before trimming, NaN closes not guarded (schema guarantees close > 0). Rulings: split fixture has no dividend, so a payout straddling a split is not directly observed (doc says so); Trend takes np.log of the MA in the node (the formula is pinned in finance.md; no log kernel); missing quality column = all ok; windows trailing 253/219/253 bars reported in PriceWindow; test helpers in test files, not conftest.
 
 Human feedback round (9249dbf): alpha_nodes.conventions (BARS_PER_MONTH=21, BARS_PER_YEAR=252) used for kernel defaults (skip_return, realised_volatility) and calc-node window defaults; periods_per_year param removed from Trend and Volatility (they use BARS_PER_YEAR); all six price calc nodes memoize=False, reason in module docstring and finance.md Calculation layers; test_price_calc_nodes_are_not_memoized. 789 passed, ruff/pyright clean. Now 3 commits, squash on landing. Open point: finance.md Calculation layers item 3 still says calc nodes declare code_deps 'so editing a kernel invalidates their memo entries', which no longer applies to unmemoized calc nodes; reword at landing.
+
+Landed a0ed387 on main (squashed; includes the coordinator's finance.md code_deps rewording).
 <!-- SECTION:FINAL_SUMMARY:END -->
