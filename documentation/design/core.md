@@ -408,8 +408,9 @@ identity, never by code. The core provides the mechanics. Domains define dataset
   `known_at`: the provider-reported publication time (e.g. filing date) when available,
   else `first_seen_at`. A re-fetch or renormalise that changes a row's canonical values **or
   its labels** (`repairs`, `quality`, `quality_reasons`) adds a new version, so restatements
-  and relabels are both kept; bookkeeping columns (`fetch_id`, `first_seen_at`,
-  `normaliser_version`) don't count as a change. Each `renormalise` run is logged.
+  and relabels are both kept. Facts live in one DuckDB table per dataset, built from
+  `Dataset.frame_schema` with typed columns (never JSON rows); bookkeeping columns (`fetch_id`, `first_seen_at`,
+  `normaliser_version`, `version_seq`) don't count as a change. The latest version of a key is the one with the greatest `version_seq`, drawn from a store-wide sequence. Each `renormalise` run is logged; it keeps, per key, the row from the newest raw response, so restated keys add nothing when the normaliser is unchanged. `query` serves the first provider in the chain that holds any fact for the request, then applies `as_of` and quality filters (never falling through to a fallback because of them).
 - **Coverage = interval sets** per (entity, dataset, provider, params). It records the
   *requested* ranges that were successfully fetched, not the returned dates, so
   weekends/holidays are not "gaps". Gap-fill fetches only the missing intervals, including
@@ -427,7 +428,7 @@ identity, never by code. The core provides the mechanics. Domains define dataset
     change nothing and are never cached.
   - Freshness is checked *per requested interval*, not as a global "fetched recently" gate.
 - **As-of queries**: `query(dataset, entity, range, as_of)` returns the latest version of
-  each key with `known_at <= as_of`. Datasets whose provider can't supply real publication
+  each key with `known_at` before the end of the `as_of` day (UTC); `as_of=None` is latest. Datasets whose provider can't supply real publication
   times are marked `pit_reliable = false`. As-of runs warn, or refuse via config, when a
   deterministic lens depends on them.
 - **Offline mode**: no fetching at all. Serve from the store or fail. Used in tests and

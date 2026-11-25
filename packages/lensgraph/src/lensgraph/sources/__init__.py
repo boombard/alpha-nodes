@@ -2,6 +2,7 @@
 
 from .base import Clock, Provider, SourceStore, SourceUnavailable
 from .clock import FakeClock, SystemClock
+from .duckdb_store import DuckDBSourceStore
 from .models import (
     FACT_META_COLUMNS,
     AttemptKind,
@@ -26,6 +27,7 @@ __all__ = [
     "Clock",
     "Dataset",
     "DateInterval",
+    "DuckDBSourceStore",
     "FakeClock",
     "FetchAttempt",
     "FetchOutcome",
