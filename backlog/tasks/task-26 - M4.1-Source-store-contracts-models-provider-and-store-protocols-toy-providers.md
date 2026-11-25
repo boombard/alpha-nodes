@@ -3,9 +3,10 @@ id: TASK-26
 title: >-
   M4.1 Source store contracts: models, provider and store protocols, toy
   providers
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-25T01:09:15Z'
+updated_date: '2026-11-25T02:29:37Z'
 labels:
   - core
   - contracts
@@ -180,3 +181,9 @@ Out of scope: gap planning (M4.2), scheduling and limiting (M4.3), the DuckDB st
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_450a25a0e6f9, worktree task-26
+<!-- SECTION:NOTES:END -->
