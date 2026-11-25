@@ -1,9 +1,10 @@
 ---
 id: TASK-41
 title: 'Source store: held empty outcomes are persisted under another call''s dataset'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-25T05:45:08Z'
+updated_date: '2026-11-25T05:52:42Z'
 labels:
   - lensgraph
 dependencies: []
@@ -55,3 +56,9 @@ Out of scope: changing breaker thresholds or streak semantics.
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_9a326584f5c7, worktree task-41
+<!-- SECTION:NOTES:END -->
