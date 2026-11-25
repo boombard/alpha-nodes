@@ -22,6 +22,7 @@ from toy.sources_catalog import (
     AssaySchema,
     FakeAssayProvider,
     FakeBulkAssayProvider,
+    make_raw,
 )
 
 
@@ -109,7 +110,7 @@ def test_fake_provider_fetch_script_unknown_and_settled() -> None:
     first = p.fetch(ASSAYS, items)
     assert [o.kind for o in first] == ["rate_limited", "empty"]
     second = p.fetch(ASSAYS, items[:1])[0]
-    assert second.kind == "ok" and second.settled_through == d(3) and len(second.payload) == 3
+    assert second.kind == "ok" and second.settled_through == d(3) and len(second.payload) == 5
     assert len(p.calls) == 2
     info = p.fetch(STRAIN_INFO, [WorkItem(dataset="strain_info", entity="S1", interval=None)])
     assert info[0].kind == "ok"
@@ -120,7 +121,7 @@ def test_fake_provider_normalise_marks_spike_suspect() -> None:
     p.spike_days = {d(3)}
     item = WorkItem(dataset="assays", entity="S1", interval=iv(1, 5))
     outcome = p.fetch(ASSAYS, [item])[0]
-    frame = p.normalise(ASSAYS, None, outcome.payload)  # type: ignore[arg-type]
+    frame = p.normalise(ASSAYS, make_raw(), outcome.payload)
     by_day: pd.DataFrame = frame.set_index(frame["day"].dt.day)
     assert by_day.loc[3, "quality"] == "suspect"
     assert by_day.loc[3, "quality_reasons"] == ["jump_x100"]
@@ -134,5 +135,5 @@ def test_fake_provider_normalise_marks_spike_suspect() -> None:
 def test_normalise_marks_non_positive_rejected() -> None:
     p = FakeAssayProvider()
     payload = pd.DataFrame({"t": ["2026-01-01", "2026-01-02"], "value": [1.0, -1.0]})
-    frame = p.normalise(ASSAYS, None, payload)  # type: ignore[arg-type]
+    frame = p.normalise(ASSAYS, make_raw(), payload)
     assert list(frame["quality"]) == ["ok", "rejected"]

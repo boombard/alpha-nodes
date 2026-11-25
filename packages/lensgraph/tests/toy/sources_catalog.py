@@ -4,7 +4,7 @@
 so scheduler tests can tell them apart. Data is deterministic from the entity name.
 """
 
-from datetime import date, timedelta
+from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
 import numpy as np
@@ -82,6 +82,7 @@ class _FakeProvider:
         self.spike_days: set[date] = set()
 
     def normaliser_version(self, dataset: str) -> str:
+        """Return the configured normaliser version."""
         return self.normaliser_version_value
 
     def fetch(self, dataset: Dataset, items: list[WorkItem]) -> list[FetchOutcome]:
@@ -101,13 +102,13 @@ class _FakeProvider:
             payload = pd.DataFrame({"label": [f"strain {item.entity}"], "lab": ["lab-a"]})
             return FetchOutcome(item=item, kind="ok", payload=payload)
         assert item.interval is not None
-        last = min(item.interval.end, self.settled_through or item.interval.end)
-        days = pd.date_range(item.interval.start, last, freq="D")
+        settled = min(item.interval.end, self.settled_through or item.interval.end)
+        days = pd.date_range(item.interval.start, item.interval.end, freq="D")
         rng = np.random.default_rng(sum(map(ord, item.entity)))
         values = 1.0 + rng.uniform(0.0, 0.1, len(days))
         values = np.where([d.date() in self.spike_days for d in days], values * 100, values)
         payload = pd.DataFrame({"t": days.strftime("%Y-%m-%d"), "value": values})
-        return FetchOutcome(item=item, kind="ok", payload=payload, settled_through=last)
+        return FetchOutcome(item=item, kind="ok", payload=payload, settled_through=settled)
 
     def normalise(self, dataset: Dataset, raw: RawResponse, payload: Any) -> pd.DataFrame:
         """Map raw columns to canonical ones and add quality metadata."""
@@ -161,3 +162,17 @@ class FakeBulkAssayProvider(_FakeProvider):
 
     def __init__(self, name: str = "fake_bulk") -> None:
         super().__init__(name)
+
+
+def make_raw(provider: str = "fake", dataset: str = "assays", entity: str = "S1") -> RawResponse:
+    """A real `RawResponse` for calling `normalise` directly in tests."""
+    return RawResponse(
+        raw_id="raw-1",
+        provider=provider,
+        dataset=dataset,
+        entity=entity,
+        interval=None,
+        payload_hash="h",
+        fetched_at=datetime(2026, 1, 1, tzinfo=UTC),
+        library_version="toy-1",
+    )

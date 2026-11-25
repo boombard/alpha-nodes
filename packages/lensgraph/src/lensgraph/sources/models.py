@@ -8,7 +8,7 @@ Source store (layer 1 cache).
 
 from collections.abc import Iterable
 from datetime import date, datetime, timedelta
-from typing import Any, Literal, Optional
+from typing import Any, Literal, Optional, get_args
 
 import pandas as pd
 import pandera.pandas as pa
@@ -121,7 +121,7 @@ class Dataset(BaseModel):
     `frame_schema`. See documentation/design/core.md, Source store.
     """
 
-    model_config = ConfigDict(frozen=True, extra="forbid", arbitrary_types_allowed=True)
+    model_config = _FROZEN_ARBITRARY
 
     name: str
     frame_schema: type[pa.DataFrameModel]  # canonical columns only (no fact meta columns)
@@ -238,7 +238,7 @@ class NormalisedMeta(pa.DataFrameModel):
     """Columns `Provider.normalise` adds next to the canonical ones."""
 
     repairs: Series[object]  # list[str] per row, e.g. ["minor_unit"]; [] when none
-    quality: Series[str] = pa.Field(isin=["ok", "suspect", "rejected"])  # a `Quality`
+    quality: Series[str] = pa.Field(isin=list(get_args(Quality)))  # a `Quality`
     quality_reasons: Series[object]  # list[str]; non-empty when quality != "ok"
     known_at: Optional[Series[pd.DatetimeTZDtype]] = pa.Field(  # noqa: UP045 (pandera Optional)
         nullable=True, dtype_kwargs={"unit": "ns", "tz": "UTC"}
@@ -267,7 +267,7 @@ FACT_META_COLUMNS: tuple[str, ...] = (
 class SourceSlice(BaseModel):
     """What a fetch node reads: facts for one entity, canonical + `FACT_META_COLUMNS`."""
 
-    model_config = ConfigDict(extra="forbid", arbitrary_types_allowed=True)
+    model_config = _FROZEN_ARBITRARY
 
     dataset: str
     entity: str
