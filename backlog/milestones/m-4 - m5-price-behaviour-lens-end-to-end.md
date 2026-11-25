@@ -10,3 +10,5 @@ Detailed 2026-11-25 (TASK-12). Calculation layers per finance.md: numpy kernels 
 TASK-43 M5.1 contracts -> {TASK-45 M5.3 adapters + calc nodes (also after TASK-44 M5.2 kernels), TASK-46 M5.4 price_behaviour lens, TASK-47 M5.5 run-view charts} -> TASK-48 M5.6 registry, 50-ticker run, e2e. TASK-44 has no dependencies and runs alongside TASK-43.
 
 **Demo gate:** a live 50-ticker run gives an HTML report with a dossier per candidate, where claims drill down to the metrics and the price chart. Rerunning after a threshold change recomputes only the lens and the aggregator.
+
+**Signed off 2026-11-25** by the user. Live run 20261125T075512-ba8ac6: 50/50 price_behaviour ok; threshold change rerun --offline (20261125T075525-e86db1) changed only price_behaviour and dossier outputs, every fetch and calc output identical (calc nodes are not memoized), no provider calls. Chart and metric cites clicked through in a browser. Evidence in .lensgraph/m5-demo/.
