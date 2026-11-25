@@ -1,10 +1,10 @@
 ---
 id: TASK-40
 title: lensgraph run reports failed nodes
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-25T05:31:05Z'
-updated_date: '2026-11-25T05:45:09Z'
+updated_date: '2026-11-25T05:48:36Z'
 labels:
   - lensgraph
 dependencies: []
@@ -42,17 +42,17 @@ Out of scope: changing exit codes, `sources status` output.
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 lensgraph run prints node counts by status and one line per failed node (capped), for completed and aborted runs
-- [ ] #2 Exit codes unchanged; core.md CLI section documents the output
-- [ ] #3 Tested with a toy failing node in test_cli.py
+- [x] #1 lensgraph run prints node counts by status and one line per failed node (capped), for completed and aborted runs
+- [x] #2 Exit codes unchanged; core.md CLI section documents the output
+- [x] #3 Tested with a toy failing node in test_cli.py
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -65,4 +65,6 @@ Worker: dispatch ctx_ff0a1c773ece, worktree task-40
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 Worker: lensgraph run prints a 'nodes:' counts line (ok, recovered, failed, skipped; zero counts omitted) and 'failed: name[candidate]: <first error line>' lines capped at 20 with '… and N more', for completed and aborted runs; exit codes unchanged; core.md CLI section updated. 1 commit d2f2f86; 4 new CLI tests; pytest 630 passed, ruff and pyright clean. Coordinator review: ACs met, no fix round needed. Rulings: key printed as name[candidate] (existing NodeKey str); 'recovered' counted; a failed node with no error prints 'no error recorded'. The flaky test the worker saw (test_m4_e2e unknown ticker) is a real pre-existing bug on main, filed as TASK-41; unrelated to this diff.
+
+Landed 98d624d on main.
 <!-- SECTION:FINAL_SUMMARY:END -->
