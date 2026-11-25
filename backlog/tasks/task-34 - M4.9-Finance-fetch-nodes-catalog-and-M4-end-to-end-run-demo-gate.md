@@ -4,7 +4,7 @@ title: M4.9 Finance fetch nodes, catalog and M4 end-to-end run (demo gate)
 status: In Review
 assignee: []
 created_date: '2026-11-25T01:09:40Z'
-updated_date: '2026-11-25T05:26:09Z'
+updated_date: '2026-11-25T05:29:05Z'
 labels:
   - finance
 milestone: m-3
@@ -92,6 +92,8 @@ Out of scope: lenses and calcs on prices (M5), adjusted-close calc (M5), `data_q
 Worker: dispatch ctx_13aafebdd418, worktree task-34
 
 Demo commands (network, run by the human): 'uv run lensgraph run runs/m4_prices.yaml' twice, then 'uv run lensgraph sources status --suspect', then 'uv run lensgraph run runs/m4_prices.yaml --offline'.
+
+Demo gate run 2026-11-25 by the worker in task-34 (logs .lensgraph/m4-demo/ in that worktree): PARTIAL. Pass: second run makes no network calls for ok items; GBp normalised (BP.L 5.44 GBP); no live bar stored; suspect = 6 NOK fx_jump rows, no price suspects; no truncation on 10y. Fail: prices for SAP.DE and MC.PA fail in every run with 'normalise: TransactionException: Current transaction is aborted (please ROLLBACK)', so the offline rerun is 21/23 ok; failed items are retried each run. Also: CLI prints ok and exits 0 with failed nodes. Not signed off.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
