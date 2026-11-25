@@ -331,6 +331,31 @@ cross-candidate ranking in v1) and exposed as params. The backtest is how they g
 Liquidity, market cap, listing age, data coverage. It is likely to be more useful as a
 campaign stage-0 gate than as a lens.
 
+## Technical analysis and TA-Lib (user, 2026-11-25)
+
+The v1 price calcs are an MVP. Much more technical analysis is expected later.
+[TA-Lib](https://github.com/TA-Lib/ta-lib) (C library, BSD-3) and its Python wrapper
+[ta-lib-python](https://github.com/TA-Lib/ta-lib-python) are the reference implementations
+for named technical indicators. They're used in two ways:
+
+1. **Test oracle.** Our calcs are our own code (pandas), with conventions pinned in this
+   doc. Where a calc has a TA-Lib equivalent, its tests also compare it against TA-Lib
+   on the same series (e.g. `SMA`, `LINEARREG_SLOPE`, `STDDEV` with the ddof difference
+   made explicit). TA-Lib is a **dev dependency** only, until a production calc needs it.
+   - Calcs TA-Lib doesn't cover (12-1 total-return momentum, max drawdown, total-return
+     adjustment, all fundamentals) are tested against hand-computed values only.
+2. **Research reference.** A local snapshot of TA-Lib's per-function docs (formula,
+   inputs, params, defaults, notes) lives in `documentation/reference/ta-lib/`, with an
+   index. Agents read it when choosing or specifying indicators. It records which
+   functions the pinned ta-lib-python version actually exposes, because the docs on
+   TA-Lib's `main` can run ahead of the released wrapper.
+
+When a production calc is a convention-heavy indicator (Wilder smoothing in RSI/ATR/ADX,
+MACD, stochastics, candlestick patterns), calling TA-Lib directly is an option. It goes
+behind the finance indicator module, never in lenses, the same way providers sit behind
+adapters. Watch for TA-Lib's NaN behaviour: a gap can turn the rest of a smoothed output
+into NaN, so inputs need explicit gap handling.
+
 ## Universe campaign (finance instantiation of core campaigns)
 
 Example (user's motivating case): equities listed in the UK and Europe, balanced

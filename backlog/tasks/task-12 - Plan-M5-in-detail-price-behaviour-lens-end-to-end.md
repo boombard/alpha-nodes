@@ -4,13 +4,14 @@ title: 'Plan M5 in detail: price-behaviour lens end-to-end'
 status: To Do
 assignee: []
 created_date: '2026-11-23T08:03:32Z'
-updated_date: '2026-11-25T01:09:40Z'
+updated_date: '2026-11-25T06:03:36Z'
 labels:
   - plan
   - sketch
 milestone: m-4
 dependencies:
   - TASK-34
+  - TASK-42
 references:
   - documentation/design/finance.md
 type: task
@@ -21,7 +22,7 @@ ordinal: 12000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 Sketched tasks:
-- M5.1 calc nodes: momentum 12-1, trend vs 200d MA + slope, realised vol (1y annualised), max drawdown (3y); ratio-based (as-of safe); exact-value tests on synthetic series. [parallel]
+- M5.1 calc nodes: momentum 12-1, trend vs 200d MA + slope, realised vol (1y annualised), max drawdown (3y); ratio-based (as-of safe); exact-value tests on synthetic series, plus TA-Lib oracle tests where an equivalent exists (SMA, LINEARREG_SLOPE, STDDEV; see finance.md, Technical analysis and TA-Lib). Return/vol conventions pinned in finance.md. [parallel; needs TASK-42 for the ta-lib dev dependency]
 - M5.2 `price_behaviour` DeterministicLens with components and default thresholds as params. [after M5.1 contracts]
 - M5.3 finance report renderers (price chart, metrics table). [parallel]
 - M5.4 100-ticker demo run YAML + e2e (recorded fixtures in tests; live run is the demo gate).
