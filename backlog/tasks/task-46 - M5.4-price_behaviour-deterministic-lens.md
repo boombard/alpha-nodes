@@ -1,10 +1,10 @@
 ---
 id: TASK-46
 title: M5.4 price_behaviour deterministic lens
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T06:37:27Z'
-updated_date: '2026-11-25T06:57:15Z'
+updated_date: '2026-11-25T07:00:28Z'
 labels:
   - finance
 milestone: m-4
@@ -96,3 +96,11 @@ Out of scope: registering the lens (M5.6); calibrating defaults (M8); coverage d
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_0938ae3c3037, worktree task-46 (run run_3fc22c1f4db5)
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker: PriceBehaviour deterministic lens (5 components with the specified scorers, weights and claim templates; price_chart optional, evidence only, input weight 0; data_quality warn flag added in an assess() override that calls super().assess(), citing <input>.suspect_bars for each input with suspect bars). 13 tests (all specified plus test_chart_does_not_change_coverage). pytest 780 passed, ruff and pyright clean.
+Coordinator review: matches ACs 1-4, Files and Interfaces; docstrings present and meaningful. One fix round: an out-of-scope ruff-format reflow of test_m4_e2e.py was reverted (e4adda6). Diff vs main is now only the 3 task files.
+Open points: 3 commits (feat, test fix, revert) - squash on landing. Rulings: flag text 'Suspect price bars used in: momentum (2 suspect bars), ...'; the flag is also added to abstained verdicts (harmless).
+<!-- SECTION:FINAL_SUMMARY:END -->
