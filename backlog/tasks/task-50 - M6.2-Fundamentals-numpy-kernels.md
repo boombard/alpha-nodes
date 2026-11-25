@@ -1,9 +1,10 @@
 ---
 id: TASK-50
 title: M6.2 Fundamentals numpy kernels
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-25T08:17:39Z'
+updated_date: '2026-11-25T08:26:48Z'
 labels:
   - finance
 milestone: m-5
@@ -74,3 +75,9 @@ Out of scope: pandas adapters and calc nodes (M6.6, M6.7); currency handling (M6
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_19e844b9e856, worktree task-50 (run run_af908de3f039)
+<!-- SECTION:NOTES:END -->
