@@ -1,10 +1,10 @@
 ---
 id: TASK-45
 title: M5.3 Price frame adapters and calc nodes
-status: In Review
+status: In Progress
 assignee: []
 created_date: '2026-11-25T06:37:26Z'
-updated_date: '2026-11-25T07:02:53Z'
+updated_date: '2026-11-25T07:38:39Z'
 labels:
   - finance
 milestone: m-4
@@ -101,7 +101,7 @@ Out of scope: registering the nodes (M5.6); the lens (M5.4); fx conversion (rati
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
-Worker: dispatch ctx_0c33e8ad5b31, worktree task-45 (run run_3fc22c1f4db5)
+Human feedback sent to the worker (ctx_09e03d27df57): alpha_nodes.conventions (BARS_PER_MONTH/BARS_PER_YEAR) as defaults, periods_per_year node params removed, price calc nodes memoize=False.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
