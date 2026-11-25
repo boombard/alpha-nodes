@@ -1,10 +1,10 @@
 ---
 id: TASK-13
 title: 'Plan M6 in detail: fundamentals lenses'
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-23T08:03:32Z'
-updated_date: '2026-11-25T08:18:33Z'
+updated_date: '2026-11-25T23:11:47Z'
 labels:
   - plan
   - sketch
@@ -49,10 +49,10 @@ Design refs: finance.md (Datasets, Providers, Data quality, v1 lenses 2 and 3, K
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -60,3 +60,9 @@ Design refs: finance.md (Datasets, Providers, Data quality, v1 lenses 2 and 3, K
 <!-- SECTION:NOTES:BEGIN -->
 Planned 2026-11-25: TASK-49..57 plus TASK-25 detailed as M6.3; sketches TASK-58 (filings_text), TASK-59 (ESEF), TASK-60 (FallbackModel). finance.md gained 'Fundamentals: datasets, providers and pinned conventions'. TASK-14 now depends on TASK-57. Awaiting human approval before dispatch.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+M6 planned (commit d58f7ea): TASK-49 contracts, TASK-50 kernels, TASK-25 (moved into M6 as M6.3 critical inputs) -> TASK-51 EDGAR, TASK-52 yfinance fundamentals+news, TASK-53 adapters+calcs, TASK-55 quality_value, TASK-56 price_vs_fundamentals -> TASK-54 valuation -> TASK-57 e2e/demo gate. Sketches TASK-58 filings_text (deferred), TASK-59 ESEF research, TASK-60 FallbackModel. TASK-14 re-pointed at TASK-57. Human approval: TASK-50 (2026-11-25), TASK-49 and TASK-25 (2026-11-26); user closed this plan task 2026-11-26 after TASK-25/49 landed. Open for the user: verify the rubric's Buffett sources in TASK-55; provide ALPHA_NODES_SEC_USER_AGENT when TASK-51 records fixtures.
+<!-- SECTION:FINAL_SUMMARY:END -->
