@@ -1,9 +1,10 @@
 ---
 id: TASK-42
 title: TA-Lib function reference library and dev dependency
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-25T06:03:29Z'
+updated_date: '2026-11-25T06:06:22Z'
 labels:
   - finance
   - docs
@@ -66,3 +67,9 @@ The group should come from the wrapper's `talib.get_function_groups()` where ava
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_bfef94df016c, worktree task-42
+<!-- SECTION:NOTES:END -->
