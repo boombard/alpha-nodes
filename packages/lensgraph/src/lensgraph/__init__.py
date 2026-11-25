@@ -1,6 +1,7 @@
 """lensgraph: generic candidates x lenses -> dossiers core (no domain concepts)."""
 
 from .aggregate import Aggregator, ShrunkMeanAggregator, VetoAggregator
+from .charts import LineChart
 from .citations import citable_ids
 from .config import ReportOptions, RunConfig, Settings, load_object
 from .graph import build_plan
@@ -68,6 +69,7 @@ __all__ = [
     "LensAssessment",
     "LensNode",
     "LensVerdict",
+    "LineChart",
     "Node",
     "NodeRegistry",
     "Panel",

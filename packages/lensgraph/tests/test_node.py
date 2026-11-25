@@ -118,3 +118,35 @@ def test_code_version_covers_node_base_class_source():
     a, b = _make_a(), _make_b()
     assert inspect.getsource(a) == inspect.getsource(b)
     assert a.code_version() != b.code_version()
+
+
+def _helper(x):
+    return x + 1
+
+
+def test_code_deps_change_code_version():
+    import types
+
+    class Plain(GrowthRate):
+        pass
+
+    class WithFn(GrowthRate):
+        code_deps: ClassVar[tuple] = (_helper,)
+
+    class WithModule(GrowthRate):
+        code_deps: ClassVar[tuple] = (types,)
+
+    assert WithFn.code_version() != Plain.code_version()
+    assert WithModule.code_version() not in {Plain.code_version(), WithFn.code_version()}
+
+
+def test_code_version_unchanged_without_code_deps():
+    import hashlib
+
+    class Plain(GrowthRate):
+        pass
+
+    material = Plain.version + "".join(
+        inspect.getsource(c) for c in Plain.__mro__ if issubclass(c, Node)
+    )
+    assert Plain.code_version() == hashlib.sha256(material.encode()).hexdigest()[:16]

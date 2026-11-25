@@ -77,7 +77,7 @@
                   "growth_rate": "2ffde053d982db220b1c7b5881cc79d08ce963330f02dda2b19e4922f6ab2cfe"
                 },
                 "input_tokens": 0,
-                "lens_version": "362096961ca9446a",
+                "lens_version": "3b1ea2637f718833",
                 "model": null,
                 "model_settings": {},
                 "output_tokens": 0,
@@ -120,7 +120,7 @@
                   "tox_notes": "60290af994e9abf7f8bed9a787b481324432bb09c54d7af5dbdf61804fdbd282"
                 },
                 "input_tokens": 153,
-                "lens_version": "dc43a48cfb7a5a0d",
+                "lens_version": "1bdc8ab73560312f",
                 "model": "function:_scripted:",
                 "model_settings": {},
                 "output_tokens": 20,
@@ -157,10 +157,10 @@
             "attempts": 1,
             "backtest_valid": true,
             "input_hashes": {
-              "dossier": "639492defa7cf6da74e1117bcbb5ab4b0304bef7959ee37ed7c40bce8bacf8b7"
+              "dossier": "08e35064e2e747c191661165f05ee65286a5a92691783ac2a12afebb801c2283"
             },
             "input_tokens": 219,
-            "lens_version": "31fce35c12840f3a",
+            "lens_version": "086350ab594184ce",
             "model": "function:_scripted:",
             "model_settings": {},
             "output_tokens": 26,
@@ -250,7 +250,7 @@
                   "growth_rate": "ba11a289db070b309f4bbdd7151cf2af50703deacbc236f1fd34310fe369a312"
                 },
                 "input_tokens": 0,
-                "lens_version": "362096961ca9446a",
+                "lens_version": "3b1ea2637f718833",
                 "model": null,
                 "model_settings": {},
                 "output_tokens": 0,
@@ -293,7 +293,7 @@
                   "tox_notes": "5c28d529a964745c7ba2651b5591b0935543c054e7b00d25ed2139686c4a8ede"
                 },
                 "input_tokens": 144,
-                "lens_version": "dc43a48cfb7a5a0d",
+                "lens_version": "1bdc8ab73560312f",
                 "model": "function:_scripted:",
                 "model_settings": {},
                 "output_tokens": 20,
@@ -330,10 +330,10 @@
             "attempts": 1,
             "backtest_valid": true,
             "input_hashes": {
-              "dossier": "6bd5ae334c127615db639b78b154a6a0f13dc73dc1e4410e27584a1c864abdf9"
+              "dossier": "4c9eeba95bcd6bb761aa04ae2699a6ca86941035bedaf3717e1197907c8122af"
             },
             "input_tokens": 219,
-            "lens_version": "31fce35c12840f3a",
+            "lens_version": "086350ab594184ce",
             "model": "function:_scripted:",
             "model_settings": {},
             "output_tokens": 26,
@@ -394,7 +394,7 @@
                 "backtest_valid": true,
                 "input_hashes": {},
                 "input_tokens": 0,
-                "lens_version": "362096961ca9446a",
+                "lens_version": "3b1ea2637f718833",
                 "model": null,
                 "model_settings": {},
                 "output_tokens": 0,
@@ -423,7 +423,7 @@
                 "backtest_valid": true,
                 "input_hashes": {},
                 "input_tokens": 0,
-                "lens_version": "dc43a48cfb7a5a0d",
+                "lens_version": "1bdc8ab73560312f",
                 "model": null,
                 "model_settings": {},
                 "output_tokens": 0,
@@ -460,10 +460,10 @@
             "attempts": 1,
             "backtest_valid": true,
             "input_hashes": {
-              "dossier": "e12df55cbf685f09ad9d0454e0ef2cdf55b51b42652832eaa8a3044f569f529b"
+              "dossier": "7d1c4d505396d7ce098abab52df6e5523e66346b701fd8bdd6b1852d3d9e8452"
             },
             "input_tokens": 208,
-            "lens_version": "31fce35c12840f3a",
+            "lens_version": "086350ab594184ce",
             "model": "function:_scripted:",
             "model_settings": {},
             "output_tokens": 26,

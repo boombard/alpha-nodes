@@ -48,6 +48,7 @@ class Component(BaseModel):
     weight: float = (
         1.0  # relative weight; overridable per run via `DeterministicLens.weight_overrides`
     )
+    evidence: tuple[str, ...] = ()  # extra citable ids added to the claim's cites when citable
     claim_template: str = "{name}: {value:.3g}"  # formatted with `name` and the raw `value`
 
 
@@ -76,6 +77,19 @@ class DeterministicLens(LensNode):
     thresholds: tuple[float, float, float, float] = (-0.6, -0.2, 0.2, 0.6)  # stance cut points
     conviction_margins: tuple[float, float] = (0.1, 0.3)  # distance below which: low, medium
     weight_overrides: dict[str, float] = {}  # noqa: RUF012  # component name -> weight, replacing the default
+
+    scorer_overrides: dict[str, LinearScorer] = {}  # noqa: RUF012  # component name -> scorer, replacing the default
+
+    @model_validator(mode="after")
+    def _check_scorer_overrides(self) -> Self:
+        """Reject scorer override names that match no component (typos)."""
+        known = {c.name for c in type(self).components}
+        unknown = sorted(set(self.scorer_overrides) - known)
+        if unknown:
+            raise ValueError(
+                f"scorer_overrides names unknown components {unknown}; known: {sorted(known)}"
+            )
+        return self
 
     @model_validator(mode="after")
     def _check_weight_overrides(self) -> Self:
@@ -124,7 +138,7 @@ class DeterministicLens(LensNode):
         present = [(c, v) for c in self.components if (v := raw[c.name]) is not None]
         if not present:
             return LensAssessment(status="abstained", abstain_reason="no components available")
-        scored = {c.name: c.scorer(v) for c, v in present}
+        scored = {c.name: self.scorer_overrides.get(c.name, c.scorer)(v) for c, v in present}
         weights = {c.name: self.weight_overrides.get(c.name, c.weight) for c, _ in present}
         total = sum(weights.values())
         if total <= 0:
@@ -136,7 +150,7 @@ class DeterministicLens(LensNode):
             Claim(
                 text=c.claim_template.format(name=c.name, value=v),
                 direction=1 if scored[c.name] >= 0 else -1,
-                cites=[c.source],
+                cites=[c.source, *(e for e in c.evidence if e in citables)],
             )
             for c, v in present
         ]

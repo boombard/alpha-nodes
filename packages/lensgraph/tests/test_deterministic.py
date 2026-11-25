@@ -195,3 +195,44 @@ async def test_zero_total_weight_abstains():
 def test_linear_scorer_rejects_equal_bounds():
     with pytest.raises(ValueError, match="hi"):
         LinearScorer(lo=1, hi=1)
+
+
+async def test_scorer_overrides_replace_default():
+    base = await _verdict(ScoreLens(), x=0.5)
+    override = LinearScorer(lo=0, hi=1)
+    changed = await _verdict(ScoreLens(scorer_overrides={"x": override}), x=0.5)
+    assert changed.components["x"] == pytest.approx(0.0)
+    assert changed.components != base.components
+    assert changed.score != base.score
+
+
+def test_scorer_overrides_unknown_name_rejected():
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError, match=r"known: \['a', 'b'\]"):
+        DirectLens(scorer_overrides={"zzz": LinearScorer(lo=0, hi=1)})
+
+
+class EvidenceLens(DeterministicLens):
+    """One component with an extra `chart` evidence cite."""
+
+    name: ClassVar[str] = "evidence_lens"
+    lens_name: ClassVar[str] = "evidence_lens"
+    inputs: ClassVar[dict[str, str]] = {"x": "x_node"}
+    optional_inputs: ClassVar[dict[str, str]] = {"chart": "chart_node"}
+    components: ClassVar[list[Component]] = [
+        Component(
+            name="x", source="x", scorer=LinearScorer(lo=-1, hi=1), evidence=("chart",)
+        )
+    ]
+
+
+async def test_evidence_cited_when_available():
+    verdict = await _verdict(EvidenceLens(), x=0.5, chart="a chart")
+    assert verdict.claims[0].cites == ["x", "chart"]
+
+
+async def test_evidence_skipped_when_not_citable():
+    verdict = await _verdict(EvidenceLens(), x=0.5, chart=Absent(reason="none"))
+    assert verdict.status == "ok"
+    assert verdict.claims[0].cites == ["x"]

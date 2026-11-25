@@ -48,7 +48,9 @@ Class-based (pydantic models, see above). Each node declares, as `ClassVar`s (cf
   or a plain type. It is **validated after `run`**. A violation fails the node.
 - `scope`: `"shared"` (once per run, e.g. a market index) or `"candidate"` (once per candidate).
 - `version`: explicit string, bumped by hand when behaviour changes in code the source
-  hash can't see (helpers).
+  hash can't see and `code_deps` doesn't cover.
+- `code_deps`: tuple of helper functions or modules (default empty) whose source
+  `code_version()` also hashes, so editing a kernel or helper invalidates the node's cache.
 - `resource`: optional name of a rate-limited resource (e.g. `"yfinance"`, `"llm:anthropic"`).
 - `run(candidate, **inputs, **params)`: sync or async. Sync runs in a worker thread.
 
@@ -139,7 +141,9 @@ Rules:
 - Content-addressed blobs: an unchanged output stops the rerun cascade ("early cutoff";
   observed in all three spike implementations).
 - Code-version rule (Claude's call): explicit `version` + the source hash of the node class and all its `Node` base classes (so editing a shared lens template or aggregator invalidates subclasses' caches).
-  The hash doesn't see helper functions, so there is an escape hatch:
+  Helpers are covered by `code_deps`: `code_version()` also hashes `inspect.getsource(d)` for each
+  declared function or module, in declared order. With `code_deps` empty the hash is unchanged.
+  Anything still invisible (undeclared helpers, third-party code) has the escape hatch:
   `--invalidate <node>` (that node and descendants) and `--no-cache`.
 - AI nodes: the key includes model id, prompt template hash, prompt variant, and the
   rendered context hash. Identical calls are never paid for twice.
@@ -307,6 +311,10 @@ in config and are selected per run (`llm_profile: dev`) or per lens.
 - `stance_mean` is the score interpolated between threshold centres (`numpy.interp`), so it is
   monotone in the score; the integer stance still comes from the thresholds.
 - Claims are generated from templates per component, citing the calc fields used.
+  `Component.evidence` lists extra citable ids (e.g. a chart) appended to the claim's cites,
+  each only if it is in `citables`; an unavailable evidence input never fails the claim.
+- `scorer_overrides` (param, `{component name: LinearScorer}`) replaces a component's default
+  scorer per run, like `weight_overrides`; unknown names are rejected.
 
 ### Possible future: fuzzy rule bases (not decided)
 
@@ -593,6 +601,9 @@ reading **the same data contract**.
     `src/types/run-view.ts` with the schema hash on its first line; `test_view_schema.py`
     compares that hash with `lensgraph.view.schema.schema_hash()` and checks the committed
     `fixtures/toy-run.json` (`LENSGRAPH_REGEN_FIXTURES=1` rewrites it), so Python tests need no Node.
+- **`LineChart`** (`lensgraph.charts`) is a core value type (title, shared `x` dates, named
+  `series` of floats or null, optional `y_label`) that a node may output and a claim may cite.
+  Its view rendering arrives in M5.5.
 - **App:** `packages/lensgraph-ui` (React + TypeScript, Vite). UI components are **MUI** (Material UI)
   with **MUI X DataGrid, community edition** (MIT; no Pro features) for tables, and one theme
   (`src/theme.ts`) with light and dark palettes that follow `prefers-color-scheme`; status colours

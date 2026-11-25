@@ -6,8 +6,9 @@ documentation/design/core.md, Nodes.
 
 import hashlib
 import inspect
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from datetime import date
+from types import ModuleType
 from typing import Any, ClassVar
 
 import pandera.pandas as pa
@@ -63,6 +64,8 @@ class Node(BaseModel):
     memoize: ClassVar[bool] = True  # False: always execute (fetch nodes); see Memoization
     hash_source: ClassVar[bool] = True  # include the class source in `code_version()`
     consumes_verdicts: ClassVar[bool] = False  # only aggregators may read lens verdicts
+    # helper functions/modules whose source `code_version()` also hashes (see core.md, Memoization)
+    code_deps: ClassVar[tuple[Callable[..., Any] | ModuleType, ...]] = ()
 
     def run(self, ctx: NodeContext, **inputs: Any) -> Any:
         """Compute the output from resolved inputs. Subclasses implement it (may be `async`)."""
@@ -107,12 +110,14 @@ class Node(BaseModel):
 
         The source covers the class and every `Node` base class in its MRO, so editing
         inherited logic (e.g. a lens template or aggregator formula) invalidates caches.
+        `code_deps` sources are appended in declared order; empty leaves the hash unchanged.
         """
         material = cls.version
         if cls.hash_source:
             material += "".join(
                 inspect.getsource(c) for c in cls.__mro__ if issubclass(c, Node)
             )
+        material += "".join(inspect.getsource(d) for d in cls.code_deps)
         return hashlib.sha256(material.encode()).hexdigest()[:16]
 
     @classmethod
