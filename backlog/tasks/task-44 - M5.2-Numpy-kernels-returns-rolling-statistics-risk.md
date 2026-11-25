@@ -1,10 +1,10 @@
 ---
 id: TASK-44
 title: 'M5.2 Numpy kernels: returns, rolling statistics, risk'
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T06:37:17Z'
-updated_date: '2026-11-25T06:44:29Z'
+updated_date: '2026-11-25T06:47:27Z'
 labels:
   - finance
 milestone: m-4
@@ -90,3 +90,11 @@ Out of scope: pandas adapters and calc nodes (M5.3); any kernel the price_behavi
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_00e73ddd91c0, worktree task-44
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker: all 11 kernels + _validate, test-first, in commit dad7908 (worktree task-44). pytest 753 passed, ruff and pyright clean. TA-Lib oracles for sma (20, 200), linreg_slope (20), rolling_std ddof=0 and rescaled realised_volatility.
+Review verdict: approved, no fix round. Signatures match the Interfaces exactly; vectorised (sliding_window_view, centred-t OLS slope); kernels import no pandas; ValueError names the argument; short input gives nan/all-NaN.
+Rulings to check: (1) linreg_slope oracle adds atol=1e-12 beside rtol=1e-10 (TA-Lib running-sum drift on near-zero slopes); (2) log/simple agreement uses rtol=1e-9, atol=1e-14; (3) the cross-kernel validation tests sit in test_kernels_returns.py through an ALL_KERNELS dict; (4) skip_return, realised_volatility and total_return_index also validate lookback, periods_per_year, ddof and negative dividends (stricter than specified). Open points: none.
+<!-- SECTION:FINAL_SUMMARY:END -->
