@@ -1,10 +1,10 @@
 ---
 id: TASK-41
 title: 'Source store: held empty outcomes are persisted under another call''s dataset'
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-25T05:45:08Z'
-updated_date: '2026-11-25T05:58:34Z'
+updated_date: '2026-11-25T06:01:16Z'
 labels:
   - lensgraph
 dependencies: []
@@ -44,17 +44,17 @@ Out of scope: changing breaker thresholds or streak semantics.
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 A held empty outcome is handed to the on_outcome/on_tripped of the call that fetched it, for streak ends, the final flush and breaker trips
-- [ ] #2 Concurrent ensure calls on two datasets of one provider log and cache an empty under its own dataset (store test)
-- [ ] #3 test_m4_e2e unknown-ticker test passes 30 runs in a row
+- [x] #1 A held empty outcome is handed to the on_outcome/on_tripped of the call that fetched it, for streak ends, the final flush and breaker trips
+- [x] #2 Concurrent ensure calls on two datasets of one provider log and cache an empty under its own dataset (store test)
+- [x] #3 test_m4_e2e unknown-ticker test passes 30 runs in a row
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -67,4 +67,6 @@ Worker: dispatch ctx_9a326584f5c7, worktree task-41
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 Worker: ProviderLimiter holds (outcome, on_outcome, on_tripped) entries; a streak end, the final flush and a breaker trip hand each held empty to the call that fetched it (streak still provider-wide). Review round: a failing or cancelled call now takes back only its own held empties (take_held(owner=on_outcome)); other calls' stay held. core.md Circuit breakers updated. Commits ef79107, 1fd6b80; tests: 6 scheduler tests (streak end, final flush, trip, own-failure, other call failing, other call cancelled) and a concurrent two-dataset store test that failed before the fix; pytest 637 passed, ruff and pyright clean; test_m4_e2e -k unknown 30/30. Coordinator review: ACs met after one fix round, nothing open. Rulings: limiter.flush() takes no argument (module-internal); call ownership is the identity of the call's on_outcome closure (one per ensure pass and provider); the old failed-run scheduler test was rewritten because it encoded the cross-call behaviour.
+
+Landed 5f3e468 (squashed ef79107..1fd6b80) on main; unknown-ticker e2e test 15/15 on main.
 <!-- SECTION:FINAL_SUMMARY:END -->
