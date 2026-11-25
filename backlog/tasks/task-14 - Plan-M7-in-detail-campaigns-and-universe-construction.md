@@ -4,6 +4,7 @@ title: 'Plan M7 in detail: campaigns and universe construction'
 status: To Do
 assignee: []
 created_date: '2026-11-23T08:03:32Z'
+updated_date: '2026-11-25T05:17:09Z'
 labels:
   - plan
   - sketch
@@ -52,3 +53,9 @@ Design refs: core.md (Campaigns), finance.md (Universe campaign).
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Plan TASK-39 (delisted detection) with universe construction: dead tickers otherwise error on every top-up and can trip the yfinance error breaker.
+<!-- SECTION:NOTES:END -->
