@@ -1,10 +1,10 @@
 ---
 id: TASK-27
 title: 'M4.2 Source coverage planning: gaps, settled tail, TTL and empty caching'
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T01:09:15Z'
-updated_date: '2026-11-25T02:53:28Z'
+updated_date: '2026-11-25T02:56:13Z'
 labels:
   - core
 milestone: m-3
@@ -102,3 +102,12 @@ Out of scope: storage of states and attempts (M4.5), scheduling (M4.3).
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_576944040993, worktree task-27
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker: lensgraph/sources/coverage.py (CoverageState, GapPlan, plan_gaps, apply_outcome), 20 tests, core.md TTL bullet replaced. 1 commit b5cf22d. pytest 364 passed, ruff and pyright clean (re-run by coordinator).
+Worker rulings: a request wholly inside settled history leaves tail_checked_at unchanged; settled_through never moves backwards; an ok outcome wholly past settled_through adds no coverage; plan_gaps raises ValueError for a date axis without an interval; restated_before=date.min is a no-op; empty is cached for snapshots too.
+Coordinator review: approve, no fix round. Matches Interfaces and semantics exactly; docstrings fine.
+Open point (spec-level, for the human / TASK-30): empty_at is one scalar per (dataset, entity, provider, params). An `empty` for one date range (e.g. a no-news window or an unsettled tail day) makes plan_gaps return known_empty for ANY request within empty_ttl, including ranges already settled. TASK-30 must not "serve empty" over settled facts; either the store serves stored facts when known_empty, or empty should be recorded per interval.
+<!-- SECTION:FINAL_SUMMARY:END -->
