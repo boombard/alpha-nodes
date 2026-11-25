@@ -112,3 +112,47 @@ def replay(monkeypatch: pytest.MonkeyPatch) -> Iterator["YFReplay"]:
 def clock() -> FakeClock:
     """A Wednesday during LSE trading hours, the day after the fixtures' last bar."""
     return FakeClock(datetime(2026, 11, 25, 10, 0, tzinfo=UTC))
+
+
+@pytest.fixture
+def fundamentals_frame() -> pd.DataFrame:
+    """Two annual periods in GBP; the older one has no filing date (yfinance-style) and sparse items."""
+    nan = float("nan")
+    return pd.DataFrame(
+        {
+            "period_type": ["annual", "annual"],
+            "period_end": pd.to_datetime(["2023-12-31", "2024-12-31"]),
+            "filed_at": pd.to_datetime([None, "2025-03-01"]),
+            "currency": ["GBP", "GBP"],
+            "revenue": [1000.0, 1100.0],
+            "operating_income": [100.0, 120.0],
+            "net_income": [80.0, 90.0],
+            "interest_expense": [nan, 5.0],
+            "depreciation_amortization": [20.0, 22.0],
+            "operating_cash_flow": [110.0, 130.0],
+            "capex": [30.0, 35.0],
+            "total_assets": [2000.0, 2100.0],
+            "total_liabilities": [1200.0, 1250.0],
+            "total_equity": [800.0, 850.0],
+            "common_equity": [790.0, 840.0],
+            "total_debt": [300.0, 310.0],
+            "cash": [150.0, 170.0],
+            "shares_diluted": [100.0, 99.0],
+            "shares_outstanding": [100.0, 98.0],
+        }
+    )
+
+
+@pytest.fixture
+def news_frame() -> pd.DataFrame:
+    """Two news items; the second has no optional text."""
+    return pd.DataFrame(
+        {
+            "id": ["a1", "a2"],
+            "published_at": pd.to_datetime(["2026-01-05T09:00:00Z", "2026-01-06T10:30:00Z"], utc=True).as_unit("ns"),
+            "headline": ["Profit up", "CEO steps down"],
+            "source": ["Wire", None],
+            "url": ["https://example.test/a1", None],
+            "summary": ["Profits rose.", None],
+        }
+    )

@@ -22,6 +22,7 @@ dependencies = [
     { name = "curl-cffi" },
     { name = "exchange-calendars" },
     { name = "lensgraph" },
+    { name = "pydantic-settings" },
     { name = "yfinance", extra = ["repair"] },
 ]
 
@@ -30,6 +31,7 @@ requires-dist = [
     { name = "curl-cffi", specifier = "==0.17.0" },
     { name = "exchange-calendars", specifier = ">=4.11" },
     { name = "lensgraph", editable = "packages/lensgraph" },
+    { name = "pydantic-settings" },
     { name = "yfinance", extras = ["repair"], specifier = "==1.8.0" },
 ]
 

@@ -1,4 +1,4 @@
-"""Finance fetch nodes: `prices`, `profile` and `fx`, thin subclasses of the generic dataset fetch nodes.
+"""Finance fetch nodes: `prices`, `profile`, `fx`, `fundamentals` and `news`, thin subclasses of the generic dataset fetch nodes.
 
 They read through the source store (the `sources` service), which decides whether the network is
 needed. See documentation/design/finance.md (Providers, Currency) and core.md (Source store).
@@ -27,6 +27,20 @@ class Profile(DatasetFetch):
 
     name: ClassVar[str] = "profile"
     dataset: ClassVar[str] = "profile"
+
+
+class Fundamentals(DatasetFetch):
+    """The candidate's annual statements, every filing known as of the run; a snapshot, so no lookback."""
+
+    name: ClassVar[str] = "fundamentals"
+    dataset: ClassVar[str] = "fundamentals"
+
+
+class News(DatasetFetch):
+    """News items about the candidate; items accumulate across fetches. Untrusted text."""
+
+    name: ClassVar[str] = "news"
+    dataset: ClassVar[str] = "news"
 
 
 class FxRates(DatasetFetchMany):

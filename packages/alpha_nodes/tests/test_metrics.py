@@ -1,13 +1,22 @@
-from datetime import date
+from datetime import UTC, date, datetime
 
 import pytest
 from alpha_nodes.metrics import (
+    BalanceSheetResult,
+    CashGenerationResult,
     DrawdownResult,
+    FundamentalTrendResult,
     MomentumResult,
+    NewsItem,
+    PeriodWindow,
     PriceWindow,
+    ProfitabilityResult,
     TrendResult,
+    ValuationChangeResult,
+    ValuationResult,
     VolatilityResult,
 )
+from lensgraph import citable_ids
 from pydantic import ValidationError
 
 
@@ -30,3 +39,44 @@ def test_none_fields_allowed_for_short_history():
     assert VolatilityResult(**empty, annualised=None).annualised is None
     dd = DrawdownResult(**empty, max_drawdown=None, peak_date=None, trough_date=None)
     assert dd.trough_date is None
+
+
+NO_PERIODS = {"periods": 0, "first_period_end": None, "last_period_end": None, "suspect_periods": 0, "currency": None}
+
+
+def test_suspect_periods_cannot_exceed_periods():
+    with pytest.raises(ValidationError, match="suspect_periods"):
+        PeriodWindow(
+            periods=2,
+            first_period_end=date(2023, 12, 31),
+            last_period_end=date(2024, 12, 31),
+            suspect_periods=3,
+            currency="USD",
+        )
+
+
+def test_fundamentals_results_allow_none_fields():
+    def none_of(model: type) -> object:
+        return model(**NO_PERIODS, **{f: None for f in model.model_fields if f not in NO_PERIODS})
+
+    for model in (
+        ProfitabilityResult,
+        BalanceSheetResult,
+        CashGenerationResult,
+        FundamentalTrendResult,
+        ValuationResult,
+        ValuationChangeResult,
+    ):
+        result = none_of(model)
+        assert isinstance(result, PeriodWindow)
+        with pytest.raises(ValidationError):
+            result.periods = 1  # pyright: ignore[reportAttributeAccessIssue]
+        with pytest.raises(ValidationError):
+            model(**NO_PERIODS, junk=1)  # pyright: ignore[reportCallIssue]
+
+
+def test_news_item_is_citable_by_id():
+    item = NewsItem(
+        id="a1", published_at=datetime(2026, 1, 5, tzinfo=UTC), headline="h", source=None, url=None, summary=None
+    )
+    assert "news[a1]" in citable_ids({"news": [item]})

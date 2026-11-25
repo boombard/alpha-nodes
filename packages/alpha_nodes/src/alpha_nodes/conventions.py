@@ -6,3 +6,6 @@ Pinned conventions.
 
 BARS_PER_MONTH = 21
 BARS_PER_YEAR = 252  # also the annualisation factor, for every venue
+
+FILING_LAG_DAYS = 90  # a period with no filing date counts as known 90 days after period_end
+MAX_ANNUAL_PERIODS = 10  # fundamentals windows take at most the last 10 known annual periods

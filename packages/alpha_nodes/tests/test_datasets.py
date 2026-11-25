@@ -4,10 +4,22 @@ from typing import get_args
 import pandas as pd
 import pandera.pandas as pa
 import pytest
-from alpha_nodes.datasets import DATASETS, FX, PRICES, PROFILE, FxSchema, PriceSchema, ProfileSchema
+from alpha_nodes.datasets import (
+    DATASETS,
+    FUNDAMENTALS,
+    FX,
+    NEWS,
+    PRICES,
+    PROFILE,
+    FundamentalsSchema,
+    FxSchema,
+    NewsSchema,
+    PriceSchema,
+    ProfileSchema,
+)
 from alpha_nodes.units import FieldKind
 
-SCHEMAS = [PriceSchema, ProfileSchema, FxSchema]
+SCHEMAS = [PriceSchema, ProfileSchema, FxSchema, FundamentalsSchema, NewsSchema]
 
 
 @pytest.mark.parametrize("schema", SCHEMAS)
@@ -53,7 +65,7 @@ def test_fx_valid_and_rejects_non_positive(fx_frame: pd.DataFrame) -> None:
 
 
 def test_datasets_registry_names_match() -> None:
-    assert set(DATASETS) == {"prices", "profile", "fx"}
+    assert set(DATASETS) == {"prices", "profile", "fx", "fundamentals", "news"}
     for name, ds in DATASETS.items():
         assert ds.name == name
     assert DATASETS["prices"] is PRICES and DATASETS["profile"] is PROFILE
@@ -67,3 +79,58 @@ def test_dataset_shapes() -> None:
         assert (ds.ttl, ds.empty_ttl) == (day, week)
     assert (PROFILE.axis, PROFILE.key_columns) == ("none", ())
     assert (PROFILE.ttl, PROFILE.empty_ttl) == (timedelta(days=90), week)
+
+
+def test_datasets_registry_has_fundamentals_and_news() -> None:
+    assert DATASETS["fundamentals"] is FUNDAMENTALS and DATASETS["news"] is NEWS
+    assert (FUNDAMENTALS.axis, FUNDAMENTALS.key_columns) == ("none", ("period_type", "period_end", "filed_at"))
+    assert (FUNDAMENTALS.ttl, FUNDAMENTALS.empty_ttl) == (timedelta(days=7), timedelta(days=7))
+    assert (NEWS.axis, NEWS.key_columns) == ("none", ("id",))
+    assert (NEWS.ttl, NEWS.empty_ttl) == (timedelta(days=1), timedelta(days=7))
+
+
+def test_every_fundamentals_column_declares_a_kind() -> None:
+    columns = FundamentalsSchema.to_schema().columns
+    assert columns["capex"].metadata == {"kind": "money"}
+    assert columns["shares_diluted"].metadata == {"kind": "shares"}
+    assert columns["filed_at"].metadata == {"kind": "date"}
+    assert columns["period_type"].metadata == {"kind": "code"}
+
+
+def test_fundamentals_schema_accepts_canonical_frame(fundamentals_frame: pd.DataFrame) -> None:
+    assert list(fundamentals_frame["filed_at"].isna()) == [True, False]
+    FundamentalsSchema.validate(fundamentals_frame)
+
+
+def test_fundamentals_rejects_negative_capex(fundamentals_frame: pd.DataFrame) -> None:
+    fundamentals_frame.loc[0, "capex"] = -1.0
+    with pytest.raises(pa.errors.SchemaError):
+        FundamentalsSchema.validate(fundamentals_frame)
+
+
+def test_fundamentals_rejects_minor_unit_currency(fundamentals_frame: pd.DataFrame) -> None:
+    fundamentals_frame["currency"] = "GBp"
+    with pytest.raises(pa.errors.SchemaError):
+        FundamentalsSchema.validate(fundamentals_frame)
+
+
+def test_fundamentals_rejects_non_positive_shares(fundamentals_frame: pd.DataFrame) -> None:
+    fundamentals_frame.loc[0, "shares_diluted"] = 0.0
+    with pytest.raises(pa.errors.SchemaError):
+        FundamentalsSchema.validate(fundamentals_frame)
+
+
+def test_fundamentals_rejects_unknown_period_type(fundamentals_frame: pd.DataFrame) -> None:
+    fundamentals_frame["period_type"] = "quarterly"
+    with pytest.raises(pa.errors.SchemaError):
+        FundamentalsSchema.validate(fundamentals_frame)
+
+
+def test_news_schema_accepts_canonical_frame(news_frame: pd.DataFrame) -> None:
+    NewsSchema.validate(news_frame)
+
+
+def test_news_schema_requires_tz_aware_published_at(news_frame: pd.DataFrame) -> None:
+    news_frame["published_at"] = news_frame["published_at"].dt.tz_localize(None)
+    with pytest.raises(pa.errors.SchemaError):
+        NewsSchema.validate(news_frame)
