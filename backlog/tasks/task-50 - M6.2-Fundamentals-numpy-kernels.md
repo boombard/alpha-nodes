@@ -1,10 +1,10 @@
 ---
 id: TASK-50
 title: M6.2 Fundamentals numpy kernels
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T08:17:39Z'
-updated_date: '2026-11-25T08:26:48Z'
+updated_date: '2026-11-25T08:28:45Z'
 labels:
   - finance
 milestone: m-5
@@ -81,3 +81,11 @@ Out of scope: pandas adapters and calc nodes (M6.6, M6.7); currency handling (M6
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_19e844b9e856, worktree task-50 (run run_af908de3f039)
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker: alpha_nodes.kernels.fundamentals with the eight kernels (safe_ratio, growth, cagr, mean_std, coefficient_of_variation, owner_earnings, sum_ratio, capitalised_value), exported from alpha_nodes.kernels; 41 tests. Commit b1f2110 (worktree task-50, single commit). pytest 851 passed, ruff and pyright clean.
+Coordinator review: approved, no fix round. Matches the Interfaces and finance.md pinned conventions; docstrings state formulas and nan rules.
+Rulings to check: mean_std uses max(min_n, 2) as the std threshold (ddof=1 needs 2); scalar kernels (growth, cagr, capitalised_value) don't check finiteness (spec required it for arrays only; a nan scalar propagates as nan). Open points: none.
+<!-- SECTION:FINAL_SUMMARY:END -->
