@@ -1,10 +1,10 @@
 ---
 id: TASK-36
 title: M4.5b Source-store circuit breakers and normalise failure isolation
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-25T04:06:44Z'
-updated_date: '2026-11-25T05:01:36Z'
+updated_date: '2026-11-25T05:03:34Z'
 labels:
   - core
 milestone: m-3
@@ -72,18 +72,18 @@ Out of scope: setting the yfinance values (TASK-37); overlap reconciliation (TAS
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Consecutive errors across distinct entities raise GlobalFailure at max_consecutive_errors; retries of one entity count once; ok resets
-- [ ] #2 Consecutive empties raise GlobalFailure at max_consecutive_empty and the tripping streak is not cached; shorter streaks are handed over and cached as before
-- [ ] #3 Both breakers are off by default, so existing providers behave as before
-- [ ] #4 A normalise exception becomes a logged, uncached, unretried entity error raising SourceUnavailable; other entities are persisted
+- [x] #1 Consecutive errors across distinct entities raise GlobalFailure at max_consecutive_errors; retries of one entity count once; ok resets
+- [x] #2 Consecutive empties raise GlobalFailure at max_consecutive_empty and the tripping streak is not cached; shorter streaks are handed over and cached as before
+- [x] #3 Both breakers are off by default, so existing providers behave as before
+- [x] #4 A normalise exception becomes a logged, uncached, unretried entity error raising SourceUnavailable; other entities are persisted
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -98,4 +98,6 @@ Worker: dispatch ctx_56508efae863, worktree task-36
 Worker: RateLimitPolicy.max_consecutive_errors / max_consecutive_empty (off by default) implemented in ProviderLimiter.settle, counting distinct entities in completion order; empty outcomes withheld while a streak is open, flushed when broken or at run end, dropped and logged uncached (on_tripped) when tripped or when the run fails; DuckDBSourceStore isolates normalise/settled-cut/version-append failures via a private _NormaliseError: error attempt 'normalise: ...(payload hash)', nothing cached, not retried, SourceUnavailable after the provider level (first failure + '(+N more)'). core.md Source store updated. Commits bfe41a6, dc5053f; pytest 566 passed, ruff and pyright clean.
 Coordinator review: one round sent and applied: (1) streaks counted per work item, not distinct entity (gaps give several items per entity); (2) open empty streak discarded without logging on other failures; (3) normalise catch wrapped the whole txn and would have mislabelled DuckDB/blob errors. Verdict: approve.
 Open points: test_duplicate_keys_from_normalise_raise renamed and now expects SourceUnavailable (version-append ValueError is an entity error per spec); streaks reset per run_items call (do not span datasets/runs); on cancellation held empties are not logged (noted in a code comment, not the docstring); after a breaker trip, later ok/error outcomes in the same round are still handed over (no stranding).
+
+Landed 3761d05..648e5d9 on main
 <!-- SECTION:FINAL_SUMMARY:END -->
