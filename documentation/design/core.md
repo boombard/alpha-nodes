@@ -115,7 +115,7 @@ Rules:
 | Node raises / output contract violated | executor catches → `Failed(node, candidate, error)` | node failed; dependents **skipped** (not run) |
 | Upstream failed, node is a `LensNode` | default `on_upstream_failure` | `LensVerdict(status="failed", error="upstream 'prices' failed: …")` |
 | Optional input failed or absent | passed as `None`/`Absent` | node runs; lens lowers `coverage` or abstains |
-| Legitimately empty data (no news) | fetch returns explicit empty result, *not* an error | downstream sees empty; coverage reflects it |
+| Legitimately empty data (no news this week) | fetch returns `ok` with an empty frame, *not* an error | downstream sees empty; coverage records the range |
 | AI output invalid (schema/citation) | pydantic-ai `ModelRetry` with the error, up to `max_retries` | then node fails. **Never a placeholder** |
 
 - A dossier is always produced per candidate unless the run aborts.
@@ -381,8 +381,13 @@ identity, never by code. The core provides the mechanics. Domains define dataset
 - **Dataset**: a name + canonical schema + key columns + a *coverage axis* (a date, a
   period, or none for snapshot data) + a TTL policy.
 - **Provider**: an adapter that fetches a dataset slice and maps it to the canonical
-  schema. It classifies outcomes as `ok`, `empty` (legitimately nothing), `error`
-  (transient → retry/backoff, never cached), or `GlobalFailure`.
+  schema. It classifies outcomes as `ok`, `empty`, `error` (transient → retry/backoff,
+  never cached), or `GlobalFailure`.
+  - **`empty` is entity-level**: the provider has nothing at all for this entity (unknown or
+    delisted ticker). A known entity whose requested range simply has no rows (weekend,
+    holiday, today before the close, a week without news) is `ok` with an empty frame and
+    `settled_through`, so coverage records the range like any other. This is why coverage
+    keeps one `empty_at` per (dataset, entity, provider, params), not per interval.
   - Providers are swappable (e.g. a free feed now, a paid one later). The core knows a
     provider only through what it **declares**: entities per request (`max_batch`, 1 =
     no batching), a rate-limit policy (max concurrency, requests/s, burst, backoff
@@ -409,7 +414,8 @@ identity, never by code. The core provides the mechanics. Domains define dataset
   holes in the middle.
 - **Fetch-attempt log**: every attempt with outcome and timestamp. `empty` outcomes are
   cached with their own (shorter) TTL, so a delisted entity isn't re-requested every run.
-  Errors are not cached.
+  While that cache is fresh the store fetches nothing for the entity but still serves any
+  facts it already holds (a delisted ticker keeps its history). Errors are not cached.
 - **TTL per dataset** (e.g. prices 1 day, fundamentals ~1 quarter, profiles 90 days).
   Freshness is checked *per requested interval*, not as a global "fetched recently" gate.
 - **As-of queries**: `query(dataset, entity, range, as_of)` returns the latest version of

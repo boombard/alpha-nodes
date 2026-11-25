@@ -45,7 +45,7 @@ class DuckDBSourceStore(SourceStore):
 ```
 Semantics (each is pinned by a test below):
 - `get` = `ensure` for one entity, then `query`. One `ProviderLimiter` per provider name per store.
-- **Fallback is per entity**: try the chain in order; a provider that is `known_empty` or answers `empty` passes to the next. The slice comes from one provider only (no mixing). All empty → `SourceSlice(empty=True, provider=None)` with an empty frame of the right columns.
+- **Fallback is per entity**: try the chain in order; a provider that is `known_empty` or answers `empty` passes to the next, **unless it already holds facts for this entity in the requested range**: then it fetches nothing and serves those (a delisted ticker keeps its history; see core.md, Provider, "`empty` is entity-level"). The slice comes from one provider only (no mixing). All empty → `SourceSlice(empty=True, provider=None)` with an empty frame of the right columns.
 - **Persistence per outcome**: in `on_outcome`, write the raw response (payload to blobs, record to DuckDB), the attempt, the new coverage state, and the normalised facts, in one DuckDB transaction. A later `GlobalFailure` leaves these in place.
 - **Facts are append-only**: a row is compared with the latest version of its key on its canonical values **and** its labels (`repairs`, `quality`, `quality_reasons`); bookkeeping columns (`fetch_id`, `first_seen_at`, `normaliser_version`) are not compared. A row equal on both adds nothing; a row that differs in either adds a version (`first_seen_at = now`), so a relabel alone (e.g. a new check marking a row `suspect`) is kept in the history. Rows after the outcome's `settled_through` are dropped and an `unsettled` attempt is logged for that tail. `known_at` from the normaliser, else `first_seen_at`.
 - **Queries**: latest version per key with `known_at < as_of + 1 day` (as_of is a date; the cut-off is the end of that UTC day); `as_of=None` means latest. `rejected` rows excluded unless `include_rejected`; `suspect` rows served with their reasons. Interval filter on the axis column.
@@ -68,6 +68,7 @@ Semantics (each is pinned by a test below):
   - `test_rejected_excluded_suspect_served_with_reasons`
   - `test_fallback_to_second_provider_on_empty`: entity unknown to `fake` is served by `fake_bulk`; `provider` on the slice says so; a second get calls neither (empty is cached for `fake`).
   - `test_all_providers_empty_gives_empty_slice`
+  - `test_known_empty_still_serves_stored_facts`: `fake` has stored facts for the entity, then answers `empty`; within `empty_ttl` a `get` over the stored range calls no provider and returns those facts with `provider="fake"`.
   - `test_error_raises_source_unavailable_and_is_not_cached`
   - `test_global_failure_keeps_finished_items_and_resumes`: `ensure` over 4 entities where the 3rd hits the unreachable threshold → `GlobalFailure`; a new store on the same file fetches only the unfinished entities.
   - `test_ensure_batches_by_max_batch`: 7 entities → 2 calls on `fake_bulk`.
