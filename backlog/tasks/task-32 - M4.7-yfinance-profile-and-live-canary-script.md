@@ -1,10 +1,10 @@
 ---
 id: TASK-32
 title: M4.7 yfinance profile and live canary script
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-25T01:09:29Z'
-updated_date: '2026-11-25T04:50:58Z'
+updated_date: '2026-11-25T04:54:02Z'
 labels:
   - finance
 milestone: m-3
@@ -84,19 +84,19 @@ Out of scope: fundamentals/news/screen (M6/M7); the store and runs (M4.9).
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Profile fixtures recorded for the canary set (incl. USD/EUR .L line and two small caps, listed in the README)
-- [ ] #2 normalise_profile maps trading (major unit) and reporting currencies, ISIN and shares; no Yahoo ratios or market cap ingested
-- [ ] #3 Missing shares marked suspect; missing name rejected; profile in capabilities with outcome classification reused
-- [ ] #4 canary.py compares live data with fixtures and exits 1 on drift; its comparison function is unit-tested
-- [ ] #5 Recorder adds small-cap/.L-line price fixtures without re-recording existing ones; README lists gap/zero-volume/duplicate/non-session counts; canary has a health check (exit 2), HTTP request counts per history() call and a concurrency mode, with results in README and finance.md
+- [x] #1 Profile fixtures recorded for the canary set (incl. USD/EUR .L line and two small caps, listed in the README)
+- [x] #2 normalise_profile maps trading (major unit) and reporting currencies, ISIN and shares; no Yahoo ratios or market cap ingested
+- [x] #3 Missing shares marked suspect; missing name rejected; profile in capabilities with outcome classification reused
+- [x] #4 canary.py compares live data with fixtures and exits 1 on drift; its comparison function is unit-tested
+- [x] #5 Recorder adds small-cap/.L-line price fixtures without re-recording existing ones; README lists gap/zero-volume/duplicate/non-session counts; canary has a health check (exit 2), HTTP request counts per history() call and a concurrency mode, with results in README and finance.md
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -119,4 +119,6 @@ Findings recorded in finance.md / README: `.info` has `firstTradeDateMillisecond
 Rulings to check: (1) DESIGN CHANGE: finance.md now says the profile ISIN is a hint, never a join key - the market-focus plan to de-duplicate dual listings by ISIN needs another source (M7). (2) test_yf_provider.py edited outside Files (capabilities assertions). (3) listing_date from firstTradeDateMilliseconds (EpochUtc kept as fallback). (4) Canaries: VUSD.L (USD ETF - no shares, so suspect no_shares), BOOT.L, ALCLS.PA (EUR quote, USD reporting). (5) Missing trading currency raises in normalise (backstop); bad financialCurrency -> reporting None + suspect; profile pit_reliable=False; known_at NaT. (6) test_dual_listing_has_isin uses AAPL (only well-formed ISIN fixture). (7) Recorder default now skips existing files. (8) Canary windows = fixture end - 30 days.
 
 Open points: "cold" concurrency only relocates tz/cookie cache files; the in-memory crumb survives, so a brand-new process's first concurrent requests aren't covered. Exit-2 health path not exercised live. Rejected (no-name) profile rows store name "".
+
+Landed bcc49b2 (squashed) on main
 <!-- SECTION:FINAL_SUMMARY:END -->
