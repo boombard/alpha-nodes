@@ -1,10 +1,10 @@
 ---
 id: TASK-40
 title: lensgraph run reports failed nodes
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T05:31:05Z'
-updated_date: '2026-11-25T05:40:36Z'
+updated_date: '2026-11-25T05:45:09Z'
 labels:
   - lensgraph
 dependencies: []
@@ -60,3 +60,9 @@ Out of scope: changing exit codes, `sources status` output.
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_ff0a1c773ece, worktree task-40
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker: lensgraph run prints a 'nodes:' counts line (ok, recovered, failed, skipped; zero counts omitted) and 'failed: name[candidate]: <first error line>' lines capped at 20 with '… and N more', for completed and aborted runs; exit codes unchanged; core.md CLI section updated. 1 commit d2f2f86; 4 new CLI tests; pytest 630 passed, ruff and pyright clean. Coordinator review: ACs met, no fix round needed. Rulings: key printed as name[candidate] (existing NodeKey str); 'recovered' counted; a failed node with no error prints 'no error recorded'. The flaky test the worker saw (test_m4_e2e unknown ticker) is a real pre-existing bug on main, filed as TASK-41; unrelated to this diff.
+<!-- SECTION:FINAL_SUMMARY:END -->
