@@ -4,7 +4,7 @@ title: M4.5 DuckDB point-in-time source store
 status: In Review
 assignee: []
 created_date: '2026-11-25T01:09:28Z'
-updated_date: '2026-11-25T03:52:49Z'
+updated_date: '2026-11-25T03:53:41Z'
 labels:
   - core
 milestone: m-3
@@ -113,7 +113,8 @@ Human feedback 2026-11-25: replace rowid with an explicit version_seq column (Po
 ## Final Summary
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
-Worker: DuckDBSourceStore with typed per-dataset facts tables plus raw_responses/attempts/coverage/renormalisations tables; per-entity fallback, append-only versions (values or labels), as-of to end of UTC day, offline, restated replan, renormalise. Commits 8527f3d, 017c488, 3f37fb1, f121227 (squash on landing). pytest 451 passed, ruff and pyright clean. ACs 1-4 met.
+Worker: DuckDBSourceStore with typed per-dataset facts tables plus raw_responses/attempts/coverage/renormalisations tables; per-entity fallback, append-only versions (values or labels), as-of to end of UTC day, offline, restated replan, renormalise. Commits 8527f3d, 017c488, 3f37fb1, f121227, 3edf888 (squash on landing). pytest 451 passed, ruff and pyright clean. ACs 1-4 met.
 Coordinator review (code-review medium + read): one round sent and applied: (1) renormalise keeps the newest raw's row per key, so restated keys no longer add stale+current versions on every run; (2) renormalise appends + log row in one transaction; (3) query chooses the serving provider by unfiltered _has_facts, so as_of/quality filters never fall through to a fallback provider (filtered primary -> empty frame, empty=False); (4) duplicate keys from normalise raise ValueError. Verdict: approve.
 Open points / rulings to check: core.md edited (outside Files) for as-of end-of-day cut-off, typed facts tables, renormalise and query wording. Public extras raw_responses() and renormalisations() -> RenormalisationRecord. Keyless snapshot datasets must normalise to one row. Canonical frames are not pandera-validated on ingest. An error outcome raises SourceUnavailable after the whole provider level finishes (other entities persisted). Restated replan capped at 2 passes. policy_overrides via a provider wrapper (_PolicyOverride); the same provider name must be the same object across datasets. Renormalise rows carry their source raw_id as fetch_id. Not fixed (minor): normalise failure in _persist leaves an orphan content-addressed blob and no attempt row; naive UTC interval bounds would misbehave for a tz-aware TIMESTAMPTZ axis (no such dataset yet); __init__ doesn't close the connection on schema failure; mutable {} defaults.
+Human feedback (applied in 3edf888): rowid replaced by explicit sequences for Postgres portability: facts tables have version_seq (fact_version_seq; latest = greatest, never compared); log tables raw_responses/attempts/renormalisations have seq (log_seq), a worker ruling beyond the request. No rowid left; pytest 453 passed, ruff and pyright clean.
 <!-- SECTION:FINAL_SUMMARY:END -->
