@@ -1,4 +1,6 @@
+import hashlib
 import inspect
+import json
 from typing import ClassVar
 
 import pytest
@@ -120,29 +122,31 @@ def test_code_version_covers_node_base_class_source():
     assert a.code_version() != b.code_version()
 
 
-def _helper(x):
+def _helper_a(x):
     return x + 1
 
 
-def test_code_deps_change_code_version():
-    import types
+def _helper_b(x):
+    return x + 2
 
-    class Plain(GrowthRate):
-        pass
 
-    class WithFn(GrowthRate):
-        code_deps: ClassVar[tuple] = (_helper,)
+def _with_dep(dep):
+    class D(GrowthRate):
+        code_deps: ClassVar[tuple] = (dep,)
 
-    class WithModule(GrowthRate):
-        code_deps: ClassVar[tuple] = (types,)
+    return D
 
-    assert WithFn.code_version() != Plain.code_version()
-    assert WithModule.code_version() not in {Plain.code_version(), WithFn.code_version()}
+
+@pytest.mark.parametrize(
+    ("dep_a", "dep_b"), [(_helper_a, _helper_b), (json, hashlib)], ids=["function", "module"]
+)
+def test_code_deps_change_code_version(dep_a, dep_b):
+    a, b = _with_dep(dep_a), _with_dep(dep_b)
+    assert inspect.getsource(a) == inspect.getsource(b)  # only the dependency differs
+    assert a.code_version() != b.code_version()
 
 
 def test_code_version_unchanged_without_code_deps():
-    import hashlib
-
     class Plain(GrowthRate):
         pass
 

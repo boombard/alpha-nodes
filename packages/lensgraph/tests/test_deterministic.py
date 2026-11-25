@@ -14,7 +14,7 @@ from lensgraph.plan import NodeKey
 from lensgraph.registry import NodeRegistry
 from lensgraph.types import Absent
 from lensgraph.verdict import LensVerdict
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 from toy.growth_lens import GrowthLens
 
 
@@ -207,8 +207,6 @@ async def test_scorer_overrides_replace_default():
 
 
 def test_scorer_overrides_unknown_name_rejected():
-    from pydantic import ValidationError
-
     with pytest.raises(ValidationError, match=r"known: \['a', 'b'\]"):
         DirectLens(scorer_overrides={"zzz": LinearScorer(lo=0, hi=1)})
 
