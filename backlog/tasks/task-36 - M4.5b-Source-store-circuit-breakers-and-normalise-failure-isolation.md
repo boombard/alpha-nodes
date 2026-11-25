@@ -1,9 +1,10 @@
 ---
 id: TASK-36
 title: M4.5b Source-store circuit breakers and normalise failure isolation
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-25T04:06:44Z'
+updated_date: '2026-11-25T04:57:10Z'
 labels:
   - core
 milestone: m-3
@@ -84,3 +85,9 @@ Out of scope: setting the yfinance values (TASK-37); overlap reconciliation (TAS
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_56508efae863, worktree task-36
+<!-- SECTION:NOTES:END -->
