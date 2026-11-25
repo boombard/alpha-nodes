@@ -10,16 +10,17 @@ exclude = ["packages/lensgraph-ui"]  # the Node UI package, not a Python member
 
 [tool.uv.sources]
 lensgraph = { workspace = true }
+alpha-nodes = { workspace = true }
 
 [dependency-groups]
-dev = ["lensgraph", "pytest>=8", "pytest-asyncio", "ruff", "pyright"]
+dev = ["lensgraph", "alpha-nodes", "pytest>=8", "pytest-asyncio", "ruff", "pyright"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 testpaths = ["packages"]
 addopts = "--import-mode=importlib"
-pythonpath = ["packages/lensgraph/tests"]
+pythonpath = ["packages/lensgraph/tests", "packages/alpha_nodes/tests"]
 
 [tool.ruff]
 line-length = 100

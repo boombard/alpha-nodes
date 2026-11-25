@@ -25,8 +25,8 @@ Every downstream node relies on that schema and never on provider-specific colum
 
 | Dataset | Coverage axis | Notes |
 |---|---|---|
-| `prices` | trading date | daily OHLCV + adjusted close. ≥10y history needed for 12-1 momentum + 200-day trend + risk |
-| `profile` | none (snapshot) | name, country, exchange, currency, sector, industry, market cap, listing date, business summary |
+| `prices` | trading date | daily OHLCV + dividends + split ratio, major units, **no adjusted close** (see Prices and point-in-time). ≥10y history needed for 12-1 momentum + 200-day trend + risk |
+| `profile` | none (snapshot) | name, country, exchange, currency, sector, industry, shares outstanding (**no market cap**: computed as price × shares), listing date, business summary |
 | `fundamentals` | fiscal period (annual/quarterly) | income/balance/cash-flow line items with `period_end`, `filed_at` where available |
 | `news` | published time | id, published_at, headline, source, url, summary. Providers may only serve recent items |
 | `filings_text` | filing date | e.g. 10-K "Business" + "Risk factors" sections (US) |
@@ -163,10 +163,13 @@ when `period_ending` is missing; first-writer-wins alias collisions.
 
 - `known_at` for a price row = that trading date's close. A price is public when it prints,
   so historical backfills are point-in-time for as-of purposes.
-- Store **both** the provider's close and adjusted close. Backward adjustment applies a
-  constant factor to all earlier prices, so **returns, trend ratios, volatility and drawdown
-  over windows ending at `as_of` are unaffected by later splits/dividends**. The v1 price
-  lens is ratio-based, so as-of runs are clean.
+- Store the provider's close, dividends and split ratio. **No adjusted close**: Yahoo's
+  adjusted close rewrites the past on every dividend, which breaks append-only facts. The
+  total-return adjustment is our own calc node (M5). Returns, trend ratios, volatility and
+  drawdown over windows ending at `as_of` use split-adjusted closes and are unaffected by
+  later splits. The v1 price lens is ratio-based, so as-of runs are clean.
+- `profile` stores shares outstanding, not market cap; market cap = price × shares is
+  computed (data quality principle 1).
 - Calcs that use price *levels* (absolute price filters, market cap = price × shares) must
   declare `level_based = True`. In as-of runs they warn: yfinance's "close" is already
   split-adjusted.
