@@ -3,10 +3,10 @@ id: TASK-33
 title: >-
   M4.8 DatasetFetch nodes, sources run config, offline mode and sources status
   CLI
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-25T01:09:29Z'
-updated_date: '2026-11-25T04:48:32Z'
+updated_date: '2026-11-25T04:55:00Z'
 labels:
   - core
 milestone: m-3
@@ -104,18 +104,18 @@ Out of scope: finance nodes and config (M4.9).
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 DatasetFetch and DatasetFetchMany read through the sources service; empty slices are empty frames; SourceUnavailable fails the node
-- [ ] #2 RunConfig.sources builds the DuckDB source store under the store root; unknown dataset or provider names are ParamsError
-- [ ] #3 Toy config run twice calls the provider only in run 1; downstream memo hits until the slice changes; offline rerun serves from the store
-- [ ] #4 lensgraph run --offline and lensgraph sources status [--suspect] work; core.md Run configuration updated
+- [x] #1 DatasetFetch and DatasetFetchMany read through the sources service; empty slices are empty frames; SourceUnavailable fails the node
+- [x] #2 RunConfig.sources builds the DuckDB source store under the store root; unknown dataset or provider names are ParamsError
+- [x] #3 Toy config run twice calls the provider only in run 1; downstream memo hits until the slice changes; offline rerun serves from the store
+- [x] #4 lensgraph run --offline and lensgraph sources status [--suspect] work; core.md Run configuration updated
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -138,4 +138,6 @@ Out-of-Files edits (approved): hashing.py + test_hashing.py (list/ndarray cells 
 Rulings to check: window = [end - lookback_days, end] inclusive; lookback_days None = no interval; build_source_store builds only datasets listed in sources.providers and also rejects unknown limits names, empty provider chains, bad catalog refs; --offline without sources is a CLI error; sources status counts rows over all stored versions, exits 2 when no sources.duckdb; ctx.as_of is never set by the executor today, so live runs use the store clock.
 
 Open point: the store's empty query frames carry string columns as object dtype while non-empty reads give str. Round 2 patched this in DatasetFetchMany only (casts non-list object columns to str, with a hard-coded `_LIST_COLUMNS = {repairs, quality_reasons}` duplicating the fact-meta knowledge). Single DatasetFetch still returns the object-dtype empty frame. The proper fix is in DuckDBSourceStore's empty-slice construction (candidate for TASK-36), after which the node cast can go.
+
+Landed 4d253a1 (squashed) on main
 <!-- SECTION:FINAL_SUMMARY:END -->
