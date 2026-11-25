@@ -1,10 +1,10 @@
 ---
 id: TASK-31
 title: M4.6 yfinance provider for prices and fx with recorded fixtures
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T01:09:28Z'
-updated_date: '2026-11-25T03:35:37Z'
+updated_date: '2026-11-25T03:45:54Z'
 labels:
   - finance
 milestone: m-3
@@ -125,3 +125,12 @@ Out of scope: profile (M4.7), canary script (M4.7), fetch nodes and runs (M4.9).
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_efd6266c1540, worktree task-31
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker: YFinanceProvider (prices+fx), history normalisation with repairs/checks, live recorder, fixtures recorded 2026-11-25 with yfinance 1.8.0 (all symbols succeeded). Commits 5c1e24c, e647760, af38af7. pytest 477 passed, ruff and pyright clean. ACs 1-4 met.
+Coordinator review: one round sent and applied: (1) normalise runs checks over the padded payload but returns only requested days (padding is outside coverage); (2) HTTP 404 on the chart request is `empty` directly, not error-then-empty via retries. Verdict: approve.
+Verified findings (README + finance.md): cache setter is yfinance.cache.set_cache_location; HAS_CURL_CFFI is in yfinance._http; timeout is a history() arg; unknown symbol answers 404 before YFTzMissingError; LSE rows mostly carry Repaired?=true.
+Open points / rulings to check: outside Files: finance.md verified-notes block, shared yf_payload/yf_frame in tests/conftest.py, uv.lock (sanctioned). Rejected rows (close NaN/<=0) are kept with raw values (store does not pandera-validate on ingest). Non-session bars get known_at NaT (store falls back to first_seen_at). restated_before = latest split in the requested interval. fx entity is the currency code, prices entity the Yahoo symbol. Empty-in-range payload has metadata {}. Imports private yfinance._http.
+<!-- SECTION:FINAL_SUMMARY:END -->
