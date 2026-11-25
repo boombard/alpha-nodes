@@ -6,9 +6,12 @@ disable-model-invocation: true
 
 # backlog-converge
 
-Land approved work onto `main`. You are the **coordinator** (Opus, on `main`)
-and you do the rebases and conflict resolution yourself. This is the back half
-of the pair started by `/backlog-unleash`.
+Land approved work onto `main`. You are the **coordinator** (Opus, on `main`). You
+own the gates, the user conversation, the `backlog/` edits and the final
+verification. The mechanical landing of each task (rebase, mechanical conflict
+resolution, checks, ff-merge, worktree removal) is delegated to a **Sonnet
+subworker**, one task at a time, to save tokens. This is the back half of the pair
+started by `/backlog-unleash`.
 
 Load first: `orchestration` (`ORCA skills get orchestration`), `orca-cli`. `BL` is
 `npx -y backlog.md@1.57.4`. Read `documentation/workflow.md`.
@@ -20,12 +23,17 @@ Load first: `orchestration` (`ORCA skills get orchestration`), `orca-cli`. `BL` 
 - **Landing:** rebase `task-<n>` onto `main`'s tip, then `git merge --ff-only`.
   Linear history: no squash, no PR, **never push**.
 - **Sequential**, in dependency order (a task's deps land before it), tie-broken by
-  task number. Each rebase builds on the previous landing.
+  task number. Each rebase builds on the previous landing. Never run two landing
+  subworkers at once: they share `main`.
+- **Delegation:** landing is done by a subworker spawned with the Agent tool,
+  `subagent_type: "general-purpose"`, `model: "sonnet"`, foreground. It cannot talk
+  to the user, so it never decides anything the conflict policy reserves for the
+  user: it stops and reports back, and you ask.
 - **Conflict policy:**
-  - Resolve mechanical conflicts yourself: imports, adjacent lines, `uv.lock`
+  - The subworker resolves mechanical conflicts: imports, adjacent lines, `uv.lock`
     (regenerate with `uv lock`), `__init__.py` exports, `conftest.py` fixtures
     added on both sides.
-  - **Stop and ask the user** when both sides changed the same logic with competing
+  - **The subworker stops and reports; you ask the user** when both sides changed the same logic with competing
     intent, or when the conflict is in `documentation/`, `backlog/`, any `CLAUDE.md`,
     or a `contracts`-labelled task's interfaces.
   - The tests arbitrate. A resolution isn't done until the full suite is green.
@@ -62,24 +70,41 @@ Use AskUserQuestion to approve, drop or reorder.
 
 For each approved task, in order:
 
-1. **Quiesce the worker.** If its dispatch is live and idle, `worker-release`. If it
-   is mid-turn, stop and ask the user: they may still be talking to it.
-2. **Rebase in its worktree:** `git -C <path> rebase main`. Resolve conflicts per the
-   policy, and commit any resolution as `fix: resolve rebase onto main (TASK-<n>)`.
-   If you hit a stop-and-ask conflict: `git -C <path> rebase --abort`, tell the user,
-   skip this task, and continue with the next one only if it doesn't depend on this one.
-3. **Verify in the worktree:** all three checks pass. If they fail, fix only what the
-   rebase broke. Anything more is a skip with reason **post-rebase failure** (the
-   worktree is left as is).
-4. **Land:** from the main checkout, `git merge --ff-only task-<n>`, then run the
-   checks on `main` once more.
-5. **Remove** only if `git merge-base --is-ancestor task-<n> main` holds:
-   - `ORCA worktree rm --worktree name:task-<n> --json`, with no `--force`.
-   - Wait until `git worktree list` no longer shows it, then `git branch -D task-<n>`
-     if the branch still exists.
-   - **If removal is refused**, show `git -C <path> status --porcelain -uall` and ask
-     whether to move, delete or keep the files. Only "delete" authorises `--force`.
-6. **Close the task** on `main`:
+1. **Quiesce the worker (you).** If its dispatch is live and idle, `worker-release`.
+   If it is mid-turn, stop and ask the user: they may still be talking to it.
+2. **Spawn the landing subworker** (Agent tool, `model: "sonnet"`, foreground). Its
+   prompt must be self-contained, since it starts cold. Give it: the task id, the
+   worktree path and branch, the repo root, the check commands from step 1, the
+   conflict policy and the no-push rule above, and these steps:
+   1. **Rebase in the worktree:** `git -C <path> rebase main`. Resolve mechanical
+      conflicts, and commit any resolution as `fix: resolve rebase onto main
+      (TASK-<n>)`. On a stop-and-ask conflict: `git -C <path> rebase --abort` and
+      return **STOPPED: conflict** with the files and both sides' intent. Do not
+      guess.
+   2. **Verify in the worktree:** all three checks pass. If they fail, fix only what
+      the rebase broke. Anything more: return **STOPPED: post-rebase failure** with
+      the failing output, and leave the worktree as is.
+   3. **Land:** from the main checkout, `git merge --ff-only task-<n>`, then run the
+      checks on `main`.
+   4. **Remove** only if `git merge-base --is-ancestor task-<n> main` holds:
+      `ORCA worktree rm --worktree name:task-<n> --json`, with no `--force`. Wait
+      until `git worktree list` no longer shows it, then `git branch -D task-<n>`
+      if the branch still exists. If removal is refused, do not force: return
+      **STOPPED: removal refused** with `git -C <path> status --porcelain -uall`.
+   5. **Do not** touch `backlog/`, push, or start the next task. Return a short
+      report: outcome, commit range `<first>..<last>`, check results, any
+      resolutions made (file and one line each), and whether the worktree is gone.
+3. **Handle the report (you).**
+   - **STOPPED: conflict:** tell the user, skip this task, and continue with the
+     next one only if it doesn't depend on this one.
+   - **STOPPED: post-rebase failure:** skip with that reason.
+   - **STOPPED: removal refused:** show the status output and ask whether to move,
+     delete or keep the files. Only "delete" authorises `--force`, and you run it.
+   - **Landed:** verify it yourself: `git merge-base --is-ancestor task-<n> main`
+     (or the branch is gone and the commits are on `main`) and run the checks on
+     `main`. Review any resolutions the subworker made. If a check fails or a
+     resolution touched logic, treat it as a stop-and-ask.
+4. **Close the task (you)** on `main`:
    - `BL task edit <n> -s Done`
    - `--check-ac` for each AC that the worker's report and your review showed was met
    - check the DoD items
@@ -105,7 +130,9 @@ origin; nothing was pushed."
 
 | Mistake | Reality |
 |---|---|
-| "The worker's tests passed" | Run the checks yourself, after the rebase and again on `main`. |
+| "The worker's tests passed" / "the subworker said green" | Re-run the checks yourself on `main` after each landing. |
+| Letting the subworker resolve a docs/contracts conflict or edit `backlog/` | It stops and reports. You decide and you write `backlog/`. |
+| Spawning landing subworkers in parallel | They share `main`. One at a time. |
 | Landing an `In Review` task the user didn't approve | `In Review` means waiting for the human. It is not approval. |
 | Resolving a conflict in docs or contracts by picking a side | Stop and ask. Those are design decisions. |
 | `--force` to finish cleanup | A refusal means files exist only there. Ask. |
