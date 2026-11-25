@@ -1,9 +1,10 @@
 ---
 id: TASK-45
 title: M5.3 Price frame adapters and calc nodes
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-25T06:37:26Z'
+updated_date: '2026-11-25T06:57:14Z'
 labels:
   - finance
 milestone: m-4
@@ -96,3 +97,9 @@ Out of scope: registering the nodes (M5.6); the lens (M5.4); fx conversion (rati
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_0c33e8ad5b31, worktree task-45 (run run_3fc22c1f4db5)
+<!-- SECTION:NOTES:END -->

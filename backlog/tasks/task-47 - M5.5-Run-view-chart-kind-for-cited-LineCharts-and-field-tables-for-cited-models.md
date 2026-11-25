@@ -3,9 +3,10 @@ id: TASK-47
 title: >-
   M5.5 Run view: chart kind for cited LineCharts and field tables for cited
   models
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-25T06:37:27Z'
+updated_date: '2026-11-25T06:57:15Z'
 labels:
   - core
   - ui
@@ -80,3 +81,9 @@ Out of scope: finance chart content (M5.3 `price_chart`); new pages; interactive
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_2cf2685fd968, worktree task-47 (run run_3fc22c1f4db5)
+<!-- SECTION:NOTES:END -->

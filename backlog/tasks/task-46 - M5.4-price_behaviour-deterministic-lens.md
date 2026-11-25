@@ -1,9 +1,10 @@
 ---
 id: TASK-46
 title: M5.4 price_behaviour deterministic lens
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-25T06:37:27Z'
+updated_date: '2026-11-25T06:57:15Z'
 labels:
   - finance
 milestone: m-4
@@ -89,3 +90,9 @@ Out of scope: registering the lens (M5.6); calibrating defaults (M8); coverage d
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_0938ae3c3037, worktree task-46 (run run_3fc22c1f4db5)
+<!-- SECTION:NOTES:END -->
