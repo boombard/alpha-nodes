@@ -337,7 +337,12 @@ async def test_consecutive_empty_trips_global_failure(clock: FakeClock) -> None:
 
     with pytest.raises(GlobalFailure, match=r"fake.*3.*empty"):
         await run_items(
-            provider, ASSAYS, make_items(5), make_limiter(provider, clock), got, on_tripped=on_tripped
+            provider,
+            ASSAYS,
+            make_items(5),
+            make_limiter(provider, clock),
+            got,
+            on_tripped=on_tripped,
         )
     assert got.seen == []  # held back, never handed to on_outcome
     assert [o.item.entity for o in tripped.seen] == ["S0", "S1", "S2"]
@@ -362,3 +367,44 @@ async def test_breakers_off_by_default(clock: FakeClock) -> None:
     got = Collector()
     outcomes = await run(provider, make_items(20), make_limiter(provider, clock), got)
     assert len(outcomes) == len(got.seen) == 20
+
+
+@pytest.mark.parametrize("kind", ["error", "empty"])
+async def test_two_gaps_of_one_entity_count_once(clock: FakeClock, kind: str) -> None:
+    provider = FakeAssayProvider()
+    serial(provider, max_consecutive_errors=2, max_consecutive_empty=2)
+    if kind == "error":
+        provider.script["S0"] = ["error", "error"]
+    else:
+        provider.unknown = {"S0"}
+    first, second = make_items(1)[0], make_items(1)[0]
+    second = second.model_copy(
+        update={"interval": DateInterval(start=date(2026, 1, 5), end=date(2026, 1, 6))}
+    )
+    got = Collector()
+    outcomes = await run(provider, [first, second], make_limiter(provider, clock), got)
+    assert [o.kind for o in outcomes] == [kind, kind]
+    assert len(got.seen) == 2
+
+
+async def test_open_empty_streak_is_reported_when_run_fails(clock: FakeClock) -> None:
+    provider = FakeAssayProvider()
+    serial(provider, max_consecutive_empty=5, max_rate_limit_episodes=0)
+    provider.unknown = {"S0", "S1"}
+    provider.script["S2"] = ["rate_limited"]
+    got, dropped = Collector(), Collector()
+
+    async def on_tripped(held: list[FetchOutcome]) -> None:
+        dropped.seen.extend(held)
+
+    with pytest.raises(GlobalFailure):
+        await run_items(
+            provider,
+            ASSAYS,
+            make_items(3),
+            make_limiter(provider, clock),
+            got,
+            on_tripped=on_tripped,
+        )
+    assert [o.item.entity for o in dropped.seen] == ["S0", "S1"]
+    assert got.seen == []

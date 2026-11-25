@@ -100,6 +100,10 @@ class RenormalisationRecord(BaseModel):
     rows_written: int  # new versions appended (rows whose values and labels were unchanged add none)
 
 
+class _NormaliseError(Exception):
+    """A normalisation step failed for one item; `_persist` turns it into an entity error."""
+
+
 class _PolicyOverride:
     """A `Provider` that delegates to another but declares a replacement rate-limit policy.
 
@@ -584,9 +588,12 @@ class DuckDBSourceStore(SourceStore):
                     fetched_at=now,
                     library_version=provider.library_version,
                 )
-                frame = self._settled_only(
-                    ds, provider.normalise(ds, raw, outcome.payload), outcome.settled_through
-                )
+                try:
+                    frame = self._settled_only(
+                        ds, provider.normalise(ds, raw, outcome.payload), outcome.settled_through
+                    )
+                except Exception as exc:
+                    raise _NormaliseError(exc) from exc
             with self._txn():
                 attempts: list[tuple[AttemptKind, DateInterval | None, str]] = [
                     (outcome.kind, item.interval, outcome.message)
@@ -594,10 +601,13 @@ class DuckDBSourceStore(SourceStore):
                 interval, through = item.interval, outcome.settled_through
                 if raw and frame is not None:
                     self._insert_raw(raw, through)
-                    self._append_versions(
-                        ds, provider.name, item.entity, params_key, frame, raw.raw_id,
-                        provider.normaliser_version(ds.name), now,
-                    )  # fmt: skip
+                    version = provider.normaliser_version(ds.name)
+                    try:
+                        self._append_versions(
+                            ds, provider.name, item.entity, params_key, frame, raw.raw_id, version, now
+                        )
+                    except Exception as exc:
+                        raise _NormaliseError(exc) from exc
                     if interval and through and interval.end > through:
                         tail = DateInterval(start=max(interval.start, through + _ONE_DAY), end=interval.end)
                         attempts.append(("unsettled", tail, "after settled_through"))
@@ -608,21 +618,20 @@ class DuckDBSourceStore(SourceStore):
                         "INSERT OR REPLACE INTO coverage VALUES (?, ?, ?, ?, ?)",
                         [ds.name, item.entity, provider.name, params_key, new_state.model_dump_json()],
                     )
-        except Exception as exc:
-            if outcome.kind != "ok":
-                raise
+        except _NormaliseError as failure:
+            exc = failure.__cause__ or failure
             message = f"normalise: {type(exc).__name__}: {exc} (payload {payload_hash or 'unstored'})"
             self._log_attempt(provider.name, ds.name, item, "error", item.interval, now, message)
             return message
         return None
 
     def _log_tripped_empties(self, provider: Provider, ds: Dataset, held: list[FetchOutcome]) -> None:
-        """Log the `empty` attempts of a tripped streak without caching them (entities stay unknown)."""
+        """Log the `empty` attempts of a dropped streak (breaker tripped, or the run failed) without caching them (entities stay unknown)."""
         now = self._clock.now()
         for outcome in held:
             self._log_attempt(
                 provider.name, ds.name, outcome.item, "empty", outcome.item.interval, now,
-                "not cached: empty-streak circuit breaker tripped",
+                "not cached: empty streak dropped (breaker tripped or run failed)",
             )  # fmt: skip
 
     def _insert_raw(self, raw: RawResponse, settled_through: date | None) -> None:

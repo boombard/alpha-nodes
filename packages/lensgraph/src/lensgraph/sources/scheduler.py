@@ -50,7 +50,8 @@ class ProviderLimiter:
         self._paused_until: datetime | None = None
         self._episodes = 0  # consecutive rate-limit episodes
         self._unreachable = 0  # consecutive unreachable outcomes
-        self._errors = 0  # consecutive entities whose final outcome is `error`
+        self._error_entities: set[str] = set()  # entities in the open error streak
+        self._empty_entities: set[str] = set()  # entities in the open empty streak (`_held`)
         self._held: list[FetchOutcome] = []  # open empty streak, withheld from on_outcome
 
     async def settle(
@@ -62,6 +63,7 @@ class ProviderLimiter:
         """Hand one *final* outcome over and apply the entity-level circuit breakers.
 
         Unlike `report` (every provider answer, retries included) this sees each entity once.
+        Streaks count distinct entities: several items of one entity (one per gap) count once.
         `max_consecutive_errors`: reaching it after the outcome was handed over raises
         `GlobalFailure`. `max_consecutive_empty`: `empty` outcomes are withheld while the streak
         is open and handed over when a non-empty outcome breaks it (or by `flush`); reaching the
@@ -70,44 +72,47 @@ class ProviderLimiter:
         the empty streak. Both breakers are off while their policy field is None.
         """
         kind = outcome.kind
+        entity = outcome.item.entity
         if kind == "empty":
-            self._errors = 0
+            self._error_entities.clear()
             limit = self.policy.max_consecutive_empty
             if limit is None:
                 await on_outcome(outcome)
                 return
             self._held.append(outcome)
-            if len(self._held) >= limit:
-                held, self._held = self._held, []
+            self._empty_entities.add(entity)
+            if len(self._empty_entities) >= limit:
+                held = self.take_held()
                 if on_tripped is not None:
                     await on_tripped(held)
                 raise GlobalFailure(
-                    f"{self.provider}: {len(held)} entities in a row answered empty "
+                    f"{self.provider}: {limit} entities in a row answered empty "
                     "(provider incident or throttling?); nothing cached for them"
                 )
             return
         await self.flush(on_outcome)
         await on_outcome(outcome)
         if kind == "ok":
-            self._errors = 0
+            self._error_entities.clear()
         elif kind == "error":
-            self._errors += 1
+            self._error_entities.add(entity)
             limit = self.policy.max_consecutive_errors
-            if limit is not None and self._errors >= limit:
+            if limit is not None and len(self._error_entities) >= limit:
                 raise GlobalFailure(
-                    f"{self.provider}: {self._errors} entities in a row ended in error "
+                    f"{self.provider}: {len(self._error_entities)} entities in a row ended in error "
                     f"(last: {outcome.message or 'error'})"
                 )
 
     async def flush(self, on_outcome: Callable[[FetchOutcome], Awaitable[None]]) -> None:
         """Hand over the withheld `empty` outcomes: the streak ended below its threshold."""
-        held, self._held = self._held, []
-        for outcome in held:
+        for outcome in self.take_held():
             await on_outcome(outcome)
 
-    def discard_held(self) -> None:
-        """Forget a withheld empty streak (the run is failing); those entities stay unknown."""
-        self._held = []
+    def take_held(self) -> list[FetchOutcome]:
+        """Remove and return the withheld `empty` outcomes, ending the empty streak."""
+        held, self._held = self._held, []
+        self._empty_entities.clear()
+        return held
 
     def slot(self) -> AbstractAsyncContextManager[None]:
         """Context manager that waits for a pause to end, a concurrency slot and a pacing token."""
@@ -230,6 +235,10 @@ async def _run_batch(
                 needs_delay = True
             else:
                 results[index] = outcome
+                if failure is not None and outcome.kind == "empty":
+                    if on_tripped is not None:  # after a trip nothing more is cached for empties
+                        await on_tripped([outcome])
+                    continue
                 try:
                     await limiter.settle(outcome, on_outcome, on_tripped)
                 except GlobalFailure as exc:
@@ -277,8 +286,10 @@ async def run_items(
     try:
         await asyncio.gather(*tasks)
         await limiter.flush(on_outcome)
-    except BaseException:
-        limiter.discard_held()
+    except BaseException as exc:
+        held = limiter.take_held()  # an open empty streak: asked, so logged, but never cached
+        if held and on_tripped is not None and not isinstance(exc, asyncio.CancelledError):
+            await on_tripped(held)  # skipped on cancellation: no store calls while unwinding
         for task in tasks:
             task.cancel()
         await asyncio.gather(*tasks, return_exceptions=True)
