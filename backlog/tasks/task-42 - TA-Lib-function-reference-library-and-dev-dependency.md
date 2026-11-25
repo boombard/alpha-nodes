@@ -1,10 +1,10 @@
 ---
 id: TASK-42
 title: TA-Lib function reference library and dev dependency
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T06:03:29Z'
-updated_date: '2026-11-25T06:06:22Z'
+updated_date: '2026-11-25T06:12:11Z'
 labels:
   - finance
   - docs
@@ -73,3 +73,9 @@ The group should come from the wrapper's `talib.get_function_groups()` where ava
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_bfef94df016c, worktree task-42
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker: ta-lib==0.8.3.post1 in root dev group; sync_talib_reference.py (pure parse/render + pydantic models, network only in main); 248 verbatim pages at TA-Lib 6435b2a with README (provenance, BSD-3 notice, refresh, index of 246 functions, 237 in wrapper / 9 not); pointer in documentation/README.md. Review: pages spot-checked byte-identical upstream (rsi, alma, adx, cdlhammer); wrapper availability from talib.get_functions/get_function_groups; one round fixed the hard-coded wrapper version (now talib.__version__). pytest 642 passed, ruff and pyright clean. Open points: uv.lock touched outside Files (required); index.md/stability.md prose pages snapshotted but not indexed. Not in wrapper yet: GATOR, MACDV, ALLIGATOR, CE, MAENV, SSF, SHARPE, SKEW, SORTINO.
+<!-- SECTION:FINAL_SUMMARY:END -->
