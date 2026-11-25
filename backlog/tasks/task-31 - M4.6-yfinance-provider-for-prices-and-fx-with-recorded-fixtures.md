@@ -1,9 +1,10 @@
 ---
 id: TASK-31
 title: M4.6 yfinance provider for prices and fx with recorded fixtures
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-25T01:09:28Z'
+updated_date: '2026-11-25T03:35:37Z'
 labels:
   - finance
 milestone: m-3
@@ -118,3 +119,9 @@ Out of scope: profile (M4.7), canary script (M4.7), fetch nodes and runs (M4.9).
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_efd6266c1540, worktree task-31
+<!-- SECTION:NOTES:END -->

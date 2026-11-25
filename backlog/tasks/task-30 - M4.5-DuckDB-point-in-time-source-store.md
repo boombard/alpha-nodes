@@ -1,9 +1,10 @@
 ---
 id: TASK-30
 title: M4.5 DuckDB point-in-time source store
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-25T01:09:28Z'
+updated_date: '2026-11-25T03:35:36Z'
 labels:
   - core
 milestone: m-3
@@ -101,3 +102,9 @@ Out of scope: the fetch node, run wiring and CLI (M4.8); any finance dataset.
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_99ae6051c7a3, worktree task-30
+<!-- SECTION:NOTES:END -->
