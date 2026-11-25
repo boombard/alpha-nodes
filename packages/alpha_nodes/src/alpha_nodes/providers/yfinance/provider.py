@@ -1,4 +1,4 @@
-"""`YFinanceProvider`: prices and fx from Yahoo via yfinance 1.8.0.
+"""`YFinanceProvider`: prices, fx and profile from Yahoo via yfinance 1.8.0.
 
 The only code that knows yfinance names, Yahoo symbols and Yahoo quirks. The core sees
 just the declared capabilities. See documentation/design/finance.md, "yfinance fetching
@@ -29,7 +29,7 @@ from lensgraph.sources import (
 from yfinance.exceptions import YFPricesMissingError, YFRateLimitError, YFTzMissingError
 
 from alpha_nodes import markets
-from alpha_nodes.datasets import FX, PRICES
+from alpha_nodes.datasets import FX, PRICES, PROFILE
 from alpha_nodes.providers.yfinance.history import (
     FX_NORMALISER_VERSION,
     PRICES_NORMALISER_VERSION,
@@ -38,6 +38,13 @@ from alpha_nodes.providers.yfinance.history import (
     normalise_prices,
     payload_from_history,
 )
+from alpha_nodes.providers.yfinance.profile import (
+    PROFILE_NORMALISER_VERSION,
+    YFProfilePayload,
+    normalise_profile,
+    payload_from_ticker,
+)
+from alpha_nodes.units import to_major
 
 SUFFIX_MIC: dict[str, str] = {
     ".L": "XLON",
@@ -99,10 +106,12 @@ def _known_timezone(symbol: str) -> str | None:
 
 
 class YFinanceProvider:
-    """Provider for the `prices` and `fx` datasets; fetch is one `Ticker.history` per item.
+    """Provider for `prices`, `fx` and `profile`; fetch is one yfinance call group per item.
 
-    Entities are Yahoo symbols for prices (e.g. "BP.L") and currency codes for fx ("GBP").
-    Payloads are `YFHistoryPayload`, stored verbatim and normalised by `normalise`.
+    Entities are Yahoo symbols for prices and profile (e.g. "BP.L") and currency codes for
+    fx ("GBP"). Prices and fx fetch one `Ticker.history` and store a `YFHistoryPayload`;
+    profile reads `Ticker.info` and `.isin` (about 3 requests, finance.md "Profile cost") and
+    stores a `YFProfilePayload`. Payloads are stored verbatim and normalised by `normalise`.
 
     Args:
         cache_dir: where yfinance keeps its timezone, cookie and ISIN caches.
@@ -128,28 +137,62 @@ class YFinanceProvider:
         self._min_window = timedelta(days=min_window_days)
         self.library_version = yf.__version__
         self.capabilities = ProviderCapabilities(
-            datasets=frozenset({PRICES.name, FX.name}),
+            datasets=frozenset({PRICES.name, FX.name, PROFILE.name}),
             max_batch=1,
             rate_limit=YF_POLICY,
-            pit_reliable={PRICES.name: True, FX.name: True},
+            pit_reliable={PRICES.name: True, FX.name: True, PROFILE.name: False},
         )
 
     def normaliser_version(self, dataset: str) -> str:
         """Version of the payload -> canonical mapping for `dataset`."""
-        return {PRICES.name: PRICES_NORMALISER_VERSION, FX.name: FX_NORMALISER_VERSION}[dataset]
+        return {
+            PRICES.name: PRICES_NORMALISER_VERSION,
+            FX.name: FX_NORMALISER_VERSION,
+            PROFILE.name: PROFILE_NORMALISER_VERSION,
+        }[dataset]
 
     def fetch(self, dataset: Dataset, items: list[WorkItem]) -> list[FetchOutcome]:
         """One outcome per item (blocking); yfinance errors are classified, never raised."""
         return [self._fetch_one(dataset.name, item) for item in items]
 
     def normalise(self, dataset: Dataset, raw: RawResponse, payload: Any) -> pd.DataFrame:
-        """Map a stored `YFHistoryPayload` (model or its JSON dict) to canonical columns."""
+        """Map a stored payload (`YFHistoryPayload` or `YFProfilePayload`, model or JSON dict)."""
+        if dataset.name == PROFILE.name:
+            profile = YFProfilePayload.model_validate(payload)
+            return normalise_profile(profile, symbol_mic(profile.symbol))
         history = YFHistoryPayload.model_validate(payload)
         if dataset.name == FX.name:
             return normalise_fx(history)
         return normalise_prices(history, symbol_mic(history.symbol))
 
+    def _fetch_profile(self, item: WorkItem) -> FetchOutcome:
+        """`Ticker.info` plus `.isin` for one symbol.
+
+        Empty info, or a stub without a currency (Yahoo's answer for unknown symbols), is
+        `empty`; a currency code `to_major` rejects is a retryable `error`. Both are caught
+        here so `normalise_profile` never sees them (its ValueError is only a backstop).
+        """
+        symbol = item.entity
+        try:
+            ticker = yf.Ticker(symbol)
+            info = ticker.info
+            if not info:
+                return FetchOutcome(item=item, kind="empty", message="empty info")
+            currency = info.get("currency")
+            if currency is None:  # Yahoo's stub answer for an unknown or delisted symbol
+                return FetchOutcome(
+                    item=item, kind="empty", message="no currency in info: unknown symbol"
+                )
+            to_major(str(currency))  # ValueError for an unrecognised code, classified below
+            isin = ticker.isin
+            payload = payload_from_ticker(symbol, dict(info), isin)
+        except Exception as exc:  # noqa: BLE001 - classified below
+            return _classify(item, exc)
+        return FetchOutcome(item=item, kind="ok", payload=payload)
+
     def _fetch_one(self, dataset: str, item: WorkItem) -> FetchOutcome:
+        if dataset == PROFILE.name:
+            return self._fetch_profile(item)
         interval = item.interval
         if interval is None:
             raise ValueError(f"{dataset} is date-axis; item has no interval")
@@ -174,10 +217,6 @@ class YFinanceProvider:
             payload = payload_from_history(
                 symbol, frame, ticker.history_metadata, interval.start, interval.end
             )
-        except YFRateLimitError as exc:
-            return FetchOutcome(item=item, kind="rate_limited", message=str(exc))
-        except YFTzMissingError as exc:
-            return FetchOutcome(item=item, kind="empty", message=str(exc))
         except YFPricesMissingError as exc:
             if _known_timezone(symbol) is None:
                 return FetchOutcome(item=item, kind="empty", message=str(exc))
@@ -194,15 +233,8 @@ class YFinanceProvider:
             return FetchOutcome(
                 item=item, kind="ok", payload=payload, settled_through=settled, message=str(exc)
             )
-        except CurlHTTPError as exc:
-            status = getattr(exc.response, "status_code", None)
-            if status == 404:  # Yahoo's answer for a symbol it has never heard of
-                return FetchOutcome(item=item, kind="empty", message=str(exc))
-            return FetchOutcome(item=item, kind="error", message=f"{type(exc).__name__}: {exc}")
-        except _UNREACHABLE as exc:
-            return FetchOutcome(item=item, kind="unreachable", message=str(exc))
-        except Exception as exc:  # noqa: BLE001 - anything else is a retryable item error
-            return FetchOutcome(item=item, kind="error", message=f"{type(exc).__name__}: {exc}")
+        except Exception as exc:  # noqa: BLE001 - classified below
+            return _classify(item, exc)
         return FetchOutcome(
             item=item,
             kind="ok",
@@ -210,6 +242,25 @@ class YFinanceProvider:
             settled_through=settled,
             restated_before=_restated_before(payload),
         )
+
+
+def _classify(item: WorkItem, exc: Exception) -> FetchOutcome:
+    """Map a yfinance/curl_cffi exception to a non-ok outcome; shared by every dataset.
+
+    Rate limit -> `rate_limited`; unknown symbol (missing timezone, HTTP 404) -> `empty`;
+    connection failure or timeout -> `unreachable`; anything else -> retryable `error`.
+    """
+    if isinstance(exc, YFRateLimitError):
+        return FetchOutcome(item=item, kind="rate_limited", message=str(exc))
+    if isinstance(exc, YFTzMissingError):
+        return FetchOutcome(item=item, kind="empty", message=str(exc))
+    if isinstance(exc, CurlHTTPError):
+        if getattr(exc.response, "status_code", None) == 404:  # Yahoo: never heard of it
+            return FetchOutcome(item=item, kind="empty", message=str(exc))
+        return FetchOutcome(item=item, kind="error", message=f"{type(exc).__name__}: {exc}")
+    if isinstance(exc, _UNREACHABLE):
+        return FetchOutcome(item=item, kind="unreachable", message=str(exc))
+    return FetchOutcome(item=item, kind="error", message=f"{type(exc).__name__}: {exc}")
 
 
 def _restated_before(payload: YFHistoryPayload) -> date | None:

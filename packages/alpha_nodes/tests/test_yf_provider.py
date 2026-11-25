@@ -133,10 +133,10 @@ def test_symbol_mic_and_fx_symbol() -> None:
 def test_capabilities_declared(provider: YFinanceProvider) -> None:
     caps = provider.capabilities
     assert provider.name == "yfinance"
-    assert caps.datasets == {"prices", "fx"}
+    assert caps.datasets == {"prices", "fx", "profile"}
     assert caps.max_batch == 1
     assert caps.rate_limit == YF_POLICY
-    assert caps.pit_reliable == {"prices": True, "fx": True}
+    assert caps.pit_reliable == {"prices": True, "fx": True, "profile": False}
     assert (YF_POLICY.concurrency, YF_POLICY.per_second, YF_POLICY.burst) == (4, 2, 4)
     assert YF_POLICY.backoff_s == (30, 60, 120, 240)
     assert provider.library_version == yf.__version__

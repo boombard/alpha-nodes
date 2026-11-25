@@ -1,21 +1,37 @@
 """Live recorder for the yfinance test fixtures (the one sanctioned network use; see TASK-31).
 
 Run once, commit the output, never import from tests:
-    uv run python packages/alpha_nodes/scripts/record_yfinance_fixtures.py
-Payloads are written exactly as `payload_from_history` captures them; never hand-edit.
+    uv run python packages/alpha_nodes/scripts/record_yfinance_fixtures.py [--only NAME ...]
+Without `--only` only fixtures that do not exist yet are recorded; `--only` re-records exactly
+the named ones (file stems, e.g. `profile_BP.L`). Existing TASK-31 price/fx fixtures are
+therefore never re-recorded by accident. Payloads are written exactly as
+`payload_from_history` / `payload_from_ticker` capture them; never hand-edit.
+Prices fixtures get a stats table (missing sessions, zero-volume days, duplicate dates,
+non-session bars) printed as markdown for the README.
 """
 
+import argparse
 import json
 import tempfile
+from collections.abc import Callable
 from datetime import date, timedelta
 from pathlib import Path
 
 import yfinance as yf
 import yfinance.cache as yf_cache
-from alpha_nodes.providers.yfinance.history import payload_from_history
+from alpha_nodes.providers.yfinance.history import YFHistoryPayload, payload_from_history
+from alpha_nodes.providers.yfinance.profile import payload_from_ticker
+from alpha_nodes.providers.yfinance.stats import price_stats
 
 OUT = Path(__file__).resolve().parents[1] / "tests" / "fixtures" / "yfinance"
-PRICE_SYMBOLS = ["BP.L", "HSBA.L", "VOD.L", "ASML.AS", "SAP.DE", "NESN.SW", "NOVO-B.CO", "AAPL"]
+CORE_SYMBOLS = ["BP.L", "HSBA.L", "VOD.L", "ASML.AS", "SAP.DE", "NESN.SW", "NOVO-B.CO", "AAPL"]
+NEW_CANARIES = ["VUSD.L", "BOOT.L", "ALCLS.PA"]
+"""TASK-32 additions: a USD-quoted .L line (Vanguard S&P 500 UCITS ETF), a UK small-cap
+(Henry Boot) and a European small-cap (Cellectis, EUR quote, USD reporting)."""
+ILLIQUID_SYMBOLS = ["BMT.L"]
+"""Prices only, not canaries: an AIM micro-cap with many no-trade days (TASK-37 gap evidence)."""
+PRICE_SYMBOLS = CORE_SYMBOLS + NEW_CANARIES + ILLIQUID_SYMBOLS
+PROFILE_SYMBOLS = CORE_SYMBOLS + NEW_CANARIES
 FX_SYMBOLS = ["GBPUSD=X", "EURUSD=X", "CHFUSD=X", "DKKUSD=X"]
 SPLIT = ("AAPL", date(2020, 8, 28), date(2020, 9, 3))  # 4:1 split effective 2020-08-31
 MISSING_PROBES = {  # name -> (symbol, start, end): provoke the two "missing" exceptions
@@ -54,26 +70,75 @@ def record(symbol: str, start: date, end: date, name: str) -> str | None:
     return doc.get("exception")
 
 
+def record_profile(symbol: str, name: str) -> str | None:
+    """Fetch `Ticker.info` and `.isin` and write them as a `YFProfilePayload` (or the error)."""
+    ticker = yf.Ticker(symbol)
+    try:
+        doc = payload_from_ticker(symbol, ticker.info, ticker.isin).model_dump(mode="json")
+    except Exception as exc:  # noqa: BLE001 - recorded verbatim
+        doc = {"exception": type(exc).__name__, "message": str(exc), "symbol": symbol}
+        print(f"{name}: {type(exc).__name__}: {exc}")
+    (OUT / f"{name}.json").write_text(json.dumps(doc, indent=0) + "\n")
+    return doc.get("exception")
+
+
+def print_price_stats() -> None:
+    """Print a markdown table of `price_stats` for every recorded prices fixture."""
+    print("| Fixture | bars | missing sessions | zero-volume | duplicate dates | non-session |")
+    print("|---|---|---|---|---|---|")
+    for path in sorted(OUT.glob("prices_*.json")):
+        stats = price_stats(YFHistoryPayload.model_validate_json(path.read_text()))
+        print(f"| `{path.name}` | " + " | ".join(str(v) for v in stats.values()) + " |")
+
+
+def targets() -> dict[str, Callable[[], str | None]]:
+    """Every price/fx/profile fixture by file stem, as a zero-argument recorder."""
+    today = date.today()
+    out: dict[str, Callable[[], str | None]] = {}
+    for sym in PRICE_SYMBOLS:
+        out[f"prices_{sym}"] = lambda sym=sym: record(
+            sym, today - timedelta(days=730), today - timedelta(days=1), f"prices_{sym}"
+        )
+    for sym in FX_SYMBOLS:
+        out[f"fx_{sym}"] = lambda sym=sym: record(
+            sym, today - timedelta(days=365), today - timedelta(days=1), f"fx_{sym}"
+        )
+    out[f"split_{SPLIT[0]}"] = lambda: record(SPLIT[0], SPLIT[1], SPLIT[2], f"split_{SPLIT[0]}")
+    for sym in PROFILE_SYMBOLS:
+        out[f"profile_{sym}"] = lambda sym=sym: record_profile(sym, f"profile_{sym}")
+    return out
+
+
 def main() -> None:
-    """Record every fixture for today's date."""
+    """Record the selected fixtures (default: those missing on disk) and print price stats."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--only", nargs="+", metavar="NAME", help="re-record exactly these stems")
+    args = parser.parse_args()
     yf.config.debug.hide_exceptions = False
     yf_cache.set_cache_location(
         tempfile.mkdtemp()
     )  # fresh tz cache: unknown symbols behave as on a first run
     OUT.mkdir(parents=True, exist_ok=True)
-    today = date.today()
-    for sym in PRICE_SYMBOLS:
-        record(sym, today - timedelta(days=730), today - timedelta(days=1), f"prices_{sym}")
-    for sym in FX_SYMBOLS:
-        record(sym, today - timedelta(days=365), today - timedelta(days=1), f"fx_{sym}")
-    record(SPLIT[0], SPLIT[1], SPLIT[2], f"split_{SPLIT[0]}")
-    for name, (sym, start, end) in MISSING_PROBES.items():
-        # An unknown symbol answers HTTP 404 until yfinance has cached its missing timezone
-        # (observed: the third call), then YFTzMissingError; repeat until the probe's class shows.
-        for _ in range(6):
-            if record(sym, start, end, name) == WANTED.get(name, None) or name not in WANTED:
-                break
-    print("yfinance", yf.__version__, "recorded", today)
+    wanted = targets()
+    if args.only:
+        unknown = set(args.only) - set(wanted) - set(MISSING_PROBES)
+        if unknown:
+            parser.error(f"unknown fixture names: {sorted(unknown)}")
+        names = list(args.only)
+    else:
+        names = [n for n in [*wanted, *MISSING_PROBES] if not (OUT / f"{n}.json").exists()]
+    for name in names:
+        if name in MISSING_PROBES:
+            sym, start, end = MISSING_PROBES[name]
+            # An unknown symbol answers HTTP 404 until yfinance has cached its missing timezone
+            # (observed: the third call), then YFTzMissingError; repeat until the class shows.
+            for _ in range(6):
+                if record(sym, start, end, name) == WANTED.get(name, None) or name not in WANTED:
+                    break
+        else:
+            wanted[name]()
+    print("yfinance", yf.__version__, "recorded", date.today(), "->", names)
+    print_price_stats()
 
 
 if __name__ == "__main__":

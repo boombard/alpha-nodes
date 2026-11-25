@@ -114,6 +114,22 @@ Source store).
   known, giving an `ok` empty interval.
 - LSE bars come back in GBp, with yfinance's own `Repaired?` flag true on most rows, so
   `yf_price_repair` is common there and is not by itself a quality signal.
+- (TASK-32, canary run 2026-11-25) `.info` has no `firstTradeDateEpochUtc`; the first trade
+  date is `firstTradeDateMilliseconds`. `Ticker.isin` is `"-"` for most non-US symbols and
+  was wrong for ASML.AS (an `AR...` ISIN), so the profile ISIN is a hint, never a join key.
+  `financialCurrency` differs from the trading currency for BP.L, HSBA.L (USD), VOD.L (EUR)
+  and ALCLS.PA (USD). An ETF (VUSD.L) has no `sharesOutstanding`, so it is `suspect`.
+- **Request counts** (canary, live): a history fetch costs 3-5 HTTP requests on a symbol's
+  first sight and 1-2 once caches are warm; `repair=True` adds 2 requests for GBp symbols
+  (3 vs 1) and none for AAPL. A profile (`.info` + `.isin`) costs 3-4 first sight and 2 warm.
+  The limiter's one-request-per-item assumption undercounts; TASK-37 should weight it.
+- Four concurrent workers over 11 symbols (prices and profile), both with freshly relocated
+  tz/cookie cache files (cold) and warm, raised no "database is locked", crumb or rate-limit
+  errors. A brand-new process's very first concurrent request is not covered.
+- Yahoo answers `.info` for an unknown symbol with a non-empty stub dict; no `currency` in
+  `.info` is therefore classified `empty`. Illiquid LSE names (Braime Group, BMT.L: 213 of 506
+  bars at zero volume) keep a bar for every session with the close carried forward, so
+  missing sessions is not the no-trade signal there; zero volume is.
 
 ### Data quality: yfinance quirks and how we handle them
 
