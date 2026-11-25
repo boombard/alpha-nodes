@@ -3,9 +3,10 @@ id: TASK-49
 title: >-
   M6.1 Contracts: fundamentals and news datasets, fundamentals result models,
   money helpers, settings
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-25T08:17:39Z'
+updated_date: '2026-11-25T22:29:15Z'
 labels:
   - finance
   - contracts
@@ -145,3 +146,9 @@ Out of scope: providers (M6.4, M6.5), kernels (M6.2), adapters and calc nodes (M
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_27df73b5b1c2, worktree task-49 (Orca run run_743fda9ec0e6)
+<!-- SECTION:NOTES:END -->

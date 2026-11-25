@@ -1,10 +1,10 @@
 ---
 id: TASK-25
 title: 'M6.3 Lens critical inputs and minimum coverage: abstain before judging'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-24T08:05:27Z'
-updated_date: '2026-11-25T08:18:09Z'
+updated_date: '2026-11-25T22:29:16Z'
 labels:
   - core
   - ui
@@ -80,3 +80,9 @@ Out of scope: suspect rows lowering sufficiency (core.md mentions it; not built)
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_13d3c5d47f07, worktree task-25 (Orca run run_743fda9ec0e6)
+<!-- SECTION:NOTES:END -->
