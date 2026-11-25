@@ -3,10 +3,10 @@ id: TASK-43
 title: >-
   M5.1 Contracts: code_deps, scorer overrides, evidence cites, LineChart, price
   metric models
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T06:37:16Z'
-updated_date: '2026-11-25T06:44:28Z'
+updated_date: '2026-11-25T06:47:36Z'
 labels:
   - core
   - finance
@@ -112,3 +112,11 @@ Out of scope: kernels (M5.2), calc nodes (M5.3), the lens (M5.4), rendering `Lin
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_257eda8344a8, worktree task-43
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker: code_deps hashed in code_version (byte-identical hash when empty), DeterministicLens.scorer_overrides (unknown names rejected), Component.evidence, LineChart (exported from lensgraph), the price metric models in alpha_nodes.metrics, and core.md (Nodes, Memoization, Deterministic lenses, Reporting). Commits bbcfce2 + bbfc0f0 (worktree task-43). pytest 656 passed, ruff and pyright clean.
+Review verdict: approved after one fix round. The round rewrote test_code_deps_change_code_version so the class sources are identical and only the dependency differs (function and module cases); the mutation check confirms it fails without code_deps hashing. It also moved in-function test imports to module top.
+Rulings to check: (1) regenerated packages/lensgraph-ui/fixtures/toy-run.json (outside the Files list) because editing deterministic.py changes lens_version hashes; only hash fields changed. (2) Evidence cite order is [source, *evidence] in declared order. (3) Tests use InMemoryBlobStore (the task named it MemoryBlobStore). Open points: none.
+<!-- SECTION:FINAL_SUMMARY:END -->
