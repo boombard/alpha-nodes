@@ -10,7 +10,7 @@ labels:
   - sketch
 milestone: m-6
 dependencies:
-  - TASK-13
+  - TASK-57
 references:
   - documentation/design/core.md
   - documentation/design/finance.md

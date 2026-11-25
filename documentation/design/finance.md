@@ -27,9 +27,9 @@ Every downstream node relies on that schema and never on provider-specific colum
 |---|---|---|
 | `prices` | trading date | daily OHLCV + dividends + split ratio, major units, **no adjusted close** (see Prices and point-in-time). ≥10y history needed for 12-1 momentum + 200-day trend + risk |
 | `profile` | none (snapshot) | name, country, exchange, currency, sector, industry, shares outstanding (**no market cap**: computed as price × shares), listing date, business summary |
-| `fundamentals` | fiscal period (annual/quarterly) | income/balance/cash-flow line items with `period_end`, `filed_at` where available |
-| `news` | published time | id, published_at, headline, source, url, summary. Providers may only serve recent items |
-| `filings_text` | filing date | e.g. 10-K "Business" + "Risk factors" sections (US) |
+| `fundamentals` | none (snapshot, keyed by period and filing) | annual income/balance/cash-flow line items with `period_end`, `filed_at` where available (M6: annual only; see Fundamentals below) |
+| `news` | none (snapshot, keyed by item id) | id, published_at, headline, source, url, summary. Providers may only serve recent items; stored items accumulate across fetches |
+| `filings_text` | filing date | e.g. 10-K "Business" + "Risk factors" sections (US). **Deferred** (M6 plan): US-only and fragile HTML section extraction; the profile business summary covers every region |
 | `screen` | none | population listing for campaigns (ticker, country, exchange, sector, mcap, volume) |
 | `fx` | date | daily FX rates to USD, for comparable absolute thresholds |
 
@@ -330,7 +330,7 @@ cross-candidate ranking in v1) and exposed as params. The backtest is how they g
   - share-count trend
   - earnings consistency (no losses / volatility)
   - a valuation range: owner-earnings yield vs. a hurdle, plus a simple intrinsic-value band
-- **Text inputs**: profile business summary; 10-K business section where available (US); recent news.
+- **Text inputs**: profile business summary; recent news. (A 10-K business section for US names waits for `filings_text`, deferred.)
 - **Default prompt**: a rubric that states Buffett's principles faithfully, grounded in
   primary sources.
   - Berkshire's published acquisition criteria (consistent earning power; good returns on
@@ -358,6 +358,100 @@ cross-candidate ranking in v1) and exposed as params. The backtest is how they g
   - valuation change (e.g. P/E or EV/EBIT now vs. 1y ago)
 - **Output**: stance on whether fundamentals support the price. Flags such as
   `price_up_fundamentals_down` (warn) and `derating_despite_improvement` (info).
+
+### Fundamentals: datasets, providers and pinned conventions (Claude's call, M6 plan 2026-11-25)
+
+**Dataset shapes.**
+- `fundamentals` is **annual only** in M6 (`period_type == "annual"`). Quarterly periods need
+  YTD de-accumulation on EDGAR (10-Qs report year-to-date; Q4 exists only as FY − 9M) and give
+  yfinance ~5 periods; they wait for a later milestone.
+- One **wide** row per (period, filing): canonical line items are typed columns with field
+  kinds, in the reporting currency's major unit, with a `currency` column. Key columns
+  `(period_type, period_end, filed_at)`; axis `none` (a snapshot refetched after the TTL, 7 days).
+- One fetch of EDGAR company facts holds every filing, including the comparatives a later
+  10-K re-reports. Each (period, filing) is its own key and `known_at = filed_at`, so as-of
+  queries see exactly what was filed by then. The adapter `annual_periods` then keeps, per
+  `period_end`, the latest filing known on the date asked about (restatements win once filed).
+- yfinance has no filing dates: `filed_at` is null, `known_at` = first seen, `pit_reliable=false`.
+  Periods Yahoo drops later stay in the store (facts are append-only), so a UK name's history
+  slowly grows from the ~4 years Yahoo serves.
+- `news` is a snapshot keyed by `id` with a 1-day TTL and `known_at = published_at`; items
+  accumulate across fetches. Items are untrusted text: prompts present them as evidence to
+  weigh, never as instructions.
+
+**Canonical line items** (all nullable floats, kind `money` unless noted): `revenue`,
+`operating_income`, `net_income` (attributable to common shareholders), `interest_expense`
+(positive = cost), `depreciation_amortization`, `operating_cash_flow`, `capex` (positive =
+cash spent), `total_assets`, `total_liabilities`, `total_equity` (incl. minority interest),
+`common_equity` (attributable to the parent), `total_debt`, `cash`, `shares_diluted`
+(weighted average, kind `shares`), `shares_outstanding` (period end, kind `shares`).
+EPS is computed (`net_income / shares_diluted`), never ingested (data quality principle 1).
+
+**Providers.**
+- `EdgarProvider` (`edgar`): SEC company facts (`data.sec.gov/api/xbrl/companyfacts`), US
+  `us-gaap` 10-K filers only. Entities are Yahoo symbols; a symbol with an exchange suffix
+  is `empty` without a request, and so is a ticker missing from SEC's ticker map (cached in the
+  provider cache dir, 7 days). Annual facts: form 10-K or 10-K/A, `fp == "FY"`, and for flow
+  items a duration of 350–380 days. A curated map gives each canonical item an ordered list of
+  `us-gaap` tags; per (period, filing) the first tag with a value is used, and when a later tag
+  in the list also has a value that differs by more than 1%, the row is `suspect`
+  (`tag_conflict:<item>`). Never first-writer-wins silently. User-Agent from
+  `ALPHA_NODES_SEC_USER_AGENT` (never committed); the factory fails clearly when it is unset.
+  Rate limit: SEC allows 10 requests/s; declare concurrency 2, 5/s. **The empty breaker is off**
+  (`max_consecutive_empty=None`): a UK/European universe is all `empty` for EDGAR by design.
+  `pit_reliable=true`.
+- `YFinanceProvider` adds `fundamentals` (annual income statement, balance sheet and cash
+  flow merged on `period_end`, plus `financialCurrency` and `.info` net income for the scale
+  check) and `news`. An empty statement set is a transient `error`; an unknown symbol `empty`.
+  Period columns more than 70% NaN are dropped (recorded on the payload, finance quirk table);
+  capex is mapped to positive. `pit_reliable=false` for both.
+- Run configs use `providers: {fundamentals: [edgar, yfinance]}`: US names come from EDGAR,
+  the rest fall back to yfinance (per entity, core.md Source store).
+
+**Checks on `fundamentals` rows.** `suspect` when `total_assets` and `total_liabilities +
+total_equity` differ by more than 2% (`balance_mismatch`); `rejected` when statements net
+income and `.info` net income differ by a factor near 1e3 or 1e6 (`scale_mismatch`); `rejected`
+with no reporting currency (`no_currency`). `tag_conflict` as above.
+
+**Pinned conventions.** Kernels in `alpha_nodes.kernels.fundamentals`; adapters in
+`alpha_nodes.statements`.
+- **Known on a date:** a period counts as known on day `d` if `filed_at <= d`, or, when
+  `filed_at` is null, if `period_end + FILING_LAG_DAYS (90) <= d`. Calcs use `as_of`, else the
+  run's today. Windows take the last ≤ `MAX_ANNUAL_PERIODS` (10) known periods.
+- **ROE** = `net_income / common_equity` per period (None when equity ≤ 0). Reported:
+  mean, min, and std (`ddof=1`, needs ≥ 3 periods).
+- **Operating margin** = `operating_income / revenue` (None when revenue ≤ 0); mean and std.
+- **Leverage** (latest period): `debt_to_equity = total_debt / common_equity` (None when
+  equity ≤ 0); `interest_cover = operating_income / interest_expense` (None when interest
+  expense is missing or ≤ 0).
+- **Owner earnings** = `net_income + depreciation_amortization − min(capex,
+  depreciation_amortization)`: maintenance capex is proxied by D&A, capped at actual capex.
+- **FCF** = `operating_cash_flow − capex`; **FCF conversion** = Σ FCF / Σ net income over the
+  window (None when Σ net income ≤ 0).
+- **Share-count trend** = CAGR of `shares_diluted` from the first to the last period of the
+  window, in years between their `period_end`s (needs ≥ 2 periods).
+- **Earnings consistency:** `loss_years` = periods with net income < 0;
+  `net_income_cv` = std / mean (None when mean ≤ 0 or fewer than 3 periods).
+- **Growth** (`growth(prev, cur)`) = `(cur − prev) / |prev|`, None when `prev == 0`; CAGR needs
+  both ends > 0. `revenue_growth_1y`, `revenue_cagr_3y` (4 periods), `eps_growth_1y`,
+  `fcf_growth_1y`; `op_margin_change_1y` is the difference in margin (fraction points).
+- **Market cap** = close on the day × `shares_outstanding` of the latest known period, in the
+  trading currency, converted to the reporting currency through `fx` on that day
+  (`alpha_nodes.money`; mixing currencies without fx raises `CurrencyMismatch`). It is
+  level-based (see Prices and point-in-time).
+- **Valuation** (latest known period): `owner_earnings_yield` = owner earnings / market cap;
+  intrinsic-value band = owner earnings capitalised at the hurdle rates (default 12% → low,
+  8% → high; None when owner earnings ≤ 0); `price_to_value` = market cap / band midpoint. Earnings yield and P/E use
+  net income / market cap; P/E is None when earnings ≤ 0.
+- **Valuation change:** the same at `as_of` and 252 bars earlier, each with the periods known
+  on its own day; `pe_change = pe_now / pe_then − 1`.
+- Every fundamentals result reports its window (`periods`, first and last `period_end`,
+  `suspect_periods`, `currency`); a field that can't be computed is None, never 0.
+
+**Lens inputs and abstention.** Both AI lenses take the `annual_fundamentals` frame as a
+critical input with a depth requirement (`quality_value`: desired 8, minimum 3;
+`price_vs_fundamentals`: desired 4, minimum 2), so a name with too few periods abstains before
+any LLM call (TASK-25). Neither lens sees analyst ratings or price targets (LLM herding risk).
 
 ### Optional later lens: `investability` (deterministic)
 

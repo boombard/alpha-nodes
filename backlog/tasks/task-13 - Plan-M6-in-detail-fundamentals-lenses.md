@@ -1,10 +1,10 @@
 ---
 id: TASK-13
 title: 'Plan M6 in detail: fundamentals lenses'
-status: To Do
+status: In Review
 assignee: []
 created_date: '2026-11-23T08:03:32Z'
-updated_date: '2026-11-25T06:37:35Z'
+updated_date: '2026-11-25T08:18:33Z'
 labels:
   - plan
   - sketch
@@ -54,3 +54,9 @@ Design refs: finance.md (Datasets, Providers, Data quality, v1 lenses 2 and 3, K
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Planned 2026-11-25: TASK-49..57 plus TASK-25 detailed as M6.3; sketches TASK-58 (filings_text), TASK-59 (ESEF), TASK-60 (FallbackModel). finance.md gained 'Fundamentals: datasets, providers and pinned conventions'. TASK-14 now depends on TASK-57. Awaiting human approval before dispatch.
+<!-- SECTION:NOTES:END -->
