@@ -1,10 +1,10 @@
 ---
 id: TASK-25
 title: 'M6.3 Lens critical inputs and minimum coverage: abstain before judging'
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-24T08:05:27Z'
-updated_date: '2026-11-25T22:29:16Z'
+updated_date: '2026-11-25T22:33:32Z'
 labels:
   - core
   - ui
@@ -86,3 +86,9 @@ Out of scope: suspect rows lowering sufficiency (core.md mentions it; not built)
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_13d3c5d47f07, worktree task-25 (Orca run run_743fda9ec0e6)
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker: LensNode.critical_inputs (frozenset param, validated against all_inputs at plan time) and min_coverage (0..1); LensNode.run abstains before assess (no LLM call) with 'critical input <name> unavailable' (+N more) or 'coverage X below minimum Y', keeping coverage/input_sufficiency, provenance lens_version + input_hashes only. Toy SafetyLens declares tox_notes critical; S2 safety abstains, dossier rests on growth (evidence_share 0.25). Run view shows abstained reason as info alert 'Abstained:'; fixture and bundle regenerated; core.md updated. Commits dffc6ef + 7b08656 (review fix) - squash on landing. Evidence: pytest 860 passed, ruff/pyright clean, pnpm test 55 passed, typecheck clean. Coordinator verdict: approve; one review round (removed a dead test-helper branch). Rulings: critical input reason wins over min_coverage; test_absent_optional_input_rendered_not_available_and_not_citable passes critical_inputs=[] to keep exercising the optional-absent path; test_panel_e2e/test_ai_lens/fixture/bundle touched beyond listed toy files (expectations/regen only). Open: none.
+<!-- SECTION:FINAL_SUMMARY:END -->
