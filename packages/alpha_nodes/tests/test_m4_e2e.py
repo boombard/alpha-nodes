@@ -1,13 +1,12 @@
 """M4 demo gate offline: `runs/m4_prices.yaml` replayed from the recorded yfinance fixtures."""
 
-from collections.abc import Callable, Iterator
-from datetime import UTC, date, datetime
+from collections.abc import Callable
+from datetime import date
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
 import pytest
-import yfinance as yf
 from alpha_nodes.nodes.fetch import FxRates, Prices, Profile
 from alpha_nodes.providers.yfinance.history import YFHistoryPayload
 from alpha_nodes.registry import build_registry
@@ -28,22 +27,6 @@ SYMBOLS = ["BP.L", "HSBA.L", "VOD.L", "ASML.AS", "SAP.DE", "NESN.SW", "NOVO-B.CO
 FX_CURRENCIES = {"GBP", "EUR", "CHF", "SEK", "NOK", "DKK", "PLN"}
 
 Runner = Callable[..., Any]
-
-
-@pytest.fixture
-def replay(monkeypatch: pytest.MonkeyPatch) -> Iterator[YFReplay]:
-    """`yfinance.Ticker` replaced by the recorded fixtures."""
-    stub = YFReplay()
-    stub.install(monkeypatch)
-    saved = (yf.config.debug.hide_exceptions, yf.config.network.retries)  # the provider sets these
-    yield stub
-    yf.config.debug.hide_exceptions, yf.config.network.retries = saved
-
-
-@pytest.fixture
-def clock() -> FakeClock:
-    """A Wednesday during LSE trading hours, the day after the fixtures' last bar."""
-    return FakeClock(datetime(2026, 11, 25, 10, 0, tzinfo=UTC))
 
 
 def make_config(symbols: list[str], prices_days: int = 700) -> RunConfig:
@@ -91,7 +74,7 @@ def output(result: Any, node: str, candidate: str | None) -> pd.DataFrame:
 
 
 def test_registry_and_catalog_expose_the_fetch_nodes() -> None:
-    assert sorted(build_registry().names()) == ["fx", "prices", "profile"]
+    assert {"fx", "prices", "profile"} <= set(build_registry().names())
     assert (Prices().lookback_days or 0) >= 3653
     assert Profile.dataset == "profile"
     assert FxRates().entities == ["GBP", "EUR", "CHF", "SEK", "NOK", "DKK", "PLN"]

@@ -1,0 +1,79 @@
+# M5 demo: the price_behaviour lens over 50 UK/European large and mid caps (no AI, no reviewer).
+#   uv run lensgraph run runs/m5_price_behaviour.yaml        # live; first fetch is 50 tickers x 10y
+# Edit nodes.price_behaviour.thresholds and rerun (--offline): only price_behaviour and dossier recompute.
+registry: alpha_nodes.registry:build_registry
+candidates:
+  # LSE
+  - id: SHEL.L
+  - id: AZN.L
+  - id: HSBA.L
+  - id: ULVR.L
+  - id: BP.L
+  - id: GSK.L
+  - id: RIO.L
+  - id: DGE.L
+  - id: BATS.L
+  - id: LSEG.L
+  - id: REL.L
+  - id: NG.L
+  - id: VOD.L
+  - id: BARC.L
+  - id: LLOY.L
+  - id: TSCO.L
+  - id: BA.L
+  - id: RR.L
+  - id: CPG.L
+  - id: SSE.L
+  # Euronext Paris
+  - id: MC.PA
+  - id: OR.PA
+  - id: AIR.PA
+  - id: SU.PA
+  # Euronext Amsterdam
+  - id: ASML.AS
+  - id: INGA.AS
+  - id: PHIA.AS
+  # Euronext Brussels
+  - id: UCB.BR
+  - id: ABI.BR
+  # Euronext Lisbon
+  - id: EDP.LS
+  - id: GALP.LS
+  # Euronext Dublin
+  - id: RYA.IR
+  # Xetra
+  - id: SAP.DE
+  - id: SIE.DE
+  - id: ALV.DE
+  # Milan
+  - id: ENEL.MI
+  - id: ISP.MI
+  # Madrid
+  - id: SAN.MC
+  - id: IBE.MC
+  # SIX Swiss
+  - id: NESN.SW
+  - id: RO.SW
+  - id: NOVN.SW
+  # Stockholm
+  - id: VOLV-B.ST
+  - id: ERIC-B.ST
+  # Copenhagen
+  - id: NOVO-B.CO
+  - id: DSV.CO
+  # Oslo
+  - id: EQNR.OL
+  - id: DNB.OL
+  # Helsinki
+  - id: NOKIA.HE
+  - id: KNEBV.HE
+panel:
+  lenses: [price_behaviour]
+nodes:
+  price_behaviour:
+    thresholds: [-0.6, -0.2, 0.2, 0.6]
+sources:
+  catalog: alpha_nodes.catalog:CATALOG
+  providers:
+    prices: [yfinance]
+    profile: [yfinance]

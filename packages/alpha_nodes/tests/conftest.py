@@ -1,12 +1,19 @@
-"""Shared fixtures: valid canonical frames for the alpha_nodes datasets."""
+"""Shared fixtures: valid canonical frames for the alpha_nodes datasets, and the offline yfinance replay."""
 
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
+from datetime import UTC, datetime
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
 import pytest
+import yfinance as yf
 from alpha_nodes.providers.yfinance.history import YFHistoryPayload
+from lensgraph.sources import FakeClock
+
+if TYPE_CHECKING:
+    from .yf_replay import YFReplay
 
 YF_FIXTURES = Path(__file__).parent / "fixtures" / "yfinance"
 
@@ -87,3 +94,21 @@ def random_walk() -> Callable[[int, int], np.ndarray]:
         return 100.0 * np.exp(np.cumsum(rng.normal(0.0003, 0.01, n)))
 
     return make
+
+
+@pytest.fixture
+def replay(monkeypatch: pytest.MonkeyPatch) -> Iterator["YFReplay"]:
+    """`yfinance.Ticker` replaced by the recorded fixtures (see yf_replay.py)."""
+    from .yf_replay import YFReplay
+
+    stub = YFReplay()
+    stub.install(monkeypatch)
+    saved = (yf.config.debug.hide_exceptions, yf.config.network.retries)  # the provider sets these
+    yield stub
+    yf.config.debug.hide_exceptions, yf.config.network.retries = saved
+
+
+@pytest.fixture
+def clock() -> FakeClock:
+    """A Wednesday during LSE trading hours, the day after the fixtures' last bar."""
+    return FakeClock(datetime(2026, 11, 25, 10, 0, tzinfo=UTC))
