@@ -1,10 +1,10 @@
 ---
 id: TASK-28
 title: M4.3 Provider scheduler and shared rate limiter
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-25T01:09:15Z'
-updated_date: '2026-11-25T02:58:26Z'
+updated_date: '2026-11-25T03:31:48Z'
 labels:
   - core
 milestone: m-3
@@ -79,18 +79,18 @@ Out of scope: deciding what to fetch (M4.2), persistence (M4.5).
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 run_items batches by declared max_batch and never mixes params in a batch
-- [ ] #2 ProviderLimiter enforces concurrency and token-bucket pacing, pauses the whole provider on a rate limit with the declared backoff and jitter
-- [ ] #3 GlobalFailure after the declared consecutive rate-limit episodes or unreachable outcomes; ok resets the counters; errors retried then final
-- [ ] #4 Every final outcome reaches on_outcome before an abort; tests pass against both fake providers
+- [x] #1 run_items batches by declared max_batch and never mixes params in a batch
+- [x] #2 ProviderLimiter enforces concurrency and token-bucket pacing, pauses the whole provider on a rate limit with the declared backoff and jitter
+- [x] #3 GlobalFailure after the declared consecutive rate-limit episodes or unreachable outcomes; ok resets the counters; errors retried then final
+- [x] #4 Every final outcome reaches on_outcome before an abort; tests pass against both fake providers
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -106,4 +106,6 @@ Worker: lensgraph/sources/scheduler.py (ProviderLimiter: lazy asyncio primitives
 Worker rulings: concurrent rate_limited outcomes during an active pause count as one episode; retries re-run inside the same batch task (a re-fetched batch can be smaller than max_batch); a rate_limited-only round adds no sleep beyond the provider pause.
 Coordinator review: one round sent and done. (1) AC4 gap fixed: the whole batch is classified and final outcomes delivered before limiter.report runs, so a mid-batch GlobalFailure no longer strands later ok outcomes (new test with the failing item in the middle). (2) unreachable retries now sleep backoff_s[0] once per round, shared with error retries (deviation from the spec, which had unreachable re-queued with no delay). Approve.
 Open points: a cancelled batch whose fetch thread is still running is not interrupted (asyncio.to_thread); its outcomes are lost, not persisted. Error/unreachable backoff is fixed at backoff_s[0], not escalating.
+
+Landed 5bec80b (2 worker commits squashed; tree verified equal) on main.
 <!-- SECTION:FINAL_SUMMARY:END -->
