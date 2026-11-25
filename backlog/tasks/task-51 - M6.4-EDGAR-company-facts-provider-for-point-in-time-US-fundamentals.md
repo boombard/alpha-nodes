@@ -1,10 +1,10 @@
 ---
 id: TASK-51
 title: M6.4 EDGAR company-facts provider for point-in-time US fundamentals
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T08:17:58Z'
-updated_date: '2026-11-25T23:47:47Z'
+updated_date: '2026-11-25T23:50:32Z'
 labels:
   - finance
 milestone: m-5
@@ -110,3 +110,9 @@ Worker: dispatch ctx_8c455556e912, worktree task-51 (Orca run run_09eee9a7786f)
 2026-11-26: first worker_done failed (no SEC User-Agent; question timed out). Human supplied the UA; resumed as follow-up dispatch ctx_10ae7d5603c8.
 Review round 1 sent (HEAD 379aa4e): total_debt excludes short-term borrowings and its LongTermDebtNoncurrent fallback changes meaning.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker summary: EdgarProvider (SEC company facts, ticker->CIK map cached 7 days, suffixed/unknown symbols empty without a request, 429/403 rate_limited, 404 empty, EDGAR_POLICY with empty breaker off, pit_reliable), companyfacts normaliser + curated TAG_MAP, replay fake, catalog 'edgar' factory (ValueError naming ALPHA_NODES_SEC_USER_AGENT), fixtures recorded live 2026-11-26 (AAPL, KO, LAKE; 4 requests; UA via env only, not in any file) with README findings, finance.md EDGAR note. pytest 923 passed, ruff and pyright clean. 5 commits 5e8aeea..8bddc0f: squash on landing. Review: 1 fix round. R1: total_debt was long-term debt only and its LongTermDebtNoncurrent fallback silently dropped current maturities (fixed: _compose_total_debt = LongTermDebt, else Noncurrent+Current, else Noncurrent alone with partial:total_debt suspect, plus first of ShortTermBorrowings/CommercialPaper; leases excluded; finance.md updated). Verdict: approve. Rulings: a period exists only where a full-year flow fact exists; total_equity and cash use first-tag fallback without tag_conflict; shares_outstanding from us-gaap CommonStockSharesOutstanding (null for KO), total_liabilities not derived (KO null, balance check skipped); SalesRevenueGoodsNet added for KO history; edgar_replay fixture in tests/conftest.py (outside Files, accepted; TASK-53 also edits conftest.py at a different spot). Open for the human: tag_conflict fires on AAPL D&A/interest in 24+12 of 57 rows and LAKE in 7, which may make suspect noisy; decide whether D&A/interest tag differences should count as conflicts.
+<!-- SECTION:FINAL_SUMMARY:END -->
