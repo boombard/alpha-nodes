@@ -6,7 +6,7 @@ title: >-
 status: In Progress
 assignee: []
 created_date: '2026-11-25T06:37:34Z'
-updated_date: '2026-11-25T07:47:59Z'
+updated_date: '2026-11-25T07:48:05Z'
 labels:
   - finance
 milestone: m-4
@@ -88,5 +88,7 @@ Out of scope: an AI reviewer in the demo; fx; campaign or universe logic (M7).
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
+From TASK-47 landing: the chart kind and flat-model field tables have not been clicked through in a real browser (toy run cites no LineChart). Check price_chart and the metric tables in the demo report via Orca's browser.
+
 Worker: dispatch ctx_b42ce863e711, worktree task-48
 <!-- SECTION:NOTES:END -->
