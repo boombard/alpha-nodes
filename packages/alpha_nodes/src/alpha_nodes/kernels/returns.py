@@ -6,6 +6,7 @@ Pinned conventions).
 
 import numpy as np
 
+from alpha_nodes.conventions import BARS_PER_MONTH, BARS_PER_YEAR
 from alpha_nodes.kernels._validate import as_series, check_same_length, check_window
 
 
@@ -38,7 +39,7 @@ def total_return_index(close: np.ndarray, dividends: np.ndarray) -> np.ndarray:
     return np.concatenate(([1.0], np.cumprod(factors)))
 
 
-def skip_return(x: np.ndarray, lookback: int = 252, skip: int = 21) -> float:
+def skip_return(x: np.ndarray, lookback: int = BARS_PER_YEAR, skip: int = BARS_PER_MONTH) -> float:
     """Momentum with a skipped recent window: `x[-1-skip] / x[-1-lookback] - 1`.
 
     `nan` if `len(x) < lookback + 1`. Requires `0 <= skip < lookback`; `x` positive.

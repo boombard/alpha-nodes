@@ -5,10 +5,13 @@ Pure numpy; see documentation/design/finance.md (price_behaviour, Pinned convent
 
 import numpy as np
 
+from alpha_nodes.conventions import BARS_PER_YEAR
 from alpha_nodes.kernels._validate import as_series, check_window
 
 
-def realised_volatility(returns: np.ndarray, periods_per_year: int = 252, ddof: int = 1) -> float:
+def realised_volatility(
+    returns: np.ndarray, periods_per_year: int = BARS_PER_YEAR, ddof: int = 1
+) -> float:
     """Annualised volatility: `std(returns, ddof) * sqrt(periods_per_year)`.
 
     `nan` if `len(returns) <= ddof`.

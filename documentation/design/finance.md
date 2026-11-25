@@ -283,8 +283,13 @@ cross-candidate ranking in v1) and exposed as params. The backtest is how they g
 - **Total-return index** (`total_return_index`): `TR_0 = 1`,
   `TR_t = TR_{t-1} × (close_t + dividend_t) / close_{t-1}`, with the dividend on its ex-date
   row. `split_ratio` is **not** applied, because yfinance closes are already split-adjusted.
-  Dividends are assumed to be on the same split basis as the closes (*unverified*; M5.3
-  checks it on the AAPL split fixture).
+  Dividends are assumed to be on the same split basis as the closes. M5.3 checked what the
+  AAPL fixtures show: closes are split-adjusted through the 4:1 split of 2020-08-31 (the TR
+  index moves 3.4% that day, no 4× artefact), and the two-year AAPL fixture's eight payouts
+  (0.25–0.27) form a smooth series whose trailing-year yield is a plausible AAPL 0.2–1.5% (a ×4 basis
+  error would fall outside). The recorded split window contains no dividend, so a
+  payout straddling a split is *not* directly observed; the assumption rests on yfinance
+  adjusting both columns together.
 - **Momentum 12-1** (`skip_return`): `TR[-1-21] / TR[-1-252] - 1`. It needs ≥ 253 bars, else
   None.
 - **Trend:** MA = `sma(close, 200)` on split-adjusted closes (price, not TR, by convention).
@@ -381,8 +386,15 @@ then applied to pandas frames. There are three layers, each depending only on th
    facts (bars used, dates, suspect bars). They hold no maths of their own.
 3. **Calc nodes** (`alpha_nodes.nodes`): `CalcNode`/`TransformNode` subclasses. They expose
    windows as params, call adapters, and return pydantic result models whose fields are
-   what lenses cite. They declare the kernels and adapters they use in `code_deps`, so
-   editing a kernel invalidates their memo entries (core.md, Memoization).
+   what lenses cite. They declare the kernels and adapters they use in `code_deps`
+   (core.md, Memoization); the price calc nodes are not memoized (below), so this only
+   matters if caching is turned back on.
+
+The bar-count conventions (`BARS_PER_MONTH`, `BARS_PER_YEAR`) live in
+`alpha_nodes.conventions`. Calc nodes are **not memoized**: they cost milliseconds and their
+outputs are stored for lineage anyway, so caching saves almost nothing, and it risks stale
+results from things outside the memo key (module constants, library upgrades) that would
+persist indefinitely in fixed as-of runs. Lenses, AI nodes and the reviewer stay memoized.
 
 Lenses never call kernels or adapters directly. They read calc node outputs only.
 
