@@ -1,10 +1,10 @@
 ---
 id: TASK-46
 title: M5.4 price_behaviour deterministic lens
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-25T06:37:27Z'
-updated_date: '2026-11-25T07:00:28Z'
+updated_date: '2026-11-25T07:42:48Z'
 labels:
   - finance
 milestone: m-4
@@ -77,18 +77,18 @@ Out of scope: registering the lens (M5.6); calibrating defaults (M8); coverage d
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 PriceBehaviour has the specified inputs, components, default scorers, weights and claim templates
-- [ ] #2 Suspect bars raise a data_quality warn flag citing the affected inputs' suspect_bars
-- [ ] #3 Claims cite price_chart as evidence only when present; missing components skipped; all missing abstains
-- [ ] #4 thresholds, weight_overrides and scorer_overrides change the verdict as params
+- [x] #1 PriceBehaviour has the specified inputs, components, default scorers, weights and claim templates
+- [x] #2 Suspect bars raise a data_quality warn flag citing the affected inputs' suspect_bars
+- [x] #3 Claims cite price_chart as evidence only when present; missing components skipped; all missing abstains
+- [x] #4 thresholds, weight_overrides and scorer_overrides change the verdict as params
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -103,4 +103,6 @@ Worker: dispatch ctx_0938ae3c3037, worktree task-46 (run run_3fc22c1f4db5)
 Worker: PriceBehaviour deterministic lens (5 components with the specified scorers, weights and claim templates; price_chart optional, evidence only, input weight 0; data_quality warn flag added in an assess() override that calls super().assess(), citing <input>.suspect_bars for each input with suspect bars). 13 tests (all specified plus test_chart_does_not_change_coverage). pytest 780 passed, ruff and pyright clean.
 Coordinator review: matches ACs 1-4, Files and Interfaces; docstrings present and meaningful. One fix round: an out-of-scope ruff-format reflow of test_m4_e2e.py was reverted (e4adda6). Diff vs main is now only the 3 task files.
 Open points: 3 commits (feat, test fix, revert) - squash on landing. Rulings: flag text 'Suspect price bars used in: momentum (2 suspect bars), ...'; the flag is also added to abstained verdicts (harmless).
+
+Landed 2a2879a on main (squashed).
 <!-- SECTION:FINAL_SUMMARY:END -->
