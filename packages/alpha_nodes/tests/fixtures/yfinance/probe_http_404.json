@@ -1,0 +1,7 @@
+{
+"exception": "HTTPError",
+"message": "HTTP Error 404: ",
+"symbol": "NOSUCH.XX",
+"requested_start": "2026-01-05",
+"requested_end": "2026-01-09"
+}

@@ -1,0 +1,7 @@
+{
+"exception": "YFTzMissingError",
+"message": "$NOSUCH.XX: possibly delisted; no timezone found",
+"symbol": "NOSUCH.XX",
+"requested_start": "2026-01-05",
+"requested_end": "2026-01-09"
+}

@@ -5,6 +5,8 @@ requires-python = ">=3.13,<3.14"
 dependencies = [
     "lensgraph",
     "exchange_calendars>=4.11",
+    "yfinance[repair]==1.8.0",
+    "curl_cffi",
 ]
 
 [tool.uv.sources]

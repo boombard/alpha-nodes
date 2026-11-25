@@ -101,6 +101,20 @@ Source store).
   15 s timeout. Unknown tickers are `empty` with a ~7-day TTL. Anecdotally Yahoo blocks
   are per IP and last ~1.5–24 h, so stopping beats hammering.
 
+**Verified by recorded fixtures (2026-11-25, yfinance 1.8.0; see
+`packages/alpha_nodes/tests/fixtures/yfinance/README.md`):**
+
+- The cache setter is `yfinance.cache.set_cache_location`, and `HAS_CURL_CFFI` is in
+  `yfinance._http`. The per-request timeout is the `timeout=` argument of `history`
+  (`config.network` has only `proxy` and `retries`).
+- An unknown symbol first answers a bare `HTTPError 404` (status on `exc.response`), and
+  `YFTzMissingError` only after yfinance has cached the missing timezone (third call). Both
+  are classified `empty`; the 404 is not left to retries.
+- `YFPricesMissingError` for a weekend range on a known symbol is raised with the timezone
+  known, giving an `ok` empty interval.
+- LSE bars come back in GBp, with yfinance's own `Repaired?` flag true on most rows, so
+  `yf_price_repair` is common there and is not by itself a quality signal.
+
 ### Data quality: yfinance quirks and how we handle them
 
 Researched 2026-11-23: the old repo's fixtures and code, plus yfinance issues and changelog.

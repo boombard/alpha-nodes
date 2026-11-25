@@ -1,0 +1,7 @@
+{
+"exception": "YFPricesMissingError",
+"message": "$AAPL: possibly delisted; no price data found  (1d 2026-01-03 -> 2026-01-05)",
+"symbol": "AAPL",
+"requested_start": "2026-01-03",
+"requested_end": "2026-01-04"
+}
