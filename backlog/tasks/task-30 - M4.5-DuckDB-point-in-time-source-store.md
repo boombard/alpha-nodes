@@ -47,12 +47,12 @@ Semantics (each is pinned by a test below):
 - `get` = `ensure` for one entity, then `query`. One `ProviderLimiter` per provider name per store.
 - **Fallback is per entity**: try the chain in order; a provider that is `known_empty` or answers `empty` passes to the next. The slice comes from one provider only (no mixing). All empty → `SourceSlice(empty=True, provider=None)` with an empty frame of the right columns.
 - **Persistence per outcome**: in `on_outcome`, write the raw response (payload to blobs, record to DuckDB), the attempt, the new coverage state, and the normalised facts, in one DuckDB transaction. A later `GlobalFailure` leaves these in place.
-- **Facts are append-only**: a row whose canonical values equal the latest version of its key adds nothing; a changed row adds a version (`first_seen_at = now`). Rows after the outcome's `settled_through` are dropped and an `unsettled` attempt is logged for that tail. `known_at` from the normaliser, else `first_seen_at`.
+- **Facts are append-only**: a row is compared with the latest version of its key on its canonical values **and** its labels (`repairs`, `quality`, `quality_reasons`); bookkeeping columns (`fetch_id`, `first_seen_at`, `normaliser_version`) are not compared. A row equal on both adds nothing; a row that differs in either adds a version (`first_seen_at = now`), so a relabel alone (e.g. a new check marking a row `suspect`) is kept in the history. Rows after the outcome's `settled_through` are dropped and an `unsettled` attempt is logged for that tail. `known_at` from the normaliser, else `first_seen_at`.
 - **Queries**: latest version per key with `known_at < as_of + 1 day` (as_of is a date; the cut-off is the end of that UTC day); `as_of=None` means latest. `rejected` rows excluded unless `include_rejected`; `suspect` rows served with their reasons. Interval filter on the axis column.
 - **`error` after retries** raises `SourceUnavailable` naming dataset, entity and provider; nothing is cached.
 - **`restated_before`**: applied through `apply_outcome`, and `get` replans once in the same call, so the restated history is refetched immediately.
 - **Offline**: no provider is called; any gap (or due snapshot) raises `SourceUnavailable`; covered data is served.
-- **`renormalise(dataset, provider)`**: re-runs `provider.normalise` over every stored raw response for that pair (oldest first) and appends versions where values changed, stamped with the new `normaliser_version`. Never calls `fetch`.
+- **`renormalise(dataset, provider)`**: re-runs `provider.normalise` over every stored raw response for that pair (oldest first) and appends versions where values or labels changed (same rule as above), stamped with the new `normaliser_version`. Never calls `fetch`. Each call is logged in a `renormalisations` table (dataset, provider, normaliser_version, started/finished, raw responses read, rows written); this is store-internal, not part of the `SourceStore` protocol.
 - `pit_reliable` on slices comes from the serving provider's capabilities.
 - All DuckDB access happens on the event-loop thread (providers run in threads but never touch the DB).
 
@@ -62,6 +62,7 @@ Semantics (each is pinned by a test below):
   - `test_mid_range_hole_fetches_only_the_hole`
   - `test_rows_after_settled_not_stored_and_tail_logged`
   - `test_unchanged_refetch_adds_no_version`
+  - `test_relabel_only_adds_version`: same value, different `quality` → a new version; `as_of` before it sees the old label.
   - `test_changed_value_adds_version_and_as_of_sees_old`: restate one day after the clock moves; `as_of` before the restatement returns the old value, `as_of=None` the new one.
   - `test_as_of_excludes_later_known_at`
   - `test_rejected_excluded_suspect_served_with_reasons`
@@ -73,7 +74,7 @@ Semantics (each is pinned by a test below):
   - `test_restated_before_refetches_history_in_same_get`
   - `test_snapshot_refetched_after_ttl`
   - `test_offline_serves_covered_and_raises_on_gap`
-  - `test_renormalise_rebuilds_without_fetch`: bump the fake's normaliser version and its spike threshold; renormalise; facts reflect it; `calls` unchanged; raw responses count unchanged.
+  - `test_renormalise_rebuilds_without_fetch`: bump the fake's normaliser version and its spike threshold; renormalise; facts reflect it (the spike rows' new labels are new versions even though od600 is unchanged); `calls` unchanged; raw responses count unchanged; one `renormalisations` row records the run.
   - `test_policy_override_replaces_declared_policy`
 - [ ] Run `uv run pytest packages/lensgraph/tests/test_source_store.py -q`. Expected: FAIL.
 - [ ] Implement.

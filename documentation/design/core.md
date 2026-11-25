@@ -399,7 +399,10 @@ identity, never by code. The core provides the mechanics. Domains define dataset
     still-changing bar never becomes an append-only version.
 - **Facts are append-only.** Each row carries `provider`, `fetch_id`, `first_seen_at`, and
   `known_at`: the provider-reported publication time (e.g. filing date) when available,
-  else `first_seen_at`. Re-fetches that change a value add a new version (restatements are kept).
+  else `first_seen_at`. A re-fetch or renormalise that changes a row's canonical values **or
+  its labels** (`repairs`, `quality`, `quality_reasons`) adds a new version, so restatements
+  and relabels are both kept; bookkeeping columns (`fetch_id`, `first_seen_at`,
+  `normaliser_version`) don't count as a change. Each `renormalise` run is logged.
 - **Coverage = interval sets** per (entity, dataset, provider, params). It records the
   *requested* ranges that were successfully fetched, not the returned dates, so
   weekends/holidays are not "gaps". Gap-fill fetches only the missing intervals, including
