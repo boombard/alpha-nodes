@@ -1,0 +1,225 @@
+---
+title: "Swiss Army Knife - Gaussian Filter (SWAK_GAUSS)"
+description: "The Gaussian row of John Ehlers' Swiss Army Knife filter: a two-pole low-pass smoother whose impulse response approximates a Gaussian, so it lags price…"
+---
+
+## Summary
+
+The Gaussian row of John Ehlers' Swiss Army Knife filter: a two-pole low-pass smoother whose impulse response approximates a Gaussian, so it lags price without the overshoot a sharper filter leaves behind a turn.
+
+Read it as a smoothed price line. Its DC gain is 1, so a flat market returns the price itself and the line sits on the chart with price rather than oscillating around zero. The cutoff period sets how much is removed: cycles far shorter than it are attenuated smoothly, cycles far longer pass essentially untouched, and there is no band in between where the filter rings.
+
+The alpha is the one the Gaussian construction asks for, not the exponential-moving-average alpha. Ehlers notes that the same shape can be had by taking an EMA of an EMA, but that doing so "leaves the computation of the correct alpha to be a little nebulous", and gives these coefficients instead. `TA_EMA` cannot stand in: its alpha is `2/(n+1)` for whole `n`, and at a cutoff period of 20 this filter's alpha is 0.38217, which would ask for `n = 4.233`.
+
+## Chart
+
+<ta-chart src="/functions/swak_gauss.svg" ratio="720:274" label="SWAK_GAUSS over IBM, daily, 1999" alt="Drawn on the price pane over the close as a line, with outReal as a solid line."></ta-chart>
+
+<div class="ta-chart-links">
+
+[Reference data (CSV)](/functions/swak_gauss.csv) · [Chart (SVG)](/functions/swak_gauss.svg)
+
+</div>
+
+::: details Chart metadata <span class="flag-tip" tabindex="0" role="note" aria-label="The chart is drawn automatically from metadata TA-Lib provides. Your app can get the same through the Abstract API." data-tip="The chart is drawn automatically from metadata TA-Lib provides. Your app can get the same through the Abstract API.">i</span>
+
+**Outputs**
+
+- `outReal`: `line`
+
+:::
+
+## Formula
+
+```
+w   = 2 * pi / optInTimePeriod
+b2p = 2.415 * (1 - cos(w))
+a2p = -b2p + sqrt(b2p^2 + 2 * b2p)
+
+c0  = a2p^2
+a1  = 2 * (1 - a2p)
+a2  = -(1 - a2p)^2
+
+y[i] = c0 * x[i] + a1 * y[i-1] + a2 * y[i-2]
+```
+
+The filter is seeded in the steady state of a constant input equal to its first bar: both output slots start at that bar's value, which is what a gain-1 row answers for a constant.
+
+## Notes
+
+`SWAK` is the abbreviation the trading platforms use for this filter, and the suffix is Ehlers' own label for the row. The prefix is load-bearing rather than decorative: the Swiss Army Knife's Butterworth row keeps this same double real pole and adds two zeros at Nyquist, while the Gaussian paper contrasts it with the Butterworth filters of a separate article, and the SuperSmoother is a third two-pole low-pass with complex poles. A bare `GAUSS` would claim all of them.
+
+Every term of the recurrence exists at the first bar, so there is no structural lookback and nothing is dropped from the front of the request. What the first bars do carry is the seed, which decays rather than ending: set `TA_FUNC_UNST_SWAK_GAUSS` to discard bars until that transient is below whatever matters for the caller.
+
+The output may alias the input. This row's `b1` and `b2` are zero, so it never re-reads an earlier input slot that an aliased write would already have overwritten.
+
+## Inputs
+
+- `inReal` — The series to filter; Ehlers' default is the bar midpoint `(H+L)/2`, which the caller passes as `TA_MEDPRICE` output
+
+## Outputs
+
+- `outReal` — The filtered line, on the same scale as the input
+
+## Parameters
+
+| Parameter | Type | Default | Accepted values | Description |
+| --- | --- | --- | --- | --- |
+| `optInTimePeriod` | integer | 20 | 2–10000 | Cutoff period; shorter keeps more of the fast motion, longer smooths harder and lags more |
+
+## Properties
+
+**Numerical Stability:** [Initial Unstable Period](/functions/stability.md#initial-unstable-period)
+
+<div class="flag-cols">
+
+<div class="flag-table">
+
+|  |
+| :-- |
+| <span class="flag-box">✅</span> **Overlap Input** <span class="flag-tip" tabindex="0" role="note" aria-label="Output is on the same scale as the input price, so it is drawn over the price chart." data-tip="Output is on the same scale as the input price, so it is drawn over the price chart.">i</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Independent Y-Axis</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Candlestick</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Display Shift</span> |
+
+</div>
+
+<div class="flag-table">
+
+|  |
+| :-- |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Can Output NaN or ±Inf</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Identity at Period 1</span> |
+| <span class="flag-box">✅</span> **Uses Transcendental** <span class="flag-tip" tabindex="0" role="note" aria-label="Calls a transcendental math function (exp, log, log10, trigonometric, inverse trigonometric or hyperbolic), so a value may differ slightly between languages, between a stream and a batch call, and between machines. TA-Lib targets a difference below 1e-9." data-tip="Calls a transcendental math function (exp, log, log10, trigonometric, inverse trigonometric or hyperbolic), so a value may differ slightly between languages, between a stream and a batch call, and between machines. TA-Lib targets a difference below 1e-9.">i</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Input Must Be Positive</span> |
+
+</div>
+
+</div>
+
+## Example
+
+::: code-tabs#lang
+
+@tab C
+
+```c
+#include <stdio.h>
+#include <ta_libc.h>
+
+int n = 252;
+double series[252]; /* your data, oldest first */
+double out[252];
+int outBegIdx, outNBElement;
+
+TA_Initialize();
+TA_SWAK_GAUSS( 0, n - 1, series, 20, &outBegIdx, &outNBElement, out );
+printf( "%d values from bar %d: [%.4f, ..., %.4f]\n", outNBElement, outBegIdx, out[0], out[outNBElement - 1] );
+```
+
+@tab Rust
+
+```rust
+use ta_lib::Core;
+
+let series = vec![0.0; 252]; // your data, oldest first
+let mut out = vec![0.0; 252];
+
+let core = Core::new();
+let range = core.swak_gauss(0, series.len() - 1, &series, 20, &mut out)?;
+println!("{} values from bar {}: [{:.4}, ..., {:.4}]", range.count, range.beg_idx, out[0], out[range.count - 1]);
+```
+
+@tab Java
+
+```java
+import io.github.talib.Core;
+import io.github.talib.OutRange;
+import java.util.Locale;
+
+double[] series = new double[252]; // your data, oldest first
+double[] out = new double[252];
+
+Core core = Core.DEFAULT;
+OutRange r = core.swakGauss(0, series.length - 1, series, 20, out);
+System.out.printf(Locale.ROOT, "%d values from bar %d: [%.4f, ..., %.4f]%n", r.count(), r.begIdx(), out[0], out[r.count() - 1]);
+```
+
+@tab C\#
+
+```csharp
+using System;
+using TALib;
+
+var series = new double[252]; // your data, oldest first
+var outReal = new double[252];
+
+var core = Core.Default;
+OutRange r = core.SwakGauss(0, series.Length - 1, series, 20, outReal);
+Console.WriteLine(FormattableString.Invariant($"{r.Count} values from bar {r.BegIdx}: [{outReal[0]:F4}, ..., {outReal[r.Count - 1]:F4}]"));
+```
+
+@tab TypeScript
+
+```ts
+import { swakGauss } from 'ta-lib';
+
+const series = new Float64Array(252); // your data, oldest first
+
+const { begIdx, values } = swakGauss(series, { timePeriod: 20 });
+console.log(values.length + ' values from bar ' + begIdx + ': [' + values[0].toFixed(4) + ', ..., ' + values[values.length - 1].toFixed(4) + ']');
+```
+
+@tab Go
+
+```go
+import (
+	"fmt"
+	"log"
+
+	talib "ta-lib.github.io/go"
+)
+
+series := make([]float64, 252) // your data, oldest first
+out := make([]float64, 252)
+
+core := talib.NewCore()
+r, err := core.SWAK_GAUSS(0, len(series)-1, series, 20, out)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Printf("%d values from bar %d: [%.4f, ..., %.4f]\n", r.NBElement, r.BegIdx, out[0], out[r.NBElement-1])
+```
+
+:::
+
+## Implementation
+
+Added in 0.8.3 (ta-lib-python 0.8.3).
+
+TA-Lib Definition: [`swak_gauss.c`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/input/swak_gauss/swak_gauss.c) · [`swak_gauss.yaml`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/input/swak_gauss/swak_gauss.yaml)
+
+| Native | File |
+|--------|------|
+| C | [`ta_SWAK_GAUSS.c`](https://github.com/TA-Lib/ta-lib/blob/main/src/ta_func/ta_SWAK_GAUSS.c) |
+| Rust | [`swak_gauss.rs`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/rust/library/src/ta_func/swak_gauss.rs) |
+| Java | [`Core_SWAK_GAUSS.java`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/java/fragments/Core_SWAK_GAUSS.java) |
+| C# | [`Core_SWAK_GAUSS.cs`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/csharp/library/src/Core_SWAK_GAUSS.cs) |
+| TypeScript | [`swakGauss.ts`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/ts/library/src/func/swakGauss.ts) |
+| Go | [`swak_gauss.go`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/go/swak_gauss.go) |
+
+Python: `talib.SWAK_GAUSS` (ta-lib-python 0.8.3 or later), see [ta-lib-python](https://ta-lib.github.io/ta-lib-python/func_groups/overlap_studies.html).
+
+TA-Lib is also available for R and more using a [wrapper](/install/#wrappers).
+
+## Aliases
+
+Swiss Army Knife Gaussian Filter, SWAK Gauss, Ehlers Gaussian Filter
+
+## See Also
+
+[SWAK_BUTTER](/functions/swak_butter.md) · [EMA](/functions/ema.md) · [MEDPRICE](/functions/medprice.md)
+
+## References
+
+- Ehlers, John F. "Swiss Army Knife Indicator." *Technical Analysis of Stocks & Commodities* V.24:1 (January 2006), pp. 28-31, 50-53.

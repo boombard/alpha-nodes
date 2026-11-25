@@ -1,0 +1,274 @@
+---
+title: "KDJ Stochastic (KDJ)"
+description: "The stochastic oscillator as it is drawn on Chinese-market platforms: the Slow-%K and Slow-%D lines plus a third line J that amplifies the gap between…"
+---
+
+## Summary
+
+The stochastic oscillator as it is drawn on Chinese-market platforms: the Slow-%K and Slow-%D lines plus a third line J that amplifies the gap between them. K and D are read like any stochastic — above 80 overbought, below 20 oversold, a K/D crossing signalling a momentum shift — while J is a divergence gauge whose excursions outside the 0-100 band mark the strongest moves. Both smoothing stages default to Wilder's moving average, which is the smoother the original formula language specifies; selecting a simple moving average for both reproduces the classic Slow Stochastic with a J line attached.
+
+## Chart
+
+<ta-chart src="/functions/kdj.svg" ratio="720:416" label="KDJ over IBM, daily, 1999" alt="Drawn on the price pane over candles; below it, a separate indicator pane with a zero line showing outK as a solid line with dashed rules at 20 and 80, outD as a dashed line and outJ as a solid line."></ta-chart>
+
+<div class="ta-chart-links">
+
+[Reference data (CSV)](/functions/kdj.csv) · [Chart (SVG)](/functions/kdj.svg)
+
+</div>
+
+::: details Chart metadata <span class="flag-tip" tabindex="0" role="note" aria-label="The chart is drawn automatically from metadata TA-Lib provides. Your app can get the same through the Abstract API." data-tip="The chart is drawn automatically from metadata TA-Lib provides. Your app can get the same through the Abstract API.">i</span>
+
+**Outputs**
+
+- `outK`: `line` · `zero` · `positive` · `negative` · `levels: 20, 80`
+- `outD`: `dash_line` · `zero` · `positive` · `negative`
+- `outJ`: `line` · `zero` · `positive` · `negative`
+
+:::
+
+## Formula
+
+RSV = 100*(Close - LL_n)/(HH_n - LL_n), n = FastK_Period (LL/HH = lowest low / highest high over n)
+K = MA(RSV, SlowK_Period, SlowK_MAType)
+D = MA(K, SlowD_Period, SlowD_MAType)
+J = 3*K - 2*D
+
+## Notes
+
+- The default smoothing is Wilder's moving average. The originating 通达信 (Tongdaxin) formula language writes each stage as `SMA(X, N, 1)`, a recurrence with weight 1/N on the new value, which is Wilder's smoothing under another name — not a simple average.
+- How that recurrence is started is a TA-Lib house convention, not something the originating specification settles: like every other Wilder-smoothed function here, the first value is the simple average of the first N inputs, and callers who want the transient gone set the unstable period. Platforms that seed the recurrence at 50, or at the first raw value, differ for the first several dozen bars.
+- J is deliberately unbounded. It leaves the 0-100 band routinely and is never clamped.
+- When the high-low range over the window is zero, the raw stochastic is set to 0 instead of being undefined.
+
+## Inputs
+
+- `inHigh` — High price of each bar
+- `inLow` — Low price of each bar
+- `inClose` — Close price of each bar
+
+## Outputs
+
+- `outK` — Raw stochastic smoothed by SlowK_Period MA
+- `outD` — Signal line: K smoothed by SlowD_Period MA
+- `outJ` — Divergence line, three parts K less two parts D
+
+## Parameters
+
+| Parameter | Type | Default | Accepted values | Description |
+| --- | --- | --- | --- | --- |
+| `optInFastK_Period` | integer | 9 | 1–100000 | Lookback window for the raw stochastic high-low range |
+| `optInSlowK_Period` | integer | 3 | 1–100000 | Smoothing period turning the raw stochastic into K |
+| `optInSlowK_MAType` | MAType | RMA (13) | any MAType | MA type used to smooth into K |
+| `optInSlowD_Period` | integer | 3 | 1–100000 | Smoothing period for the D signal line |
+| `optInSlowD_MAType` | MAType | RMA (13) | any MAType | MA type used for the D line |
+
+*`MAType` values: 0 SMA · 1 EMA · 2 WMA · 3 DEMA · 4 TEMA · 5 TRIMA · 6 KAMA · 7 MAMA · 8 T3 · 9 HMA · 10 DISABLED · 11 DEFAULT · 12 ZLEMA · 13 RMA · 14 VIDYA · 15 ALMA · 16 SSF*
+
+## Properties
+
+**Numerical Stability:** [Depends on MA Type](/functions/stability.md#depends-on-ma-type) — This function's default, RMA, has an initial unstable period.
+
+<div class="flag-cols">
+
+<div class="flag-table">
+
+|  |
+| :-- |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Overlap Input</span> |
+| <span class="flag-box">✅</span> **Independent Y-Axis** <span class="flag-tip" tabindex="0" role="note" aria-label="Output is on its own scale, drawn in a separate pane below the price chart." data-tip="Output is on its own scale, drawn in a separate pane below the price chart.">i</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Candlestick</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Display Shift</span> |
+
+</div>
+
+<div class="flag-table">
+
+|  |
+| :-- |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Can Output NaN or ±Inf</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Identity at Period 1</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Uses Transcendental</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Input Must Be Positive</span> |
+
+</div>
+
+</div>
+
+## Example
+
+::: code-tabs#lang
+
+@tab C
+
+```c
+#include <stdio.h>
+#include <ta_libc.h>
+
+int n = 252;
+double high[252]; /* your data, oldest first */
+double low[252]; /* your data, oldest first */
+double close[252]; /* your data, oldest first */
+double k[252], d[252], j[252];
+int outBegIdx, outNBElement;
+
+TA_Initialize();
+TA_KDJ( 0, n - 1, high, low, close, 9, 3, TA_MAType_RMA, 3, TA_MAType_RMA,
+        &outBegIdx, &outNBElement, k, d, j );
+printf( "%d values from bar %d:\n", outNBElement, outBegIdx );
+printf( "k = [%.4f, ..., %.4f]\n", k[0], k[outNBElement - 1] );
+printf( "d = [%.4f, ..., %.4f]\n", d[0], d[outNBElement - 1] );
+printf( "j = [%.4f, ..., %.4f]\n", j[0], j[outNBElement - 1] );
+```
+
+@tab Rust
+
+```rust
+use ta_lib::{Core, MAType};
+
+let high = vec![0.0; 252]; // your data, oldest first
+let low = vec![0.0; 252]; // your data, oldest first
+let close = vec![0.0; 252]; // your data, oldest first
+let mut k = vec![0.0; 252];
+let mut d = vec![0.0; 252];
+let mut j = vec![0.0; 252];
+
+let core = Core::new();
+let range = core.kdj(0, high.len() - 1, &high, &low, &close, 9, 3, MAType::RMA, 3, MAType::RMA,
+                     &mut k, &mut d, &mut j)?;
+println!("{} values from bar {}:", range.count, range.beg_idx);
+println!("k = [{:.4}, ..., {:.4}]", k[0], k[range.count - 1]);
+println!("d = [{:.4}, ..., {:.4}]", d[0], d[range.count - 1]);
+println!("j = [{:.4}, ..., {:.4}]", j[0], j[range.count - 1]);
+```
+
+@tab Java
+
+```java
+import io.github.talib.Core;
+import io.github.talib.MAType;
+import io.github.talib.OutRange;
+import java.util.Locale;
+
+double[] high = new double[252]; // your data, oldest first
+double[] low = new double[252]; // your data, oldest first
+double[] close = new double[252]; // your data, oldest first
+double[] k = new double[252];
+double[] d = new double[252];
+double[] j = new double[252];
+
+Core core = Core.DEFAULT;
+OutRange r = core.kdj(0, high.length - 1, high, low, close, 9, 3, MAType.RMA, 3, MAType.RMA,
+                      k, d, j);
+System.out.printf(Locale.ROOT, "%d values from bar %d:%n", r.count(), r.begIdx());
+System.out.printf(Locale.ROOT, "k = [%.4f, ..., %.4f]%n", k[0], k[r.count() - 1]);
+System.out.printf(Locale.ROOT, "d = [%.4f, ..., %.4f]%n", d[0], d[r.count() - 1]);
+System.out.printf(Locale.ROOT, "j = [%.4f, ..., %.4f]%n", j[0], j[r.count() - 1]);
+```
+
+@tab C\#
+
+```csharp
+using System;
+using TALib;
+
+var high = new double[252]; // your data, oldest first
+var low = new double[252]; // your data, oldest first
+var close = new double[252]; // your data, oldest first
+var k = new double[252];
+var d = new double[252];
+var j = new double[252];
+
+var core = Core.Default;
+OutRange r = core.Kdj(0, high.Length - 1, high, low, close, 9, 3, MAType.RMA, 3, MAType.RMA,
+                      k, d, j);
+Console.WriteLine($"{r.Count} values from bar {r.BegIdx}:");
+Console.WriteLine(FormattableString.Invariant($"k = [{k[0]:F4}, ..., {k[r.Count - 1]:F4}]"));
+Console.WriteLine(FormattableString.Invariant($"d = [{d[0]:F4}, ..., {d[r.Count - 1]:F4}]"));
+Console.WriteLine(FormattableString.Invariant($"j = [{j[0]:F4}, ..., {j[r.Count - 1]:F4}]"));
+```
+
+@tab TypeScript
+
+```ts
+import { MAType, kdj } from 'ta-lib';
+
+const high = new Float64Array(252); // your data, oldest first
+const low = new Float64Array(252); // your data, oldest first
+const close = new Float64Array(252); // your data, oldest first
+
+const { begIdx, outK, outD, outJ } = kdj({ high, low, close }, {
+  fastKPeriod: 9,
+  slowKPeriod: 3,
+  slowKMaType: MAType.RMA,
+  slowDPeriod: 3,
+  slowDMaType: MAType.RMA,
+});
+console.log(outK.length + ' values from bar ' + begIdx + ':');
+console.log('outK = [' + outK[0].toFixed(4) + ', ..., ' + outK[outK.length - 1].toFixed(4) + ']');
+console.log('outD = [' + outD[0].toFixed(4) + ', ..., ' + outD[outD.length - 1].toFixed(4) + ']');
+console.log('outJ = [' + outJ[0].toFixed(4) + ', ..., ' + outJ[outJ.length - 1].toFixed(4) + ']');
+```
+
+@tab Go
+
+```go
+import (
+	"fmt"
+	"log"
+
+	talib "ta-lib.github.io/go"
+)
+
+high := make([]float64, 252) // your data, oldest first
+low := make([]float64, 252) // your data, oldest first
+close := make([]float64, 252) // your data, oldest first
+k := make([]float64, 252)
+d := make([]float64, 252)
+j := make([]float64, 252)
+
+core := talib.NewCore()
+r, err := core.KDJ(0, len(high)-1, high, low, close, 9, 3, talib.MATypeRMA, 3, talib.MATypeRMA,
+	k, d, j)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Printf("%d values from bar %d:\n", r.NBElement, r.BegIdx)
+fmt.Printf("k = [%.4f, ..., %.4f]\n", k[0], k[r.NBElement-1])
+fmt.Printf("d = [%.4f, ..., %.4f]\n", d[0], d[r.NBElement-1])
+fmt.Printf("j = [%.4f, ..., %.4f]\n", j[0], j[r.NBElement-1])
+```
+
+:::
+
+## Implementation
+
+Added in 0.8.1 (ta-lib-python 0.8.1).
+
+TA-Lib Definition: [`kdj.c`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/input/kdj/kdj.c) · [`kdj.yaml`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/input/kdj/kdj.yaml)
+
+| Native | File |
+|--------|------|
+| C | [`ta_KDJ.c`](https://github.com/TA-Lib/ta-lib/blob/main/src/ta_func/ta_KDJ.c) |
+| Rust | [`kdj.rs`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/rust/library/src/ta_func/kdj.rs) |
+| Java | [`Core_KDJ.java`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/java/fragments/Core_KDJ.java) |
+| C# | [`Core_KDJ.cs`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/csharp/library/src/Core_KDJ.cs) |
+| TypeScript | [`kdj.ts`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/ts/library/src/func/kdj.ts) |
+| Go | [`kdj.go`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/go/kdj.go) |
+
+Python: `talib.KDJ` (ta-lib-python 0.8.1 or later), see [ta-lib-python](https://ta-lib.github.io/ta-lib-python/func_groups/momentum_indicators.html).
+
+TA-Lib is also available for R and more using a [wrapper](/install/#wrappers).
+
+## Aliases
+
+KDJ Indicator, Random Index, Stochastic KDJ, K D J lines
+
+## See Also
+
+[STOCH](/functions/stoch.md) · [STOCHF](/functions/stochf.md) · [RMA](/functions/rma.md) · [MA](/functions/ma.md)
+
+## References
+
+- [KDJ indicator explained — GTCFX](https://www.gtcfx.com/en-intl/knowledge-to-learn/technical-analysis/kdj-indicator-explained/kdj-k-d-and-j-lines-explained-formulas-and-meaning)
+- [What is the KDJ indicator — Futu](https://www.futuhk.com/en/blog/detail-kdj-9-241091014)

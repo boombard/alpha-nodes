@@ -20,6 +20,12 @@ Read in this order:
 4. [design/lessons.md](design/lessons.md): what we learned from alpha-capture and from
    the engine-comparison spike. It explains *why* several decisions were made.
 
+## Reference
+
+- [reference/ta-lib/README.md](reference/ta-lib/README.md): verbatim snapshot of TA-Lib's
+  per-function docs (formulas, inputs, params, defaults) with an index. Read it when choosing
+  or specifying technical indicators.
+
 ## Workflow and plan
 
 - [workflow.md](workflow.md): coordinator/worker loop, task rules, backlog usage.

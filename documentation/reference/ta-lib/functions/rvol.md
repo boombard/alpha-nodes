@@ -1,0 +1,209 @@
+---
+title: "Relative Volume (RVOL)"
+description: "Relative Volume: today's volume as a ratio to the average volume of the bars that came before it."
+---
+
+## Summary
+
+Relative Volume: today's volume as a ratio to the average volume of the bars that came before it. A value of 1 means the bar traded exactly its recent average, above 1 means unusual participation, below 1 means the move is thin. Because the current bar is excluded from its own baseline, a volume spike shows up at full size instead of being diluted by the average it is compared against.
+
+Read it as a confirmation filter rather than a direction signal: it says how much conviction is behind a price move, not which way. Breakouts on a high ratio are the ones that tend to follow through; the same breakout near 1 is the one to distrust.
+
+## Chart
+
+<ta-chart src="/functions/rvol.svg" ratio="720:484" label="RVOL over IBM, daily, 1999" alt="Drawn on the price pane over the close as a line; below it, a separate indicator pane showing outReal as a solid line, then a volume pane."></ta-chart>
+
+<div class="ta-chart-links">
+
+[Reference data (CSV)](/functions/rvol.csv) · [Chart (SVG)](/functions/rvol.svg)
+
+</div>
+
+::: details Chart metadata <span class="flag-tip" tabindex="0" role="note" aria-label="The chart is drawn automatically from metadata TA-Lib provides. Your app can get the same through the Abstract API." data-tip="The chart is drawn automatically from metadata TA-Lib provides. Your app can get the same through the Abstract API.">i</span>
+
+**Outputs**
+
+- `outReal`: `line` · `zero` · `positive`
+
+:::
+
+## Formula
+
+RVOL_t = Volume_t / ( (1/N) * sum_{i=t-N}^{t-1} Volume_i ), N = optInTimePeriod
+
+## Notes
+
+- The baseline is the mean of the N bars *preceding* the current one, so RVOL needs one bar more than a moving average of the same period before it emits a value.
+- A window in which every bar traded nothing has a baseline of zero and no defined ratio: that element is ±Inf, or NaN when the current bar is also zero. Real volume is non-negative, so this only happens on a dead window — an instrument that did not trade at all, or a series carrying no volume, such as a cash-index feed.
+
+## Inputs
+
+- `inVolume` — Volume of each bar
+
+## Outputs
+
+- `outReal` — Ratio of the current bar's volume to the average of the preceding window
+
+## Parameters
+
+| Parameter | Type | Default | Accepted values | Description |
+| --- | --- | --- | --- | --- |
+| `optInTimePeriod` | integer | 20 | 1–100000 | Number of preceding bars averaged to form the baseline |
+
+## Properties
+
+**Numerical Stability:** [Start-Independent](/functions/stability.md#start-independent)
+
+<div class="flag-cols">
+
+<div class="flag-table">
+
+|  |
+| :-- |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Overlap Input</span> |
+| <span class="flag-box">✅</span> **Independent Y-Axis** <span class="flag-tip" tabindex="0" role="note" aria-label="Output is on its own scale, drawn in a separate pane below the price chart." data-tip="Output is on its own scale, drawn in a separate pane below the price chart.">i</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Candlestick</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Display Shift</span> |
+
+</div>
+
+<div class="flag-table">
+
+|  |
+| :-- |
+| <span class="flag-box">✅</span> **Can Output NaN or ±Inf** <span class="flag-tip" tabindex="0" role="note" aria-label="Some inputs have no finite result, so a successful call can return NaN or ±Inf — a gap with nothing to plot. See Notes for when." data-tip="Some inputs have no finite result, so a successful call can return NaN or ±Inf — a gap with nothing to plot. See Notes for when.">i</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Identity at Period 1</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Uses Transcendental</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Input Must Be Positive</span> |
+
+</div>
+
+</div>
+
+## Example
+
+::: code-tabs#lang
+
+@tab C
+
+```c
+#include <stdio.h>
+#include <ta_libc.h>
+
+int n = 252;
+double volume[252]; /* your data, oldest first */
+double out[252];
+int outBegIdx, outNBElement;
+
+TA_Initialize();
+TA_RVOL( 0, n - 1, volume, 20, &outBegIdx, &outNBElement, out );
+printf( "%d values from bar %d: [%.4f, ..., %.4f]\n", outNBElement, outBegIdx, out[0], out[outNBElement - 1] );
+```
+
+@tab Rust
+
+```rust
+use ta_lib::Core;
+
+let volume = vec![0.0; 252]; // your data, oldest first
+let mut out = vec![0.0; 252];
+
+let core = Core::new();
+let range = core.rvol(0, volume.len() - 1, &volume, 20, &mut out)?;
+println!("{} values from bar {}: [{:.4}, ..., {:.4}]", range.count, range.beg_idx, out[0], out[range.count - 1]);
+```
+
+@tab Java
+
+```java
+import io.github.talib.Core;
+import io.github.talib.OutRange;
+import java.util.Locale;
+
+double[] volume = new double[252]; // your data, oldest first
+double[] out = new double[252];
+
+Core core = Core.DEFAULT;
+OutRange r = core.rvol(0, volume.length - 1, volume, 20, out);
+System.out.printf(Locale.ROOT, "%d values from bar %d: [%.4f, ..., %.4f]%n", r.count(), r.begIdx(), out[0], out[r.count() - 1]);
+```
+
+@tab C\#
+
+```csharp
+using System;
+using TALib;
+
+var volume = new double[252]; // your data, oldest first
+var outReal = new double[252];
+
+var core = Core.Default;
+OutRange r = core.Rvol(0, volume.Length - 1, volume, 20, outReal);
+Console.WriteLine(FormattableString.Invariant($"{r.Count} values from bar {r.BegIdx}: [{outReal[0]:F4}, ..., {outReal[r.Count - 1]:F4}]"));
+```
+
+@tab TypeScript
+
+```ts
+import { rvol } from 'ta-lib';
+
+const volume = new Float64Array(252); // your data, oldest first
+
+const { begIdx, values } = rvol({ volume }, { timePeriod: 20 });
+console.log(values.length + ' values from bar ' + begIdx + ': [' + values[0].toFixed(4) + ', ..., ' + values[values.length - 1].toFixed(4) + ']');
+```
+
+@tab Go
+
+```go
+import (
+	"fmt"
+	"log"
+
+	talib "ta-lib.github.io/go"
+)
+
+volume := make([]float64, 252) // your data, oldest first
+out := make([]float64, 252)
+
+core := talib.NewCore()
+r, err := core.RVOL(0, len(volume)-1, volume, 20, out)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Printf("%d values from bar %d: [%.4f, ..., %.4f]\n", r.NBElement, r.BegIdx, out[0], out[r.NBElement-1])
+```
+
+:::
+
+## Implementation
+
+Added in 0.8.1 (ta-lib-python 0.8.1).
+
+TA-Lib Definition: [`rvol.c`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/input/rvol/rvol.c) · [`rvol.yaml`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/input/rvol/rvol.yaml)
+
+| Native | File |
+|--------|------|
+| C | [`ta_RVOL.c`](https://github.com/TA-Lib/ta-lib/blob/main/src/ta_func/ta_RVOL.c) |
+| Rust | [`rvol.rs`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/rust/library/src/ta_func/rvol.rs) |
+| Java | [`Core_RVOL.java`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/java/fragments/Core_RVOL.java) |
+| C# | [`Core_RVOL.cs`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/csharp/library/src/Core_RVOL.cs) |
+| TypeScript | [`rvol.ts`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/ts/library/src/func/rvol.ts) |
+| Go | [`rvol.go`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/go/rvol.go) |
+
+Python: `talib.RVOL` (ta-lib-python 0.8.1 or later), see [ta-lib-python](https://ta-lib.github.io/ta-lib-python/func_groups/volume_indicators.html).
+
+TA-Lib is also available for R and more using a [wrapper](/install/#wrappers).
+
+## Aliases
+
+Relative Volume, RVol
+
+## See Also
+
+[OBV](/functions/obv.md) · [PVO](/functions/pvo.md) · [VWMA](/functions/vwma.md) · [SMA](/functions/sma.md)
+
+## References
+
+- RVOL has no attributable originator; it is retail scanner convention, and every published definition agrees on the ratio and on excluding the current bar from its own baseline.
+- Reference implementation used as the independent oracle: [trading-signals](https://www.npmjs.com/package/trading-signals), `volume/RVOL`.

@@ -1,0 +1,216 @@
+---
+title: "True Strength Index (TSI)"
+description: "True Strength Index: William Blau's double-smoothed momentum oscillator."
+---
+
+## Summary
+
+True Strength Index: William Blau's double-smoothed momentum oscillator. The one-bar price change is smoothed twice with exponential averages, and the same pair of averages is applied to the magnitude of that change; the ratio of the two is scaled by 100. Dividing the smoothed signed momentum by the smoothed absolute momentum normalises the reading, so the result is bounded by -100 and +100 and comparable across instruments. The double smoothing is what separates it from a raw momentum plot: the curve is smooth enough to read while keeping far less lag than a single average of the same total length.
+
+Zero is the reference line — positive means the smoothed momentum is net upward, negative net downward — and its crossings are the usual trade trigger. Extreme readings mark overbought and oversold conditions, and divergence against price is the classic Blau reading. A signal line is not part of the output; apply `EMA` to `outReal` to obtain one, since no source agrees on its period.
+
+## Chart
+
+<ta-chart src="/functions/tsi.svg" ratio="720:416" label="TSI over IBM, daily, 1999" alt="Drawn on the price pane over the close as a line; below it, a separate indicator pane with a zero line showing outReal as a solid line."></ta-chart>
+
+<div class="ta-chart-links">
+
+[Reference data (CSV)](/functions/tsi.csv) · [Chart (SVG)](/functions/tsi.svg)
+
+</div>
+
+::: details Chart metadata <span class="flag-tip" tabindex="0" role="note" aria-label="The chart is drawn automatically from metadata TA-Lib provides. Your app can get the same through the Abstract API." data-tip="The chart is drawn automatically from metadata TA-Lib provides. Your app can get the same through the Abstract API.">i</span>
+
+**Outputs**
+
+- `outReal`: `line` · `zero` · `positive` · `negative`
+
+:::
+
+## Formula
+
+m = close - previous close
+
+TSI = 100 * EMA(EMA(m, firstPeriod), secondPeriod) / EMA(EMA(|m|, firstPeriod), secondPeriod)
+
+The first period is applied first, to the raw change; the second smooths its result. The order matters: the two averages do not commute, because each is seeded from a simple average of its own inputs.
+
+## Notes
+
+- An input whose every change is exactly zero leaves both the numerator and the denominator at zero. Rather than divide, TSI emits 0 there, its neutral value, as CCI and IMI emit theirs. Some implementations divide unguarded and return a non-finite value.
+- Each exponential average is seeded with a simple average of its own first inputs, the same seeding TA-Lib's EMA uses, so the first published values converge toward an unlimited-history result rather than reproducing it exactly. `TA_SetUnstablePeriod(TA_FUNC_UNST_EMA, ...)` discards more of that warm-up. Implementations seeding from a single first sample — trading-signals among them — differ over the transient and agree once it decays.
+- The parameters are named by the order they are applied in, not fast and slow. Blau's published pair applies the longer average first, the inverse of the differenced fast/slow pairs elsewhere in the library, so swapping them silently returns a different indicator with the same lookback.
+
+## Inputs
+
+- `inReal` — Source price/value series, canonically the close
+
+## Outputs
+
+- `outReal` — True Strength Index, -100 to +100
+
+## Parameters
+
+| Parameter | Type | Default | Accepted values | Description |
+| --- | --- | --- | --- | --- |
+| `optInFirstPeriod` | integer | 25 | 2–100000 | Period of the first smoothing, applied to the raw momentum |
+| `optInSecondPeriod` | integer | 13 | 2–100000 | Period of the second smoothing, applied to the first |
+
+## Properties
+
+**Numerical Stability:** [Initial Unstable Period](/functions/stability.md#initial-unstable-period) — Inherited from EMA, which TSI computes internally; tunable via EMA's unstable period.
+
+<div class="flag-cols">
+
+<div class="flag-table">
+
+|  |
+| :-- |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Overlap Input</span> |
+| <span class="flag-box">✅</span> **Independent Y-Axis** <span class="flag-tip" tabindex="0" role="note" aria-label="Output is on its own scale, drawn in a separate pane below the price chart." data-tip="Output is on its own scale, drawn in a separate pane below the price chart.">i</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Candlestick</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Display Shift</span> |
+
+</div>
+
+<div class="flag-table">
+
+|  |
+| :-- |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Can Output NaN or ±Inf</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Identity at Period 1</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Uses Transcendental</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Input Must Be Positive</span> |
+
+</div>
+
+</div>
+
+## Example
+
+::: code-tabs#lang
+
+@tab C
+
+```c
+#include <stdio.h>
+#include <ta_libc.h>
+
+int n = 252;
+double series[252]; /* your data, oldest first */
+double out[252];
+int outBegIdx, outNBElement;
+
+TA_Initialize();
+TA_TSI( 0, n - 1, series, 25, 13, &outBegIdx, &outNBElement, out );
+printf( "%d values from bar %d: [%.4f, ..., %.4f]\n", outNBElement, outBegIdx, out[0], out[outNBElement - 1] );
+```
+
+@tab Rust
+
+```rust
+use ta_lib::Core;
+
+let series = vec![0.0; 252]; // your data, oldest first
+let mut out = vec![0.0; 252];
+
+let core = Core::new();
+let range = core.tsi(0, series.len() - 1, &series, 25, 13, &mut out)?;
+println!("{} values from bar {}: [{:.4}, ..., {:.4}]", range.count, range.beg_idx, out[0], out[range.count - 1]);
+```
+
+@tab Java
+
+```java
+import io.github.talib.Core;
+import io.github.talib.OutRange;
+import java.util.Locale;
+
+double[] series = new double[252]; // your data, oldest first
+double[] out = new double[252];
+
+Core core = Core.DEFAULT;
+OutRange r = core.tsi(0, series.length - 1, series, 25, 13, out);
+System.out.printf(Locale.ROOT, "%d values from bar %d: [%.4f, ..., %.4f]%n", r.count(), r.begIdx(), out[0], out[r.count() - 1]);
+```
+
+@tab C\#
+
+```csharp
+using System;
+using TALib;
+
+var series = new double[252]; // your data, oldest first
+var outReal = new double[252];
+
+var core = Core.Default;
+OutRange r = core.Tsi(0, series.Length - 1, series, 25, 13, outReal);
+Console.WriteLine(FormattableString.Invariant($"{r.Count} values from bar {r.BegIdx}: [{outReal[0]:F4}, ..., {outReal[r.Count - 1]:F4}]"));
+```
+
+@tab TypeScript
+
+```ts
+import { tsi } from 'ta-lib';
+
+const series = new Float64Array(252); // your data, oldest first
+
+const { begIdx, values } = tsi(series, { firstPeriod: 25, secondPeriod: 13 });
+console.log(values.length + ' values from bar ' + begIdx + ': [' + values[0].toFixed(4) + ', ..., ' + values[values.length - 1].toFixed(4) + ']');
+```
+
+@tab Go
+
+```go
+import (
+	"fmt"
+	"log"
+
+	talib "ta-lib.github.io/go"
+)
+
+series := make([]float64, 252) // your data, oldest first
+out := make([]float64, 252)
+
+core := talib.NewCore()
+r, err := core.TSI(0, len(series)-1, series, 25, 13, out)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Printf("%d values from bar %d: [%.4f, ..., %.4f]\n", r.NBElement, r.BegIdx, out[0], out[r.NBElement-1])
+```
+
+:::
+
+## Implementation
+
+Added in 0.8.1 (ta-lib-python 0.8.1).
+
+TA-Lib Definition: [`tsi.c`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/input/tsi/tsi.c) · [`tsi.yaml`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/input/tsi/tsi.yaml)
+
+| Native | File |
+|--------|------|
+| C | [`ta_TSI.c`](https://github.com/TA-Lib/ta-lib/blob/main/src/ta_func/ta_TSI.c) |
+| Rust | [`tsi.rs`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/rust/library/src/ta_func/tsi.rs) |
+| Java | [`Core_TSI.java`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/java/fragments/Core_TSI.java) |
+| C# | [`Core_TSI.cs`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/csharp/library/src/Core_TSI.cs) |
+| TypeScript | [`tsi.ts`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/ts/library/src/func/tsi.ts) |
+| Go | [`tsi.go`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/go/tsi.go) |
+
+Python: `talib.TSI` (ta-lib-python 0.8.1 or later), see [ta-lib-python](https://ta-lib.github.io/ta-lib-python/func_groups/momentum_indicators.html).
+
+TA-Lib is also available for R and more using a [wrapper](/install/#wrappers).
+
+## Aliases
+
+true strength index, Blau true strength index
+
+## See Also
+
+[SMI](/functions/smi.md) · [MACD](/functions/macd.md) · [CMO](/functions/cmo.md) · [RSI](/functions/rsi.md)
+
+## References
+
+- William Blau, "True Strength Index", *Technical Analysis of Stocks & Commodities*, v9:11 (November 1991), pp. 438-446
+- William Blau, *Momentum, Direction and Divergence*, Wiley 1995 (ISBN 0471027294)
+- [StockCharts: True Strength Index](https://school.stockcharts.com/doku.php?id=technical_indicators:true_strength_index)

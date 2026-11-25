@@ -1,0 +1,228 @@
+---
+title: "Volume Weighted Average Price (VWAP)"
+description: "Volume Weighted Average Price: the average price paid per unit of volume traded, accumulated from the first bar of the range onward."
+---
+
+## Summary
+
+Volume Weighted Average Price: the average price paid per unit of volume traded, accumulated from the first bar of the range onward. Because every bar is weighted by the volume that traded on it, VWAP tracks where the bulk of the money actually changed hands rather than where the last trade printed. Price above VWAP is read as buyers paying up relative to the session's average cost, price below it as the reverse, which is why execution desks quote fills against it.
+
+VWAP is a running mean, not a moving average: it has no window and no decay, so each new bar carries a smaller share of the total and the line grows steadily more sluggish the further it runs from its anchor. It stays within the range of the typical prices it averages, but over a long trending range it can sit far from the current price.
+
+## Chart
+
+<ta-chart src="/functions/vwap.svg" ratio="720:342" label="VWAP over IBM, daily, 1999" alt="Drawn on the price pane over candles, with outReal as a solid line; below it, a volume pane."></ta-chart>
+
+<div class="ta-chart-links">
+
+[Reference data (CSV)](/functions/vwap.csv) · [Chart (SVG)](/functions/vwap.svg)
+
+</div>
+
+::: details Chart metadata <span class="flag-tip" tabindex="0" role="note" aria-label="The chart is drawn automatically from metadata TA-Lib provides. Your app can get the same through the Abstract API." data-tip="The chart is drawn automatically from metadata TA-Lib provides. Your app can get the same through the Abstract API.">i</span>
+
+**Outputs**
+
+- `outReal`: `line`
+
+:::
+
+## Formula
+
+TP_t = ( High_t + Low_t + Close_t ) / 3; VWAP_t = ( Σ TP · Volume ) / ( Σ Volume ), both sums running from the first bar of the range
+
+## Notes
+
+- The sums run from the first bar of the range and are never reset. Charting packages anchor VWAP to a trading session and restart it at each session boundary; no TA-Lib function takes a timestamp or a session boundary, so the anchor is the range the caller asks for — pass one session's bars to get that session's VWAP. This is how AD and OBV, the other cumulative volume functions, are already used across sessions.
+- Volume is expected to be non-negative. A zero-volume bar carries no weight, so one occurring after volume has traded leaves the average exactly where it was. Before *any* volume has traded there are no weights at all and the weighted mean is undefined; those bars carry the previous value forward, which is 0 until the first bar with volume. A successful call never emits NaN or ±Inf. Other implementations differ here: pandas-ta-classic divides through and emits NaN, and trading-signals emits no value for the bar at all.
+- A bar whose price or volume is not a finite number cannot be weighted, so it is left out of the average entirely and repeats the previous value. It is skipped, not absorbed: the running average stays usable and resumes on the next bar that can be weighted, rather than being held at one stale value for the remainder of the range.
+
+## Inputs
+
+- `inHigh` — High price of each bar
+- `inLow` — Low price of each bar
+- `inClose` — Close price of each bar
+- `inVolume` — Volume of each bar
+
+## Outputs
+
+- `outReal` — Volume weighted average price, cumulative from the first bar of the range
+
+## Properties
+
+**Numerical Stability:** [Path-Dependent](/functions/stability.md#path-dependent)
+
+<div class="flag-cols">
+
+<div class="flag-table">
+
+|  |
+| :-- |
+| <span class="flag-box">✅</span> **Overlap Input** <span class="flag-tip" tabindex="0" role="note" aria-label="Output is on the same scale as the input price, so it is drawn over the price chart." data-tip="Output is on the same scale as the input price, so it is drawn over the price chart.">i</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Independent Y-Axis</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Candlestick</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Display Shift</span> |
+
+</div>
+
+<div class="flag-table">
+
+|  |
+| :-- |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Can Output NaN or ±Inf</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Identity at Period 1</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Uses Transcendental</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Input Must Be Positive</span> |
+
+</div>
+
+</div>
+
+## Example
+
+::: code-tabs#lang
+
+@tab C
+
+```c
+#include <stdio.h>
+#include <ta_libc.h>
+
+int n = 252;
+double high[252]; /* your data, oldest first */
+double low[252]; /* your data, oldest first */
+double close[252]; /* your data, oldest first */
+double volume[252]; /* your data, oldest first */
+double out[252];
+int outBegIdx, outNBElement;
+
+TA_Initialize();
+TA_VWAP( 0, n - 1, high, low, close, volume, &outBegIdx, &outNBElement, out );
+printf( "%d values from bar %d: [%.4f, ..., %.4f]\n", outNBElement, outBegIdx, out[0], out[outNBElement - 1] );
+```
+
+@tab Rust
+
+```rust
+use ta_lib::Core;
+
+let high = vec![0.0; 252]; // your data, oldest first
+let low = vec![0.0; 252]; // your data, oldest first
+let close = vec![0.0; 252]; // your data, oldest first
+let volume = vec![0.0; 252]; // your data, oldest first
+let mut out = vec![0.0; 252];
+
+let core = Core::new();
+let range = core.vwap(0, high.len() - 1, &high, &low, &close, &volume, &mut out)?;
+println!("{} values from bar {}: [{:.4}, ..., {:.4}]", range.count, range.beg_idx, out[0], out[range.count - 1]);
+```
+
+@tab Java
+
+```java
+import io.github.talib.Core;
+import io.github.talib.OutRange;
+import java.util.Locale;
+
+double[] high = new double[252]; // your data, oldest first
+double[] low = new double[252]; // your data, oldest first
+double[] close = new double[252]; // your data, oldest first
+double[] volume = new double[252]; // your data, oldest first
+double[] out = new double[252];
+
+Core core = Core.DEFAULT;
+OutRange r = core.vwap(0, high.length - 1, high, low, close, volume, out);
+System.out.printf(Locale.ROOT, "%d values from bar %d: [%.4f, ..., %.4f]%n", r.count(), r.begIdx(), out[0], out[r.count() - 1]);
+```
+
+@tab C\#
+
+```csharp
+using System;
+using TALib;
+
+var high = new double[252]; // your data, oldest first
+var low = new double[252]; // your data, oldest first
+var close = new double[252]; // your data, oldest first
+var volume = new double[252]; // your data, oldest first
+var outReal = new double[252];
+
+var core = Core.Default;
+OutRange r = core.Vwap(0, high.Length - 1, high, low, close, volume, outReal);
+Console.WriteLine(FormattableString.Invariant($"{r.Count} values from bar {r.BegIdx}: [{outReal[0]:F4}, ..., {outReal[r.Count - 1]:F4}]"));
+```
+
+@tab TypeScript
+
+```ts
+import { vwap } from 'ta-lib';
+
+const high = new Float64Array(252); // your data, oldest first
+const low = new Float64Array(252); // your data, oldest first
+const close = new Float64Array(252); // your data, oldest first
+const volume = new Float64Array(252); // your data, oldest first
+
+const { begIdx, values } = vwap({ high, low, close, volume });
+console.log(values.length + ' values from bar ' + begIdx + ': [' + values[0].toFixed(4) + ', ..., ' + values[values.length - 1].toFixed(4) + ']');
+```
+
+@tab Go
+
+```go
+import (
+	"fmt"
+	"log"
+
+	talib "ta-lib.github.io/go"
+)
+
+high := make([]float64, 252) // your data, oldest first
+low := make([]float64, 252) // your data, oldest first
+close := make([]float64, 252) // your data, oldest first
+volume := make([]float64, 252) // your data, oldest first
+out := make([]float64, 252)
+
+core := talib.NewCore()
+r, err := core.VWAP(0, len(high)-1, high, low, close, volume, out)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Printf("%d values from bar %d: [%.4f, ..., %.4f]\n", r.NBElement, r.BegIdx, out[0], out[r.NBElement-1])
+```
+
+:::
+
+## Implementation
+
+Added in 0.8.1 (ta-lib-python 0.8.1).
+
+TA-Lib Definition: [`vwap.c`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/input/vwap/vwap.c) · [`vwap.yaml`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/input/vwap/vwap.yaml)
+
+| Native | File |
+|--------|------|
+| C | [`ta_VWAP.c`](https://github.com/TA-Lib/ta-lib/blob/main/src/ta_func/ta_VWAP.c) |
+| Rust | [`vwap.rs`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/rust/library/src/ta_func/vwap.rs) |
+| Java | [`Core_VWAP.java`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/java/fragments/Core_VWAP.java) |
+| C# | [`Core_VWAP.cs`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/csharp/library/src/Core_VWAP.cs) |
+| TypeScript | [`vwap.ts`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/ts/library/src/func/vwap.ts) |
+| Go | [`vwap.go`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/go/vwap.go) |
+
+Python: `talib.VWAP` (ta-lib-python 0.8.1 or later), see [ta-lib-python](https://ta-lib.github.io/ta-lib-python/func_groups/volume_indicators.html).
+
+TA-Lib is also available for R and more using a [wrapper](/install/#wrappers).
+
+## Aliases
+
+Volume Weighted Average Price
+
+## See Also
+
+[AD](/functions/ad.md) · [OBV](/functions/obv.md) · [TYPPRICE](/functions/typprice.md) · [VWMA](/functions/vwma.md)
+
+## References
+
+- No single attributable author: VWAP is charting-package convention rather than a published indicator, and the sources below all state the same definition.
+- Investopedia, *Volume-Weighted Average Price (VWAP)*: the typical price of each bar weighted by that bar's volume, cumulated over the trading day: [investopedia.com/terms/v/vwap.asp](https://www.investopedia.com/terms/v/vwap.asp)
+- StockCharts ChartSchool, *VWAP Intraday*: the same cumulative form, and the source of the session-reset convention: [stockcharts.com/school](https://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:vwap_intraday)
+- TradingView, *Volume Weighted Average Price*: `VWAP = cumulative(typical price x volume) / cumulative(volume)`, anchored to the session: [tradingview.com/wiki](https://www.tradingview.com/wiki/Volume_Weighted_Average_Price_%28VWAP%29)
+- pandas-ta-classic `overlap/vwap.py` states the core form verbatim in its own docstring, `VWAP = tpv.cumsum() / volume.cumsum()`, and reaches the session reset only by grouping on a `DatetimeIndex`. trading-signals `trend/VWAP` implements the cumulative form with no anchor at all.

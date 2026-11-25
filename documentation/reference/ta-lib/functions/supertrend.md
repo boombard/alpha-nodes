@@ -1,0 +1,258 @@
+---
+title: "SuperTrend (SUPERTREND)"
+description: "An ATR-scaled trailing band that follows price on one side at a time and flips to the other side when the close breaks through it."
+---
+
+## Summary
+
+An ATR-scaled trailing band that follows price on one side at a time and flips to the other side when the close breaks through it. The trend rides the lower band while it is up and the upper band while it is down, so the line is usually below price in an uptrend and above it in a downtrend, and the flip is the signal. Attributed to Olivier Seban.
+
+## Chart
+
+<ta-chart src="/functions/supertrend.svg" ratio="720:416" label="SUPERTREND over IBM, daily, 1999" alt="Drawn on the price pane over candles, with outSupertrend as a solid line broken wherever outTrend changes, in the up colour where outTrend is positive and the down colour where it is negative; below it, a step pane of its own for the integer output outTrend."></ta-chart>
+
+<div class="ta-chart-links">
+
+[Reference data (CSV)](/functions/supertrend.csv) · [Chart (SVG)](/functions/supertrend.svg)
+
+</div>
+
+::: details Chart metadata <span class="flag-tip" tabindex="0" role="note" aria-label="The chart is drawn automatically from metadata TA-Lib provides. Your app can get the same through the Abstract API." data-tip="The chart is drawn automatically from metadata TA-Lib provides. Your app can get the same through the Abstract API.">i</span>
+
+**Outputs**
+
+- `outSupertrend`: `line` · `segmented`
+- `outTrend`: `line` · `positive` · `negative`
+
+:::
+
+## Formula
+
+Median = (High + Low) / 2
+BasicUpper = Median + Multiplier * ATR(TimePeriod)
+BasicLower = Median - Multiplier * ATR(TimePeriod)
+
+Upper = BasicUpper, when BasicUpper < previous Upper or previous Close > previous Upper; otherwise the previous Upper
+Lower = BasicLower, when BasicLower > previous Lower or previous Close < previous Lower; otherwise the previous Lower
+
+SuperTrend = Lower while the trend is up, until Close < Lower flips it down
+SuperTrend = Upper while the trend is down, until Close > Upper flips it up
+
+## Notes
+
+- Both bands are carried forward on every bar, and the trend is decided against the current bar's band. This is the form Investopedia, TradingView and ta4j all describe. A second published form, from the AmiBroker script attributed to Seban, carries only the band the trend is riding and lets the other float free; the two agree on almost every bar and part company at a flip, where this form hands back a band it has been carrying all along and that one hands back a fresh value.
+- The recurrence has no value before the first bar it can be computed on, so the trend is seeded up there and both bands take their unclamped value. Published implementations are split on that seed; this is ta4j's. The choice stays visible for as long as the first trend lasts, it never washes out on a series whose close never leaves the band, and it is why the same bar computed from a later start index can differ.
+- The direction is reported as +1 for an uptrend and -1 for a downtrend, the sign every other signed output in this library uses for bullish. TradingView's built-in `ta.supertrend` returns the opposite signs for the same two states, and seeds the other way; a strategy ported from Pine has to swap them.
+- The two carried bands are released by different conditions, so nothing keeps the lower one below the upper one. Where they cross, a flip leaves the line on the far side of the close, and within a single trend the line can widen away from price instead of tightening toward it. Both are ordinary consequences of the published formula, not a variation on it; they are simply not the guarantees the indicator is usually described as giving.
+- A multiplier of zero is degenerate but defined: the two basic bands collapse onto the median price exactly. The carried bands do not collapse with them — each is still released by its own condition — so they coincide on some bars and differ on others, and the trend flips on most bars rather than on every one.
+- The band inherits the Average True Range's warm-up, so a caller who wants it converged sets `TA_FUNC_UNST_ATR`, exactly as when calling that function directly.
+
+## Inputs
+
+- `inHigh` — High price of each bar
+- `inLow` — Low price of each bar
+- `inClose` — Close price of each bar
+
+## Outputs
+
+- `outSupertrend` — The SuperTrend line: the band the trend is currently riding
+- `outTrend` — Trend direction: +1 while the trend rides the lower band, -1 while it rides the upper one
+
+## Parameters
+
+| Parameter | Type | Default | Accepted values | Description |
+| --- | --- | --- | --- | --- |
+| `optInTimePeriod` | integer | 10 | 2–100000 | Smoothing period of the Average True Range |
+| `optInMultiplier` | real | 3 | ≥ 0 | Multiplier applied to the Average True Range to set the band width |
+
+## Properties
+
+**Numerical Stability:** [Path-Dependent](/functions/stability.md#path-dependent) — It also computes ATR internally, so ATR's unstable period governs how many leading values are discarded.
+
+<div class="flag-cols">
+
+<div class="flag-table">
+
+|  |
+| :-- |
+| <span class="flag-box">✅</span> **Overlap Input** <span class="flag-tip" tabindex="0" role="note" aria-label="Output is on the same scale as the input price, so it is drawn over the price chart." data-tip="Output is on the same scale as the input price, so it is drawn over the price chart.">i</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Independent Y-Axis</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Candlestick</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Display Shift</span> |
+
+</div>
+
+<div class="flag-table">
+
+|  |
+| :-- |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Can Output NaN or ±Inf</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Identity at Period 1</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Uses Transcendental</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Input Must Be Positive</span> |
+
+</div>
+
+</div>
+
+## Example
+
+::: code-tabs#lang
+
+@tab C
+
+```c
+#include <stdio.h>
+#include <ta_libc.h>
+
+int n = 252;
+double high[252]; /* your data, oldest first */
+double low[252]; /* your data, oldest first */
+double close[252]; /* your data, oldest first */
+double supertrend[252];
+int trend[252];
+int outBegIdx, outNBElement;
+
+TA_Initialize();
+TA_SUPERTREND( 0, n - 1, high, low, close, 10, 3.0, &outBegIdx, &outNBElement, supertrend, trend );
+printf( "%d values from bar %d:\n", outNBElement, outBegIdx );
+printf( "supertrend = [%.4f, ..., %.4f]\n", supertrend[0], supertrend[outNBElement - 1] );
+printf( "trend = [%d, ..., %d]\n", trend[0], trend[outNBElement - 1] );
+```
+
+@tab Rust
+
+```rust
+use ta_lib::Core;
+
+let high = vec![0.0; 252]; // your data, oldest first
+let low = vec![0.0; 252]; // your data, oldest first
+let close = vec![0.0; 252]; // your data, oldest first
+let mut supertrend = vec![0.0; 252];
+let mut trend = vec![0i32; 252];
+
+let core = Core::new();
+let range = core.supertrend(0, high.len() - 1, &high, &low, &close, 10, 3.0,
+                            &mut supertrend, &mut trend)?;
+println!("{} values from bar {}:", range.count, range.beg_idx);
+println!("supertrend = [{:.4}, ..., {:.4}]", supertrend[0], supertrend[range.count - 1]);
+println!("trend = [{}, ..., {}]", trend[0], trend[range.count - 1]);
+```
+
+@tab Java
+
+```java
+import io.github.talib.Core;
+import io.github.talib.OutRange;
+import java.util.Locale;
+
+double[] high = new double[252]; // your data, oldest first
+double[] low = new double[252]; // your data, oldest first
+double[] close = new double[252]; // your data, oldest first
+double[] supertrend = new double[252];
+int[] trend = new int[252];
+
+Core core = Core.DEFAULT;
+OutRange r = core.supertrend(0, high.length - 1, high, low, close, 10, 3.0, supertrend, trend);
+System.out.printf(Locale.ROOT, "%d values from bar %d:%n", r.count(), r.begIdx());
+System.out.printf(Locale.ROOT, "supertrend = [%.4f, ..., %.4f]%n", supertrend[0], supertrend[r.count() - 1]);
+System.out.printf(Locale.ROOT, "trend = [%d, ..., %d]%n", trend[0], trend[r.count() - 1]);
+```
+
+@tab C\#
+
+```csharp
+using System;
+using TALib;
+
+var high = new double[252]; // your data, oldest first
+var low = new double[252]; // your data, oldest first
+var close = new double[252]; // your data, oldest first
+var supertrend = new double[252];
+var trend = new int[252];
+
+var core = Core.Default;
+OutRange r = core.Supertrend(0, high.Length - 1, high, low, close, 10, 3.0, supertrend, trend);
+Console.WriteLine($"{r.Count} values from bar {r.BegIdx}:");
+Console.WriteLine(FormattableString.Invariant($"supertrend = [{supertrend[0]:F4}, ..., {supertrend[r.Count - 1]:F4}]"));
+Console.WriteLine(FormattableString.Invariant($"trend = [{trend[0]}, ..., {trend[r.Count - 1]}]"));
+```
+
+@tab TypeScript
+
+```ts
+import { supertrend } from 'ta-lib';
+
+const high = new Float64Array(252); // your data, oldest first
+const low = new Float64Array(252); // your data, oldest first
+const close = new Float64Array(252); // your data, oldest first
+
+const { begIdx, outSupertrend, outTrend } = supertrend({ high, low, close }, {
+  timePeriod: 10,
+  multiplier: 3,
+});
+console.log(outSupertrend.length + ' values from bar ' + begIdx + ':');
+console.log('outSupertrend = [' + outSupertrend[0].toFixed(4) + ', ..., ' + outSupertrend[outSupertrend.length - 1].toFixed(4) + ']');
+console.log('outTrend = [' + outTrend[0] + ', ..., ' + outTrend[outTrend.length - 1] + ']');
+```
+
+@tab Go
+
+```go
+import (
+	"fmt"
+	"log"
+
+	talib "ta-lib.github.io/go"
+)
+
+high := make([]float64, 252) // your data, oldest first
+low := make([]float64, 252) // your data, oldest first
+close := make([]float64, 252) // your data, oldest first
+supertrend := make([]float64, 252)
+trend := make([]int32, 252)
+
+core := talib.NewCore()
+r, err := core.SUPERTREND(0, len(high)-1, high, low, close, 10, 3, supertrend, trend)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Printf("%d values from bar %d:\n", r.NBElement, r.BegIdx)
+fmt.Printf("supertrend = [%.4f, ..., %.4f]\n", supertrend[0], supertrend[r.NBElement-1])
+fmt.Printf("trend = [%d, ..., %d]\n", trend[0], trend[r.NBElement-1])
+```
+
+:::
+
+## Implementation
+
+Added in 0.8.1 (ta-lib-python 0.8.1).
+
+TA-Lib Definition: [`supertrend.c`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/input/supertrend/supertrend.c) · [`supertrend.yaml`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/input/supertrend/supertrend.yaml)
+
+| Native | File |
+|--------|------|
+| C | [`ta_SUPERTREND.c`](https://github.com/TA-Lib/ta-lib/blob/main/src/ta_func/ta_SUPERTREND.c) |
+| Rust | [`supertrend.rs`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/rust/library/src/ta_func/supertrend.rs) |
+| Java | [`Core_SUPERTREND.java`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/java/fragments/Core_SUPERTREND.java) |
+| C# | [`Core_SUPERTREND.cs`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/csharp/library/src/Core_SUPERTREND.cs) |
+| TypeScript | [`supertrend.ts`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/ts/library/src/func/supertrend.ts) |
+| Go | [`supertrend.go`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/go/supertrend.go) |
+
+Python: `talib.SUPERTREND` (ta-lib-python 0.8.1 or later), see [ta-lib-python](https://ta-lib.github.io/ta-lib-python/func_groups/overlap_studies.html).
+
+TA-Lib is also available for R and more using a [wrapper](/install/#wrappers).
+
+## Aliases
+
+Super Trend, Supertrend Indicator
+
+## See Also
+
+[ATR](/functions/atr.md) · [MEDPRICE](/functions/medprice.md) · [SAR](/functions/sar.md) · [SAREXT](/functions/sarext.md) · [KC](/functions/kc.md)
+
+## References
+
+- [Supertrend — TradingView](https://www.tradingview.com/support/solutions/43000634738-supertrend/)
+- [Supertrend Indicator — Investopedia](https://www.investopedia.com/supertrend-indicator-7976167)
+- Olivier Seban, *Tout le monde mérite d'être riche*, Maxima

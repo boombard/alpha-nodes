@@ -1,0 +1,233 @@
+---
+title: "Premier Stochastic Oscillator (PSO)"
+description: "Premier Stochastic Oscillator: a short-period Fast %K, recentred on zero and rescaled, double-smoothed and then squashed into the range -1 to +1."
+---
+
+## Summary
+
+Premier Stochastic Oscillator: a short-period Fast %K, recentred on zero and rescaled, double-smoothed and then squashed into the range -1 to +1. Leibfarth's reading is that the plain stochastic spends most of its life pinned at one end or the other, so the extremes stop meaning anything; the two exponential passes strip the bar-to-bar noise out of it, and the squash gives back a scale on which the extremes are rare again. Readings beyond ±0.9 are the extremes, and ±0.2 the band Leibfarth watches for the crossing back toward the middle.
+
+## Chart
+
+<ta-chart src="/functions/pso.svg" ratio="720:416" label="PSO over IBM, daily, 1999" alt="Drawn on the price pane over candles; below it, a separate indicator pane with a zero line showing outReal as a solid line with dashed rules at -0.9, -0.2, 0.2 and 0.9."></ta-chart>
+
+<div class="ta-chart-links">
+
+[Reference data (CSV)](/functions/pso.csv) · [Chart (SVG)](/functions/pso.svg)
+
+</div>
+
+::: details Chart metadata <span class="flag-tip" tabindex="0" role="note" aria-label="The chart is drawn automatically from metadata TA-Lib provides. Your app can get the same through the Abstract API." data-tip="The chart is drawn automatically from metadata TA-Lib provides. Your app can get the same through the Abstract API.">i</span>
+
+**Outputs**
+
+- `outReal`: `line` · `zero` · `positive` · `negative` · `levels: -0.9, -0.2, 0.2, 0.9`
+
+:::
+
+## Formula
+
+K = STOCHF(high, low, close, fastKPeriod)   (Fast-K only)
+
+NSK = 0.1 * (K - 50)
+
+SS = EMA(EMA(NSK, emaPeriod), emaPeriod)
+
+PSO = (e^SS - 1) / (e^SS + 1) = tanh(SS / 2)
+
+## Notes
+
+- The affine step comes before the smoothing, as the author's listing spells it. Smoothing first and recentring after is the same value in real arithmetic and differs in the last bit or two in doubles.
+- The squash is computed as `tanh(SS/2)`, which is the published quotient rewritten. The quotient form is `inf/inf` once `SS` exceeds 709.78, which a bar whose close lies outside its own high/low range can reach; `tanh` saturates at ±1 instead.
+- A Fast-K window whose range is zero reads 50, the midpoint, so a flat market reads PSO 0 rather than the near-extreme the Fast-K convention of 0 would give it. The flatness test is the one STOCHF applies, against the window's own extremes rather than a fixed band.
+- Each exponential pass is seeded with a simple average of its own first inputs, the same seeding TA-Lib's EMA uses, and the second pass seeds on what the first publishes. `TA_SetUnstablePeriod(TA_FUNC_UNST_EMA, ...)` discards more of that warm-up, through both passes. Implementations seeding each pass from a single first sample differ over the transient and agree once it decays.
+- Leibfarth parameterises the smoothing as the square root of a longer period, 25 in his article. The length is taken here directly, as an integer, because the sources that follow the square root disagree over how to round it.
+
+## Inputs
+
+- `inHigh` — High price series
+- `inLow` — Low price series
+- `inClose` — Close price series
+
+## Outputs
+
+- `outReal` — Premier Stochastic Oscillator, -1 to +1
+
+## Parameters
+
+| Parameter | Type | Default | Accepted values | Description |
+| --- | --- | --- | --- | --- |
+| `optInFastK_Period` | integer | 8 | 1–100000 | Time period for building the Fast-K line |
+| `optInEMAPeriod` | integer | 5 | 1–100000 | Period of each of the two smoothing passes |
+
+## Properties
+
+**Numerical Stability:** [Initial Unstable Period](/functions/stability.md#initial-unstable-period) — Inherited from EMA, which PSO computes internally; tunable via EMA's unstable period.
+
+<div class="flag-cols">
+
+<div class="flag-table">
+
+|  |
+| :-- |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Overlap Input</span> |
+| <span class="flag-box">✅</span> **Independent Y-Axis** <span class="flag-tip" tabindex="0" role="note" aria-label="Output is on its own scale, drawn in a separate pane below the price chart." data-tip="Output is on its own scale, drawn in a separate pane below the price chart.">i</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Candlestick</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Display Shift</span> |
+
+</div>
+
+<div class="flag-table">
+
+|  |
+| :-- |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Can Output NaN or ±Inf</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Identity at Period 1</span> |
+| <span class="flag-box">✅</span> **Uses Transcendental** <span class="flag-tip" tabindex="0" role="note" aria-label="Calls a transcendental math function (exp, log, log10, trigonometric, inverse trigonometric or hyperbolic), so a value may differ slightly between languages, between a stream and a batch call, and between machines. TA-Lib targets a difference below 1e-9." data-tip="Calls a transcendental math function (exp, log, log10, trigonometric, inverse trigonometric or hyperbolic), so a value may differ slightly between languages, between a stream and a batch call, and between machines. TA-Lib targets a difference below 1e-9.">i</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Input Must Be Positive</span> |
+
+</div>
+
+</div>
+
+## Example
+
+::: code-tabs#lang
+
+@tab C
+
+```c
+#include <stdio.h>
+#include <ta_libc.h>
+
+int n = 252;
+double high[252]; /* your data, oldest first */
+double low[252]; /* your data, oldest first */
+double close[252]; /* your data, oldest first */
+double out[252];
+int outBegIdx, outNBElement;
+
+TA_Initialize();
+TA_PSO( 0, n - 1, high, low, close, 8, 5, &outBegIdx, &outNBElement, out );
+printf( "%d values from bar %d: [%.4f, ..., %.4f]\n", outNBElement, outBegIdx, out[0], out[outNBElement - 1] );
+```
+
+@tab Rust
+
+```rust
+use ta_lib::Core;
+
+let high = vec![0.0; 252]; // your data, oldest first
+let low = vec![0.0; 252]; // your data, oldest first
+let close = vec![0.0; 252]; // your data, oldest first
+let mut out = vec![0.0; 252];
+
+let core = Core::new();
+let range = core.pso(0, high.len() - 1, &high, &low, &close, 8, 5, &mut out)?;
+println!("{} values from bar {}: [{:.4}, ..., {:.4}]", range.count, range.beg_idx, out[0], out[range.count - 1]);
+```
+
+@tab Java
+
+```java
+import io.github.talib.Core;
+import io.github.talib.OutRange;
+import java.util.Locale;
+
+double[] high = new double[252]; // your data, oldest first
+double[] low = new double[252]; // your data, oldest first
+double[] close = new double[252]; // your data, oldest first
+double[] out = new double[252];
+
+Core core = Core.DEFAULT;
+OutRange r = core.pso(0, high.length - 1, high, low, close, 8, 5, out);
+System.out.printf(Locale.ROOT, "%d values from bar %d: [%.4f, ..., %.4f]%n", r.count(), r.begIdx(), out[0], out[r.count() - 1]);
+```
+
+@tab C\#
+
+```csharp
+using System;
+using TALib;
+
+var high = new double[252]; // your data, oldest first
+var low = new double[252]; // your data, oldest first
+var close = new double[252]; // your data, oldest first
+var outReal = new double[252];
+
+var core = Core.Default;
+OutRange r = core.Pso(0, high.Length - 1, high, low, close, 8, 5, outReal);
+Console.WriteLine(FormattableString.Invariant($"{r.Count} values from bar {r.BegIdx}: [{outReal[0]:F4}, ..., {outReal[r.Count - 1]:F4}]"));
+```
+
+@tab TypeScript
+
+```ts
+import { pso } from 'ta-lib';
+
+const high = new Float64Array(252); // your data, oldest first
+const low = new Float64Array(252); // your data, oldest first
+const close = new Float64Array(252); // your data, oldest first
+
+const { begIdx, values } = pso({ high, low, close }, {
+  fastKPeriod: 8,
+  emaPeriod: 5,
+});
+console.log(values.length + ' values from bar ' + begIdx + ': [' + values[0].toFixed(4) + ', ..., ' + values[values.length - 1].toFixed(4) + ']');
+```
+
+@tab Go
+
+```go
+import (
+	"fmt"
+	"log"
+
+	talib "ta-lib.github.io/go"
+)
+
+high := make([]float64, 252) // your data, oldest first
+low := make([]float64, 252) // your data, oldest first
+close := make([]float64, 252) // your data, oldest first
+out := make([]float64, 252)
+
+core := talib.NewCore()
+r, err := core.PSO(0, len(high)-1, high, low, close, 8, 5, out)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Printf("%d values from bar %d: [%.4f, ..., %.4f]\n", r.NBElement, r.BegIdx, out[0], out[r.NBElement-1])
+```
+
+:::
+
+## Implementation
+
+Added in 0.8.3 (ta-lib-python 0.8.3).
+
+TA-Lib Definition: [`pso.c`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/input/pso/pso.c) · [`pso.yaml`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/input/pso/pso.yaml)
+
+| Native | File |
+|--------|------|
+| C | [`ta_PSO.c`](https://github.com/TA-Lib/ta-lib/blob/main/src/ta_func/ta_PSO.c) |
+| Rust | [`pso.rs`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/rust/library/src/ta_func/pso.rs) |
+| Java | [`Core_PSO.java`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/java/fragments/Core_PSO.java) |
+| C# | [`Core_PSO.cs`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/csharp/library/src/Core_PSO.cs) |
+| TypeScript | [`pso.ts`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/ts/library/src/func/pso.ts) |
+| Go | [`pso.go`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/go/pso.go) |
+
+Python: `talib.PSO` (ta-lib-python 0.8.3 or later), see [ta-lib-python](https://ta-lib.github.io/ta-lib-python/func_groups/momentum_indicators.html).
+
+TA-Lib is also available for R and more using a [wrapper](/install/#wrappers).
+
+## Aliases
+
+premier stochastic oscillator, premier stochastic
+
+## See Also
+
+[STOCHF](/functions/stochf.md) · [STOCH](/functions/stoch.md) · [SMI](/functions/smi.md) · [WILLR](/functions/willr.md)
+
+## References
+
+- Lee Leibfarth, "Premier Stochastic Oscillator", *Technical Analysis of Stocks & Commodities*, v26:8 (August 2008), pp. 30-36

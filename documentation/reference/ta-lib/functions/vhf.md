@@ -1,0 +1,214 @@
+---
+title: "Vertical Horizontal Filter (VHF)"
+description: "Vertical Horizontal Filter: Adam White's trend-versus-range filter, the range a window covered divided by the path it actually travelled. Bounded in [0,1]."
+---
+
+## Summary
+
+Vertical Horizontal Filter: Adam White's trend-versus-range filter, the range a window covered divided by the path it actually travelled.
+
+Bounded in [0,1]. Values near 1 mean the market covered most of its path in one direction (trending); values near 0 mean it retraced repeatedly and went nowhere (choppy). Like ADX it measures trend *strength*, not direction, but it uses no smoothing and carries no recursion.
+
+A common use is regime selection: run trend-following logic while VHF is high, oscillator logic while it is low.
+
+## Chart
+
+<ta-chart src="/functions/vhf.svg" ratio="720:416" label="VHF over IBM, daily, 1999" alt="Drawn on the price pane over the close as a line; below it, a separate indicator pane showing outReal as a solid line."></ta-chart>
+
+<div class="ta-chart-links">
+
+[Reference data (CSV)](/functions/vhf.csv) · [Chart (SVG)](/functions/vhf.svg)
+
+</div>
+
+::: details Chart metadata <span class="flag-tip" tabindex="0" role="note" aria-label="The chart is drawn automatically from metadata TA-Lib provides. Your app can get the same through the Abstract API." data-tip="The chart is drawn automatically from metadata TA-Lib provides. Your app can get the same through the Abstract API.">i</span>
+
+**Outputs**
+
+- `outReal`: `line` · `zero` · `positive`
+
+:::
+
+## Formula
+
+num = MAX(C[t-optInTimePeriod+1..t]) - MIN(C[t-optInTimePeriod+1..t]), the range spanned by the `optInTimePeriod` most recent closes. den = SUM( |C[j] - C[j-1]| ) for j = t-optInTimePeriod+1 .. t, the total absolute movement over the same number of changes, which therefore reaches one close further back. VHF = num / den.
+
+The two windows are deliberately not co-terminal: the extrema span `optInTimePeriod` closes, the changes consume one more. Because `num` is the distance between two points the changes connect, `num <= den` always, so the result never leaves [0,1].
+
+## Notes
+
+- A window whose closes are all identical has no vertical movement and no horizontal movement. VHF reports 0 there. Other libraries differ: Tulip Indicators leaves the division unguarded and emits NaN, pandas-ta-classic perturbs the numerator and emits +Inf.
+- Adam White later described an 18-bar VHF smoothed by a 6-bar moving average. That variant is not implemented here; apply a moving average to `outReal` to obtain it.
+
+## Inputs
+
+- `inReal` — Source price/value series, canonically the close
+
+## Outputs
+
+- `outReal` — Vertical Horizontal Filter value
+
+## Parameters
+
+| Parameter | Type | Default | Accepted values | Description |
+| --- | --- | --- | --- | --- |
+| `optInTimePeriod` | integer | 28 | 2–100000 | Number of trailing closes spanned by the range |
+
+## Properties
+
+**Numerical Stability:** [Start-Independent](/functions/stability.md#start-independent)
+
+<div class="flag-cols">
+
+<div class="flag-table">
+
+|  |
+| :-- |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Overlap Input</span> |
+| <span class="flag-box">✅</span> **Independent Y-Axis** <span class="flag-tip" tabindex="0" role="note" aria-label="Output is on its own scale, drawn in a separate pane below the price chart." data-tip="Output is on its own scale, drawn in a separate pane below the price chart.">i</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Candlestick</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Display Shift</span> |
+
+</div>
+
+<div class="flag-table">
+
+|  |
+| :-- |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Can Output NaN or ±Inf</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Identity at Period 1</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Uses Transcendental</span> |
+| <span class="flag-box">☐</span> <span style="opacity:0.5">Input Must Be Positive</span> |
+
+</div>
+
+</div>
+
+## Example
+
+::: code-tabs#lang
+
+@tab C
+
+```c
+#include <stdio.h>
+#include <ta_libc.h>
+
+int n = 252;
+double series[252]; /* your data, oldest first */
+double out[252];
+int outBegIdx, outNBElement;
+
+TA_Initialize();
+TA_VHF( 0, n - 1, series, 28, &outBegIdx, &outNBElement, out );
+printf( "%d values from bar %d: [%.4f, ..., %.4f]\n", outNBElement, outBegIdx, out[0], out[outNBElement - 1] );
+```
+
+@tab Rust
+
+```rust
+use ta_lib::Core;
+
+let series = vec![0.0; 252]; // your data, oldest first
+let mut out = vec![0.0; 252];
+
+let core = Core::new();
+let range = core.vhf(0, series.len() - 1, &series, 28, &mut out)?;
+println!("{} values from bar {}: [{:.4}, ..., {:.4}]", range.count, range.beg_idx, out[0], out[range.count - 1]);
+```
+
+@tab Java
+
+```java
+import io.github.talib.Core;
+import io.github.talib.OutRange;
+import java.util.Locale;
+
+double[] series = new double[252]; // your data, oldest first
+double[] out = new double[252];
+
+Core core = Core.DEFAULT;
+OutRange r = core.vhf(0, series.length - 1, series, 28, out);
+System.out.printf(Locale.ROOT, "%d values from bar %d: [%.4f, ..., %.4f]%n", r.count(), r.begIdx(), out[0], out[r.count() - 1]);
+```
+
+@tab C\#
+
+```csharp
+using System;
+using TALib;
+
+var series = new double[252]; // your data, oldest first
+var outReal = new double[252];
+
+var core = Core.Default;
+OutRange r = core.Vhf(0, series.Length - 1, series, 28, outReal);
+Console.WriteLine(FormattableString.Invariant($"{r.Count} values from bar {r.BegIdx}: [{outReal[0]:F4}, ..., {outReal[r.Count - 1]:F4}]"));
+```
+
+@tab TypeScript
+
+```ts
+import { vhf } from 'ta-lib';
+
+const series = new Float64Array(252); // your data, oldest first
+
+const { begIdx, values } = vhf(series, { timePeriod: 28 });
+console.log(values.length + ' values from bar ' + begIdx + ': [' + values[0].toFixed(4) + ', ..., ' + values[values.length - 1].toFixed(4) + ']');
+```
+
+@tab Go
+
+```go
+import (
+	"fmt"
+	"log"
+
+	talib "ta-lib.github.io/go"
+)
+
+series := make([]float64, 252) // your data, oldest first
+out := make([]float64, 252)
+
+core := talib.NewCore()
+r, err := core.VHF(0, len(series)-1, series, 28, out)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Printf("%d values from bar %d: [%.4f, ..., %.4f]\n", r.NBElement, r.BegIdx, out[0], out[r.NBElement-1])
+```
+
+:::
+
+## Implementation
+
+Added in 0.8.1 (ta-lib-python 0.8.1).
+
+TA-Lib Definition: [`vhf.c`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/input/vhf/vhf.c) · [`vhf.yaml`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/input/vhf/vhf.yaml)
+
+| Native | File |
+|--------|------|
+| C | [`ta_VHF.c`](https://github.com/TA-Lib/ta-lib/blob/main/src/ta_func/ta_VHF.c) |
+| Rust | [`vhf.rs`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/rust/library/src/ta_func/vhf.rs) |
+| Java | [`Core_VHF.java`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/java/fragments/Core_VHF.java) |
+| C# | [`Core_VHF.cs`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/csharp/library/src/Core_VHF.cs) |
+| TypeScript | [`vhf.ts`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/ts/library/src/func/vhf.ts) |
+| Go | [`vhf.go`](https://github.com/TA-Lib/ta-lib/blob/main/ta_codegen/output/go/vhf.go) |
+
+Python: `talib.VHF` (ta-lib-python 0.8.1 or later), see [ta-lib-python](https://ta-lib.github.io/ta-lib-python/func_groups/momentum_indicators.html).
+
+TA-Lib is also available for R and more using a [wrapper](/install/#wrappers).
+
+## Aliases
+
+Vertical Horizontal Filter
+
+## See Also
+
+[ADX](/functions/adx.md) · [CMO](/functions/cmo.md) · [CMOU](/functions/cmou.md)
+
+## References
+
+- Adam White, "The Vertical Horizontal Filter", *Futures Magazine*, August 1991
+- Steven B. Achelis, *Technical Analysis from A to Z*, McGraw-Hill (p. 354)
+- [Incredible Charts: Vertical Horizontal Filter](https://www.incrediblecharts.com/indicators/vertical_horizontal_filter.php)
