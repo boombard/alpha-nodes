@@ -1,10 +1,10 @@
 ---
 id: TASK-34
 title: M4.9 Finance fetch nodes, catalog and M4 end-to-end run (demo gate)
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-25T01:09:40Z'
-updated_date: '2026-11-25T05:34:35Z'
+updated_date: '2026-11-25T05:38:49Z'
 labels:
   - finance
 milestone: m-3
@@ -72,18 +72,18 @@ Out of scope: lenses and calcs on prices (M5), adjusted-close calc (M5), `data_q
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Prices, Profile and FxRates nodes, CATALOG and build_registry exist; runs/m4_prices.yaml targets them over 10 UK/European tickers plus AAPL
-- [ ] #2 Replayed e2e: the second run makes no yfinance calls; GBp normalised; no live bar stored; unknown ticker is empty and not refetched
-- [ ] #3 A x100 row surfaces as suspect in the node output and in sources status --suspect; fx covers all seven currencies
-- [ ] #4 Task notes give the exact demo commands for the human
+- [x] #1 Prices, Profile and FxRates nodes, CATALOG and build_registry exist; runs/m4_prices.yaml targets them over 10 UK/European tickers plus AAPL
+- [x] #2 Replayed e2e: the second run makes no yfinance calls; GBp normalised; no live bar stored; unknown ticker is empty and not refetched
+- [x] #3 A x100 row surfaces as suspect in the node output and in sources status --suspect; fx covers all seven currencies
+- [x] #4 Task notes give the exact demo commands for the human
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -102,4 +102,6 @@ Fix 154c2b9 (human-approved, outside the original Files): DuckDB guessed the lis
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 Worker: Prices/Profile/FxRates fetch nodes, build_registry, CATALOG, runs/m4_prices.yaml (11 tickers), yf_replay stand-in and test_m4_e2e.py (9 tests: second run 0 yfinance calls, offline rerun, GBp minor_unit repair, live bar not stored + unsettled attempt, x100 row suspect in output and sources status --suspect, unknown ticker empty and not refetched, fx covers 7 currencies, shipped config pinned). Commits f3990a2 + 9538888; pytest 620 passed, ruff and pyright clean. Coordinator review: ACs met; one fix round (pin shipped yaml in a test, import placement, Attributes docstrings) done. Open points/rulings: e2e overrides lookbacks (prices 700, fx 360) to fit 2-year fixtures, so the 10-year window is only exercised by the live demo; SEK/NOK/PLN fx replay the EUR fixture relabelled (coverage tested, not rate values); finance.md unchanged. Demo gate not yet run.
+
+Landed 91b920e (squashed f3990a2..154c2b9) on main. M4 demo gate passed after the store fix: 23/23 nodes ok online and offline.
 <!-- SECTION:FINAL_SUMMARY:END -->
