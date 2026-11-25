@@ -1,12 +1,16 @@
 """Citation lineage: every cite in a verdict resolves to a stored value via its provenance."""
 
+from datetime import date
+
 import pandas as pd
 import pytest
+from lensgraph.charts import LineChart
 from lensgraph.lineage import UnresolvedCitation, resolve_all, resolve_citation
 from lensgraph.plan import NodeKey
 from lensgraph.store.files import FileBlobStore
 from lensgraph.store.memory import InMemoryBlobStore
 from lensgraph.verdict import Claim, Flag, LensVerdict, Provenance
+from pydantic import BaseModel
 from toy.nodes import ToxNote
 
 
@@ -87,3 +91,19 @@ def test_resolve_after_cache_hit(toy_panel_runner, tmp_path):
     resolved = resolve_all(verdict, FileBlobStore(tmp_path / "blobs"))
     assert isinstance(resolved["growth_rate"].value, float)
     assert resolved["tox_notes[S1-n1]"].kind == "item"
+
+
+class ChartHolder(BaseModel):
+    """A model with a chart field, for citing `holder.chart`."""
+
+    chart: LineChart
+
+
+def test_line_chart_cite_has_chart_kind(blobs):
+    chart = LineChart(title="t", x=[date(2024, 1, 1)], series={"a": [1.0]})
+    v = _verdict(
+        {"price_chart": blobs.put(chart), "holder": blobs.put(ChartHolder(chart=chart))},
+        ["price_chart", "holder.chart"],
+    )
+    assert resolve_citation(v, "price_chart", blobs).kind == "chart"
+    assert resolve_citation(v, "holder.chart", blobs).kind == "chart"

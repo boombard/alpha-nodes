@@ -479,6 +479,7 @@
   ],
   "cited": {
     "2ffde053d982db22:growth_rate": {
+      "chart": null,
       "cite": "growth_rate",
       "id": "2ffde053d982db22:growth_rate",
       "json_value": 0.1244723864244175,
@@ -487,6 +488,7 @@
       "table": null
     },
     "ba11a289db070b30:growth_rate": {
+      "chart": null,
       "cite": "growth_rate",
       "id": "ba11a289db070b30:growth_rate",
       "json_value": 0.13346206957001966,

@@ -17,6 +17,7 @@ import numpy as np
 import pandas as pd
 from pydantic import BaseModel
 
+from ..charts import LineChart
 from ..lineage import CitedValue, UnresolvedCitation, resolve_citation
 from ..plan import NodeResult, NodeStatus
 from ..records import DossierRecord
@@ -87,7 +88,10 @@ def cited_view(cited: CitedValue, *, max_rows: int) -> CitedView:
     value = cited.value
     table: TableData | None = None
     json_value: Any = None
-    if isinstance(value, pd.DataFrame):
+    chart: LineChart | None = None
+    if isinstance(value, LineChart):
+        chart = value
+    elif isinstance(value, pd.DataFrame):
         table = frame_table(value, max_rows=max_rows)
     elif (
         isinstance(value, list)
@@ -104,6 +108,7 @@ def cited_view(cited: CitedValue, *, max_rows: int) -> CitedView:
         kind=cited.kind,
         table=table,
         json_value=json_value,
+        chart=chart,
     )
 
 

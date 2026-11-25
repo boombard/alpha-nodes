@@ -1,6 +1,7 @@
 """Generic chart value types a node may output and a claim may cite.
 
-See documentation/design/core.md, Reporting. Rendering in the run view arrives in M5.5.
+See documentation/design/core.md, Reporting. A cited chart has kind "chart" in the run view (lineage.py, view/models.py) and is drawn by
+the UI's `LineChartView`.
 """
 
 from datetime import date

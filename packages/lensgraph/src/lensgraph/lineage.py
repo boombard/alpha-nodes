@@ -11,6 +11,7 @@ from typing import Any, Literal
 import pandas as pd
 from pydantic import BaseModel, ConfigDict
 
+from .charts import LineChart
 from .store.base import BlobStore
 from .verdict import LensVerdict
 
@@ -24,7 +25,8 @@ class CitedValue(BaseModel):
         cite: the citable id as written in the claim or flag.
         source_hash: content hash of the input blob the value came from.
         value: the resolved value (frame, model, scalar, list item, ...).
-        kind: "frame" / "model" / "value" for a whole input (by its type), "field" for
+        kind: "chart" for any resolved `LineChart` (whole input or field); otherwise
+            "frame" / "model" / "value" for a whole input (by its type), "field" for
             `n.field`, "item" for `n[id]`.
     """
 
@@ -32,7 +34,7 @@ class CitedValue(BaseModel):
     cite: str
     source_hash: str
     value: Any
-    kind: Literal["frame", "model", "field", "item", "value"]
+    kind: Literal["frame", "model", "field", "item", "value", "chart"]
 
 
 class UnresolvedCitation(LookupError):
@@ -59,14 +61,22 @@ def resolve_citation(verdict: LensVerdict, cite: str, blobs: BlobStore) -> Cited
         field = match["field"]
         if not isinstance(root, BaseModel) or field not in type(root).model_fields:
             raise UnresolvedCitation(f"{cite}: input {name!r} has no field {field!r}")
-        return CitedValue(cite=cite, source_hash=h, value=getattr(root, field), kind="field")
+        value = getattr(root, field)
+        field_kind: Literal["field", "chart"] = "chart" if isinstance(value, LineChart) else "field"
+        return CitedValue(cite=cite, source_hash=h, value=value, kind=field_kind)
     if match["item"] is not None:
         item_id = match["item"]
         for item in root if isinstance(root, list) else []:
             if getattr(item, "id", None) == item_id:
                 return CitedValue(cite=cite, source_hash=h, value=item, kind="item")
         raise UnresolvedCitation(f"{cite}: input {name!r} has no item with id {item_id!r}")
-    kind = "frame" if isinstance(root, pd.DataFrame) else "model" if isinstance(root, BaseModel) else "value"
+    kind: Literal["frame", "model", "value", "chart"]
+    if isinstance(root, LineChart):
+        kind = "chart"
+    elif isinstance(root, pd.DataFrame):
+        kind = "frame"
+    else:
+        kind = "model" if isinstance(root, BaseModel) else "value"
     return CitedValue(cite=cite, source_hash=h, value=root, kind=kind)
 
 

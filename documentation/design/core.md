@@ -646,8 +646,12 @@ reading **the same data contract**.
   so the live view is the report watched as it fills in. See the live-view sketch task.
 - **Python users never need Node:** the built bundle is committed into the Python package, with an
   up-to-date check in the Python tests. Only UI development needs Node (pnpm).
-- **Domain renderers:** cited values carry a `kind` and table/JSON payloads; domains add renderers
-  by kind in the app (e.g. a price chart) in later milestones.
+- **Cited value renderers:** cited values carry a `kind` and table/JSON payloads, rendered through
+  the `renderers` hook by kind. A cited `LineChart` (a whole input or a model field) resolves to kind
+  `chart`; `CitedView.chart` holds it (dates as ISO strings, missing y values as null) and the app draws
+  it with MUI X Charts: one line per series, date axis, legend, tooltip. A cited model whose fields are
+  all scalars (kind `model`, `json_value`) is drawn as a field/value table; nested models stay a JSON
+  block. Both are generic: domains only output `LineChart`s and models, and need no app code.
 
 ## Campaigns
 

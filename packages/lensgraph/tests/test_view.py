@@ -2,15 +2,23 @@
 
 import json
 import math
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 
 import pandas as pd
 import pytest
+from lensgraph.aggregate import ShrunkMeanAggregator
+from lensgraph.charts import LineChart
+from lensgraph.plan import NodeKey, NodeResult
+from lensgraph.plangraph import PlanGraph
 from lensgraph.records import LLMCall, RunInfo
 from lensgraph.store.duckdb_index import DuckDBRunIndex
+from lensgraph.store.memory import InMemoryBlobStore, InMemoryRunIndex
+from lensgraph.types import CandidateRef
+from lensgraph.verdict import Claim, Flag, LensVerdict, Provenance
 from lensgraph.view.build import build_run_view, render_run_json, write_run_view
 from lensgraph.view.models import RunView
+from toy.nodes import ToxNote
 from toy.toy_view import ToyRun, run_toy_panel
 
 
@@ -228,13 +236,6 @@ def test_run_without_any_time_is_an_error(toy_run: ToyRun):
 
 
 def test_flag_cites_resolved_into_shared_cited_map():
-    from lensgraph import Panel  # noqa: F401
-    from lensgraph.aggregate import ShrunkMeanAggregator
-    from lensgraph.plan import NodeKey, NodeResult
-    from lensgraph.plangraph import PlanGraph
-    from lensgraph.store.memory import InMemoryBlobStore, InMemoryRunIndex
-    from lensgraph.types import CandidateRef
-    from lensgraph.verdict import Claim, Flag, LensVerdict, Provenance
 
     blobs, index = InMemoryBlobStore(), InMemoryRunIndex()
     h = blobs.put(0.12)
@@ -263,3 +264,43 @@ def test_flag_cites_resolved_into_shared_cited_map():
     assert cand.flags[0].cites == {"growth_rate": claim_id}
     assert cand.flags[1].cites == {"gone": None}
     assert view.summary.status == "ok"
+
+
+def _view_citing(value, cite: str = "x"):
+    """Build a one-candidate run view whose only claim cites `value` as input `x`."""
+
+    blobs, index = InMemoryBlobStore(), InMemoryRunIndex()
+    verdict = LensVerdict(
+        lens="l", status="ok", stance=1, conviction="high", stance_mean=1.0, coverage=1.0,
+        claims=[Claim(text="c", direction=1, cites=[cite])],
+        provenance=Provenance(lens_version="v", input_hashes={"x": blobs.put(value)}),
+    )
+    dossier = ShrunkMeanAggregator().combine(CandidateRef(id="S1"), [verdict])
+    index.start_run("r", {"panel": {"aggregator": "dossier"}})
+    index.finish_run("r", "ok")
+    index._plans["r"] = PlanGraph(nodes=[], edges=[])
+    index.record_node(
+        "r", NodeResult(key=NodeKey(name="dossier", candidate="S1"), status="ok", output_hash=blobs.put(dossier))
+    )
+    view = build_run_view("r", index, blobs)
+    return next(iter(view.cited.values()))
+
+
+def test_cited_chart_in_run_view():
+
+
+    chart = LineChart(
+        title="px", x=[date(2024, 1, 1), date(2024, 1, 2)], series={"a": [1.0, None]}, y_label="usd"
+    )
+    cited = _view_citing(chart)
+    assert cited.kind == "chart" and cited.json_value is None and cited.table is None
+    assert cited.chart is not None
+    dumped = json.loads(cited.model_dump_json())["chart"]
+    assert dumped["x"] == ["2024-01-01", "2024-01-02"]
+    assert dumped["series"] == {"a": [1.0, None]}
+
+
+def test_cited_model_unchanged():
+
+    cited = _view_citing(ToxNote(id="n", text="t"))
+    assert cited.kind == "model" and cited.json_value == {"id": "n", "text": "t"} and cited.chart is None

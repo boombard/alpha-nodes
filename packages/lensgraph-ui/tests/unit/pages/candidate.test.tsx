@@ -37,10 +37,14 @@ test("a review point shows text, priority badge and cite chips as separate eleme
 });
 
 test("provenance shows model, attempts and tokens only for model-backed verdicts", () => {
-  renderWithRun(<CandidatePage id="S1" />);
+  const run = loadToyRun();
+  const growthVerdict = run.candidates
+    .find((c) => c.id === "S1")!
+    .record.dossier.verdicts.find((v) => v.lens === "growth")!;
+  renderWithRun(<CandidatePage id="S1" />, run);
   const growth = screen.getByRole("article", { name: "Verdict growth" });
   const safety = screen.getByRole("article", { name: "Verdict safety" });
-  expect(within(growth).getByText(/v362096961ca9446a/)).toBeInTheDocument();
+  expect(within(growth).getByText(new RegExp(`v${growthVerdict.provenance.lens_version}`))).toBeInTheDocument();
   expect(growth).not.toHaveTextContent(/attempt/);
   expect(growth).not.toHaveTextContent(/tokens/);
   expect(safety).toHaveTextContent(/function:_scripted:, default, 1 attempt\(s\), 153\/20 tokens/);

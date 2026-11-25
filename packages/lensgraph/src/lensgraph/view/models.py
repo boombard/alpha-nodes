@@ -10,6 +10,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict
 
+from ..charts import LineChart
 from ..plan import NodeStatus
 from ..plangraph import PlanGraph
 from ..records import DossierRecord, LLMCall
@@ -48,14 +49,16 @@ class CitedView(_ViewModel):
         kind: as `lineage.CitedValue.kind`.
         table: frames and lists of models.
         json_value: models, fields, items and scalars.
+        chart: set iff kind == "chart" (dates serialise as ISO strings, missing y values as null).
     """
 
     id: str
     cite: str
     source_hash: str
-    kind: Literal["frame", "model", "field", "item", "value"]
+    kind: Literal["frame", "model", "field", "item", "value", "chart"]
     table: TableData | None = None
     json_value: Any = None
+    chart: LineChart | None = None
 
 
 class ClaimRef(_ViewModel):
