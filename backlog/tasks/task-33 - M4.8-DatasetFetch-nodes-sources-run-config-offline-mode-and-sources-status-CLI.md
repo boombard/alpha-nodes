@@ -3,10 +3,10 @@ id: TASK-33
 title: >-
   M4.8 DatasetFetch nodes, sources run config, offline mode and sources status
   CLI
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T01:09:29Z'
-updated_date: '2026-11-25T04:38:10Z'
+updated_date: '2026-11-25T04:45:24Z'
 labels:
   - core
 milestone: m-3
@@ -123,3 +123,17 @@ Out of scope: finance nodes and config (M4.9).
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_595ec695149a, worktree task-33
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker: DatasetFetch/DatasetFetchMany (sources/node.py), SourceCatalog/ProviderContext/SourcesConfig/build_source_store (sources/catalog.py), RunConfig.sources wired into arun (built, injected, closed on every path), `lensgraph run --offline`, `lensgraph sources status [--dataset] [--suspect]`, core.md Run configuration updated. Commits c2dde13 + b6dec99 (review fixes). pytest 520 passed, ruff clean, pyright 0 errors.
+
+Coordinator review: ACs 1-4 met. One feedback round, all applied: window docstring corrected (lookback_days+1 inclusive days); DatasetFetchMany all-empty result keeps the dataset's columns; source store can no longer leak its file lock if index setup fails; `sources status --dataset <unknown>` is a CliError.
+
+Out-of-Files edits (approved mid-task): hashing.py + test_hashing.py (list/ndarray cells hash by canonical sorted-key JSON so a Parquet round trip hashes equal; frames without list cells keep a pinned identical digest); duckdb_store.py read-only `clock` property.
+
+Rulings to check: window = [end - lookback_days, end] inclusive; lookback_days None = no interval; build_source_store builds only datasets listed in sources.providers and also rejects unknown limits names, empty provider chains, bad catalog refs; --offline without sources is a CLI error; sources status counts rows over all stored versions, exits 2 when no sources.duckdb; ctx.as_of is never set by the executor today, so live runs use the store clock.
+
+Open points: DatasetFetchMany with an empty `entities` list raises IndexError (entities[0]); no test for the store-leak path; empty-frame test checks columns, not dtypes; hashing scans every object column per hash (Python-level map), a possible cost on big frames.
+<!-- SECTION:FINAL_SUMMARY:END -->
