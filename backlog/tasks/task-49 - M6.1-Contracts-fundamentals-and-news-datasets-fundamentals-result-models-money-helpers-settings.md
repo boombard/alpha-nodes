@@ -3,10 +3,10 @@ id: TASK-49
 title: >-
   M6.1 Contracts: fundamentals and news datasets, fundamentals result models,
   money helpers, settings
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T08:17:39Z'
-updated_date: '2026-11-25T22:29:15Z'
+updated_date: '2026-11-25T22:37:10Z'
 labels:
   - finance
   - contracts
@@ -152,3 +152,9 @@ Out of scope: providers (M6.4, M6.5), kernels (M6.2), adapters and calc nodes (M
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_27df73b5b1c2, worktree task-49 (Orca run run_743fda9ec0e6)
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker: FundamentalsSchema/NewsSchema + FUNDAMENTALS/NEWS datasets in DATASETS (every column has a field kind); PeriodWindow + Profitability/BalanceSheet/CashGeneration/FundamentalTrend/Valuation/ValuationChange results and NewsItem (frozen, None allowed); money.py (CurrencyMismatch, require_same_currency, usd_per_unit, fx_factor; never defaults a missing rate to 1.0); reference_day; FinanceSettings (ALPHA_NODES_SEC_USER_AGENT); FILING_LAG_DAYS/MAX_ANNUAL_PERIODS; Fundamentals and News fetch nodes. DuckDB store round-trips null filed_at, keeps a 10-K and 10-K/A as separate facts, as-of sees only filings known then, news accumulates across snapshots. No core change needed; finance.md unchanged. Commits a6546d4 + review fix - squash on landing. Evidence: pytest 880 passed, ruff/pyright clean. Coordinator verdict: approve; one review round (usd_per_unit selects positionally so a non-unique fx index is safe, + test; pydantic-settings declared in alpha_nodes/pyproject.toml, outside Files, coordinator-approved, uv.lock updated). Rulings: NewsSchema.published_at pinned to datetime64[ns, UTC] like the store's known_at, so providers must cast (pandas 3 parses to us) - a forgotten cast fails validation loudly; fundamentals_frame/news_frame fixtures added to tests/conftest.py plus extra schema tests. Open: none.
+<!-- SECTION:FINAL_SUMMARY:END -->
