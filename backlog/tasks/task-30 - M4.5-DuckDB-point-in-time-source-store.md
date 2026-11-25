@@ -4,7 +4,7 @@ title: M4.5 DuckDB point-in-time source store
 status: In Review
 assignee: []
 created_date: '2026-11-25T01:09:28Z'
-updated_date: '2026-11-25T03:46:16Z'
+updated_date: '2026-11-25T03:52:49Z'
 labels:
   - core
 milestone: m-3
@@ -107,6 +107,7 @@ Out of scope: the fetch node, run wiring and CLI (M4.8); any finance dataset.
 
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_99ae6051c7a3, worktree task-30
+Human feedback 2026-11-25: replace rowid with an explicit version_seq column (Postgres portability); sent to worker.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
