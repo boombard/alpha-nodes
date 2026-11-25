@@ -3,10 +3,10 @@ id: TASK-33
 title: >-
   M4.8 DatasetFetch nodes, sources run config, offline mode and sources status
   CLI
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-25T01:09:29Z'
-updated_date: '2026-11-25T01:09:40Z'
+updated_date: '2026-11-25T04:38:10Z'
 labels:
   - core
 milestone: m-3
@@ -117,3 +117,9 @@ Out of scope: finance nodes and config (M4.9).
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_595ec695149a, worktree task-33
+<!-- SECTION:NOTES:END -->

@@ -1,10 +1,10 @@
 ---
 id: TASK-32
 title: M4.7 yfinance profile and live canary script
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-25T01:09:29Z'
-updated_date: '2026-11-25T04:07:08Z'
+updated_date: '2026-11-25T04:38:09Z'
 labels:
   - finance
 milestone: m-3
@@ -98,3 +98,9 @@ Out of scope: fundamentals/news/screen (M6/M7); the store and runs (M4.9).
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_479cd1dcb02e, worktree task-32
+<!-- SECTION:NOTES:END -->
