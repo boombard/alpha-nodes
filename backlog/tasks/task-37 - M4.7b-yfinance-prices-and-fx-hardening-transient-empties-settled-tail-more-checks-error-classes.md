@@ -3,10 +3,10 @@ id: TASK-37
 title: >-
   M4.7b yfinance prices and fx hardening: transient empties, settled tail, more
   checks, error classes
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-25T04:06:45Z'
-updated_date: '2026-11-25T05:12:28Z'
+updated_date: '2026-11-25T05:18:02Z'
 labels:
   - finance
 milestone: m-3
@@ -82,18 +82,18 @@ Out of scope: overlap reconciliation with stored facts (TASK-38); dividend-only 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Prices-missing over a range with sessions, 404 for a known symbol and truncated history are error (never cached); 401/403/Invalid Crumb are rate_limited; unknown suffix is empty
-- [ ] #2 settled_through is capped at the last bar when recent sessions are missing at the tail; not capped for old last bars
-- [ ] #3 Duplicate bars collapsed; single missing sessions, split-sized jumps, tiny dividends, stale runs and fx jumps/stale marked suspect; normaliser versions bumped to 2
-- [ ] #4 Recorded fixtures get none of the new reasons; YF_POLICY sets the breakers; curl_cffi pinned
+- [x] #1 Prices-missing over a range with sessions, 404 for a known symbol and truncated history are error (never cached); 401/403/Invalid Crumb are rate_limited; unknown suffix is empty
+- [x] #2 settled_through is capped at the last bar when recent sessions are missing at the tail; not capped for old last bars
+- [x] #3 Duplicate bars collapsed; single missing sessions, split-sized jumps, tiny dividends, stale runs and fx jumps/stale marked suspect; normaliser versions bumped to 2
+- [x] #4 Recorded fixtures get none of the new reasons; YF_POLICY sets the breakers; curl_cffi pinned
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -109,4 +109,6 @@ Worker: yfinance provider classification (prices-missing over sessions -> error,
 Human ruling (via worker question): prices stale = run >=5 identical closes only when volume is NaN; zero-volume runs are genuine no-trade (BMT.L has a 9-run); fx stale unchanged. Fixtures test covers all fixtures incl. BMT.L, no exemption.
 Coordinator review (code-review medium + manual): one round sent and applied: (1) fx counted calendar days, so weekend-only fx requests errored every run and the fx tail cap kept weekends as gaps (could trip the error breaker) -> shared _trading_days helper, fx = Mon-Fri; (2) truncation check failed closed without firstTradeDate -> now fails open; (3) _bar_days docstring. Review findings set aside as spec-mandated: exact curl_cffi pin, dividend/split-jump thresholds, Unauthorized substring rule. Verdict: approve.
 Open points: delisted/long-suspended tickers error on every run (spec-accepted) and 5 in a row now trip max_consecutive_errors and abort the fetch; truncation check skipped for fx; duplicate-bar collapsing also applies to fx; missing_sessions threshold 1 chosen since no fixture has missing sessions; _classify known_tz also applies to profile (404 on known profile symbol -> error); two restatement tests got a constructed firstTradeDate.
+
+Landed 21682d8..8d96995 on main. Follow-up for open point 1 (delisted tickers vs error breaker): TASK-39.
 <!-- SECTION:FINAL_SUMMARY:END -->
