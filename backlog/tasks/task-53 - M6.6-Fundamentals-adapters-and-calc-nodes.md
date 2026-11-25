@@ -1,10 +1,10 @@
 ---
 id: TASK-53
 title: M6.6 Fundamentals adapters and calc nodes
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T08:17:59Z'
-updated_date: '2026-11-25T23:42:38Z'
+updated_date: '2026-11-25T23:46:20Z'
 labels:
   - finance
 milestone: m-5
@@ -89,3 +89,9 @@ Out of scope: valuation and market cap (M6.7); registering nodes (M6.10); quarte
 Worker: dispatch ctx_dc517ccb0bcf, worktree task-53 (Orca run run_09eee9a7786f)
 Review round 1 sent (HEAD 2a18420): positional trend spans across missing fiscal years, FCF inline x3, formatter artefact. Follow-up dispatch ctx_d58f3bb791f6.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker summary: alpha_nodes.statements adapters (AnnualFundamentalsSchema, known_on, annual_periods, period_window, values, years_between) and five memoize=False calc nodes with code_deps (annual_fundamentals, profitability, balance_sheet, cash_generation, fundamental_trend). pytest 915 passed, ruff and pyright clean. Commits 2a18420, 34d81db, 40a064d, 40d61dc: squash on landing. Review: 2 fix rounds. R1: trend growth was positional, so a missing fiscal year stretched spans (fixed: years_between, 1y fields None beyond 18 months, revenue_cagr_3y base = period closest to 3y back within 6 months, compounded over the actual span); FCF inline x3 (fixed: _fcf helper); formatter artefact (fixed). R2: the R1 tests had not been committed (fixed: 3 trend tests added). Verdict: approve. Rulings: BalanceSheet, owner earnings and latest FCF use the latest row (None if it lacks an item; BalanceSheet window = 1 period); multi-field results report the widest window; empty annual frame coerced to schema dtypes; fundamentals_rows factory in tests/conftest.py (outside Files, accepted: shared by two test modules); 3y base tolerance 6 months and 1y max 18 months are coordinator-chosen thresholds not in finance.md. finance.md untouched.
+<!-- SECTION:FINAL_SUMMARY:END -->
