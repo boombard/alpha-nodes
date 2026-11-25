@@ -4,7 +4,7 @@ title: M6.4 EDGAR company-facts provider for point-in-time US fundamentals
 status: In Progress
 assignee: []
 created_date: '2026-11-25T08:17:58Z'
-updated_date: '2026-11-25T23:25:43Z'
+updated_date: '2026-11-25T23:42:38Z'
 labels:
   - finance
 milestone: m-5
@@ -107,4 +107,5 @@ Out of scope: quarterly periods; 10-K text (`filings_text`, deferred); `ifrs-ful
 
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_8c455556e912, worktree task-51 (Orca run run_09eee9a7786f)
+2026-11-26: first worker_done failed (no SEC User-Agent; question timed out). Human supplied the UA; resumed as follow-up dispatch ctx_10ae7d5603c8.
 <!-- SECTION:NOTES:END -->

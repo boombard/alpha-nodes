@@ -4,7 +4,7 @@ title: M6.6 Fundamentals adapters and calc nodes
 status: In Progress
 assignee: []
 created_date: '2026-11-25T08:17:59Z'
-updated_date: '2026-11-25T23:25:44Z'
+updated_date: '2026-11-25T23:42:38Z'
 labels:
   - finance
 milestone: m-5
@@ -87,4 +87,5 @@ Out of scope: valuation and market cap (M6.7); registering nodes (M6.10); quarte
 
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_dc517ccb0bcf, worktree task-53 (Orca run run_09eee9a7786f)
+Review round 1 sent (HEAD 2a18420): positional trend spans across missing fiscal years, FCF inline x3, formatter artefact. Follow-up dispatch ctx_d58f3bb791f6.
 <!-- SECTION:NOTES:END -->

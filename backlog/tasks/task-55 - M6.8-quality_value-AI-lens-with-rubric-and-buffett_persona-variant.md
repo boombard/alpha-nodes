@@ -1,10 +1,10 @@
 ---
 id: TASK-55
 title: M6.8 quality_value AI lens with rubric and buffett_persona variant
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T08:17:59Z'
-updated_date: '2026-11-25T23:25:45Z'
+updated_date: '2026-11-25T23:42:38Z'
 labels:
   - finance
 milestone: m-5
@@ -105,3 +105,9 @@ Out of scope: registering nodes (M6.10); repeated sampling (TASK-17); 10-K text 
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_e7185589db01, worktree task-55 (Orca run run_09eee9a7786f)
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker summary: QualityValue AI lens (rubric default + buffett_persona variant), RecentNews transform, both prompts; 16 new tests; full suite 905 passed, ruff and pyright clean. Commits 0f11217 (feat) + 3bbfb0e (pyright fix): squash on landing. Review: 0 fix rounds; verdict: approve. ACs 1-4 met (abstain with no model call when annual_fundamentals is missing or below 3 periods; 4 periods -> sufficiency 0.5 and '4 of 8' depth note; profile cut to name/sector/industry/country/business_summary so no analyst fields; persona variant changes prompt hash and memo salt). Rulings: critical_inputs as a pydantic Field default; RecentNews window [reference_day - days, end of reference_day], future items excluded; profile filter in an overridden assess (non-frame, non-Absent profile raises TypeError); finance.md untouched. Coordinator note: the two templates duplicate the rubric and instructions; kept because AINode renders with jinja from_string and hashes only the template file text, so an include would leave memo keys stale. Open for the human: verify the Buffett sources in the rubric (2014, 1996, 2007, 1986 appendix, 1992 letters; Graham ch. 20).
+<!-- SECTION:FINAL_SUMMARY:END -->
