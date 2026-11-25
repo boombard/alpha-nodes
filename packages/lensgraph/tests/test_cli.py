@@ -245,6 +245,77 @@ def test_cli_offline_flag(tmp_path, capsys):
     assert sources_nodes.CREATED["fake"].calls == []  # type: ignore[attr-defined]
 
 
+def _gap_config(tmp_path: Path, n_candidates: int = 1) -> Path:
+    """The sources run config with unfetched candidates; offline, their fetch nodes fail."""
+    cfg = yaml.safe_load(SOURCES_YAML.read_text())
+    cfg["candidates"] = [{"id": f"NEW{i}"} for i in range(n_candidates)]
+    path = tmp_path / "gap.yaml"
+    path.write_text(yaml.safe_dump(cfg))
+    return path
+
+
+def test_cli_run_reports_node_counts_and_failed_nodes(tmp_path):
+    from toy import sources_nodes
+
+    sources_nodes.CREATED.clear()
+    gap = _gap_config(tmp_path)
+    result = CliRunner().invoke(
+        main, ["run", str(gap), "--path", str(TESTS_DIR), "--store", str(tmp_path), "--offline", "--no-report"]
+    )
+    assert result.exit_code == 0
+    lines = result.stdout.splitlines()
+    assert lines[0].startswith("run id: ") and lines[1].startswith("store: ")
+    assert lines[2].startswith("nodes: ") and "failed" in lines[2] and "0 " not in lines[2]
+    failed = [ln for ln in lines if ln.startswith("failed: ")]
+    assert any(ln.startswith("failed: strain_label[NEW0]: SourceUnavailable") for ln in failed)
+
+
+def test_cli_run_toy_reports_its_failed_candidate(tmp_path):
+    """The toy config's S3 has a bad assay; the run still exits 0 but now says so."""
+    result = CliRunner().invoke(
+        main, ["run", str(TOY_YAML), "--path", str(TESTS_DIR), "--store", str(tmp_path), "--no-report"]
+    )
+    lines = result.stdout.splitlines()
+    assert result.exit_code == 0
+    assert any(ln.startswith("nodes: ") and "ok" in ln and "failed" in ln and "skipped" in ln for ln in lines)
+    assert [ln for ln in lines if ln.startswith("failed: ")] == [
+        "failed: assay_clean[S3]: ContractViolation: assay_clean: raw is missing columns ['od600']"
+    ]
+
+
+def test_cli_run_caps_failed_lines():
+    from lensgraph.cli import MAX_FAILED_LINES, _node_status_lines
+    from lensgraph.plan import NodeKey, NodeResult, RunResult
+
+    n = MAX_FAILED_LINES + 5
+    results = {
+        NodeKey(name="fetch", candidate=f"C{i}"): NodeResult(
+            key=NodeKey(name="fetch", candidate=f"C{i}"), status="failed", error="boom\nsecond line"
+        )
+        for i in range(n)
+    }
+    skipped = NodeKey(name="after", candidate=None)
+    results[skipped] = NodeResult(key=skipped, status="skipped")
+    lines = _node_status_lines(RunResult(run_id="r", status="ok", results=results))
+    assert lines[0] == f"nodes: {n} failed, 1 skipped"
+    assert lines[1] == "failed: fetch[C0]: boom"
+    assert len(lines) == 1 + MAX_FAILED_LINES + 1
+    assert lines[-1] == "… and 5 more"
+
+
+def test_cli_aborted_run_reports_nodes(tmp_path, monkeypatch):
+    from lensgraph.types import GlobalFailure
+
+    def boom(self, strain: str):
+        raise GlobalFailure("source down")
+
+    monkeypatch.setattr(FakeAssaySource, "assays", boom)
+    result = CliRunner().invoke(main, ["run", str(TOY_YAML), "--path", str(TESTS_DIR), "--store", str(tmp_path)])
+    assert result.exit_code == 3
+    assert "aborted" in result.stderr
+    assert any(ln.startswith("nodes: ") for ln in result.stdout.splitlines())
+
+
 def _seeded_sources(root: Path) -> None:
     """A source store with one ok, one suspect-row and one failed entity, written straight to `root`."""
     import asyncio

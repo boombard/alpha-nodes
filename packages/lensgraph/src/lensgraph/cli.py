@@ -9,6 +9,7 @@ Exit codes: 0 ok (failed nodes are data, not errors), 2 config or params error, 
 
 import asyncio
 import sys
+from collections import Counter
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
@@ -21,6 +22,7 @@ from pydantic import ValidationError
 from .config import RunConfig, Settings, load_object
 from .executor.base import RunAborted
 from .graph import GraphError
+from .plan import RunResult
 from .registry import NodeRegistry
 from .run import arun
 from .sources.coverage import CoverageState
@@ -30,6 +32,8 @@ from .view import build_run_view, install_app, write_run_view
 
 EXIT_OK, EXIT_CONFIG, EXIT_ABORTED = 0, 2, 3
 DEFAULT_MAX_ROWS = 200
+MAX_FAILED_LINES = 20
+_STATUS_ORDER = ("ok", "recovered", "failed", "skipped")
 
 
 class CliError(click.ClickException):
@@ -78,18 +82,41 @@ def run_command(
     root = _store_root(store)
     code = EXIT_OK
     try:
-        run_id = asyncio.run(arun(cfg, registry, store_root=root, services=services)).run_id
+        result = asyncio.run(arun(cfg, registry, store_root=root, services=services))
     except RunAborted as exc:
         click.echo(f"Error: {exc}", err=True)
-        run_id, code = exc.result.run_id, EXIT_ABORTED
+        result, code = exc.result, EXIT_ABORTED
     except GraphError as exc:
         raise CliError(str(exc)) from exc
+    run_id = result.run_id
     click.echo(f"run id: {run_id}")
     click.echo(f"store: {root}")
+    for line in _node_status_lines(result):
+        click.echo(line)
     if cfg.report.enabled and not no_report:
         out_dir = cfg.report.out_dir or root / "reports" / run_id
         click.echo(f"report: {_write_report(root, run_id, out_dir, cfg.report.max_rows)}")
     sys.exit(code)
+
+
+def _node_status_lines(result: RunResult) -> list[str]:
+    """The `nodes:` counts line plus one `failed:` line per failed node (see core.md, CLI).
+
+    Zero counts are omitted. Failed lines show the node key, `name[candidate]`, and the first line
+    of its error, capped at `MAX_FAILED_LINES` with an `… and N more` tail. Skipped nodes are only
+    counted.
+    """
+    counts = Counter(r.status for r in result.results.values())
+    lines = []
+    if counts:
+        lines.append("nodes: " + ", ".join(f"{counts[s]} {s}" for s in _STATUS_ORDER if counts[s]))
+    failed = [r for r in result.results.values() if r.status == "failed"]
+    for r in failed[:MAX_FAILED_LINES]:
+        message = (r.error or "").strip()
+        lines.append(f"failed: {r.key}: {message.splitlines()[0] if message else 'no error recorded'}")
+    if len(failed) > MAX_FAILED_LINES:
+        lines.append(f"… and {len(failed) - MAX_FAILED_LINES} more")
+    return lines
 
 
 @main.command("report")

@@ -386,8 +386,10 @@ Recorded 2026-11-23 after a research pass; see TASK-16 for the related aggregati
     key columns, reasons). Exit 0; exit 2 if there is no source store.
   - `lensgraph report RUN_ID [--store PATH] [--out DIR]` rebuilds the report from the index and blobs alone.
   - Store root: `--store`, else `LENSGRAPH_STORE_ROOT`, else `.lensgraph`.
-  - Prints `run id:`, `store:` and `report:` (a report is `install_app` + `write_run_view`: `index.html`,
-    `run.json`, `data/run.js`).
+  - Prints `run id:`, `store:`, a `nodes:` line (counts by status, zero counts omitted, e.g.
+    `nodes: 21 ok, 2 failed, 3 skipped`), one `failed: <node>[<candidate>]: <first line of the error>` line per
+    failed node (capped at 20, then `… and N more`; skipped nodes are counted, not listed), and `report:` (a report is `install_app` + `write_run_view`: `index.html`,
+    `run.json`, `data/run.js`). An aborted run prints the same status lines (from `RunAborted.result`).
   - Exit codes: 0 ok (failed nodes are data), 2 config or params error (one line on stderr), 3 aborted run
     (the report is still built from what finished).
 
