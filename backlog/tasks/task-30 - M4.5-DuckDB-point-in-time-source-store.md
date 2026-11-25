@@ -1,10 +1,10 @@
 ---
 id: TASK-30
 title: M4.5 DuckDB point-in-time source store
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-25T01:09:28Z'
-updated_date: '2026-11-25T03:53:41Z'
+updated_date: '2026-11-25T04:10:18Z'
 labels:
   - core
 milestone: m-3
@@ -89,18 +89,18 @@ Out of scope: the fetch node, run wiring and CLI (M4.8); any finance dataset.
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Second get makes no provider calls; only gaps are fetched; rows after settled_through are not stored and the tail is logged unsettled
-- [ ] #2 Facts are append-only with versions on change; as-of queries return the latest version known by the end of that day; rejected excluded, suspect served
-- [ ] #3 Per-entity provider fallback on empty; error raises SourceUnavailable uncached; finished items survive GlobalFailure and a new store resumes from gaps
-- [ ] #4 restated_before refetches in the same get; offline serves or raises; renormalise rebuilds facts from raw without fetching
+- [x] #1 Second get makes no provider calls; only gaps are fetched; rows after settled_through are not stored and the tail is logged unsettled
+- [x] #2 Facts are append-only with versions on change; as-of queries return the latest version known by the end of that day; rejected excluded, suspect served
+- [x] #3 Per-entity provider fallback on empty; error raises SourceUnavailable uncached; finished items survive GlobalFailure and a new store resumes from gaps
+- [x] #4 restated_before refetches in the same get; offline serves or raises; renormalise rebuilds facts from raw without fetching
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -117,4 +117,6 @@ Worker: DuckDBSourceStore with typed per-dataset facts tables plus raw_responses
 Coordinator review (code-review medium + read): one round sent and applied: (1) renormalise keeps the newest raw's row per key, so restated keys no longer add stale+current versions on every run; (2) renormalise appends + log row in one transaction; (3) query chooses the serving provider by unfiltered _has_facts, so as_of/quality filters never fall through to a fallback provider (filtered primary -> empty frame, empty=False); (4) duplicate keys from normalise raise ValueError. Verdict: approve.
 Open points / rulings to check: core.md edited (outside Files) for as-of end-of-day cut-off, typed facts tables, renormalise and query wording. Public extras raw_responses() and renormalisations() -> RenormalisationRecord. Keyless snapshot datasets must normalise to one row. Canonical frames are not pandera-validated on ingest. An error outcome raises SourceUnavailable after the whole provider level finishes (other entities persisted). Restated replan capped at 2 passes. policy_overrides via a provider wrapper (_PolicyOverride); the same provider name must be the same object across datasets. Renormalise rows carry their source raw_id as fetch_id. Not fixed (minor): normalise failure in _persist leaves an orphan content-addressed blob and no attempt row; naive UTC interval bounds would misbehave for a tz-aware TIMESTAMPTZ axis (no such dataset yet); __init__ doesn't close the connection on schema failure; mutable {} defaults.
 Human feedback (applied in 3edf888): rowid replaced by explicit sequences for Postgres portability: facts tables have version_seq (fact_version_seq; latest = greatest, never compared); log tables raw_responses/attempts/renormalisations have seq (log_seq), a worker ruling beyond the request. No rowid left; pytest 453 passed, ruff and pyright clean.
+
+Landed 2da19c4..2da19c4 on main (5 worker commits squashed).
 <!-- SECTION:FINAL_SUMMARY:END -->
