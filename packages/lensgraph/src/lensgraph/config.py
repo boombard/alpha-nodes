@@ -13,6 +13,7 @@ from pydantic import BaseModel, ConfigDict
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .run import RunSpec
+from .sources.catalog import SourcesConfig
 from .verdict import AssessmentBrief
 
 
@@ -50,12 +51,15 @@ class RunConfig(RunSpec):
     Args:
         registry: "module:attr" of a `NodeRegistry` or a zero-arg factory returning one.
         services: "module:attr" of a mapping or a zero-arg factory returning one.
+        sources: source-store wiring; `arun` builds the store and injects it as the `sources`
+            service (see documentation/design/core.md, Run configuration).
     """
 
     registry: str
     services: str | None = None
     brief: AssessmentBrief | None = None
     report: ReportOptions = ReportOptions()
+    sources: SourcesConfig | None = None
 
     @classmethod
     def from_yaml(cls, path: Path) -> "RunConfig":

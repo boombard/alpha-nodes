@@ -21,6 +21,7 @@ from .panel import Panel, panel_registry
 from .plan import RunResult
 from .registry import NodeRegistry
 from .review import DossierReviewer
+from .sources.catalog import build_source_store
 from .store.duckdb_index import DuckDBRunIndex
 from .store.files import FileBlobStore
 from .types import CandidateRef
@@ -65,9 +66,12 @@ async def arun(
 ) -> RunResult:
     """Plan and execute `spec`, recording the run in `store_root/index.duckdb`.
 
-    Blobs live in `store_root/blobs`. `spec` may be a `RunConfig`: its `brief` is wired into the
-    reviewer's `brief` param, and its resolved dump (with that wiring and `profile_override`
-    applied to `nodes`) is stored as the run config, which is what `lensgraph report` rebuilds from.
+    Blobs live in `store_root/blobs`. `spec` may be a `RunConfig`:
+    - its `sources` section builds the source store (`<store_root>/sources.duckdb`), injected as the
+      `sources` service unless `services` already has one (which wins) and closed when the run ends;
+    - its `brief` is wired into the reviewer's `brief` param;
+    - its resolved dump (with that wiring and `profile_override` applied to `nodes`) is stored as the
+      run config, which is what `lensgraph report` rebuilds from.
     Targets default to `spec.panel.targets()` (the aggregator, plus the review when set).
 
     Raises `ParamsError` if `spec.invalidate` names a node not in the plan, or if `brief`
@@ -89,7 +93,17 @@ async def arun(
         raise ParamsError(f"invalidate names not in the plan: {unknown}")
     bypass = set(plan.nodes) if spec.no_cache else plan.descendants(set(spec.invalidate))
     blobs = FileBlobStore(store_root / "blobs")
-    index = DuckDBRunIndex(store_root / "index.duckdb")
+    sources_cfg = getattr(spec, "sources", None)  # only a RunConfig has one (config.py imports this module)
+    source_store = None
+    try:
+        if sources_cfg is not None and "sources" not in (services or {}):
+            source_store = build_source_store(sources_cfg, store_root, blobs)
+            services = {**(services or {}), "sources": source_store}
+        index = DuckDBRunIndex(store_root / "index.duckdb")
+    except BaseException:  # the store holds a file lock: never leak it
+        if source_store is not None:
+            source_store.close()
+        raise
     try:
         index.start_run(plan.run_id, {**spec.model_dump(mode="json"), "nodes": node_params})
         index.record_plan(plan.run_id, plan)
@@ -106,6 +120,8 @@ async def arun(
         raise
     finally:
         index.close()
+        if source_store is not None:
+            source_store.close()
 
 
 def _resolve_node_params(

@@ -124,3 +124,22 @@ def test_model_and_memo_hashes_stable_across_processes_with_set_fields(tmp_path)
     first, second = _hashes_under_seed(script, "1"), _hashes_under_seed(script, "2")
     assert len(first) == 2
     assert first == second
+
+
+def test_frame_without_list_cells_hashes_as_before():
+    """Pinned digest: frames with no list cells must keep their pre-existing hash."""
+    df = pd.DataFrame({"a": [1.0, 2.0], "s": ["x", "y"]})
+    assert content_hash(df) == "81d7e70e8b32a1c77261cf48b157bcd57beb623befd10d2b525fc1b10fefe6ed"
+
+
+def test_list_cells_equal_numpy_array_cells():
+    """A Parquet round trip turns list cells into arrays; the hash must not change."""
+    as_lists = pd.DataFrame({"r": [["a", "b"], []]})
+    as_arrays = pd.DataFrame({"r": [np.array(["a", "b"], dtype=object), np.array([], dtype=object)]})
+    assert content_hash(as_lists) == content_hash(as_arrays)
+    assert content_hash(as_lists) != content_hash(pd.DataFrame({"r": [["a", "c"], []]}))
+
+
+def test_list_cell_with_unsupported_element_raises():
+    with pytest.raises(TypeError, match="list cell"):
+        content_hash(pd.DataFrame({"r": [[object()]]}))

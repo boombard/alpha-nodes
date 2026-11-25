@@ -1,4 +1,4 @@
-"""The `lensgraph` command line (click): run a YAML run config, and (re)build a run's report.
+"""The `lensgraph` command line (click): run a YAML run config, (re)build a run's report, inspect the source store.
 
 See documentation/design/core.md, Run configuration (CLI usage) and Reporting: run view.
 A report is the prebuilt app plus the run's data (`install_app` + `write_run_view`), written
@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 
 import click
+import duckdb
 import yaml
 from pydantic import ValidationError
 
@@ -22,6 +23,7 @@ from .executor.base import RunAborted
 from .graph import GraphError
 from .registry import NodeRegistry
 from .run import arun
+from .sources.coverage import CoverageState
 from .store.duckdb_index import DuckDBRunIndex
 from .store.files import FileBlobStore
 from .view import build_run_view, install_app, write_run_view
@@ -55,6 +57,7 @@ def main() -> None:
 @click.option("--no-cache", is_flag=True, help="Ignore every cached output.")
 @click.option("--profile", help="Force this model profile on every AI node.")
 @click.option("--no-report", is_flag=True, help="Skip writing the report.")
+@click.option("--offline", is_flag=True, help="Never call a provider: serve the sources from the store only.")
 @click.option(
     "--path", "paths", multiple=True, type=click.Path(path_type=Path), metavar="DIR",
     help="Prepend DIR to sys.path before importing the registry/services refs (repeatable).",
@@ -66,10 +69,11 @@ def run_command(
     no_cache: bool,
     profile: str | None,
     no_report: bool,
+    offline: bool,
     paths: tuple[Path, ...],
 ) -> None:
     """Run the YAML run config CONFIG and write its report."""
-    cfg = _load_config(config, invalidate, no_cache, profile)
+    cfg = _load_config(config, invalidate, no_cache, profile, offline)
     registry, services = _load_wiring(cfg, paths)
     root = _store_root(store)
     code = EXIT_OK
@@ -100,13 +104,112 @@ def report_command(run_id: str, store: Path | None, out: Path | None) -> None:
     click.echo(f"report: {_write_report(root, run_id, out or root / 'reports' / run_id, None)}")
 
 
+@main.group("sources")
+def sources_group() -> None:
+    """Inspect the source store."""
+
+
+@sources_group.command("status")
+@_STORE
+@click.option("--dataset", help="Only this dataset.")
+@click.option("--suspect", is_flag=True, help="List suspect rows (entity, key, reasons).")
+def sources_status_command(store: Path | None, dataset: str | None, suspect: bool) -> None:
+    """Per dataset and provider: entities, covered ranges, attempts by kind, suspect/rejected rows.
+
+    Reads `<store>/sources.duckdb` only; no catalog is needed. Row counts cover every stored
+    version of every fact, not just the latest.
+    """
+    root = _store_root(store)
+    path = root / "sources.duckdb"
+    if not path.exists():
+        raise CliError(f"no source store in {root}")
+    con = duckdb.connect(str(path), read_only=True)
+    try:
+        if dataset is not None:
+            available = sorted(
+                r[0].removeprefix("facts_")
+                for r in con.execute("SELECT table_name FROM information_schema.tables WHERE table_name LIKE 'facts\\_%' ESCAPE '\\'").fetchall()
+            )
+            if dataset not in available:
+                raise CliError(f"unknown dataset {dataset!r}; available: {', '.join(available) or 'none'}")
+        for line in _status_lines(con, dataset, suspect):
+            click.echo(line)
+    finally:
+        con.close()
+
+
+def _status_lines(con: duckdb.DuckDBPyConnection, only: str | None, suspect: bool) -> list[str]:
+    """The `sources status` report as lines (see `sources_status_command`)."""
+    tables = {r[0] for r in con.execute("SELECT table_name FROM information_schema.tables").fetchall()}
+    datasets = sorted(t.removeprefix("facts_") for t in tables if t.startswith("facts_"))
+    lines: list[str] = []
+    for ds in datasets:
+        if only is not None and ds != only:
+            continue
+        facts = '"facts_' + ds.replace('"', '""') + '"'
+        providers = sorted(
+            {r[0] for r in con.execute("SELECT provider FROM attempts WHERE dataset=?", [ds]).fetchall()}
+            | {r[0] for r in con.execute("SELECT provider FROM coverage WHERE dataset=?", [ds]).fetchall()}
+        )
+        lines.append(f"dataset {ds}")
+        for provider in providers:
+            ranges = [
+                (entity, CoverageState.model_validate_json(state).settled)
+                for entity, state in con.execute(
+                    "SELECT entity, state FROM coverage WHERE dataset=? AND provider=? ORDER BY entity",
+                    [ds, provider],
+                ).fetchall()
+            ]
+            kinds = con.execute(
+                "SELECT kind, count(*) FROM attempts WHERE dataset=? AND provider=? GROUP BY kind ORDER BY kind",
+                [ds, provider],
+            ).fetchall()
+            counts = dict(
+                con.execute(
+                    f"SELECT quality, count(*) FROM {facts} WHERE provider=? GROUP BY quality", [provider]
+                ).fetchall()
+            )
+            entities = con.execute(
+                f"SELECT count(DISTINCT entity) FROM {facts} WHERE provider=?", [provider]
+            ).fetchone()
+            lines.append(f"  provider {provider}")
+            lines.append(f"    entities: {entities[0] if entities else 0}")
+            for entity, settled in ranges:
+                covered = ", ".join(f"{i.start}..{i.end}" for i in settled.intervals) or "none"
+                lines.append(f"    covered {entity}: {covered}")
+            lines.append("    attempts: " + (" ".join(f"{k}={n}" for k, n in kinds) or "none"))
+            lines.append(f"    rows: suspect={counts.get('suspect', 0)} rejected={counts.get('rejected', 0)}")
+            if suspect:
+                lines.extend(_suspect_lines(con, facts, provider))
+    return lines
+
+
+def _suspect_lines(con: duckdb.DuckDBPyConnection, facts: str, provider: str) -> list[str]:
+    """One line per suspect fact row: entity, its canonical columns (the key), and the reasons."""
+    cursor = con.execute(f"SELECT * FROM {facts} WHERE provider=? AND quality='suspect'", [provider])
+    names = [d[0] for d in cursor.description]
+    canonical = names[: names.index("entity")]  # canonical columns come first, then entity and the meta
+    out = []
+    for row in sorted(cursor.fetchall(), key=lambda r: (r[names.index("entity")], str(r[:1]))):
+        rec = dict(zip(names, row, strict=True))
+        key = " ".join(f"{c}={_plain(rec[c])}" for c in canonical)
+        out.append(f"    suspect {rec['entity']} {key} reasons={','.join(rec['quality_reasons'])}")
+    return out
+
+
+def _plain(value: Any) -> str:
+    """A cell for display: timestamps as their date when at midnight."""
+    text = str(value)
+    return text.removesuffix(" 00:00:00")
+
+
 def _store_root(arg: Path | None) -> Path:
     """`--store`, else `LENSGRAPH_STORE_ROOT`, else the `Settings` default."""
     return arg if arg is not None else Settings().store_root
 
 
 def _load_config(
-    path: Path, invalidate: Sequence[str], no_cache: bool, profile: str | None
+    path: Path, invalidate: Sequence[str], no_cache: bool, profile: str | None, offline: bool = False
 ) -> RunConfig:
     """Load the YAML config and apply the command-line overrides; `CliError` on any problem."""
     try:
@@ -122,6 +225,10 @@ def _load_config(
         update["no_cache"] = True
     if profile:
         update["profile_override"] = profile
+    if offline:
+        if config.sources is None:
+            raise CliError("--offline needs a `sources:` section in the config")
+        update["sources"] = config.sources.model_copy(update={"offline": True})
     return config.model_copy(update=update)
 
 

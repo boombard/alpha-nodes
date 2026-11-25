@@ -1,0 +1,10 @@
+registry: toy.sources_nodes:build_registry
+candidates:
+  - id: S1
+  - id: S2
+targets: [assay_mean, lab_upper, assay_panel]
+sources:
+  catalog: toy.sources_nodes:CATALOG
+  providers:
+    assays: [fake]
+    strain_info: [fake]

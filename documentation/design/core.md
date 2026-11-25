@@ -362,10 +362,28 @@ Recorded 2026-11-23 after a research pass; see TASK-16 for the related aggregati
   - `report`: `enabled`, `out_dir` (default `<store>/reports/<run_id>`), `max_rows`.
   - `profile_override`: a model profile forced on every AI node (`AINode` subclasses and the reviewer),
     replacing any `profile` in `nodes` (flags beat the config).
+  - `sources`: the source-store wiring (optional). `catalog` is `"module:attr"` of a `SourceCatalog` (a domain's
+    `datasets` and `providers`, the latter factories taking a `ProviderContext` of `cache_dir` and `clock`);
+    `providers` maps each served dataset to its provider names, primary first; `offline` (default false);
+    `limits` overrides a provider's `RateLimitPolicy` by provider name. `arun` builds the DuckDB store at
+    `<store>/sources.duckdb` (blobs in the run's blob store), injects it as the `sources` service (a `sources`
+    entry already in `services` wins, which tests use) and closes it when the run ends, aborted or not. An
+    unknown dataset or provider name is a `ParamsError` naming it.
+  - Fetch nodes: `DatasetFetch` (per candidate; entity is the candidate id or `attrs[entity_attr]`; `lookback_days`
+    gives the window from that many days before `as_of` (or the store clock's today) through that day, inclusive: N+1 calendar days) and `DatasetFetchMany` (shared scope, a fixed
+    entity list, one `ensure` call so provider batching applies) read the slice and return its frame (canonical
+    plus fact meta columns). An empty slice is an empty frame; `SourceUnavailable` fails the node and its
+    dependents skip. List-valued cells (`repairs`, `quality_reasons`) hash by their canonical JSON, the same
+    whether they are lists or the arrays a Parquet round trip gives back.
 - The stored run config is the resolved dump: `nodes` includes the brief and the profile override.
   `lensgraph report` relies on it.
 - **CLI** (`lensgraph`, click):
-  - `lensgraph run CONFIG.yaml [--store PATH] [--invalidate NODE]... [--no-cache] [--profile NAME] [--no-report] [--path DIR]...`
+  - `lensgraph run CONFIG.yaml [--store PATH] [--invalidate NODE]... [--no-cache] [--profile NAME] [--no-report] [--offline] [--path DIR]...`
+  - `--offline` overrides `sources.offline` for the run (an error when the config has no `sources`).
+  - `lensgraph sources status [--store PATH] [--dataset NAME] [--suspect]` reads `<store>/sources.duckdb` only (no
+    catalog) and prints, per dataset and provider: entities, covered ranges per entity, attempts by kind, and
+    suspect and rejected row counts (over all stored versions); `--suspect` also lists each suspect row (entity,
+    key columns, reasons). Exit 0; exit 2 if there is no source store.
   - `lensgraph report RUN_ID [--store PATH] [--out DIR]` rebuilds the report from the index and blobs alone.
   - Store root: `--store`, else `LENSGRAPH_STORE_ROOT`, else `.lensgraph`.
   - Prints `run id:`, `store:` and `report:` (a report is `install_app` + `write_run_view`: `index.html`,

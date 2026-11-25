@@ -5,6 +5,7 @@ persistent cache can hit; see documentation/design/core.md, Memoization.
 """
 
 import hashlib
+import json
 import math
 from collections.abc import Mapping
 from datetime import date
@@ -16,6 +17,48 @@ from pydantic import BaseModel
 
 if TYPE_CHECKING:
     from .node import Node
+
+
+_SCALAR_KINDS = frozenset(
+    {"string", "bytes", "integer", "floating", "mixed-integer-float", "decimal", "boolean",
+     "datetime64", "datetime", "date", "timedelta64", "timedelta", "time", "period", "empty"}
+)  # pd.api.types.infer_dtype results that cannot hold list or array cells
+
+
+def _cell_json(cell: Any) -> str:
+    """Canonical JSON of a list or numpy-array cell (they hash equal: a Parquet round trip turns lists into arrays).
+
+    Raises TypeError for elements JSON can't carry exactly (datetimes, objects, ...).
+    """
+    items = cell.tolist() if isinstance(cell, np.ndarray) else cell
+    try:
+        return json.dumps(items, sort_keys=True, allow_nan=True)
+    except TypeError as exc:
+        raise TypeError(f"content_hash: unsupported element in a list cell: {exc}") from exc
+
+
+def _row_hashes(value: "pd.DataFrame | pd.Series") -> bytes:
+    """Row hashes of a frame or series; list and array cells are replaced by their canonical JSON first.
+
+    Object columns without such cells are hashed exactly as pandas does, so existing keys hold.
+    """
+    def has_nested(col: pd.Series) -> bool:
+        # infer_dtype is a C scan: plainly scalar columns skip the Python-level search; only
+        # "mixed" (which is what list/array cells infer as) is searched, stopping at the first hit.
+        if col.dtype != object or pd.api.types.infer_dtype(col, skipna=True) in _SCALAR_KINDS:
+            return False
+        return any(isinstance(c, list | np.ndarray) for c in col)
+
+    if isinstance(value, pd.Series):
+        if has_nested(value):
+            value = value.map(lambda c: _cell_json(c) if isinstance(c, list | np.ndarray) else c)
+    else:
+        nested = [c for c in value.columns if has_nested(pd.Series(value[c]))]
+        if nested:
+            value = value.copy()
+            for c in nested:
+                value[c] = value[c].map(lambda x: _cell_json(x) if isinstance(x, list | np.ndarray) else x)
+    return pd.util.hash_pandas_object(value, index=True).to_numpy().tobytes()  # pyright: ignore[reportAttributeAccessIssue]
 
 
 def _feed(h: "hashlib._Hash", value: Any) -> None:
@@ -31,8 +74,7 @@ def _feed(h: "hashlib._Hash", value: Any) -> None:
         tag("none")
     elif isinstance(value, pd.DataFrame):
         tag("df", repr(list(map(str, value.columns))) + repr([str(t) for t in value.dtypes]))
-        row_hashes = pd.util.hash_pandas_object(value, index=True)  # pyright: ignore[reportAttributeAccessIssue]
-        h.update(row_hashes.to_numpy().tobytes())
+        h.update(_row_hashes(value))
     elif isinstance(value, BaseModel):
         cls = type(value)
         tag("model", f"{cls.__module__}.{cls.__qualname__}")
@@ -66,8 +108,7 @@ def _feed(h: "hashlib._Hash", value: Any) -> None:
         h.update(value)
     elif isinstance(value, pd.Series):
         tag("series", f"{value.dtype}|{value.name!r}")
-        row_hashes = pd.util.hash_pandas_object(value, index=True)  # pyright: ignore[reportAttributeAccessIssue]
-        h.update(row_hashes.to_numpy().tobytes())
+        h.update(_row_hashes(value))
     elif isinstance(value, np.ndarray):
         tag("ndarray", f"{value.dtype}|{value.shape}")
         h.update(np.ascontiguousarray(value).tobytes())

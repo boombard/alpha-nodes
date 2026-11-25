@@ -213,6 +213,11 @@ class DuckDBSourceStore(SourceStore):
         for name in self._datasets:
             self._create_facts_table(name)
 
+    @property
+    def clock(self) -> Clock:
+        """The store's clock; fetch nodes take "today" from it."""
+        return self._clock
+
     def close(self) -> None:
         """Close the connection (flushes to disk and releases the file lock)."""
         self._con.close()

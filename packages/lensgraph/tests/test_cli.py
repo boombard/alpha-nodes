@@ -213,3 +213,86 @@ def test_run_config_roundtrip_is_stored(tmp_path, capsys):
     assert stored["registry"] == "toy.registry:build_registry"
     assert stored["nodes"]["review"]["brief"]["horizon"] == "6 months"
     RunConfig.model_validate({**stored, "report": stored["report"]})
+
+
+SOURCES_YAML = TESTS_DIR / "toy" / "sources_run.yaml"
+
+
+def test_cli_offline_flag(tmp_path, capsys):
+    """A sources run fetches online; `--offline` then serves it from the store, and a gap fails the node."""
+    from toy import sources_nodes
+
+    sources_nodes.CREATED.clear()
+    code, out, _ = _run(capsys, tmp_path, config=SOURCES_YAML)
+    assert code == 0
+    assert Path(out["report"]).is_file()  # targets without a panel still build a report
+    assert sources_nodes.CREATED["fake"].calls  # type: ignore[attr-defined]
+
+    sources_nodes.CREATED.clear()
+    code, out, _ = _run(capsys, tmp_path, "--offline", config=SOURCES_YAML)
+    assert code == 0
+    assert all(r.status == "ok" for r in _results(tmp_path, out["run id"]).values())
+    assert sources_nodes.CREATED["fake"].calls == []  # type: ignore[attr-defined]
+
+    cfg = yaml.safe_load(SOURCES_YAML.read_text())
+    cfg["candidates"] = [{"id": "NEW"}]  # never fetched: a gap
+    gap = tmp_path / "gap.yaml"
+    gap.write_text(yaml.safe_dump(cfg))
+    code, out, _ = _run(capsys, tmp_path, "--offline", "--no-report", config=gap)
+    assert code == 0
+    statuses = {r.status for r in _results(tmp_path, out["run id"]).values()}
+    assert "failed" in statuses
+    assert sources_nodes.CREATED["fake"].calls == []  # type: ignore[attr-defined]
+
+
+def _seeded_sources(root: Path) -> None:
+    """A source store with one ok, one suspect-row and one failed entity, written straight to `root`."""
+    import asyncio
+    from datetime import UTC, date, datetime
+
+    from lensgraph.sources import DateInterval, DuckDBSourceStore, FakeClock, SourceUnavailable
+    from lensgraph.store.memory import InMemoryBlobStore
+    from toy.sources_catalog import ASSAYS, FakeAssayProvider
+
+    provider = FakeAssayProvider()
+    provider.spike_days = {date(2026, 3, 3)}
+    provider.script = {"BAD": ["error", "error", "error"]}
+    store = DuckDBSourceStore(
+        root / "sources.duckdb", InMemoryBlobStore(), {"assays": ASSAYS}, {"assays": [provider]},
+        clock=FakeClock(datetime(2026, 3, 10, 12, tzinfo=UTC)),
+    )
+    window = DateInterval(start=date(2026, 3, 1), end=date(2026, 3, 5))
+    try:
+        asyncio.run(store.get("assays", "S1", window))
+        try:
+            asyncio.run(store.get("assays", "BAD", window))
+        except SourceUnavailable:
+            pass
+    finally:
+        store.close()
+
+
+def test_cli_sources_status_lists_attempts_and_suspect(tmp_path, capsys):
+    _seeded_sources(tmp_path)
+    result = CliRunner().invoke(main, ["sources", "status", "--store", str(tmp_path)])
+    assert result.exit_code == 0
+    out = result.stdout
+    assert "assays" in out and "fake" in out
+    assert "2026-03-01..2026-03-05" in out  # S1's covered range
+    assert "ok=1" in out and "error=" in out  # attempts by kind
+    assert "suspect=1" in out and "rejected=0" in out
+
+    result = CliRunner().invoke(main, ["sources", "status", "--store", str(tmp_path), "--suspect"])
+    assert result.exit_code == 0
+    assert "S1" in result.stdout and "jump_x100" in result.stdout and "2026-03-03" in result.stdout
+
+    other = CliRunner().invoke(main, ["sources", "status", "--store", str(tmp_path), "--dataset", "nope"])
+    assert other.exit_code == 2
+    assert "nope" in other.stderr and "available: assays" in other.stderr
+    one = CliRunner().invoke(main, ["sources", "status", "--store", str(tmp_path), "--dataset", "assays"])
+    assert one.exit_code == 0 and "provider fake" in one.stdout
+
+
+def test_cli_sources_status_without_store_is_config_error(tmp_path):
+    result = CliRunner().invoke(main, ["sources", "status", "--store", str(tmp_path)])
+    assert result.exit_code == 2
