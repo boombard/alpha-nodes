@@ -3,6 +3,7 @@
 from collections.abc import Callable
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import pytest
 from alpha_nodes.providers.yfinance.history import YFHistoryPayload
@@ -75,3 +76,14 @@ def yf_frame(payload: YFHistoryPayload) -> pd.DataFrame:
         tz
     )
     return frame
+
+
+@pytest.fixture
+def random_walk() -> Callable[[int, int], np.ndarray]:
+    """Factory for seeded positive random-walk price arrays: `random_walk(n, seed)`."""
+
+    def make(n: int = 500, seed: int = 0) -> np.ndarray:
+        rng = np.random.default_rng(seed)
+        return 100.0 * np.exp(np.cumsum(rng.normal(0.0003, 0.01, n)))
+
+    return make
