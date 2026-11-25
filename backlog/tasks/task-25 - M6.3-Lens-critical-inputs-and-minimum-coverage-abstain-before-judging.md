@@ -1,10 +1,10 @@
 ---
 id: TASK-25
 title: 'M6.3 Lens critical inputs and minimum coverage: abstain before judging'
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-24T08:05:27Z'
-updated_date: '2026-11-25T22:33:32Z'
+updated_date: '2026-11-25T23:09:38Z'
 labels:
   - core
   - ui
@@ -66,19 +66,19 @@ Out of scope: suspect rows lowering sufficiency (core.md mentions it; not built)
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 LensNode.critical_inputs and min_coverage are params; unknown critical input names are rejected at plan time
-- [ ] #2 An unmet critical input or coverage below the minimum gives an abstained verdict naming the reason, before assess (no LLM call)
-- [ ] #3 Toy SafetyLens declares tox_notes critical; S2 abstains and toy expectations are updated
-- [ ] #4 The run view shows an abstain reason as an info alert, not an error; bundle rebuilt
-- [ ] #5 core.md documents the rule as built
+- [x] #1 LensNode.critical_inputs and min_coverage are params; unknown critical input names are rejected at plan time
+- [x] #2 An unmet critical input or coverage below the minimum gives an abstained verdict naming the reason, before assess (no LLM call)
+- [x] #3 Toy SafetyLens declares tox_notes critical; S2 abstains and toy expectations are updated
+- [x] #4 The run view shows an abstain reason as an info alert, not an error; bundle rebuilt
+- [x] #5 core.md documents the rule as built
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -91,4 +91,5 @@ Worker: dispatch ctx_13d3c5d47f07, worktree task-25 (Orca run run_743fda9ec0e6)
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 Worker: LensNode.critical_inputs (frozenset param, validated against all_inputs at plan time) and min_coverage (0..1); LensNode.run abstains before assess (no LLM call) with 'critical input <name> unavailable' (+N more) or 'coverage X below minimum Y', keeping coverage/input_sufficiency, provenance lens_version + input_hashes only. Toy SafetyLens declares tox_notes critical; S2 safety abstains, dossier rests on growth (evidence_share 0.25). Run view shows abstained reason as info alert 'Abstained:'; fixture and bundle regenerated; core.md updated. Commits dffc6ef + 7b08656 (review fix) - squash on landing. Evidence: pytest 860 passed, ruff/pyright clean, pnpm test 55 passed, typecheck clean. Coordinator verdict: approve; one review round (removed a dead test-helper branch). Rulings: critical input reason wins over min_coverage; test_absent_optional_input_rendered_not_available_and_not_citable passes critical_inputs=[] to keep exercising the optional-absent path; test_panel_e2e/test_ai_lens/fixture/bundle touched beyond listed toy files (expectations/regen only). Open: none.
+Landed 35b51ae (squashed) on main
 <!-- SECTION:FINAL_SUMMARY:END -->
