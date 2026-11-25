@@ -3,10 +3,10 @@ id: TASK-37
 title: >-
   M4.7b yfinance prices and fx hardening: transient empties, settled tail, more
   checks, error classes
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T04:06:45Z'
-updated_date: '2026-11-25T05:04:24Z'
+updated_date: '2026-11-25T05:12:28Z'
 labels:
   - finance
 milestone: m-3
@@ -101,3 +101,12 @@ Out of scope: overlap reconciliation with stored facts (TASK-38); dividend-only 
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_a067ead2ceb4, worktree task-37
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker: yfinance provider classification (prices-missing over sessions -> error, 404 known symbol -> error, 401/403/Invalid Crumb/Unauthorized -> rate_limited, unknown suffix -> empty), settled-tail cap, truncation check (prices only, vs padded start), YF_POLICY breakers 5 errors / 20 empty; history checks duplicate_bar, missing_sessions>=1, split_like_jump/unadjusted_split, tiny dividend, stale, fx_jump/stale; normaliser versions 2; curl_cffi==0.17.0 pinned; finance.md updated. Commits b78c65e, 8660e79; pytest 611 passed, ruff and pyright clean.
+Human ruling (via worker question): prices stale = run >=5 identical closes only when volume is NaN; zero-volume runs are genuine no-trade (BMT.L has a 9-run); fx stale unchanged. Fixtures test covers all fixtures incl. BMT.L, no exemption.
+Coordinator review (code-review medium + manual): one round sent and applied: (1) fx counted calendar days, so weekend-only fx requests errored every run and the fx tail cap kept weekends as gaps (could trip the error breaker) -> shared _trading_days helper, fx = Mon-Fri; (2) truncation check failed closed without firstTradeDate -> now fails open; (3) _bar_days docstring. Review findings set aside as spec-mandated: exact curl_cffi pin, dividend/split-jump thresholds, Unauthorized substring rule. Verdict: approve.
+Open points: delisted/long-suspended tickers error on every run (spec-accepted) and 5 in a row now trip max_consecutive_errors and abort the fetch; truncation check skipped for fx; duplicate-bar collapsing also applies to fx; missing_sessions threshold 1 chosen since no fixture has missing sessions; _classify known_tz also applies to profile (404 on known profile symbol -> error); two restatement tests got a constructed firstTradeDate.
+<!-- SECTION:FINAL_SUMMARY:END -->
