@@ -11,6 +11,18 @@ from .records import DossierRecord, LLMCall
 from .registry import NodeRegistry
 from .review import DossierReviewer, ReviewOut, render_review_context, review_citables
 from .run import RunSpec, arun, run
+from .sources import (
+    Clock,
+    Dataset,
+    DateInterval,
+    FakeClock,
+    IntervalSet,
+    Provider,
+    SourceSlice,
+    SourceStore,
+    SourceUnavailable,
+    SystemClock,
+)
 from .types import Absent, CandidateRef, GlobalFailure
 from .verdict import (
     AssessmentBrief,
@@ -31,14 +43,19 @@ __all__ = [
     "CalcNode",
     "CandidateRef",
     "Claim",
+    "Clock",
+    "Dataset",
+    "DateInterval",
     "DepthRequirement",
     "Dossier",
     "DossierRecord",
     "DossierReview",
     "DossierReviewer",
+    "FakeClock",
     "FetchNode",
     "Flag",
     "GlobalFailure",
+    "IntervalSet",
     "LLMCall",
     "LensAssessment",
     "LensNode",
@@ -47,6 +64,7 @@ __all__ = [
     "NodeRegistry",
     "Panel",
     "Provenance",
+    "Provider",
     "ReportOptions",
     "ReviewOut",
     "ReviewPoint",
@@ -55,6 +73,10 @@ __all__ = [
     "RunView",
     "Settings",
     "ShrunkMeanAggregator",
+    "SourceSlice",
+    "SourceStore",
+    "SourceUnavailable",
+    "SystemClock",
     "TransformNode",
     "VetoAggregator",
     "arun",
