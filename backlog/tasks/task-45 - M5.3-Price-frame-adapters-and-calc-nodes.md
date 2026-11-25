@@ -1,10 +1,10 @@
 ---
 id: TASK-45
 title: M5.3 Price frame adapters and calc nodes
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T06:37:26Z'
-updated_date: '2026-11-25T07:38:39Z'
+updated_date: '2026-11-25T07:39:39Z'
 labels:
   - finance
 milestone: m-4
@@ -110,4 +110,6 @@ Human feedback sent to the worker (ctx_09e03d27df57): alpha_nodes.conventions (B
 Worker: alpha_nodes.series (TotalReturnSchema, total_return, trailing, window_info) and nodes/price_calcs.py (TotalReturn, Momentum, Trend, Volatility, Drawdown, PriceChart) with code_deps; all maths in kernels. finance.md dividend split-basis note resolved. pytest 788 passed, ruff/pyright clean.
 Coordinator review: matches ACs 1-4 and the Pinned conventions; code-review (medium) run. One fix round (81d495f): Drawdown dates None when there is no drawdown; AAPL trailing-year dividend yield level check (0.2-1.5%, catches a x4 basis error) added to test and doc; PriceChart uses _opt.
 Open points: 2 commits, squash on landing. Not fixed (from code review): no param validation (e.g. skip >= lookback), PriceChart computes the SMA over full history before trimming, NaN closes not guarded (schema guarantees close > 0). Rulings: split fixture has no dividend, so a payout straddling a split is not directly observed (doc says so); Trend takes np.log of the MA in the node (the formula is pinned in finance.md; no log kernel); missing quality column = all ok; windows trailing 253/219/253 bars reported in PriceWindow; test helpers in test files, not conftest.
+
+Human feedback round (9249dbf): alpha_nodes.conventions (BARS_PER_MONTH=21, BARS_PER_YEAR=252) used for kernel defaults (skip_return, realised_volatility) and calc-node window defaults; periods_per_year param removed from Trend and Volatility (they use BARS_PER_YEAR); all six price calc nodes memoize=False, reason in module docstring and finance.md Calculation layers; test_price_calc_nodes_are_not_memoized. 789 passed, ruff/pyright clean. Now 3 commits, squash on landing. Open point: finance.md Calculation layers item 3 still says calc nodes declare code_deps 'so editing a kernel invalidates their memo entries', which no longer applies to unmemoized calc nodes; reword at landing.
 <!-- SECTION:FINAL_SUMMARY:END -->
