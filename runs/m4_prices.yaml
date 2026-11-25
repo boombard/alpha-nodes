@@ -1,0 +1,22 @@
+# M4 demo: fetch prices, profile and fx for 10 UK/European tickers plus AAPL.
+# Run twice (second run makes no network calls), then `lensgraph sources status --suspect`.
+registry: alpha_nodes.registry:build_registry
+candidates:
+  - id: BP.L
+  - id: HSBA.L
+  - id: VOD.L
+  - id: SHEL.L
+  - id: ULVR.L
+  - id: ASML.AS
+  - id: SAP.DE
+  - id: MC.PA
+  - id: NESN.SW
+  - id: NOVO-B.CO
+  - id: AAPL
+targets: [prices, profile, fx]
+sources:
+  catalog: alpha_nodes.catalog:CATALOG
+  providers:
+    prices: [yfinance]
+    profile: [yfinance]
+    fx: [yfinance]

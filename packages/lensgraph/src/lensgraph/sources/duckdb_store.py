@@ -32,13 +32,14 @@ threads but only ever see work items and return outcomes.
 import json
 import uuid
 from collections.abc import Iterator, Mapping, Sequence
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
 import duckdb
 import pandas as pd
+import pyarrow as pa
 from pydantic import BaseModel, ConfigDict
 
 from ..store.base import BlobStore
@@ -517,13 +518,16 @@ class DuckDBSourceStore(SourceStore):
         incoming["first_seen_at"], incoming["known_at"] = pd.Timestamp(seen), known
         incoming["quality"] = frame["quality"].astype(str)
         for label in ("repairs", "quality_reasons"):
-            incoming[label] = pd.Series([list(v) for v in frame[label]], index=frame.index, dtype=object)
+            # typed explicitly: DuckDB infers an object column's list type from a sample of rows, and
+            # on a long frame whose sample holds only empty lists it picks NULL[] and the insert fails
+            incoming[label] = pd.Series(
+                pa.array([list(v) for v in frame[label]], type=pa.list_(pa.string())),
+                index=frame.index,
+                dtype=pd.ArrowDtype(pa.list_(pa.string())),
+            )
         names = [*canonical, "entity", "provider", "params", "fetch_id", "first_seen_at", "known_at",
                  "normaliser_version", "repairs", "quality", "quality_reasons"]  # fmt: skip
-        projection = ", ".join(
-            f"CAST({_q(n)} AS VARCHAR[]) AS {_q(n)}" if n in ("repairs", "quality_reasons") else _q(n)
-            for n in names
-        )
+        projection = ", ".join(_q(n) for n in names)
         compared = [c for c in canonical if c not in ds.key_columns] + list(_LABELS)
         keys = ", ".join(_q(k) for k in ds.key_columns)
         join = " AND ".join(f"i.{_q(k)} IS NOT DISTINCT FROM l.{_q(k)}" for k in ds.key_columns) or "true"
@@ -546,8 +550,13 @@ class DuckDBSourceStore(SourceStore):
                     WHERE l.entity IS NULL OR {changed}""",
                 [entity, provider, params_key],
             ).fetchone()
-        finally:
-            self._con.unregister("incoming_frame")
+        except BaseException:
+            # the failed statement aborted the transaction, so unregistering (a catalog change) would
+            # fail too and replace the real error with "transaction is aborted"
+            with suppress(duckdb.Error):
+                self._con.unregister("incoming_frame")
+            raise
+        self._con.unregister("incoming_frame")
         return int(row[0]) if row else 0
 
     @staticmethod

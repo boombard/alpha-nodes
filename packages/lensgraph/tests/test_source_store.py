@@ -567,3 +567,46 @@ async def test_normalise_failure_is_entity_error_not_crash(make_store: MakeStore
     provider.calls.clear()
     assert days_of(await get(store, "S2")) == [1, 2, 3]  # a later get refetches it
     assert len(provider.calls) == 1
+
+
+class LateLabelProvider(FakeAssayProvider):
+    """Leaves `repairs` empty on every row but the last: a long history repaired only on its newest bar."""
+
+    def normalise(self, dataset: Dataset, raw: RawResponse, payload: Any) -> pd.DataFrame:
+        frame = super().normalise(dataset, raw, payload)
+        if dataset.name == ASSAYS.name:
+            frame["repairs"] = [[] for _ in range(len(frame) - 1)] + [["late_repair"]]
+        return frame
+
+
+async def test_label_list_first_non_empty_after_a_long_run_of_empty_ones_is_stored(
+    make_store: MakeStore,
+) -> None:
+    """DuckDB infers a list column's type from a sample of a long frame; a sample of only empty lists must not break the insert."""
+    store = make_store(assays=[LateLabelProvider()])
+    # 2542 daily rows, the size of a ten-year SAP.DE history: DuckDB's sample of that frame misses the last row
+    end = date(2026, 3, 9)
+    slice_ = await store.get("assays", "S1", DateInterval(start=end - timedelta(days=2541), end=end))
+    assert len(slice_.frame) == 2542
+    assert slice_.frame["repairs"].iloc[-1] == ["late_repair"]
+    assert slice_.frame["repairs"].iloc[0] == []
+
+
+class UnconvertibleProvider(FakeAssayProvider):
+    """Returns a value DuckDB cannot convert to the canonical column type."""
+
+    def normalise(self, dataset: Dataset, raw: RawResponse, payload: Any) -> pd.DataFrame:
+        frame = super().normalise(dataset, raw, payload)
+        if dataset.name == ASSAYS.name:
+            frame["od600"] = frame["od600"].astype(object)
+            frame.loc[frame.index[-1], "od600"] = "not a number"
+        return frame
+
+
+async def test_failing_insert_reports_its_own_error_not_transaction_aborted(make_store: MakeStore) -> None:
+    store = make_store(assays=[UnconvertibleProvider()])
+    with pytest.raises(SourceUnavailable) as raised:
+        await store.get("assays", "S1", march(1, 3))
+    assert "transaction is aborted" not in str(raised.value)
+    assert "not a number" in str(raised.value) or "convert" in str(raised.value).lower()
+    assert store.coverage("assays", "S1", "fake").is_empty()  # rolled back: nothing cached

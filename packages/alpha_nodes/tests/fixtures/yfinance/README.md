@@ -136,3 +136,14 @@ counts were identical.
   very first request is not covered.
 - **Health check**: AAPL 5-day history; a 404, empty answer or exception prints
   `yahoo unhealthy: ...` and exits 2 (not exercised live; Yahoo was healthy).
+
+## TASK-34: long-history payloads that exposed a store bug
+
+`prices_SAP.DE_10y.json` and `prices_MC.PA_10y.json` are the verbatim `YFHistoryPayload`s the
+live M4 demo stored in `raw_responses` on 2026-11-25 (yfinance 1.8.0, `auto_adjust=False,
+actions=True, repair=True`, requested 2016-11-24 .. 2026-11-24, not trimmed). Each has about
+2,540 bars with yfinance's `Repaired?` flag set on the newest bar only. That made the
+normalised `repairs` column all-empty-lists except its last row, which DuckDB's list-type
+sampling missed (it inferred `NULL[]`), so the facts insert failed. The shorter
+`prices_SAP.DE.json` / `prices_MC.PA.json` do not trigger it. Used by `test_m4_e2e.py`
+(`test_ten_year_history_with_only_its_newest_bar_repaired_is_stored`).
