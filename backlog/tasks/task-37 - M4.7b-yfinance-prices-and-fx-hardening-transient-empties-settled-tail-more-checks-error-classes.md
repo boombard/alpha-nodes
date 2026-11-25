@@ -3,9 +3,10 @@ id: TASK-37
 title: >-
   M4.7b yfinance prices and fx hardening: transient empties, settled tail, more
   checks, error classes
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-25T04:06:45Z'
+updated_date: '2026-11-25T05:04:24Z'
 labels:
   - finance
 milestone: m-3
@@ -94,3 +95,9 @@ Out of scope: overlap reconciliation with stored facts (TASK-38); dividend-only 
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_a067ead2ceb4, worktree task-37
+<!-- SECTION:NOTES:END -->
