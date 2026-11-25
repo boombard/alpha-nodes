@@ -1,10 +1,10 @@
 ---
 id: TASK-53
 title: M6.6 Fundamentals adapters and calc nodes
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T08:17:59Z'
-updated_date: '2026-11-25T23:58:03Z'
+updated_date: '2026-11-25T23:59:28Z'
 labels:
   - finance
 milestone: m-5
@@ -90,6 +90,8 @@ Worker: dispatch ctx_dc517ccb0bcf, worktree task-53 (Orca run run_09eee9a7786f)
 Review round 1 sent (HEAD 2a18420): positional trend spans across missing fiscal years, FCF inline x3, formatter artefact. Follow-up dispatch ctx_d58f3bb791f6.
 
 Round 3 (human review): document the 18-month 1y guard and 6-month 3y base tolerance in finance.md Growth bullet.
+
+Round 3 done (27895f6): Growth bullet in finance.md documents the 18-month 1y guard and 6-month 3y base; constants point to it. 5 commits, squash on landing. Approved.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

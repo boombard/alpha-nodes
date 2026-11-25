@@ -4,7 +4,7 @@ title: M6.4 EDGAR company-facts provider for point-in-time US fundamentals
 status: In Progress
 assignee: []
 created_date: '2026-11-25T08:17:58Z'
-updated_date: '2026-11-25T23:56:02Z'
+updated_date: '2026-11-25T23:59:29Z'
 labels:
   - finance
 milestone: m-5
@@ -113,6 +113,8 @@ Review round 1 sent (HEAD 379aa4e): total_debt excludes short-term borrowings an
 Round 2 sent after human review (HEAD 8bddc0f): tag synonyms vs fallbacks, fallbacks recorded in repairs, plus a 25-filer measurement (human approved the extra network use; summary only committed).
 
 Round 2 addendum (human-approved): derive total_liabilities (L&SE - NCI-inclusive equity) and shares_outstanding (issued - treasury, else single dei cover count), recorded in repairs; null-rate measurement.
+
+Round 2 + addendum done (8f4c07c), reviewed correct. Measurement over 22 filers: suspect rows 55.3% -> 13.6%; remaining tag_conflicts all revenue (worker proposes Revenues+SalesRevenueNet synonyms, ASC 606 + SalesRevenueGoodsNet fallbacks; pending human). All-row total_debt null 52.2% unchanged: latest-row breakdown requested.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
