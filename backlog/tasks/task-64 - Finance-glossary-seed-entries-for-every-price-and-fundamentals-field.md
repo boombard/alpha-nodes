@@ -1,10 +1,10 @@
 ---
 id: TASK-64
 title: 'Finance glossary: seed entries for every price and fundamentals field'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-26T00:28:00Z'
-updated_date: '2026-11-26T00:28:28Z'
+updated_date: '2026-11-26T03:54:41Z'
 labels:
   - finance
 milestone: m-5
@@ -112,3 +112,9 @@ Design text for finance.md (write it in this task): the approved draft, copied b
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_1ed3c5c919f0, worktree task-64 (Orca run run_cce261b5aaf8)
+<!-- SECTION:NOTES:END -->
