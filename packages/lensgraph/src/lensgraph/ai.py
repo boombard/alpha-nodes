@@ -10,13 +10,13 @@ from pathlib import Path
 from typing import Any, ClassVar, Literal, Self
 
 from jinja2 import Environment, StrictUndefined
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, PrivateAttr, model_validator
 from pydantic_ai import Agent, ModelRetry, NativeOutput, PromptedOutput, ToolOutput
 from pydantic_ai.exceptions import UnexpectedModelBehavior
 from pydantic_ai.settings import ModelSettings
 
 from .context import render_context, unavailable_inputs
-from .glossary import Glossary, GlossaryError
+from .glossary import Glossary, GlossaryError, contract_model, model_fields
 from .hashing import content_hash
 from .lens import LensAssessment, LensNode
 from .llm import ProfileRegistry, describe_model
@@ -128,29 +128,27 @@ class AINode(LensNode):
     settings come from the model profile named by `profile`, looked up in
     `ctx.services["profiles"]` (default: a plain `ProfileRegistry()`).
 
-    Optionally `glossary` plus `glossary_terms` (ids of the entries this lens uses) declare
-    glossary prompt notes; they are inserted into the system prompt, after the template, when
-    `use_glossary` (else the profile's `glossary` default) is on. See core.md, Glossary.
+    `glossary` names the domain's glossary directory. The lens's data dictionary (the prompt
+    note of every entry covering a field it sees, plus `glossary_concepts`) is derived from its
+    inputs' output contracts in `bind_upstream`, which `build_plan` calls; a field without an
+    entry fails the plan. The block is appended to the system prompt, after the template.
+    `use_glossary=False` omits it (ablation only). See core.md, Glossary.
     """
 
     prompt: ClassVar[Path]
     variants: ClassVar[dict[str, Path]] = {}
     flag_codes: ClassVar[frozenset[str] | None] = None
-    glossary: ClassVar[Glossary | None] = None
-    glossary_terms: ClassVar[frozenset[str]] = frozenset()
+    glossary: ClassVar[Path | None] = None  # glossary directory; loaded in bind_upstream, never at import
+    glossary_concepts: ClassVar[frozenset[str]] = frozenset()  # extra ids for non-field concepts the prompt uses
     resource = "llm"
 
     profile: str = "dev"  # model profile name; see llm.py
     variant: str = "default"  # "default" (the `prompt`) or a key of `variants`; else rejected
-    use_glossary: bool | None = None  # insert glossary notes; None = the profile's default
+    use_glossary: bool = True  # include the data dictionary in the prompt; False is for ablation only
 
-    def __init_subclass__(cls, **kwargs: Any) -> None:
-        """Reject declared glossary terms that the glossary lacks, at class definition."""
-        super().__init_subclass__(**kwargs)
-        if cls.glossary_terms:
-            if cls.glossary is None:
-                raise GlossaryError(f"{cls.__name__}: glossary_terms declared without a glossary")
-            cls.glossary._select(cls.glossary_terms)  # raises GlossaryError naming unknown ids
+    _bound: bool = PrivateAttr(default=False)
+    _dictionary: str = PrivateAttr(default="")  # the rendered block, "" when there are no terms
+    _terms: list[str] = PrivateAttr(default_factory=list)  # ids in the block, sorted
 
     @model_validator(mode="after")
     def _check_variant(self) -> Self:
@@ -164,28 +162,61 @@ class AINode(LensNode):
     def _template_path(self) -> Path:
         return self.variants.get(self.variant, self.prompt)
 
-    def _glossary_ids(self, registry: ProfileRegistry) -> list[str]:
-        """Sorted glossary ids inserted into the prompt: the declared terms when on, else none."""
-        on = self.use_glossary if self.use_glossary is not None else registry.get(self.profile).glossary
-        return sorted(self.glossary_terms) if on and self.glossary is not None else []
+    def bind_upstream(self, outputs: Mapping[str, Any]) -> None:
+        """Derive the data dictionary from the inputs' output contracts (core.md, Glossary).
 
-    def _prompt_hash(self, registry: ProfileRegistry) -> str:
+        Loads the glossary, resolves every field of every input (required and optional) to an
+        entry and raises `GlossaryError` naming this lens, the input and the field when one has
+        none; unknown `glossary_concepts` raise too. Runs even when `use_glossary` is off, so
+        coverage is still checked; the block depends on classes only, never on values.
+        """
+        self._bound = True
+        if self.glossary is None:
+            return
+        glossary = Glossary.load(self.glossary)
+        unknown = sorted(self.glossary_concepts - set(glossary.entries))
+        if unknown:
+            raise GlossaryError(f"{self.name}: unknown glossary_concepts ids: {unknown}")
+        paths: dict[str, list[str]] = {}
+        for input_name, output in outputs.items():
+            model = contract_model(output)
+            if model is None:
+                continue
+            for field in model_fields(model):
+                term = glossary.term_for(model, field)
+                if term is None:
+                    raise GlossaryError(
+                        f"{self.name}: input {input_name!r} field {field!r} ({model.__name__}) "
+                        "has no glossary entry"
+                    )
+                paths.setdefault(term, []).append(f"{input_name}.{field}")
+        terms = sorted({*paths, *self.glossary_concepts})
+        if terms:
+            self._dictionary = glossary.dictionary_block(paths, self.glossary_concepts)
+            self._terms = terms
+
+    def _check_bound(self) -> None:
+        """An AI node with a glossary must have been through `build_plan`, else its prompt is incomplete."""
+        if self.glossary is not None and not self._bound:
+            raise GlossaryError(f"{self.name}: glossary not bound; build the node through build_plan")
+
+    def _prompt_hash(self) -> str:
         """Hash of the rendered system prompt, so an edit to a used glossary entry changes it."""
-        return content_hash(self._system_prompt(registry))
+        return content_hash(self._system_prompt())
 
     def memo_salt(self, services: Mapping[str, Any]) -> str:
         """Profile fingerprint plus rendered-prompt hash; see core.md, Memoization (AI nodes)."""
         registry = _registry(services)
-        return content_hash([registry.fingerprint(self.profile), self._prompt_hash(registry)])
+        return content_hash([registry.fingerprint(self.profile), self._prompt_hash()])
 
-    def _system_prompt(self, registry: ProfileRegistry) -> str:
-        """The static system prompt: the rendered template, then the glossary block when on."""
+    def _system_prompt(self) -> str:
+        """The static system prompt: the rendered template, then the data dictionary unless ablated."""
+        self._check_bound()
         template = _JINJA.from_string(self._template_path().read_text())
         codes = sorted(self.flag_codes) if self.flag_codes is not None else None
         prompt = template.render(lens=self.lens_name, flag_codes=codes)
-        ids = self._glossary_ids(registry)
-        if ids and self.glossary is not None:
-            prompt = f"{prompt.rstrip()}\n\n{self.glossary.prompt_block(ids)}"
+        if self.use_glossary and self._dictionary:
+            prompt = f"{prompt.rstrip()}\n\n{self._dictionary}"
         return prompt
 
     def _depth_notes(self, inputs: Mapping[str, Any]) -> dict[str, str]:
@@ -214,7 +245,7 @@ class AINode(LensNode):
             registry=registry,
             profile_name=self.profile,
             output_type=AIAssessmentOut,
-            system_prompt=self._system_prompt(registry),
+            system_prompt=self._system_prompt(),
             user_message=user_message,
             validate=lambda out: guard_rail(out, citables, self.flag_codes),
         )
@@ -228,8 +259,8 @@ class AINode(LensNode):
             provenance_extra={
                 "model": extra["model"],
                 "model_settings": extra["model_settings"],
-                "prompt_hash": self._prompt_hash(registry),
-                "glossary_terms": self._glossary_ids(registry),
+                "prompt_hash": self._prompt_hash(),
+                "glossary_terms": self._terms if self.use_glossary else [],
                 "variant": self.variant,
                 "attempts": extra["attempts"],
                 "input_tokens": extra["input_tokens"],

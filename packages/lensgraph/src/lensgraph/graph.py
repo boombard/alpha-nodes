@@ -176,6 +176,8 @@ def build_plan(
     for rule in GRAPH_RULES:
         rule(classes)
     instances = _instantiate(classes, node_params or {})
+    for name, instance in instances.items():
+        instance.bind_upstream({arg: classes[up].output for arg, up in classes[name].all_inputs().items()})
 
     def keys_for(name: str) -> list[NodeKey]:
         if classes[name].scope == "shared":

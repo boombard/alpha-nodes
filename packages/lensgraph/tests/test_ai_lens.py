@@ -7,11 +7,15 @@ from typing import Any, ClassVar
 import pytest
 from lensgraph import RunSpec, run
 from lensgraph.ai import AIAssessmentOut
-from lensgraph.glossary import Glossary, GlossaryError
-from lensgraph.llm import DEFAULT_PROFILES
+from lensgraph.glossary import GlossaryError
+from lensgraph.graph import build_plan
+from lensgraph.llm import DEFAULT_PROFILES, LLMProfile
+from lensgraph.node import CalcNode, FetchNode, NodeContext
 from lensgraph.plan import NodeKey, RunResult
 from lensgraph.verdict import LensVerdict
+from pydantic import BaseModel
 from pydantic_ai.messages import ModelRequest, SystemPromptPart, ToolReturnPart, UserPromptPart
+from toy.nodes import ToxNote
 from toy.registry import build_registry
 from toy.safety_lens import SafetyLens
 
@@ -258,76 +262,221 @@ def test_ai_lens_abstains_without_model_call(ai_registry, toy_candidates, toy_se
 TOY_GLOSSARY = Path(__file__).parent / "toy" / "glossary"
 
 
+class GrowthResult(BaseModel):
+    """Output contract of the test calc node; the toy glossary claims both fields."""
+
+    rate: float
+    doubling_hours: float | None = None
+
+
+class GrowthResultNode(CalcNode):
+    """Test node producing a `GrowthResult` (a model contract, unlike the toy float)."""
+
+    name: ClassVar[str] = "growth_result"
+    output: ClassVar[Any] = GrowthResult
+
+    def run(self, ctx: NodeContext) -> GrowthResult:
+        return GrowthResult(rate=0.2, doubling_hours=3.5)
+
+
+class TypedNotes(FetchNode):
+    """Test node whose contract is `list[ToxNote]` (the item model carries the fields)."""
+
+    name: ClassVar[str] = "typed_notes"
+    output: ClassVar[Any] = list[ToxNote]
+
+    def run(self, ctx: NodeContext) -> list[ToxNote]:
+        return [ToxNote(id="n", text="t")]
+
+
+class OtherResult(BaseModel):
+    """A replacement contract with a field the toy glossary does not claim."""
+
+    zzz: float
+
+
+class OtherResultNode(GrowthResultNode):
+    """Replacement of `growth_result` with a different contract."""
+
+    output: ClassVar[Any] = OtherResult
+
+
+def _plan(registry, candidates, **kwargs):
+    return build_plan(["safety_lens"], registry, candidates, node_params={"safety_lens": {"profile": "test"}}, **kwargs)
+
+
 @pytest.fixture
 def glossary_registry(tmp_path):
-    """Factory: registry whose AI lens declares the term `growth-rate` of a toy glossary copy.
+    """Factory: registry whose AI lens reads a `GrowthResult` input and has a toy glossary copy.
 
-    `edit(entry, old, new)` rewrites one entry of the copy first (the lens then sees the edit).
+    `edit(entry, old, new)` rewrites one entry of the copy first. `optional` moves the result
+    to an optional input; `concepts` sets `glossary_concepts`; `typed` adds a `list[ToxNote]` input;
+    `critical` keeps the toy lens's critical `tox_notes` input.
     """
 
-    def make(edit: tuple[str, str, str] | None = None):
+    def make(
+        edit: tuple[str, str, str] | None = None,
+        *,
+        optional: bool = False,
+        concepts: frozenset[str] = frozenset(),
+        typed: bool = False,
+        critical: bool = True,
+    ):
         directory = tmp_path / f"glossary-{len(list(tmp_path.glob('glossary-*')))}"
         shutil.copytree(TOY_GLOSSARY, directory)
         if edit:
             path = directory / f"{edit[0]}.md"
             path.write_text(path.read_text().replace(edit[1], edit[2], 1))
+        required_in = {"growth_rate": "growth_rate"}
+        optional_in = {"tox_notes": "tox_notes"}
+        (optional_in if optional else required_in)["result"] = "growth_result"
+        if typed:
+            required_in["notes"] = "typed_notes"
 
         class GlossarySafety(SafetyLens):
-            """SafetyLens with a toy glossary."""
+            """SafetyLens with a toy glossary directory."""
 
-            glossary: ClassVar[Glossary | None] = Glossary.load(directory)
-            glossary_terms: ClassVar[frozenset[str]] = frozenset({"growth-rate"})
+            glossary: ClassVar[Path | None] = directory
+            glossary_concepts: ClassVar[frozenset[str]] = concepts
+            inputs: ClassVar[dict[str, str]] = required_in
+            optional_inputs: ClassVar[dict[str, str]] = optional_in
+            critical_inputs: frozenset[str] = frozenset({"tox_notes"}) if critical else frozenset()
 
-        return build_registry(lenses=(GlossarySafety,))
+        registry = build_registry(lenses=(GlossarySafety,))
+        registry.register(GrowthResultNode)
+        registry.register(TypedNotes)
+        return registry
 
     return make
 
 
-def _system(profiles) -> str:
-    return "\n".join(_text_parts(profiles.model_for("test").calls[0], SystemPromptPart))
+def _system(profiles, call: int = 0) -> str:
+    return "\n".join(_text_parts(profiles.model_for("test").calls[call], SystemPromptPart))
 
 
-def test_glossary_off_by_default_on_dev(
+def test_dictionary_on_by_default_for_every_profile(
     glossary_registry, s1, toy_services, scripted_profiles, tmp_path
 ):
-    assert [DEFAULT_PROFILES[n].glossary for n in ("dev", "quality", "local")] == [False, False, True]
+    assert all(not hasattr(p, "glossary") for p in DEFAULT_PROFILES.values())
+    for kwargs in ({}, {"output_mode": "prompted"}, {"settings": {"thinking": "low"}}):
+        profiles = scripted_profiles(GOOD, **kwargs)
+        _run(glossary_registry(), s1, toy_services, profiles, tmp_path)
+        system = _system(profiles)
+        assert system.index("Raise flags only") < system.index("## Data dictionary")
+        assert "- result.rate (ratio): **Growth rate (GR)**: A per-hour fractional growth." in system
+        assert "result.doubling_hours (duration): **Doubling time**" in system
+        assert "Toxicity note" not in system  # no input reaches it, not a declared concept
+
+
+def test_profile_has_no_glossary_setting():
+    assert "glossary" not in LLMProfile.model_fields
+
+
+def test_uncovered_field_fails_plan_build(glossary_registry, s1):
+    registry = glossary_registry(("growth-rate", "fields: [GrowthResult.rate]", "fields: []"))
+    with pytest.raises(GlossaryError) as exc:
+        _plan(registry, s1)
+    message = str(exc.value)
+    assert "safety_lens" in message and "'result'" in message and "'rate'" in message
+
+
+def test_uncovered_field_fails_the_run_before_any_model_call(
+    glossary_registry, s1, toy_services, scripted_profiles, tmp_path
+):
+    registry = glossary_registry(("growth-rate", "fields: [GrowthResult.rate]", "fields: []"))
     profiles = scripted_profiles(GOOD)
-    result = _run(glossary_registry(), s1, toy_services, profiles, tmp_path)
-    assert "## Terms" not in _system(profiles)
+    with pytest.raises(GlossaryError):
+        _run(registry, s1, toy_services, profiles, tmp_path)
+    assert profiles.model_for("test").calls == []
+
+
+def test_optional_input_fields_are_covered(glossary_registry, s1):
+    registry = glossary_registry(("growth-rate", "fields: [GrowthResult.rate]", "fields: []"), optional=True)
+    with pytest.raises(GlossaryError, match="rate"):
+        _plan(registry, s1)
+
+
+def test_list_of_models_contract_resolves_item_model(glossary_registry, s1):
+    registry = glossary_registry(typed=True)
+    with pytest.raises(GlossaryError, match=r"'notes'.*'id'"):  # ToxNote is unclaimed
+        _plan(registry, s1)
+    covered = glossary_registry(("toxicity-note", "fields: []", "fields: [ToxNote]"), typed=True)
+    _plan(covered, s1)
+
+
+def test_bare_contracts_contribute_no_fields(
+    s1, toy_services, scripted_profiles, tmp_path
+):
+    class BareSafety(SafetyLens):
+        """The toy lens: a float and a bare list input, so nothing needs a claim."""
+
+        glossary: ClassVar[Path | None] = TOY_GLOSSARY
+
+    profiles = scripted_profiles(GOOD)
+    result = _run(build_registry(lenses=(BareSafety,)), s1, toy_services, profiles, tmp_path)
+    assert "## Data dictionary" not in _system(profiles)
     assert result.values[_key("S1")].provenance.glossary_terms == []
 
 
-def test_profile_glossary_on_adds_block_after_static_prompt(
+def test_bind_uses_replacement_output(glossary_registry, s1):
+    registry = glossary_registry()
+    _plan(registry, s1)
+    with pytest.raises(GlossaryError, match="zzz"):
+        _plan(registry, s1, replacements={"growth_result": OtherResultNode})
+
+
+def test_unknown_concept_fails_plan_build(glossary_registry, s1):
+    with pytest.raises(GlossaryError, match=r"safety_lens.*nope"):
+        _plan(glossary_registry(concepts=frozenset({"nope"})), s1)
+
+
+def test_concept_ids_listed_without_paths(
     glossary_registry, s1, toy_services, scripted_profiles, tmp_path
 ):
-    profiles = scripted_profiles(GOOD, glossary=True)
-    _run(glossary_registry(), s1, toy_services, profiles, tmp_path)
-    system = _system(profiles)
-    assert system.index("Raise flags only") < system.index("## Terms")
-    assert "**Growth rate (GR)**: A per-hour fractional growth." in system
-    assert "Doubling time" not in system and "Toxicity note" not in system  # undeclared terms
+    profiles = scripted_profiles(GOOD)
+    registry = glossary_registry(concepts=frozenset({"toxicity-note"}))
+    result = _run(registry, s1, toy_services, profiles, tmp_path)
+    assert "- (count): **Toxicity note (TN)**: A single observation" in _system(profiles)
+    assert result.values[_key("S1")].provenance.glossary_terms == [
+        "doubling-time", "growth-rate", "toxicity-note",
+    ]
 
 
-def test_node_param_overrides_profile(
+def test_broken_entry_fails_only_plans_with_that_ai_lens(glossary_registry, s1):
+    registry = glossary_registry(("growth-rate", "## Why it matters", "## Provider notes"))
+    with pytest.raises(GlossaryError, match=r"growth-rate\.md"):
+        _plan(registry, s1)
+    build_plan(["growth_rate"], registry, s1)  # no AI lens: the glossary is never loaded
+
+
+def test_use_glossary_false_omits_block_but_still_checks_coverage(
     glossary_registry, s1, toy_services, scripted_profiles, tmp_path
 ):
-    on = scripted_profiles(GOOD, glossary=True)
-    _run(glossary_registry(), s1, toy_services, on, tmp_path, use_glossary=False)
-    assert "## Terms" not in _system(on)
-    off = scripted_profiles(GOOD)
-    _run(glossary_registry(), s1, toy_services, off, tmp_path, use_glossary=True)
-    assert "## Terms" in _system(off)
+    profiles = scripted_profiles(GOOD)
+    result = _run(glossary_registry(), s1, toy_services, profiles, tmp_path, use_glossary=False)
+    assert "## Data dictionary" not in _system(profiles)
+    assert result.values[_key("S1")].provenance.glossary_terms == []
+    broken = glossary_registry(("growth-rate", "fields: [GrowthResult.rate]", "fields: []"))
+    with pytest.raises(GlossaryError, match="rate"):
+        _run(broken, s1, toy_services, scripted_profiles(GOOD), tmp_path, use_glossary=False)
 
 
-def test_glossary_edit_changes_prompt_hash_and_memo_salt(
+def test_block_is_static_when_an_input_is_absent(
+    glossary_registry, toy_candidates, toy_services, scripted_profiles, tmp_path
+):
+    profiles = scripted_profiles(GOOD)
+    registry = glossary_registry(critical=False)
+    _run(registry, toy_candidates[:2], toy_services, profiles, tmp_path)  # S2 has no tox notes
+    systems = {_system(profiles, i) for i in range(len(profiles.model_for("test").calls))}
+    assert len(systems) == 1 and "## Data dictionary" in systems.pop()
+
+
+def test_used_note_edit_changes_memo_salt(
     glossary_registry, s1, toy_services, scripted_profiles, tmp_path
 ):
-    kwargs = {"use_glossary": True}
-    first = _run(glossary_registry(), s1, toy_services, scripted_profiles(GOOD), tmp_path, **kwargs)
+    first = _run(glossary_registry(), s1, toy_services, scripted_profiles(GOOD), tmp_path)
     edited = ("growth-rate", "Larger means faster", "Bigger means quicker")
-    second = _run(
-        glossary_registry(edited), s1, toy_services, scripted_profiles(GOOD), tmp_path, **kwargs
-    )
+    second = _run(glossary_registry(edited), s1, toy_services, scripted_profiles(GOOD), tmp_path)
     assert not second.results[_key("S1")].cache_hit
     assert (
         first.values[_key("S1")].provenance.prompt_hash
@@ -335,15 +484,12 @@ def test_glossary_edit_changes_prompt_hash_and_memo_salt(
     )
 
 
-def test_unused_entry_edit_does_not_change_hash(
+def test_unused_section_edit_keeps_memo_salt(
     glossary_registry, s1, toy_services, scripted_profiles, tmp_path
 ):
-    kwargs = {"use_glossary": True}
-    first = _run(glossary_registry(), s1, toy_services, scripted_profiles(GOOD), tmp_path, **kwargs)
-    edited = ("toxicity-note", "Weigh the wording", "Judge the wording")
-    second = _run(
-        glossary_registry(edited), s1, toy_services, scripted_profiles(GOOD), tmp_path, **kwargs
-    )
+    first = _run(glossary_registry(), s1, toy_services, scripted_profiles(GOOD), tmp_path)
+    edited = ("doubling-time", "Only valid inside", "Only trustworthy inside")  # a used entry, other section
+    second = _run(glossary_registry(edited), s1, toy_services, scripted_profiles(GOOD), tmp_path)
     assert second.results[_key("S1")].cache_hit
     assert (
         first.values[_key("S1")].provenance.prompt_hash
@@ -351,20 +497,23 @@ def test_unused_entry_edit_does_not_change_hash(
     )
 
 
-def test_unknown_glossary_term_rejected_at_class_definition():
-    with pytest.raises(GlossaryError, match="nope"):
-
-        class Bad(SafetyLens):
-            """Declares a term the glossary lacks."""
-
-            glossary: ClassVar[Glossary | None] = Glossary.load(TOY_GLOSSARY)
-            glossary_terms: ClassVar[frozenset[str]] = frozenset({"nope"})
+def test_unused_entry_edit_keeps_memo_salt(
+    glossary_registry, s1, toy_services, scripted_profiles, tmp_path
+):
+    _run(glossary_registry(), s1, toy_services, scripted_profiles(GOOD), tmp_path)
+    edited = ("toxicity-note", "Weigh the wording", "Judge the wording")
+    second = _run(glossary_registry(edited), s1, toy_services, scripted_profiles(GOOD), tmp_path)
+    assert second.results[_key("S1")].cache_hit
 
 
 def test_provenance_records_glossary_terms(
     glossary_registry, s1, toy_services, scripted_profiles, tmp_path
 ):
-    result = _run(
-        glossary_registry(), s1, toy_services, scripted_profiles(GOOD, glossary=True), tmp_path
-    )
-    assert result.values[_key("S1")].provenance.glossary_terms == ["growth-rate"]
+    result = _run(glossary_registry(), s1, toy_services, scripted_profiles(GOOD), tmp_path)
+    assert result.values[_key("S1")].provenance.glossary_terms == ["doubling-time", "growth-rate"]
+
+
+def test_unbound_ai_node_with_glossary_raises(glossary_registry, scripted_profiles):
+    lens = glossary_registry().get("safety_lens")(profile="test")
+    with pytest.raises(GlossaryError, match="not bound"):
+        lens.memo_salt({"profiles": scripted_profiles(GOOD)})

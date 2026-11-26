@@ -49,8 +49,6 @@ class LLMProfile(BaseModel):
         max_retries: how often the guard rail may send the model back to fix its answer.
         usage_limits: ceilings for one call (all its retries). Exceeding one raises
             pydantic-ai's `UsageLimitExceeded`, which fails the node; there is no fallback.
-        glossary: default for AI nodes' glossary prompt notes (a node's `use_glossary`
-            overrides); weaker local models benefit, so `local` is on. See core.md, Glossary.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
@@ -61,7 +59,6 @@ class LLMProfile(BaseModel):
     output_mode: Literal["tool", "native", "prompted"] = "tool"
     max_retries: int = 2
     usage_limits: UsageCaps | None = None
-    glossary: bool = False
 
 
 LOCAL_MODEL_ENV = "LENSGRAPH_LOCAL_MODEL"
@@ -90,7 +87,6 @@ DEFAULT_PROFILES: dict[str, LLMProfile] = {
         model=f"{_ENV_PREFIX}{LOCAL_MODEL_ENV}",
         output_mode="prompted",
         usage_limits=_caps(2),
-        glossary=True,
     ),
 }
 """Built-in profiles. `dev` is the cheapest and the default everywhere."""

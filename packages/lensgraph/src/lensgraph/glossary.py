@@ -1,19 +1,24 @@
-"""Glossary: one Markdown file per term, validated on load, with opt-in prompt notes for AI nodes.
+"""Glossary: one Markdown file per term, validated on load; the data dictionary of AI lenses.
 
 See documentation/design/core.md, Glossary. A domain ships a directory of `<id>.md` entries
-(YAML frontmatter plus fixed `##` sections). Humans read the full entry; AI nodes that opt in
-(`AINode.glossary_terms`, `AINode.use_glossary`) get only the short prompt note, via
-`Glossary.prompt_block`. `Glossary.export` is the contract for a later browser glossary page.
+(YAML frontmatter plus fixed `##` sections). Humans read the full entry; AI nodes get the short
+prompt note of every entry covering a field they see, via `Glossary.dictionary_block`, with the
+terms resolved from output contracts by `Glossary.term_for`. `Glossary.export` is the contract
+for a later browser glossary page.
 This module is domain-free: it never imports domain code (`check_imports` is the one,
 explicit, exception, run from a domain's tests).
 """
 
 import importlib
+import inspect
 import re
-from collections.abc import Iterable
+import typing
+from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import Any, Literal
 
+import pandera.pandas as pa
+import pandera.typing as pa_typing
 import yaml
 from pydantic import BaseModel, ConfigDict, ValidationError
 
@@ -232,9 +237,39 @@ class Glossary(BaseModel):
             missing.extend(p for p in entry.implemented_by if not _resolves(p))
         return missing
 
-    def by_field(self) -> dict[str, str]:
-        """`"Model.field"` -> entry id, for attaching a term to a cited output field."""
-        return {f: e.id for e in self.entries.values() for f in e.fields}
+    def term_for(self, model: type, field: str) -> str | None:
+        """The entry id explaining `field` of an output `model`, or None when nothing claims it.
+
+        Walks the model's MRO from the model itself up; at the first class that declares the
+        field, the claim `Class.field`, else the whole-model claim `Class`, wins; if neither, the
+        next class up. See core.md, Glossary (Claims).
+        """
+        claims = self._claims()
+        for cls in model.__mro__:
+            if field not in _declared_fields(cls):
+                continue
+            hit = claims.get(f"{cls.__name__}.{field}") or claims.get(cls.__name__)
+            if hit is not None:
+                return hit
+        return None
+
+    def unresolved_claims(self, models: Iterable[type]) -> list[str]:
+        """Sorted claims naming no class or field among `models` (and their bases): stale after a rename."""
+        classes = {c for m in models for c in m.__mro__}
+        by_name: dict[str, list[type]] = {}
+        for cls in classes:
+            by_name.setdefault(cls.__name__, []).append(cls)
+        stale: list[str] = []
+        for claim in self._claims():
+            name, _, field = claim.partition(".")
+            candidates = by_name.get(name, [])
+            if not candidates or (field and not any(field in _declared_fields(c) for c in candidates)):
+                stale.append(claim)
+        return sorted(stale)
+
+    def _claims(self) -> dict[str, str]:
+        """Every claim (`Model.field` or `Model`) to its entry id; uniqueness is checked on load."""
+        return {claim: e.id for e in self.entries.values() for claim in e.fields}
 
     def _select(self, ids: Iterable[str]) -> list[GlossaryEntry]:
         """Entries for `ids`, sorted by id; unknown ids raise `GlossaryError`."""
@@ -244,17 +279,26 @@ class Glossary(BaseModel):
             raise GlossaryError(f"unknown glossary ids: {unknown}")
         return [self.entries[i] for i in wanted]
 
-    def prompt_block(self, ids: Iterable[str]) -> str:
-        """The deterministic "## Terms" prompt block for `ids`: `**Name (ABBR)**: note`, sorted by id.
+    def dictionary_block(self, paths: Mapping[str, list[str]], concepts: Iterable[str] = ()) -> str:
+        """The deterministic "## Data dictionary" prompt block (core.md, Glossary).
 
-        Notes have `\\$` unescaped to `$` (the escape only matters to the browser's math renderer).
+        `paths` maps entry id to the evidence paths `input.field` it covers; one line per entry in id
+        order, `- <paths> (<kind>): **<name> (<abbreviations>)**: <prompt note>`, paths compacted per
+        input as `input.{a, b}`. `concepts` are further ids listed last without paths. Notes have
+        `\\$` unescaped to `$` (the escape only matters to the browser's math renderer).
         """
-        lines = ["## Terms", ""]
-        for entry in self._select(ids):
-            label = entry.name + (f" ({', '.join(entry.abbreviations)})" if entry.abbreviations else "")
-            lines.append(f"**{label}**: {entry.prompt_note.replace(chr(92) + '$', '$')}")
-            lines.append("")
-        return "\n".join(lines)
+        lines = [
+            self._line(entry, _compact_paths(paths[entry.id])) for entry in self._select(paths)
+        ]
+        lines += [self._line(e, None) for e in self._select(set(concepts) - set(paths))]
+        return "## Data dictionary\n\n" + "\n".join(lines) + "\n"
+
+    @staticmethod
+    def _line(entry: GlossaryEntry, paths: str | None) -> str:
+        """One dictionary line; `paths` is None for a concept (a term that is not a field)."""
+        label = entry.name + (f" ({', '.join(entry.abbreviations)})" if entry.abbreviations else "")
+        where = f"{paths} " if paths else ""
+        return f"- {where}({entry.kind}): **{label}**: {entry.prompt_note.replace(chr(92) + '$', '$')}"
 
     def content_hash(self, ids: Iterable[str]) -> str:
         """Hash of the full content of the entries `ids` (any edit to them changes it)."""
@@ -268,6 +312,60 @@ class Glossary(BaseModel):
             content_hash=self.content_hash(ids),
             entries=[self.entries[i] for i in ids],
         )
+
+
+_NON_COLUMNS = (typing.ClassVar, pa_typing.Index)
+
+
+def _declared_fields(cls: type) -> set[str]:
+    """Names declared in `cls` itself (not inherited): the fields a claim on `cls` can cover.
+
+    For a pandera frame model these are the column attributes (an aliased column keeps its
+    attribute name; `Index`, `ClassVar` and `Config` are not columns).
+    """
+    names = set(inspect.get_annotations(cls)) - {"model_config", "Config"}
+    if issubclass(cls, pa.DataFrameModel):
+        annotations = inspect.get_annotations(cls)
+        names = {n for n in names if typing.get_origin(annotations[n]) not in _NON_COLUMNS}
+    return names
+
+
+def contract_model(output: Any) -> type | None:
+    """The pydantic model or pandera frame model behind an output contract, else None.
+
+    A `list[Model]` contract resolves to its item model; bare `list`, plain types and
+    `pd.DataFrame` have no declared fields and give None.
+    """
+    if typing.get_origin(output) is list:
+        args = typing.get_args(output)
+        output = args[0] if args else None
+    if isinstance(output, type) and issubclass(output, BaseModel | pa.DataFrameModel):
+        return output
+    return None
+
+
+def model_fields(model: type) -> list[str]:
+    """Every field of a contract model, inherited ones included: pydantic fields or frame columns.
+
+    Frame columns are named by attribute (as claims and `term_for` do), not by pandera alias.
+    """
+    if issubclass(model, pa.DataFrameModel):
+        names = [n for cls in reversed(model.__mro__)
+                 if not cls.__module__.startswith("pandera") for n in sorted(_declared_fields(cls))]
+        return list(dict.fromkeys(names))
+    return list(model.model_fields)  # type: ignore[attr-defined]
+
+
+def _compact_paths(paths: list[str]) -> str:
+    """`in.a, in.b, other.c` -> `in.{a, b}, other.c`: group fields per input, sorted."""
+    grouped: dict[str, list[str]] = {}
+    for path in sorted(set(paths)):
+        head, _, field = path.partition(".")
+        grouped.setdefault(head, []).append(field)
+    return ", ".join(
+        f"{head}.{fields[0]}" if len(fields) == 1 else f"{head}.{{{', '.join(fields)}}}"
+        for head, fields in grouped.items()
+    )
 
 
 def _resolves(dotted: str) -> bool:

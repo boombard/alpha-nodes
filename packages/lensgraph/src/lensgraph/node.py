@@ -78,6 +78,15 @@ class Node(BaseModel):
         """
         raise UpstreamFailed(failure)
 
+    def bind_upstream(self, outputs: Mapping[str, Any]) -> None:
+        """Plan-build hook: told each input's upstream `output` contract (input name -> contract).
+
+        Called once per instance by `build_plan` with the resolved classes (replacements
+        included). A no-op by default; `AINode` overrides it to derive its data dictionary.
+        See documentation/design/core.md, Glossary.
+        """
+        return
+
     def memo_salt(self, services: Mapping[str, Any]) -> str:
         """Extra memo-key material derived from services (e.g. an LLM model id). Default none."""
         return ""
