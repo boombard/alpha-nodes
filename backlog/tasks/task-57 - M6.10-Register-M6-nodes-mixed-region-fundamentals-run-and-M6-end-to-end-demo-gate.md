@@ -3,10 +3,10 @@ id: TASK-57
 title: >-
   M6.10 Register M6 nodes, mixed-region fundamentals run and M6 end-to-end (demo
   gate)
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-25T08:18:00Z'
-updated_date: '2026-11-26T08:29:58Z'
+updated_date: '2026-11-26T08:56:45Z'
 labels:
   - finance
 milestone: m-5
@@ -88,19 +88,19 @@ Out of scope: an AI reviewer in the demo; campaigns (M7); as-of fundamentals bac
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 build_registry registers the thirteen M6 nodes and lenses; runs/m6_fundamentals.yaml has 15 unique US/UK/European tickers on dev, no reviewer
-- [ ] #2 Replayed e2e: three verdicts per candidate; AAPL fundamentals from edgar, BP.L from yfinance; UK/European coverage and confidence below the US name
-- [ ] #3 An unknown ticker's AI lenses abstain without model calls; a variant change reruns only quality_value and dossier
-- [ ] #4 compare_variants.py compares two runs' quality_value verdicts from the run index
-- [ ] #5 worker_done gives the exact demo commands for the human
+- [x] #1 build_registry registers the thirteen M6 nodes and lenses; runs/m6_fundamentals.yaml has 15 unique US/UK/European tickers on dev, no reviewer
+- [x] #2 Replayed e2e: three verdicts per candidate; AAPL fundamentals from edgar, BP.L from yfinance; UK/European coverage and confidence below the US name
+- [x] #3 An unknown ticker's AI lenses abstain without model calls; a variant change reruns only quality_value and dossier
+- [x] #4 compare_variants.py compares two runs' quality_value verdicts from the run index
+- [x] #5 worker_done gives the exact demo commands for the human
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -118,4 +118,6 @@ Worker: registered the 13 M6 nodes/lenses in build_registry; runs/m6_fundamental
 Review: 2 rounds. Round 1 found 3 small issues (vacuous llm_profile assert, obscure elif, yaml header period count and the sed's reliance on the literal nodes: {} line); all fixed in round 2.
 Verdict: meets ACs 1-4; AC5 (demo commands) given in worker_done. The live M6 demo gate run is still for the human.
 Open points: e2e candidates are the 8 tickers with yfinance fixtures plus NOSUCH.L (KO lacks price fixtures); the HSBA.L test accepts ok or abstained; compare agreement only counts candidates that are ok in both runs; compare_variants repeats the aggregator lookup from lensgraph view/build.py (_panel_nodes is private).
+
+Landed f636333 on main (squashed; rebased onto TASK-69's bf6b911 with no conflicts, rebased tree checked green: 1277 passed, ruff and pyright clean). The live M6 demo gate (mixed-region run on dev/Haiku, persona comparison, TASK-69 browser check of unit-bearing cites) is still for the human. Local qwen3:8b via Ollama was tried and dropped: the quality_value prompt (~6.4k tokens) is larger than Ollama's default context, and AI calls have no timeout.
 <!-- SECTION:FINAL_SUMMARY:END -->
