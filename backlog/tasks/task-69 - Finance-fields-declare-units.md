@@ -1,10 +1,10 @@
 ---
 id: TASK-69
 title: Finance fields declare units
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-26T04:35:00Z'
-updated_date: '2026-11-26T08:11:52Z'
+updated_date: '2026-11-26T08:17:57Z'
 labels:
   - finance
 milestone: m-5
@@ -43,19 +43,19 @@ Expected side effect: the evidence of every finance lens changes, so their verdi
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Every numeric result field and canonical/annual frame column has a unit; dataset kind tags replaced
-- [ ] #2 Money fields prefix an existing currency field (trading vs reporting resolved, not guessed)
-- [ ] #3 price_behaviour claims and AI evidence show formatted values
-- [ ] #4 Glossary prompt notes no longer restate units
-- [ ] #5 One shared scalar-helper module replaces the private `_opt` / `_ratio` copies in price_calcs, fundamental_calcs, valuation and valuation_calcs
+- [x] #1 Every numeric result field and canonical/annual frame column has a unit; dataset kind tags replaced
+- [x] #2 Money fields prefix an existing currency field (trading vs reporting resolved, not guessed)
+- [x] #3 price_behaviour claims and AI evidence show formatted values
+- [x] #4 Glossary prompt notes no longer restate units
+- [x] #5 One shared scalar-helper module replaces the private `_opt` / `_ratio` copies in price_calcs, fundamental_calcs, valuation and valuation_calcs
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -80,4 +80,6 @@ Worker (Sonnet, worktree task-69, 6 commits 6d08646..2dc0078; squash on landing)
 Review: 3 rounds. R1: user ruling PriceWindow.currency; restored multiple meanings in interest-cover and debt-to-equity notes. R2: finance.md wording. R3 (user rulings): Unit.decimals for per-share money, percentage points for margin changes (audit: op_margin_change_1y is the only difference of fractions; *_std stay FRACTION). Files widened by user rulings to series.py, lensgraph/units.py, core.md, run-view.ts and BUILD_INFO.json. Verdict: approve.
 
 Open points: TASK-68 browser click-through deferred to TASK-57; every finance lens's verdict cache misses once (evidence and unit maps changed).
+
+Landed f90220f..bf6b911 on main (squashed to one commit).
 <!-- SECTION:FINAL_SUMMARY:END -->
