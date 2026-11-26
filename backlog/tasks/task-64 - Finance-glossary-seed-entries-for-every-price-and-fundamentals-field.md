@@ -1,10 +1,10 @@
 ---
 id: TASK-64
 title: 'Finance glossary: seed entries for every price and fundamentals field'
-status: In Review
+status: In Progress
 assignee: []
 created_date: '2026-11-26T00:28:00Z'
-updated_date: '2026-11-26T04:05:57Z'
+updated_date: '2026-11-26T04:09:09Z'
 labels:
   - finance
 milestone: m-5
@@ -61,6 +61,7 @@ Roughly 40-50 entries (more than first planned, because frame columns now count)
   `documentation/design/finance.md` (section B); `documentation/README.md` (link); `backlog/docs/doc-1` is the
   coordinator's (line C)
 - Test: `packages/alpha_nodes/tests/test_glossary_finance.py`
+- Added in review (user, 2026-11-26): `packages/lensgraph/src/lensgraph/node.py`, `graph.py`, `sources/node.py`, `packages/alpha_nodes/src/alpha_nodes/nodes/fetch.py`, `documentation/design/core.md` (Glossary), a lensgraph test (`test_glossary.py` or `test_source_node.py`); also accepted: `tests/ai_lens_helpers.py`, `test_quality_value_lens.py`, `test_price_vs_fundamentals_lens.py`
 
 ## Steps
 - [ ] Failing tests: `test_finance_glossary_loads`, `test_every_result_field_has_one_entry` (iterates the result
@@ -102,6 +103,7 @@ Design text for finance.md (write it in this task): the approved draft, copied b
 - [ ] #1 Every citable price and fundamentals result field has exactly one entry; all entries validate and their implemented_by paths resolve
 - [ ] #2 Plans with quality_value and price_vs_fundamentals build: every input field, frame columns included, resolves to an entry; neither lens lists terms
 - [ ] #3 finance.md per-term formulas live in the entries; the conventions keep policy and link them
+- [ ] #5 build_plan binds a dataset fetch node's frame columns (Node.contract), so the profile columns reach the glossary check and the data dictionary
 - [ ] #4 Prompt notes are interpretive, state units, sign and window where relevant, and contain no formulas; prompt templates no longer define field_periods
 <!-- AC:END -->
 
@@ -117,6 +119,8 @@ Design text for finance.md (write it in this task): the approved draft, copied b
 
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_1ed3c5c919f0, worktree task-64 (Orca run run_cce261b5aaf8)
+
+Review round 2 (user ruling 2026-11-26): fold the core fetch-contract gap into TASK-64: Node.contract(), DatasetFetch frame_schema, graph.py binds via contract().
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

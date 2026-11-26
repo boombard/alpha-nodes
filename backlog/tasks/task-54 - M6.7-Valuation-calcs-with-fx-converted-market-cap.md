@@ -28,6 +28,7 @@ Valuation calcs that combine price-side and statement-side money: market cap thr
 - Modify: `packages/alpha_nodes/src/alpha_nodes/series.py` (add `close_on`, `bars_back`)
 - Test: `packages/alpha_nodes/tests/test_valuation.py`, `packages/alpha_nodes/tests/test_valuation_calcs.py`, `packages/alpha_nodes/tests/test_series.py`
 - Modify `documentation/design/finance.md` only if behaviour differs from it.
+- Modify (glossary follow-up from TASK-64): `packages/alpha_nodes/src/alpha_nodes/glossary/` valuation entries (`earnings-yield`, `pe`, `owner-earnings-yield`, `value-range`, `price-to-value`, `market-cap`, `pe-change`, `valuation-dates`, `valuation-price` and any others claiming `ValuationResult`/`ValuationChangeResult` fields): fill `implemented_by`; `packages/alpha_nodes/tests/ai_lens_helpers.py` (`lens_input_contracts`): drop the `valuation`/`valuation_change` stand-ins, use the new node classes' `output`
 
 ## Interfaces
 Consumes: `annual_periods`, `period_window` (M6.6); `latest_complete`, `PeriodWindow.field_periods`, `MAX_STALE_PERIODS` (TASK-61); `reference_day`, `fx_factor`, `ValuationResult`, `ValuationChangeResult`, `BARS_PER_YEAR` (M6.1, M5); kernels `owner_earnings`, `capitalised_value`, `safe_ratio` (M6.2); the `prices` frame (M4) and the `fx` frame from `FxRates` (entity column).
@@ -64,6 +65,7 @@ Both read the raw `fundamentals` frame (not `annual_fundamentals`) so the "then"
   - `test_valuation_calcs.py`: `test_valuation_change_uses_periods_known_then` (a period filed between then and now is used only for now), `test_valuation_change_pe_change_hand_value`, `test_short_price_history_then_none`, `test_hurdles_validated`, `test_valuation_nodes_are_not_memoized_and_declare_code_deps`.
 - [ ] Run `uv run pytest packages/alpha_nodes/tests/test_valuation.py packages/alpha_nodes/tests/test_valuation_calcs.py packages/alpha_nodes/tests/test_series.py -q`. Expected: FAIL.
 - [ ] Implement.
+- [ ] Glossary follow-up (TASK-64): fill `implemented_by` on the valuation entries with the new node classes and adapter; replace the stand-ins in `ai_lens_helpers.lens_input_contracts`. `test_glossary_finance.py` must stay green unchanged.
 - [ ] Run `uv run pytest -q`, `uv run ruff check`, `uv run pyright`. Expected: PASS.
 - [ ] Commit: `feat(alpha_nodes): valuation calcs with fx-converted market cap`.
 
@@ -76,6 +78,7 @@ Out of scope: EV/EBIT (needs debt and cash at the price date; later); as-of warn
 - [ ] #2 A missing fx rate gives None money fields, never a silent 1.0; negative earnings give pe None
 - [ ] #3 ValuationChange uses the periods known on each side's own day
 - [ ] #4 close_on and bars_back added to series.py with tests
+- [ ] #5 Valuation glossary entries name their implementing nodes (implemented_by resolves), and the test helper's valuation stand-ins are gone
 <!-- AC:END -->
 
 ## Definition of Done
