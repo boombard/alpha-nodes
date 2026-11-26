@@ -4,7 +4,7 @@ title: M6.5 yfinance fundamentals and news adapters
 status: In Review
 assignee: []
 created_date: '2026-11-25T08:17:58Z'
-updated_date: '2026-11-26T00:48:48Z'
+updated_date: '2026-11-26T00:56:13Z'
 labels:
   - finance
 milestone: m-5
@@ -103,6 +103,8 @@ Out of scope: quarterly statements; EDGAR (M6.4); analyst recommendations or pri
 
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_b5e3a004af37, worktree task-52
+
+Human review round 1 sent (dispatch ctx_d43424ea5a4b): currency null instead of XXX (datasets.py cleared), unknown_currency:<code> reason, sparse periods emitted as rejected sparse_period rows.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

@@ -4,7 +4,7 @@ title: M6.9 price_vs_fundamentals AI lens (divergence check)
 status: In Review
 assignee: []
 created_date: '2026-11-25T08:18:00Z'
-updated_date: '2026-11-26T00:45:11Z'
+updated_date: '2026-11-26T00:56:13Z'
 labels:
   - finance
 milestone: m-5
@@ -81,6 +81,8 @@ Out of scope: registering nodes (M6.10); quarterly trends.
 
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_1bb7f1d2447d, worktree task-56
+
+Human review round 1 sent (dispatch ctx_bcca3f37f72c): fundamentals() helper takes revenue_step; PvF test frame shows falling revenue.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

@@ -6,7 +6,7 @@ title: >-
 status: In Review
 assignee: []
 created_date: '2026-11-26T00:27:59Z'
-updated_date: '2026-11-26T00:48:48Z'
+updated_date: '2026-11-26T00:56:14Z'
 labels:
   - core
 milestone: m-5
@@ -184,6 +184,8 @@ reformatting entries):
 
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_fe7fafeeab27, worktree task-63
+
+Human review round 1 sent (dispatch ctx_622df1bf6fed): prompt_block unescapes \$ to $.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
