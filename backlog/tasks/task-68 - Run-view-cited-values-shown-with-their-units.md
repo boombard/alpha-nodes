@@ -1,9 +1,10 @@
 ---
 id: TASK-68
 title: 'Run view: cited values shown with their units'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-26T04:35:00Z'
+updated_date: '2026-11-26T05:16:50Z'
 labels:
   - core
   - ui
@@ -48,3 +49,9 @@ The run view formats cited values by unit (core.md "Units" and "Reporting: run v
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_598585b7319a, worktree task-68 (Orca run run_3877057d3c69)
+<!-- SECTION:NOTES:END -->
