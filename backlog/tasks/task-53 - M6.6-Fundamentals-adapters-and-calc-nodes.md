@@ -1,10 +1,10 @@
 ---
 id: TASK-53
 title: M6.6 Fundamentals adapters and calc nodes
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-25T08:17:59Z'
-updated_date: '2026-11-25T23:59:28Z'
+updated_date: '2026-11-26T00:34:11Z'
 labels:
   - finance
 milestone: m-5
@@ -69,18 +69,18 @@ Out of scope: valuation and market cap (M6.7); registering nodes (M6.10); quarte
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 alpha_nodes.statements adapters and the five nodes exist with exact names, inputs and outputs; no maths outside kernels
-- [ ] #2 annual_periods applies the known-on rule (filed_at or 90-day lag) and keeps the latest filing known on the day
-- [ ] #3 Hand-value tests pass for profitability, balance sheet, cash generation and trend; missing items give None, empty input gives periods=0
-- [ ] #4 Calc nodes declare code_deps and are not memoized
+- [x] #1 alpha_nodes.statements adapters and the five nodes exist with exact names, inputs and outputs; no maths outside kernels
+- [x] #2 annual_periods applies the known-on rule (filed_at or 90-day lag) and keeps the latest filing known on the day
+- [x] #3 Hand-value tests pass for profitability, balance sheet, cash generation and trend; missing items give None, empty input gives periods=0
+- [x] #4 Calc nodes declare code_deps and are not memoized
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -98,4 +98,6 @@ Round 3 done (27895f6): Growth bullet in finance.md documents the 18-month 1y gu
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 Worker summary: alpha_nodes.statements adapters (AnnualFundamentalsSchema, known_on, annual_periods, period_window, values, years_between) and five memoize=False calc nodes with code_deps (annual_fundamentals, profitability, balance_sheet, cash_generation, fundamental_trend). pytest 915 passed, ruff and pyright clean. Commits 2a18420, 34d81db, 40a064d, 40d61dc: squash on landing. Review: 2 fix rounds. R1: trend growth was positional, so a missing fiscal year stretched spans (fixed: years_between, 1y fields None beyond 18 months, revenue_cagr_3y base = period closest to 3y back within 6 months, compounded over the actual span); FCF inline x3 (fixed: _fcf helper); formatter artefact (fixed). R2: the R1 tests had not been committed (fixed: 3 trend tests added). Verdict: approve. Rulings: BalanceSheet, owner earnings and latest FCF use the latest row (None if it lacks an item; BalanceSheet window = 1 period); multi-field results report the widest window; empty annual frame coerced to schema dtypes; fundamentals_rows factory in tests/conftest.py (outside Files, accepted: shared by two test modules); 3y base tolerance 6 months and 1y max 18 months are coordinator-chosen thresholds not in finance.md. finance.md untouched.
+
+Landed 5dc8636 on main (squashed from 5 commits, clean rebase onto TASK-51; 974 passed, ruff and pyright clean).
 <!-- SECTION:FINAL_SUMMARY:END -->
