@@ -63,7 +63,7 @@ class CountingModel(FunctionModel):
         user = "\n".join(str(p.content) for p in parts if isinstance(p, UserPromptPart))
         ids = re.findall(r"^### \[(.+)\]$", user, flags=re.MULTILINE)
         field = next((c for c in PREFERRED_CITES if c in ids), next(i for i in ids if "." in i))
-        cites = [field, *[i for i in ids if i.startswith("recent_news[")][:1]]
+        cites = [field]
         payload = {
             "status": "ok",
             "stance": 2 if "Warren Buffett" in system else 1,
@@ -218,8 +218,6 @@ def test_report_resolves_ai_cites(run_view: RunView) -> None:
     claim = next(c for c in candidate.claims if c.lens == "quality_value")
     resolved = {cite: run_view.cited[ref] for cite, ref in claim.cites.items() if ref is not None}
     assert resolved["profitability.roe_mean"].kind == "field"
-    news = next(v for cite, v in resolved.items() if cite.startswith("recent_news["))
-    assert news.kind == "item"
 
 
 async def test_compare_variants_on_two_runs(run_once: Runner, tmp_path: Path) -> None:
@@ -246,8 +244,18 @@ def test_shipped_m6_config_is_valid() -> None:
     assert not any("profile" in params for params in cfg.nodes.values())  # AI lenses stay on `dev`
     assert "profile:" not in RUN_YAML.read_text().replace("    profile: [yfinance]", "")
     assert cfg.sources is not None
-    assert set(cfg.sources.providers) == {"prices", "profile", "fx", "news", "fundamentals"}
+    assert set(cfg.sources.providers) == {"prices", "profile", "fx", "fundamentals"}
     assert cfg.sources.providers["fundamentals"] == ["edgar", "yfinance"]
     registry = panel_registry(cfg.panel, build_registry())
     plan = build_plan(cfg.panel.targets(), registry, cfg.candidates)
-    assert {k.name for k in plan.nodes} >= {"fundamentals", "news", "fx", "valuation", *LENSES}
+    assert {k.name for k in plan.nodes} >= {"fundamentals", "fx", "valuation", *LENSES}
+    assert "news" not in {k.name for k in plan.nodes}  # parked: see test_m6_plan_fetches_no_news
+
+
+def test_m6_plan_fetches_no_news() -> None:
+    cfg = RunConfig.from_yaml(RUN_YAML)
+    assert cfg.panel is not None and cfg.sources is not None
+    registry = panel_registry(cfg.panel, build_registry())
+    plan = build_plan(cfg.panel.targets(), registry, cfg.candidates)
+    assert not {k.name for k in plan.nodes} & {"news", "recent_news"}
+    assert "news" not in cfg.sources.providers

@@ -43,7 +43,8 @@ class LLMProfile(BaseModel):
         name: the profile name nodes select, e.g. `dev`.
         model: a pydantic-ai model string (`anthropic:claude-haiku-5-5`), or `env:VAR` to read
             the model string from environment variable `VAR` when the profile is resolved.
-        settings: pydantic-ai `ModelSettings` (e.g. `{"thinking": "low"}`).
+        settings: pydantic-ai `ModelSettings` (e.g. `{"thinking": "low", "max_tokens": 2500}`);
+            `max_tokens` caps one response, thinking included.
         output_mode: how the structured answer is requested. `tool` suits API models;
             `prompted` suits local models with weak tool calling.
         max_retries: how often the guard rail may send the model back to fix its answer.
@@ -64,32 +65,42 @@ class LLMProfile(BaseModel):
 LOCAL_MODEL_ENV = "LENSGRAPH_LOCAL_MODEL"
 """Environment variable naming the local (Ollama) model, e.g. `ollama:qwen3:8b`."""
 
-def _caps(retries: int, tokens: int | None = None) -> UsageCaps:
-    """Default ceilings: the first request plus `max_retries` (2) retries and one spare."""
-    return UsageCaps(request_limit=retries + 2, total_tokens_limit=tokens)
+def _caps(retries: int, tokens: int | None = None, output: int | None = None) -> UsageCaps:
+    """Default ceilings: the first request plus `max_retries` (2) retries and one spare.
+
+    `output` caps output tokens (thinking included) over all attempts of one call.
+    """
+    return UsageCaps(request_limit=retries + 2, total_tokens_limit=tokens, output_tokens_limit=output)
 
 
 DEFAULT_PROFILES: dict[str, LLMProfile] = {
     "dev": LLMProfile(
         name="dev",
         model="anthropic:claude-haiku-5-5",
-        settings={"thinking": "low"},
-        usage_limits=_caps(2, tokens=50_000),
+        settings={"thinking": "low", "max_tokens": 2_500},
+        usage_limits=_caps(2, tokens=50_000, output=6_000),
     ),
     "quality": LLMProfile(
         name="quality",
         model="anthropic:claude-sonnet-5-5",
-        settings={"thinking": "medium"},
-        usage_limits=_caps(2, tokens=50_000),
+        settings={"thinking": "medium", "max_tokens": 4_000},
+        usage_limits=_caps(2, tokens=50_000, output=10_000),
     ),
     "local": LLMProfile(
         name="local",
         model=f"{_ENV_PREFIX}{LOCAL_MODEL_ENV}",
+        settings={"max_tokens": 2_500},
         output_mode="prompted",
-        usage_limits=_caps(2),
+        usage_limits=_caps(2, output=6_000),
     ),
 }
-"""Built-in profiles. `dev` is the cheapest and the default everywhere."""
+"""Built-in profiles. `dev` is the cheapest and the default everywhere.
+
+Output is capped twice: `max_tokens` per response and `output_tokens_limit` per call (all
+retries). Anthropic's adaptive thinking (Haiku 5.5, Sonnet 5.5) sends no fixed `budget_tokens`,
+so thinking just shares `max_tokens`; a response that hits it is truncated and fails schema
+validation. See documentation/design/core.md, Model profiles.
+"""
 
 
 def _env_model(var: str) -> str | None:

@@ -58,7 +58,9 @@ class QualityValue(AINode):
     - No analyst consensus, ratings or price targets reach the context, to avoid LLM herding
       (the TASK-13 note): the profile frame is cut to name, sector, industry, country and
       business summary before rendering.
-    - News and profile text are untrusted evidence to weigh, never instructions; the prompt says so.
+    - News is parked as a lens input (too many tokens for what it adds; redesign in TASK-71). The
+      `news` dataset, `News` fetch node and `RecentNews` remain, but this lens takes no news.
+    - Profile text is untrusted evidence to weigh, never instructions; the prompt says so.
     """
 
     name: ClassVar[str] = "quality_value"
@@ -76,12 +78,11 @@ class QualityValue(AINode):
         "capital_returns": "capital_returns",
         "valuation": "valuation",
     }
-    optional_inputs: ClassVar[dict[str, str]] = {"profile": "profile", "recent_news": "recent_news"}
+    optional_inputs: ClassVar[dict[str, str]] = {"profile": "profile"}
     depth: ClassVar[dict[str, DepthRequirement]] = {
         "annual_fundamentals": DepthRequirement(desired=8, minimum=3),
-        "recent_news": DepthRequirement(desired=5, minimum=1),
     }
-    input_weights: ClassVar[dict[str, float]] = {"recent_news": 0.5, "profile": 0.5}
+    input_weights: ClassVar[dict[str, float]] = {"profile": 0.5}
     flag_codes: ClassVar[frozenset[str] | None] = QUALITY_VALUE_FLAGS
 
     critical_inputs: frozenset[str] = Field(default=frozenset({"annual_fundamentals"}))

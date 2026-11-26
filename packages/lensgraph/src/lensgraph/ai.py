@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, ClassVar, Literal, Self
 
 from jinja2 import Environment, StrictUndefined
-from pydantic import BaseModel, PrivateAttr, model_validator
+from pydantic import BaseModel, Field, PrivateAttr, create_model, model_validator
 from pydantic_ai import Agent, ModelRetry, NativeOutput, PromptedOutput, ToolOutput
 from pydantic_ai.exceptions import UnexpectedModelBehavior
 from pydantic_ai.settings import ModelSettings
@@ -39,6 +39,22 @@ class AIAssessmentOut(BaseModel):
     claims: list[Claim] = []
     flags: list[Flag] = []
     abstain_reason: str | None = None
+
+
+def assessment_schema(max_claims: int, max_claim_chars: int) -> type[AIAssessmentOut]:
+    """`AIAssessmentOut` with at most `max_claims` claims of at most `max_claim_chars` characters.
+
+    The bounds live in the JSON schema the model sees and are enforced on its answer; an answer
+    over them fails validation like any other malformed one. See core.md, Model profiles.
+    """
+    bounded_claim = create_model(
+        "Claim", __base__=Claim, text=(str, Field(max_length=max_claim_chars))
+    )
+    return create_model(
+        "AIAssessmentOut",
+        __base__=AIAssessmentOut,
+        claims=(list[bounded_claim], Field(default=[], max_length=max_claims)),  # type: ignore[valid-type]
+    )
 
 
 def _output_spec(mode: str, output_type: type[BaseModel]) -> Any:
@@ -133,6 +149,9 @@ class AINode(LensNode):
     inputs' output contracts in `bind_upstream`, which `build_plan` calls; a field without an
     entry fails the plan. The block is appended to the system prompt, after the template.
     `use_glossary=False` omits it (ablation only). See core.md, Glossary.
+
+    `max_claims` and `max_claim_chars` bound what the model writes (output tokens cost money);
+    they go into the output schema and the system prompt. See core.md, Model profiles.
     """
 
     prompt: ClassVar[Path]
@@ -144,6 +163,8 @@ class AINode(LensNode):
 
     profile: str = "dev"  # model profile name; see llm.py
     variant: str = "default"  # "default" (the `prompt`) or a key of `variants`; else rejected
+    max_claims: int = Field(default=5, ge=1)  # most claims the answer may carry (output schema + prompt)
+    max_claim_chars: int = Field(default=300, ge=1)  # longest claim text, in characters (schema + prompt)
     use_glossary: bool = True  # include the data dictionary in the prompt; False is for ablation only
 
     _bound: bool = PrivateAttr(default=False)
@@ -218,6 +239,10 @@ class AINode(LensNode):
         template = _JINJA.from_string(self._template_path().read_text())
         codes = sorted(self.flag_codes) if self.flag_codes is not None else None
         prompt = template.render(lens=self.lens_name, flag_codes=codes)
+        prompt = (
+            f"{prompt.rstrip()}\n\nAnswer limits: at most {self.max_claims} claims, each claim text "
+            f"at most {self.max_claim_chars} characters."
+        )
         if self.use_glossary and self._dictionary:
             prompt = f"{prompt.rstrip()}\n\n{self._dictionary}"
         return prompt
@@ -247,7 +272,7 @@ class AINode(LensNode):
         out, extra = await call_structured(
             registry=registry,
             profile_name=self.profile,
-            output_type=AIAssessmentOut,
+            output_type=assessment_schema(self.max_claims, self.max_claim_chars),
             system_prompt=self._system_prompt(),
             user_message=user_message,
             validate=lambda out: guard_rail(out, citables, self.flag_codes),

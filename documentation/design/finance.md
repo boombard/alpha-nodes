@@ -334,7 +334,7 @@ cross-candidate ranking in v1) and exposed as params. The backtest is how they g
   - earnings consistency (no losses / volatility)
   - `capital_returns`: the measurable signatures of a durable advantage: pre-tax ROIC level and spread, incremental ROIC, the worst-year operating margin, and capex intensity. The lens still judges the advantage; there is no moat score. These are signs, not proof.
   - a valuation range: owner-earnings yield vs. a hurdle, plus a simple intrinsic-value band
-- **Text inputs**: profile business summary; recent news. (A 10-K business section for US names waits for `filings_text`, deferred.)
+- **Text inputs**: profile business summary. News is **parked** as a lens input (up to 10 items x 90 days was unselective and cost too many tokens for what it added; the redesign is TASK-71). The `news` dataset, `News` fetch node and `RecentNews` stay and stay tested; `quality_value` no longer takes `recent_news` and the M6 run fetches none. (A 10-K business section for US names waits for `filings_text`, deferred.)
 - **Default prompt**: a rubric of seven principles stated neutrally and operationally, with
   no investor, company, letter, year or book names, so the model isn't primed to recall
   Buffett's holdings or views (several demo names are famous Berkshire holdings) and the

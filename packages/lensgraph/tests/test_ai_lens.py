@@ -588,3 +588,64 @@ def test_ai_evidence_shows_formatted_units(scripted_model, s1, toy_services, tmp
         p.content for m in model.calls[0] for p in m.parts if isinstance(p, UserPromptPart)
     )
     assert '"yield_frac": "15.3%"' in user and "0.153" not in user
+
+
+def _many_claims(n: int) -> dict[str, Any]:
+    return _with(claims=[{"text": f"c{i}", "direction": 1, "cites": ["growth_rate"]} for i in range(n)])
+
+
+def test_output_tokens_limit_fails_the_node(ai_registry, s1, toy_services, scripted_profiles, tmp_path):
+    from lensgraph.llm import UsageCaps
+
+    profiles = scripted_profiles(
+        _bad_cite("made_up"), GOOD, usage_limits=UsageCaps(output_tokens_limit=1)
+    )
+    node_result = _run(ai_registry, s1, toy_services, profiles, tmp_path).results[_key("S1")]
+    assert node_result.status == "failed"  # no verdict, no fallback
+    assert node_result.error is not None and "output_tokens_limit" in node_result.error
+
+
+def test_truncated_answer_fails_the_node(ai_registry, s1, toy_services, tmp_path):
+    from lensgraph.llm import LLMProfile, ProfileRegistry
+    from pydantic_ai.messages import ModelResponse, ToolCallPart
+    from pydantic_ai.models.function import FunctionModel
+
+    def cut_off(messages, info):
+        return ModelResponse(
+            parts=[ToolCallPart(info.output_tools[0].name, '{"status": "ok", "stance": 1, "claims": [{"te')],
+            finish_reason="length",
+        )
+
+    profiles = ProfileRegistry(
+        {"test": LLMProfile(name="test", model="test")}, model_overrides={"test": FunctionModel(cut_off)}
+    )
+    node_result = _run(ai_registry, s1, toy_services, profiles, tmp_path).results[_key("S1")]
+    assert node_result.status == "failed"
+
+
+def test_too_many_claims_fails_schema(ai_registry, s1, toy_services, scripted_profiles, tmp_path):
+    profiles = scripted_profiles(_many_claims(6))
+    node_result = _run(ai_registry, s1, toy_services, profiles, tmp_path).results[_key("S1")]
+    assert node_result.status == "failed"
+    ok = _run(ai_registry, s1, toy_services, scripted_profiles(_many_claims(5)), tmp_path / "ok")
+    assert ok.values[_key("S1")].status == "ok"
+
+
+def test_overlong_claim_text_fails_schema(ai_registry, s1, toy_services, scripted_profiles, tmp_path):
+    long = _with(claims=[{"text": "x" * 301, "direction": 1, "cites": ["growth_rate"]}])
+    node_result = _run(ai_registry, s1, toy_services, scripted_profiles(long), tmp_path).results[_key("S1")]
+    assert node_result.status == "failed"
+
+
+def test_output_schema_states_claim_bounds(ai_registry, s1, toy_services, scripted_profiles, tmp_path):
+    from lensgraph.ai import assessment_schema
+
+    schema = assessment_schema(max_claims=4, max_claim_chars=120).model_json_schema()
+    claims = schema["properties"]["claims"]
+    assert claims["maxItems"] == 4
+    assert schema["$defs"][claims["items"]["$ref"].split("/")[-1]]["properties"]["text"]["maxLength"] == 120
+    # the same numbers reach the model: in the tool schema and in the system prompt
+    profiles = scripted_profiles(GOOD)
+    _run(ai_registry, s1, toy_services, profiles, tmp_path, max_claims=4, max_claim_chars=120)
+    system = "\n".join(_text_parts(profiles.model_for("test").calls[0], SystemPromptPart))
+    assert "at most 4 claims" in system and "120 characters" in system

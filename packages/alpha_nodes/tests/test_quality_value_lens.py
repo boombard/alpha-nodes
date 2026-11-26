@@ -1,6 +1,6 @@
 """quality_value AI lens: guard rails, abstention, depth, variants and the static rubric."""
 
-from datetime import UTC, date, datetime
+from datetime import date
 from typing import Any
 
 import pandas as pd
@@ -10,7 +10,6 @@ from alpha_nodes.metrics import (
     BalanceSheetResult,
     CapitalReturnsResult,
     CashGenerationResult,
-    NewsItem,
     ProfitabilityResult,
     ValuationResult,
 )
@@ -32,7 +31,7 @@ GOOD: dict[str, Any] = {
         {
             "text": "Returns on equity are high and steady",
             "direction": 1,
-            "cites": ["profitability.roe_mean", "recent_news[n1]"],
+            "cites": ["profitability.roe_mean", "profitability.roe_min"],
         }
     ],
     "flags": [],
@@ -52,19 +51,6 @@ def profile_frame() -> pd.DataFrame:
             "isin": ["GB0000000001"],
         }
     )
-
-
-def news_items() -> list[NewsItem]:
-    return [
-        NewsItem(
-            id="n1",
-            published_at=datetime(2026, 6, 20, tzinfo=UTC),
-            headline="Acme wins contract",
-            source=None,
-            url=None,
-            summary=None,
-        )
-    ]
 
 
 def make_inputs(periods: int = 8, **overrides: Any) -> dict[str, Any]:
@@ -91,7 +77,6 @@ def make_inputs(periods: int = 8, **overrides: Any) -> dict[str, Any]:
             value_low=90.0, value_high=140.0, price_to_value=0.9, **window(periods),
         ),
         "profile": profile_frame(),
-        "recent_news": news_items(),
     }
     inputs.update(overrides)
     return inputs
@@ -108,7 +93,7 @@ async def run_lens(
 async def test_ok_verdict_with_valid_cites(make_model):
     v = await run_lens(make_model(GOOD))
     assert v.status == "ok" and v.stance == 1
-    assert v.claims[0].cites == ["profitability.roe_mean", "recent_news[n1]"]
+    assert v.claims[0].cites == ["profitability.roe_mean", "profitability.roe_min"]
     assert v.provenance.variant == "default"
 
 
@@ -256,3 +241,10 @@ async def test_prompt_points_advantage_at_capital_returns(make_model, variant):
     assert "`capital_returns`" in system
     assert "signs, not proof" in system
     assert "judge the advantage itself from the business description" in system
+
+
+def test_quality_value_takes_no_news():
+    assert "recent_news" not in QualityValue.all_inputs()
+    assert "recent_news" not in QualityValue.depth and "recent_news" not in QualityValue.input_weights
+    for path in (QualityValue.prompt, *QualityValue.variants.values()):
+        assert "news" not in path.read_text().lower(), path.name

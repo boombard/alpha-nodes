@@ -284,6 +284,21 @@ in config and are selected per run (`llm_profile: dev`) or per lens.
   included; defaults `request_limit = max_retries + 2`, plus `total_tokens_limit = 50_000` for
   `dev` and `quality`). Exceeding one raises pydantic-ai's `UsageLimitExceeded`, which fails the
   node like exhausted retries; there is no fallback. The limits are part of the fingerprint.
+- **Output caps** (M6 demo, 2026-11-26: output, thinking included, was about 40% of the cost; a
+  first-time pass wrote about 1,800 output tokens, one retry 2,600, two retries 4,300). Three caps,
+  all on the profile or the AI node so every AI node gets them:
+  - per response, `settings["max_tokens"]`: `dev` and `local` 2,500, `quality` 4,000. Thinking
+    shares it. The Anthropic models used here take adaptive thinking, which sends no fixed
+    `budget_tokens`, so there is no budget to fit inside it. A response that hits it is truncated and
+    fails schema validation (and is retried).
+  - per call over all retries, `UsageCaps.output_tokens_limit`: `dev` and `local` 6,000,
+    `quality` 10,000. Exceeding it raises `UsageLimitExceeded`, which fails the node.
+  - what the model writes: an AI lens answer carries at most `max_claims` claims (default 5) of at
+    most `max_claim_chars` characters each (default 300). The bounds are node params, go into the
+    output JSON schema (`assessment_schema`) and are stated at the end of the system prompt, so a
+    longer answer fails validation and the model knows the limit up front.
+  Hitting any cap fails the node: no fallback, no partial verdict. The caps and the prompt line
+  change profile fingerprints and prompt hashes, so every AI verdict misses the cache once.
 - One model call per lens run. Repeated sampling (stance mean/spread) is deferred to TASK-17.
 - Inputs with nothing to show (an `Absent`, or an empty list) are rendered as
   `NOT AVAILABLE` and are not citable, even though `citable_ids` lists their node-level id.

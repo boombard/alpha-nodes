@@ -123,12 +123,12 @@
                   "growth_rate": "2ffde053d982db220b1c7b5881cc79d08ce963330f02dda2b19e4922f6ab2cfe",
                   "tox_notes": "60290af994e9abf7f8bed9a787b481324432bb09c54d7af5dbdf61804fdbd282"
                 },
-                "input_tokens": 153,
-                "lens_version": "fec887cb1ff38ada",
+                "input_tokens": 166,
+                "lens_version": "1fd418f7c7f0a463",
                 "model": "function:_scripted:",
                 "model_settings": {},
                 "output_tokens": 20,
-                "prompt_hash": "56bbd09bbd3282ae0e0e65ebc28e48cf7ca3691b5892daed8e06f11934827083",
+                "prompt_hash": "6a24ed2fc4a070de2876179679c195e51bf39dd127f818651e4a5bcadb72090a",
                 "stance_samples": [],
                 "variant": "default"
               },
@@ -163,7 +163,7 @@
             "cite_units": {},
             "glossary_terms": [],
             "input_hashes": {
-              "dossier": "04189123ef467f12f0b4d91c61c457e552b2df16e85b5f4ebcaf796394697498"
+              "dossier": "3999eaad24284b8c20c601727137a11146fe640984ce851161d5c7f093106397"
             },
             "input_tokens": 219,
             "lens_version": "f396f830e279d30e",
@@ -288,7 +288,7 @@
                   "tox_notes": "5c28d529a964745c7ba2651b5591b0935543c054e7b00d25ed2139686c4a8ede"
                 },
                 "input_tokens": 0,
-                "lens_version": "fec887cb1ff38ada",
+                "lens_version": "1fd418f7c7f0a463",
                 "model": null,
                 "model_settings": {},
                 "output_tokens": 0,
@@ -327,7 +327,7 @@
             "cite_units": {},
             "glossary_terms": [],
             "input_hashes": {
-              "dossier": "b2fbd19376badec09eb24b31bf8b298b20679a785f0312f9d1fd01c54760fa4d"
+              "dossier": "0de603a0199b74be8b0a609587896fb7f87a5f043f64fe4ac6f3679fa9020802"
             },
             "input_tokens": 209,
             "lens_version": "f396f830e279d30e",
@@ -424,7 +424,7 @@
                 "glossary_terms": [],
                 "input_hashes": {},
                 "input_tokens": 0,
-                "lens_version": "fec887cb1ff38ada",
+                "lens_version": "1fd418f7c7f0a463",
                 "model": null,
                 "model_settings": {},
                 "output_tokens": 0,
@@ -463,7 +463,7 @@
             "cite_units": {},
             "glossary_terms": [],
             "input_hashes": {
-              "dossier": "558c89b94bf6ee9712a7f3206e7f187046946badb09d7fbbff71f046317fa8c6"
+              "dossier": "d43d410bdee34f46cf8d3876e0e64b7a8cd47d88839a034b221b0bc0912c78c8"
             },
             "input_tokens": 208,
             "lens_version": "f396f830e279d30e",
@@ -537,7 +537,7 @@
       "attempts": 1,
       "candidate": "S1",
       "cost_usd": null,
-      "input_tokens": 153,
+      "input_tokens": 166,
       "model": "function:_scripted:",
       "node": "safety_lens",
       "output_tokens": 20,
@@ -1129,7 +1129,7 @@
     },
     "finished_at": "2026-01-01T00:00:05Z",
     "llm_cost_usd": null,
-    "llm_input_tokens": 789,
+    "llm_input_tokens": 802,
     "llm_output_tokens": 98,
     "node_counts": {
       "failed": 1,

@@ -41,5 +41,4 @@ sources:
     prices: [yfinance]
     profile: [yfinance]
     fx: [yfinance]
-    news: [yfinance]
     fundamentals: [edgar, yfinance]

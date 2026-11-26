@@ -8,13 +8,24 @@ from toy.safety_lens import SafetyLens
 def test_dev_profile_is_default_and_cheapest():
     assert SafetyLens().profile == "dev"
     assert DEFAULT_PROFILES["dev"].model == "anthropic:claude-haiku-5-5"
-    assert DEFAULT_PROFILES["dev"].settings == {"thinking": "low"}
+    assert DEFAULT_PROFILES["dev"].settings["thinking"] == "low"
 
 
 def test_quality_profile_uses_sonnet_with_medium_thinking():
     quality = DEFAULT_PROFILES["quality"]
     assert quality.model == "anthropic:claude-sonnet-5-5"
-    assert quality.settings == {"thinking": "medium"}
+    assert quality.settings["thinking"] == "medium"
+
+
+def test_default_profiles_cap_output_tokens():
+    """Per response (`max_tokens`) and per call over all retries (`output_tokens_limit`)."""
+    caps = {"dev": (2_500, 6_000), "quality": (4_000, 10_000), "local": (2_500, 6_000)}
+    for name, (per_response, per_call) in caps.items():
+        profile = DEFAULT_PROFILES[name]
+        assert profile.settings["max_tokens"] == per_response, name
+        assert profile.usage_limits is not None
+        assert profile.usage_limits.output_tokens_limit == per_call, name
+    assert DEFAULT_PROFILES["dev"].settings["thinking"] == "low"  # caps sit beside, not replace
 
 
 def test_local_profile_requires_env(monkeypatch: pytest.MonkeyPatch):
@@ -78,11 +89,15 @@ def test_fingerprint_differs_by_model_id_and_override_type():
 def test_default_usage_limits():
     for name in ("dev", "quality"):
         profile = DEFAULT_PROFILES[name]
+        assert profile.usage_limits is not None
         assert profile.usage_limits == UsageCaps(
-            request_limit=profile.max_retries + 2, total_tokens_limit=50_000
+            request_limit=profile.max_retries + 2,
+            total_tokens_limit=50_000,
+            output_tokens_limit=profile.usage_limits.output_tokens_limit,
         )
     local = DEFAULT_PROFILES["local"].usage_limits
-    assert local == UsageCaps(request_limit=DEFAULT_PROFILES["local"].max_retries + 2)
+    assert local is not None and local.total_tokens_limit is None
+    assert local.request_limit == DEFAULT_PROFILES["local"].max_retries + 2
 
 
 def test_changing_usage_limits_changes_fingerprint():
