@@ -48,11 +48,11 @@ class PriceVsFundamentals(AINode):
     flag_codes = frozenset(FLAG_SEVERITY)
     # assess(): super().assess, then each flag's severity is set from FLAG_SEVERITY (framework-owned, like status)
 ```
-Stance meaning (in the prompt): +2 = the fundamentals strongly support the price action and current valuation; 0 = mixed or no clear divergence; −2 = the price has run well ahead of (or against) deteriorating fundamentals. The prompt says the momentum numbers are context for the comparison, not a reason to be bullish by themselves.
+Stance meaning (in the prompt): +2 = the fundamentals strongly support the price action and current valuation; 0 = mixed or no clear divergence; −2 = the price has run well ahead of (or against) deteriorating fundamentals. The prompt says the momentum numbers are context for the comparison, not a reason to be bullish by themselves, and carries the TASK-61 line: "Fields listed in a result's `field_periods` come from an older period than its `last_period_end`; weigh them accordingly, lower your conviction when key fields are stale, and say so."
 
 ## Steps
 - [ ] Write the failing tests (`FunctionModel`, `ALLOW_MODEL_REQUESTS = False`):
-  `test_ok_verdict_with_valid_cites`, `test_flag_severity_overridden_from_code` (the model says `info` for `price_up_fundamentals_down`; the verdict has `warn`), `test_unknown_flag_code_rejected`, `test_abstains_with_one_period_and_no_model_call`, `test_depth_note_rendered` ("2 of 4"), `test_prompt_states_divergence_framing` (the system prompt contains the stance scale and the flag list), `test_docstring_records_no_analyst_inputs`.
+  `test_ok_verdict_with_valid_cites`, `test_flag_severity_overridden_from_code` (the model says `info` for `price_up_fundamentals_down`; the verdict has `warn`), `test_unknown_flag_code_rejected`, `test_abstains_with_one_period_and_no_model_call`, `test_depth_note_rendered` ("2 of 4"), `test_prompt_states_divergence_framing` (the system prompt contains the stance scale and the flag list), `test_docstring_records_no_analyst_inputs`, `test_prompt_mentions_field_periods`.
 - [ ] Run `uv run pytest packages/alpha_nodes/tests/test_price_vs_fundamentals_lens.py -q`. Expected: FAIL.
 - [ ] Implement.
 - [ ] Run `uv run pytest -q`, `uv run ruff check`, `uv run pyright`. Expected: PASS.

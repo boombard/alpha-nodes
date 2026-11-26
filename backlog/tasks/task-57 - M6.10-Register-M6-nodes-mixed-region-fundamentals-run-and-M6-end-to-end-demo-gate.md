@@ -16,6 +16,7 @@ dependencies:
   - TASK-54
   - TASK-55
   - TASK-56
+  - TASK-61
 references:
   - documentation/design/finance.md
 type: feature

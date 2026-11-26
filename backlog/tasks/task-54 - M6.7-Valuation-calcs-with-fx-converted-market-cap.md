@@ -9,6 +9,7 @@ labels:
 milestone: m-5
 dependencies:
   - TASK-53
+  - TASK-61
 references:
   - documentation/design/finance.md
 type: feature
@@ -29,7 +30,7 @@ Valuation calcs that combine price-side and statement-side money: market cap thr
 - Modify `documentation/design/finance.md` only if behaviour differs from it.
 
 ## Interfaces
-Consumes: `annual_periods`, `period_window` (M6.6); `reference_day`, `fx_factor`, `ValuationResult`, `ValuationChangeResult`, `BARS_PER_YEAR` (M6.1, M5); kernels `owner_earnings`, `capitalised_value`, `safe_ratio` (M6.2); the `prices` frame (M4) and the `fx` frame from `FxRates` (entity column).
+Consumes: `annual_periods`, `period_window` (M6.6); `latest_complete`, `PeriodWindow.field_periods`, `MAX_STALE_PERIODS` (TASK-61); `reference_day`, `fx_factor`, `ValuationResult`, `ValuationChangeResult`, `BARS_PER_YEAR` (M6.1, M5); kernels `owner_earnings`, `capitalised_value`, `safe_ratio` (M6.2); the `prices` frame (M4) and the `fx` frame from `FxRates` (entity column).
 
 Produces:
 ```python
@@ -40,7 +41,8 @@ def bars_back(prices: pd.DataFrame, day: date, bars: int) -> date | None        
 # valuation.py
 def valuation_on(prices: pd.DataFrame, fundamentals: pd.DataFrame, fx: pd.DataFrame, day: date,
                  hurdle_low: float = 0.08, hurdle_high: float = 0.12) -> ValuationResult
-    # periods = annual_periods(fundamentals, day); latest period's shares_outstanding, net_income, owner earnings;
+    # periods = annual_periods(fundamentals, day); shares_outstanding, net_income and owner earnings each via
+    # latest_complete (TASK-61), recording any older period in field_periods;
     # market_cap = close × shares × fx_factor(trading -> reporting, price_date); a missing fx rate -> fx_rate None and
     # every money-derived field None (never a silent 1.0); value_low = OE / hurdle_high, value_high = OE / hurdle_low
 
@@ -58,7 +60,7 @@ Both read the raw `fundamentals` frame (not `annual_fundamentals`) so the "then"
 ## Steps
 - [ ] Write the failing tests (hand-built frames; fx frames with an `entity` column):
   - `test_series.py`: `test_close_on_takes_last_bar_on_or_before`, `test_close_on_none_before_first_bar`, `test_bars_back`.
-  - `test_valuation.py`: `test_same_currency_hand_values` (USD/USD: market cap, earnings yield, P/E, OE yield, band, price_to_value), `test_cross_currency_uses_fx` (GBP trading, USD reporting: fx_rate = usd_per_unit(GBP)), `test_missing_fx_rate_gives_none_not_one`, `test_negative_earnings_pe_none_yield_negative`, `test_negative_owner_earnings_band_none`, `test_no_known_periods_gives_zero_period_result`.
+  - `test_valuation.py`: `test_same_currency_hand_values` (USD/USD: market cap, earnings yield, P/E, OE yield, band, price_to_value), `test_cross_currency_uses_fx` (GBP trading, USD reporting: fx_rate = usd_per_unit(GBP)), `test_missing_fx_rate_gives_none_not_one`, `test_negative_earnings_pe_none_yield_negative`, `test_negative_owner_earnings_band_none`, `test_no_known_periods_gives_zero_period_result`, `test_valuation_records_stale_shares_in_field_periods` (latest row lacks shares_outstanding: shares from the year before, listed in field_periods).
   - `test_valuation_calcs.py`: `test_valuation_change_uses_periods_known_then` (a period filed between then and now is used only for now), `test_valuation_change_pe_change_hand_value`, `test_short_price_history_then_none`, `test_hurdles_validated`, `test_valuation_nodes_are_not_memoized_and_declare_code_deps`.
 - [ ] Run `uv run pytest packages/alpha_nodes/tests/test_valuation.py packages/alpha_nodes/tests/test_valuation_calcs.py packages/alpha_nodes/tests/test_series.py -q`. Expected: FAIL.
 - [ ] Implement.
