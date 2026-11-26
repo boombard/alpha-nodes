@@ -1,10 +1,10 @@
 ---
 id: TASK-69
 title: Finance fields declare units
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-26T04:35:00Z'
-updated_date: '2026-11-26T08:08:38Z'
+updated_date: '2026-11-26T08:11:52Z'
 labels:
   - finance
 milestone: m-5
@@ -75,9 +75,9 @@ User rulings 2026-11-26 (after the In Review verdict): fix per-share money digit
 ## Final Summary
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
-Worker (Sonnet, worktree task-69, 4 commits 6d08646..7bd9248): every numeric result field, canonical dataset column and AnnualFundamentals column declares a unit; kind tags and FieldKind removed; finance units MONEY, MONEY_PER_SHARE (prefix currency), TRADING_MONEY_PER_SHARE (prefix trading_currency, ValuationResult.close), SHARES; price_behaviour claims use {signed}/{value}; glossary prompt notes stop restating units; require_units=False removed from price_behaviour, quality_value and price_vs_fundamentals; opt/ratio shared in alpha_nodes/scalars.py across the four callers. pytest 1259 passed, ruff and pyright clean. Evidence excerpt: trend = {bars: '300 bars', currency: 'GBP', close: 'GBP 189', ma: 'GBP 175', pct_above_ma: '7.9%', ma_slope: '8.1%/yr'}; balance_sheet = {debt_to_equity: '0.3×', interest_cover: '12×', net_debt: 'USD 5'}.
+Worker (Sonnet, worktree task-69, 6 commits 6d08646..2dc0078; squash on landing): every numeric result field, canonical dataset column and AnnualFundamentals column declares a unit; kind tags and FieldKind removed; finance units MONEY (compact), MONEY_PER_SHARE (2 dp, prefix currency), TRADING_MONEY_PER_SHARE (2 dp, prefix trading_currency, ValuationResult.close), SHARES; PriceWindow.currency carries the bars' trading currency so TrendResult.close/ma are prefixed; core gains Unit.decimals and PERCENTAGE_POINTS (style points, ' pp'), used by op_margin_change_1y; price_behaviour claims use {signed}/{value}; glossary prompt notes stop restating units (multiple meanings kept); require_units=False removed from price_behaviour, quality_value and price_vs_fundamentals; opt/ratio shared in alpha_nodes/scalars.py. TS types regenerated, UI typecheck and 60 tests pass. pytest 1269 passed, ruff and pyright clean. Evidence: trend close 'GBP 189.20', ma 'GBP 175.40', pct_above_ma '7.9%', ma_slope '8.1%/yr'; op_margin_change_1y '+2 pp'; balance_sheet debt_to_equity '0.3×', net_debt 'USD 5'.
 
-Review: 2 rounds. R1: user ruling added PriceWindow.currency (trading currency, carried via TotalReturnSchema.currency, filled in window_info) so TrendResult.close/ma are prefixed money (Files widened to series.py and its tests); restored the multiple meanings in interest-cover and debt-to-equity glossary notes. R2: finance.md money-units bullet wording. Verdict: approve.
+Review: 3 rounds. R1: user ruling PriceWindow.currency; restored multiple meanings in interest-cover and debt-to-equity notes. R2: finance.md wording. R3 (user rulings): Unit.decimals for per-share money, percentage points for margin changes (audit: op_margin_change_1y is the only difference of fractions; *_std stay FRACTION). Files widened by user rulings to series.py, lensgraph/units.py, core.md, run-view.ts and BUILD_INFO.json. Verdict: approve.
 
-Open points: (a) TASK-68 browser click-through of unit-bearing cites in a real finance run report not done (needs the human); (b) MONEY_PER_SHARE renders at 3 significant figures (189.20 -> 'GBP 189'); (c) op_margin_change_1y is FRACTION ('+2.0%') though it is a percentage-point change; (d) finance lens verdict caches miss once (expected).
+Open points: TASK-68 browser click-through deferred to TASK-57; every finance lens's verdict cache misses once (evidence and unit maps changed).
 <!-- SECTION:FINAL_SUMMARY:END -->
