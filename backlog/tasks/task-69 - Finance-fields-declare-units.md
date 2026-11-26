@@ -4,7 +4,7 @@ title: Finance fields declare units
 status: To Do
 assignee: []
 created_date: '2026-11-26T04:35:00Z'
-updated_date: '2026-11-26T04:57:22Z'
+updated_date: '2026-11-26T05:44:47Z'
 labels:
   - finance
 milestone: m-5
@@ -59,4 +59,6 @@ Expected side effect: the evidence of every finance lens changes, so their verdi
 
 <!-- SECTION:NOTES:BEGIN -->
 From TASK-67 review (2026-11-26): (1) price_behaviour claim templates were switched to {raw:+.1%} as a stopgap. Once FRACTION / FRACTION_PER_YEAR are declared on those fields, convert them to {signed} (or {value}) so they use format_value. (2) Bare scalar outputs (output = float) are not unit-checked. Keep every finance numeric output a pydantic or pandera model so its fields carry units.
+
+From TASK-68 (user ruling 2026-11-26): once finance fields declare units, click through unit-bearing cites in a real finance run report in a browser: field tables show display strings (e.g. 15.3%, USD 12.3bn), DataGrid headers carry unit ids, columns sort on raw values.
 <!-- SECTION:NOTES:END -->
