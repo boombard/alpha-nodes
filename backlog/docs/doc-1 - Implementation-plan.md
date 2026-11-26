@@ -45,7 +45,7 @@ pandera, DuckDB, pyarrow, pydantic-ai-slim 2.71, Jinja2; pytest + pytest-asyncio
 - Every task passes: `uv run pytest`, `uv run ruff check`, `uv run pyright` (basic).
 - UI tasks (`packages/lensgraph-ui`, pnpm) also pass `pnpm -C packages/lensgraph-ui test` and `typecheck`. The built bundle is committed into the Python package; Python tests check it is up to date, so Python-only work never needs Node.
 - Docs: if behaviour differs from `documentation/design/*`, update the doc in the same change.
-- Every new citable result field gets a glossary entry in the same task (core.md "Glossary"; enforced by the finance glossary coverage test from TASK-64 on).
+- Every new citable result field, and every new field or frame column that reaches an AI lens, gets a glossary entry in the same task (core.md "Glossary"; an unclaimed field fails the plan from TASK-66 on, and the finance coverage tests from TASK-64 on). Prompt templates hold instructions only; what a field means lives in its entry.
 
 ## Review Focus
 

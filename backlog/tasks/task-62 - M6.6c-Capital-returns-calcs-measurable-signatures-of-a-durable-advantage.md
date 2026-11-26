@@ -32,11 +32,11 @@ A moat cannot be computed, but it leaves measurable signatures: high returns on 
   - `packages/alpha_nodes/src/alpha_nodes/lenses/quality_value.py`: `capital_returns` input
   - `packages/alpha_nodes/src/alpha_nodes/prompts/quality_value.md.j2`, `prompts/quality_value_buffett_persona.md.j2`: point the durable-advantage principle at `capital_returns`
   - `documentation/design/finance.md`: quality_value calc inputs; a pinned-conventions bullet for the new fields
-- Create: glossary entries for the new fields in `packages/alpha_nodes/src/alpha_nodes/glossary/` (e.g. `roic-pretax.md`, `incremental-roic.md`, `op-margin-floor.md`, `capex-intensity.md`), `status: draft`, in the TASK-64 format; add their ids to `QualityValue.glossary_terms`
+- Create: glossary entries for the new fields in `packages/alpha_nodes/src/alpha_nodes/glossary/` (e.g. `roic-pretax.md`, `incremental-roic.md`, `op-margin-floor.md`, `capex-intensity.md`), `status: draft`, in the TASK-64 format (prompt notes state basis, window, units and the base-period fallback); no lens edit is needed for them: `quality_value`'s data dictionary is derived from its inputs, and a plan with an unclaimed `CapitalReturnsResult` field fails
 - Test: `packages/alpha_nodes/tests/test_kernels_fundamentals.py`, `test_metrics.py`, `test_fundamental_calcs.py`, `test_quality_value_lens.py`
 
 ## Interfaces
-Consumes: `safe_ratio`, `mean_std` (M6.2); `FINANCE_GLOSSARY` and the entry format (TASK-63/64); `values`, `period_window`, `years_between` (TASK-53); `PeriodWindow.field_periods` (TASK-61); `QualityValue` (TASK-55).
+Consumes: `safe_ratio`, `mean_std` (M6.2); `FINANCE_GLOSSARY_DIR` and the entry format (TASK-63/64/66); `values`, `period_window`, `years_between` (TASK-53); `PeriodWindow.field_periods` (TASK-61); `QualityValue` (TASK-55).
 
 Produces:
 ```python
@@ -88,7 +88,7 @@ Out of scope: gross margin (gross profit not ingested); after-tax ROIC (tax expe
 - [ ] #2 CapitalReturns gives pre-tax ROIC level/min/std, incremental ROIC, margin floor and capex ratios, None where not applicable (no operating income, invested capital <= 0)
 - [ ] #3 quality_value takes capital_returns as an input and both prompts point the durable-advantage principle at it, as signs not proof
 - [ ] #4 finance.md lists the new calc inputs and their conventions
-- [ ] #5 The new fields have glossary entries (draft) and quality_value declares their terms; the finance glossary coverage test passes
+- [ ] #5 The new fields have glossary entries (draft); the finance glossary coverage tests and the quality_value plan-build test pass
 <!-- AC:END -->
 
 ## Definition of Done

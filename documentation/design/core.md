@@ -146,7 +146,7 @@ Rules:
   Anything still invisible (undeclared helpers, third-party code) has the escape hatch:
   `--invalidate <node>` (that node and descendants) and `--no-cache`.
 - AI nodes: the key includes model id, hash of the rendered system prompt (template plus the glossary
-  block when on), prompt variant, and the rendered context hash. Identical calls are never paid for twice.
+  data dictionary, unless ablated), prompt variant, and the rendered context hash. Identical calls are never paid for twice.
 
 ## Verdicts and dossiers
 
@@ -309,18 +309,25 @@ in config and are selected per run (`llm_profile: dev`) or per lens.
   `provenance.backtest_valid = false`.
 - Token usage and cost are recorded per call, and are aggregable per run and per campaign.
 
-## Glossary (user decision, 2026-11-26)
+## Glossary (user decisions, 2026-11-26: mechanism; then always on for AI nodes)
+
+Status: the mechanism landed with TASK-63 (opt-in notes); the always-on data dictionary below
+(claims, binding at plan build, ablation-only switch) is implemented by TASK-66.
 
 A domain ships a **glossary**: a directory of Markdown files, one per term, each with YAML
-frontmatter. It has two readers:
+frontmatter. It is the single home of per-term definitions, and it has two readers:
 
 - **Humans**: what a term means, how we compute it, why it matters, where it misleads.
-- **AI nodes (opt-in)**: a short prompt note per term, inserted into the system prompt to
-  disambiguate terms for weaker models. The note is interpretive guidance only; the model never
-  computes (AI nodes, guard rails).
+- **AI nodes (always)**: the *data dictionary* of the lens's evidence. Almost every number we
+  hand a model is our own version of a metric (its window, basis, sign, units and fallbacks),
+  which no model knows from training. So a definition is part of the evidence, not optional
+  coaching for weaker models: every field that reaches an AI lens must have an entry, and the
+  lens's system prompt carries each entry's short prompt note. The note is interpretive only;
+  the model never computes (AI nodes, guard rails).
 
-It is the single home of per-term definitions. Design docs keep policy (why a convention was
-chosen) and link to entries; kernel and field docstrings point to their entry.
+Design docs keep policy (why a convention was chosen) and link to entries; kernel and field
+docstrings point to their entry. Prompt templates keep instructions (what to weigh, how to
+judge) and refer to fields by name; what a field *means* lives only in its entry.
 
 **Entry file** `<id>.md` (the file stem is the id, kebab-case):
 
@@ -331,7 +338,7 @@ name: Free cash flow
 abbreviations: [FCF]
 aliases: [free cash flow to equity (loosely)]
 kind: money                   # free text, domain-defined (money, ratio, growth, count, date, ...)
-fields: [CashGenerationResult.fcf]     # result-model fields that report this term ("Model.field")
+fields: [CashGenerationResult.fcf]     # claims: "Model.field" or "Model"; see Claims
 implemented_by: [alpha_nodes.nodes.fundamental_calcs._fcf]   # dotted paths; must import
 related: [owner-earnings, fcf-conversion]                    # other ids; must exist
 status: draft                 # draft (written from model knowledge) | verified (researched)
@@ -347,7 +354,26 @@ to a fixed section key, which is what code and the browser use; the heading text
 Definition (`definition`) · How we calculate it (`calculation`) · Why it matters (`relevance`) ·
 Shortcomings and pitfalls (`shortcomings`) · Provider notes (`provider_notes`, optional) ·
 Similar terms (`similar`) · Sources (`sources`, optional while draft) · Prompt note (`prompt_note`).
-The Prompt note is at most 60 words and must not contain a formula to apply (no `$` math).
+
+The **Prompt note** (at most 60 words) says what the number is *in our data*: basis, window,
+units (a ratio is a fraction: write "0.15 means 15%"), sign, fallbacks, plus at most one
+interpretive caution. A verbal definition is fine; a formula to apply is not (no `$` math;
+a domain's tests may be stricter, e.g. no `=`).
+
+**Claims (fields to entries):**
+
+- An entry's `fields` lists claims. `Model.field` claims one field; `Model` claims every field of
+  that model, and is meant for window and metadata models (a price window, a listing profile).
+  Never use a whole-model claim on a model with metric fields: a new metric field would be
+  covered silently. `Model` is the class `__name__` of a pydantic model or a pandera
+  `DataFrameModel` (frame columns are its fields).
+- A field resolves by walking its output model's MRO from the model itself up: at the first
+  class that has the field, the claim `Class.field`, else `Class`, wins; if neither, the next
+  class up. So a field inherited from a window base is claimed once, on the base.
+- No claim appears twice (validated on load). `Glossary.term_for(model, field) -> str | None`
+  is the resolver. `Glossary.unresolved_claims(models) -> list[str]` lists the claims that name
+  no class or field among `models`; a domain test passes every node `output` of its registry
+  and asserts `[]`, so a renamed or removed field can't leave a stale claim behind.
 
 **Browser-ready format** (so a glossary page and run-view links can be added later without
 reformatting entries):
@@ -362,33 +388,55 @@ reformatting entries):
   RunView: a pydantic model (`schema_version`, `content_hash`, entries with frontmatter, `summary`,
   and sections as Markdown strings keyed by section key), serialised to `glossary.json`; its TS
   types are generated like RunView's when the UI work happens.
-- Field linking needs nothing new: entries list `fields` as `ResultModel.field`
-  (`Glossary.by_field()`), and the run-view builder knows each cited output's model, so it can
-  attach the term id to a field cite.
+- Field linking needs nothing new: the run-view builder knows each cited output's model, so
+  `Glossary.term_for` gives the term id to attach to a field cite.
 - Later (not now): a standalone glossary page in the run view app, term links and tooltips on
   cited fields, and `run.json` embedding the subset of entries a run cited (with the
   `content_hash`), so an old report shows the definitions as they were when it ran.
 
-**Mechanics (lensgraph, domain-free):**
+**Data dictionary in AI prompts (lensgraph, domain-free):**
+
+- An `AINode` names its glossary directory: `glossary: ClassVar[Path | None] = None` (None: the
+  domain has no glossary and no dictionary is rendered). Nothing is loaded at import, so a broken
+  entry cannot break importing a domain's lenses.
+- **Binding at plan build.** `build_plan` calls `Node.bind_upstream(outputs)` on every node
+  instance, with `{input name: upstream output contract}` taken from the resolved classes
+  (replacements included). It is a no-op except on `AINode`, which loads its glossary and
+  resolves every field of every input's contract, optional inputs included: pydantic model
+  fields, pandera frame columns, and the item model of a `list[Model]` contract. Other
+  contracts (a bare `list`, plain types) contribute no fields.
+- **Strict.** A field with no claim fails the plan with a `GlossaryError` naming the lens, the
+  input and the field, before any model call. So does an invalid entry, but only in plans that
+  contain an AI lens using that glossary; a price-only run never loads it.
+- `glossary_concepts: ClassVar[frozenset[str]] = frozenset()` adds ids for concepts the prompt
+  uses that are not fields (e.g. a rubric term); unknown ids fail the plan.
+- `Glossary.dictionary_block(paths, concepts) -> str`, where `paths` maps entry id to the
+  evidence paths it covers: "## Data dictionary", then one line per entry in id order,
+  `- <paths> (<kind>): **<name> (<abbreviations>)**: <prompt note>`, then the concept entries
+  without paths. Paths are the exact evidence paths `input.field` (a frame column is
+  `input.column`), compacted per input as `input.{a, b}` when one entry covers several fields
+  of one input. Deterministic; escaped dollars (`\$`) are unescaped.
+- The block is appended to the system prompt after the template's static content. It depends
+  only on classes, never on values, so it is static per lens (prompt caching applies) and does
+  not change when an input is NOT AVAILABLE for a candidate.
+- **Ablation only:** param `use_glossary: bool = True`. False omits the block, set per node in a
+  run config (`nodes: {quality_value: {use_glossary: false}}`), to measure what the dictionary is
+  worth; coverage is still checked. Model profiles carry nothing about the glossary: changing
+  the model must never change what the prompt says.
+- **Hashing:** the prompt hash is the hash of the rendered system prompt (template + block). So
+  editing a used entry's name, abbreviations, kind or prompt note, or adding a field to an input's
+  output model, reruns that lens and nothing else; editing an entry's other sections reruns
+  nothing. Provenance records `prompt_hash` and `glossary_terms` (every id in the block, sorted;
+  empty when ablated).
+
+**Loading and CLI:**
 
 - `GlossaryEntry` (pydantic: frontmatter fields + `sections`, keyed by the fixed section keys)
   and `Glossary.load(directory) -> Glossary` validate everything above: id = stem, required
-  headings present, `related` ids exist, `sources` non-empty for `verified`, no field claimed by
-  two entries, prompt note length, no raw HTML, balanced math, resolvable relative links. Every
-  failure is a `GlossaryError` naming the file. `implemented_by` resolution is checked by
+  headings present, `related` ids exist, `sources` non-empty for `verified`, no claim made twice,
+  prompt note length, no raw HTML, balanced math, resolvable relative links. Every failure is a
+  `GlossaryError` naming the file. `implemented_by` resolution is checked by
   `Glossary.check_imports()` (a domain test calls it; loading never imports domain code).
-- `Glossary.prompt_block(ids) -> str`: "## Terms" then, per id in sorted order,
-  `**<name> (<abbreviations>)**: <prompt note>`. Deterministic; escaped dollars (`\$`) are
-  unescaped in the prompt.
-- `AINode` gains `glossary: ClassVar[Glossary | None] = None` and
-  `glossary_terms: ClassVar[frozenset[str]] = frozenset()` (unknown ids raise `GlossaryError` at
-  class definition), and a param `use_glossary: bool | None = None` (None = the profile's
-  default). `LLMProfile` gains `glossary: bool = False` (`local` defaults to true; `dev`,
-  `quality` false). When on, the block is appended to the system prompt after the template's
-  static content, so it stays static per lens and prompt caching still applies.
-- **Hashing:** the prompt hash is the hash of the rendered system prompt (template + glossary
-  block), so editing an entry the lens uses reruns that lens and nothing else. Provenance
-  records `prompt_hash` and `glossary_terms` used (sorted; empty when off).
 - `lensgraph glossary DIR` lists entries as `status  id  fields`, drafts first, and exits
   non-zero on a validation error.
 
