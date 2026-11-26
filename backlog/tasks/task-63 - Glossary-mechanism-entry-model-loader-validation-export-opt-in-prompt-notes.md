@@ -3,10 +3,10 @@ id: TASK-63
 title: >-
   Glossary mechanism: entry model, loader, validation, export, opt-in prompt
   notes
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-26T00:27:59Z'
-updated_date: '2026-11-26T00:57:04Z'
+updated_date: '2026-11-26T01:02:49Z'
 labels:
   - core
 milestone: m-5
@@ -166,18 +166,18 @@ reformatting entries):
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Glossary.load validates entries as core.md specifies, with GlossaryError naming file and problem
-- [ ] #2 AI nodes insert the prompt notes of their declared terms only when on (profile default, node override), after the static template; off by default on dev
-- [ ] #3 The prompt hash covers the inserted text: editing a used entry reruns the lens, an unused one does not
-- [ ] #4 lensgraph glossary DIR lists entries by status and fails on invalid ones; lensgraph stays domain-free
+- [x] #1 Glossary.load validates entries as core.md specifies, with GlossaryError naming file and problem
+- [x] #2 AI nodes insert the prompt notes of their declared terms only when on (profile default, node override), after the static template; off by default on dev
+- [x] #3 The prompt hash covers the inserted text: editing a used entry reruns the lens, an unused one does not
+- [x] #4 lensgraph glossary DIR lists entries by status and fails on invalid ones; lensgraph stays domain-free
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -194,4 +194,6 @@ Human review round 1 resolved in 7ec475e: prompt_block unescapes \$ (entries sta
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 Worker: lensgraph glossary.py (GlossaryEntry, Glossary.load with validation, prompt_block, content_hash, export/GlossaryExport, by_field, check_imports), AINode glossary/glossary_terms/use_glossary with the block appended after the static template, LLMProfile.glossary (local on), lensgraph glossary CLI, 3 toy entries, core.md Glossary section, all listed tests. Files beyond the list: verdict.py (Provenance.glossary_terms, coordinator-approved), regenerated run-view.ts, lensgraph-ui fixtures/toy-run.json and view/app/BUILD_INFO.json (schema hash checks require them); AINode tests live in test_ai_lens.py. Review: 1 round, 3 findings, all resolved in 45d8c1e: (1) core.md Memoization now says rendered-system-prompt hash; (2) escaped \$ allowed in math balance and prompt notes (test_escaped_dollar_allowed, doc line); (3) CommonMark autolinks no longer flagged as HTML (test_autolink_is_not_html). Commits: 4dbf0c0, 45d8c1e. pytest 1019 passed, ruff and pyright clean. Verdict: approve. Open points: prompt hash is now over the rendered system prompt, so every cached AI verdict misses once after landing; caps 60 words (note) / 30 (summary), any unescaped $ banned in prompt notes; an escaped \$ in a prompt note reaches the LLM with its backslash; _split_sections would also split on '## ' lines inside fenced code (unlikely in entries).
+
+Landed 3b9bfd5 on main (squashed from 4dbf0c0, 45d8c1e, 7ec475e).
 <!-- SECTION:FINAL_SUMMARY:END -->
