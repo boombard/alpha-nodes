@@ -4,6 +4,7 @@ title: Finance fields declare units
 status: To Do
 assignee: []
 created_date: '2026-11-26T04:35:00Z'
+updated_date: '2026-11-26T04:57:22Z'
 labels:
   - finance
 milestone: m-5
@@ -53,3 +54,9 @@ Expected side effect: the evidence of every finance lens changes, so their verdi
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+From TASK-67 review (2026-11-26): (1) price_behaviour claim templates were switched to {raw:+.1%} as a stopgap. Once FRACTION / FRACTION_PER_YEAR are declared on those fields, convert them to {signed} (or {value}) so they use format_value. (2) Bare scalar outputs (output = float) are not unit-checked. Keep every finance numeric output a pydantic or pandera model so its fields carry units.
+<!-- SECTION:NOTES:END -->
