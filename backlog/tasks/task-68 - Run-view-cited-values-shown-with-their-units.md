@@ -1,0 +1,50 @@
+---
+id: TASK-68
+title: 'Run view: cited values shown with their units'
+status: To Do
+assignee: []
+created_date: '2026-11-26T04:35:00Z'
+labels:
+  - core
+  - ui
+milestone: m-5
+dependencies:
+  - TASK-67
+references:
+  - documentation/design/core.md
+ordinal: 68000
+---
+
+## Description
+
+<!-- SECTION:DESCRIPTION:BEGIN -->
+The run view formats cited values by unit (core.md "Units" and "Reporting: run view"). The builder reads each verdict's `Provenance.cite_units`, so it needs no domain import. The UI shows Python's formatted strings and keeps the raw values for sorting, so there is no second formatter in TypeScript.
+
+## Files
+- Modify: `packages/lensgraph/src/lensgraph/view/models.py` (`CitedView.display: dict[str, str] | None`, field -> formatted, for model/field cites; `TableData.units: dict[str, str]` column -> unit id, and `TableData.display_rows: list[list[str | None]] | None`), `view/build.py` (fill them from `cite_units` with `format_value`, rows giving `prefix_field` context)
+- Modify (UI): `packages/lensgraph-ui/src/` (field/value table shows `display`; DataGrid uses `display_rows` in a valueFormatter, sorts on raw, and adds unit ids to the column headers), regenerated `src/types/run-view.ts`, `fixtures/toy-run.json`, bundle and `BUILD_INFO.json`
+- Test: `packages/lensgraph/tests/test_view.py`, `test_view_schema.py`; `packages/lensgraph-ui/tests/unit/` (the matching component tests)
+- Docs: core.md "Reporting: run view": one bullet on display strings
+
+## Steps
+- [ ] Failing tests: `test_cited_field_has_display`, `test_cited_frame_display_rows_and_units`, `test_money_display_uses_row_prefix`, `test_cite_without_units_has_no_display` (old runs still render); UI: the display text is shown, and sorting stays numeric.
+- [ ] Run. Expected: FAIL.
+- [ ] Implement; regenerate the types and fixture; `pnpm -C packages/lensgraph-ui test`, `typecheck`, `bundle`.
+- [ ] Run `uv run pytest -q`, `uv run ruff check`, `uv run pyright`. Expected: PASS. Open a toy report in the browser and look at a cited table and a cited model.
+- [ ] Commit: `feat(lensgraph): run view shows cited values with their units`.
+<!-- SECTION:DESCRIPTION:END -->
+
+## Acceptance Criteria
+<!-- AC:BEGIN -->
+- [ ] #1 Cited fields and frames carry display strings formatted from cite_units, with no domain import
+- [ ] #2 UI shows the display strings, sorts on raw values, and shows units in table headers
+- [ ] #3 Runs without cite_units still render
+<!-- AC:END -->
+
+## Definition of Done
+<!-- DOD:BEGIN -->
+- [ ] #1 `uv run pytest` passes (whole workspace)
+- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
+- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+<!-- DOD:END -->

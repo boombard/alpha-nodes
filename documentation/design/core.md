@@ -146,7 +146,7 @@ Rules:
   Anything still invisible (undeclared helpers, third-party code) has the escape hatch:
   `--invalidate <node>` (that node and descendants) and `--no-cache`.
 - AI nodes: the key includes model id, hash of the rendered system prompt (template plus the glossary
-  data dictionary, unless ablated), prompt variant, and the rendered context hash. Identical calls are never paid for twice.
+  data dictionary, unless ablated), prompt variant, and the lens's presentation fingerprint (its bound unit map and the renderer source; see Units). Input values enter through their content hashes. Identical calls are never paid for twice.
 
 ## Verdicts and dossiers
 
@@ -356,7 +356,7 @@ Shortcomings and pitfalls (`shortcomings`) · Provider notes (`provider_notes`, 
 Similar terms (`similar`) · Sources (`sources`, optional while draft) · Prompt note (`prompt_note`).
 
 The **Prompt note** (at most 60 words) says what the number is *in our data*: basis, window,
-units (a ratio is a fraction: write "0.15 means 15%"), sign, fallbacks, plus at most one
+sign and fallbacks (not units: values arrive formatted with their unit, see Units), plus at most one
 interpretive caution. A verbal definition is fine; a formula to apply is not (no `$` math;
 a domain's tests may be stricter, e.g. no `=`).
 
@@ -442,6 +442,58 @@ reformatting entries):
 - `lensgraph glossary DIR` lists entries as `status  id  fields`, drafts first, and exits
   non-zero on a validation error.
 
+## Units (user decision, 2026-11-26)
+
+Status: designed; core mechanism TASK-67, run view TASK-68, finance annotations TASK-69.
+
+A number's unit is a property of the **field**, declared once on the output contract, and every
+place that shows a number formats it from that declaration: the AI evidence, deterministic claim
+text and the run view. Values stay plain floats and ints everywhere they are computed, stored,
+hashed and cached (kernels, frames, blobs, the source store, memo keys). There are no quantity
+objects (pint was considered and rejected: dimension checking buys little when arithmetic runs in
+numpy kernels on plain arrays, and the one mix that matters, currency, is guarded in the domain).
+
+**`Unit`** (`lensgraph.units`): a frozen pydantic model, pure data, so it serialises into
+provenance and the run view and needs no domain code to render:
+
+```python
+class Unit(BaseModel):                     # frozen, extra="forbid"
+    id: str                                # stable label, e.g. "fraction", "money"; shown in headers
+    style: Literal["percent", "multiple", "number", "integer", "compact"]
+    suffix: str = ""                       # e.g. "/yr", " bars", "/share"
+    prefix_field: str | None = None        # sibling field / row column whose value prefixes it (e.g. a currency code)
+
+def format_value(value: float | int | None, unit: Unit, row: Mapping[str, Any] | None = None,
+                 *, signed: bool = False) -> str | None
+def unit_of(model: type, field: str) -> Unit | None    # pydantic Annotated metadata or pandera Field metadata["unit"]
+```
+
+- Generic units ship with the core: `FRACTION` (percent), `FRACTION_PER_YEAR` (percent, "/yr"),
+  `MULTIPLE` ("×"), `NUMBER`, `COUNT` (integer), `BARS`, `DAYS`, `YEARS`. A domain defines its own
+  as plain `Unit` values (finance: money and per-share money with `prefix_field` naming the
+  currency field); the core never names a domain unit.
+- **Declaring:** pydantic fields use `Annotated[float | None, FRACTION]`; frame columns use
+  `pa.Field(metadata={"unit": FRACTION})`. `unit_of` walks the MRO like glossary claims.
+- **Formatting** (one function, the only formatter): 3 significant figures, never scientific
+  notation, and a non-zero value never prints as zero (precision grows instead: 0.0004 is
+  "0.04%"); `percent` multiplies by 100; `compact` uses k/m/bn/tn; `integer` is exact; `prefix_field`
+  prepends the sibling value ("USD 12.3bn"); None stays None (rendered `null`). `signed` adds "+".
+- **Strict, at plan build.** `LensNode.bind_upstream` records the unit of every numeric field
+  (int or float, not bool) of every input contract; one without a unit fails the plan with a
+  `UnitError` naming the lens, the input and the field. Deterministic lenses check their
+  component sources the same way. Non-numeric fields (dates, text, codes) take no unit.
+- **AI evidence** (`render_context`): a model field with a unit renders as its formatted string
+  (`"roe_mean": "15.3%"`); frame cells of a unit column are formatted, with headers left as the
+  column names, since they are citable ids. Prompt notes therefore never restate units (Glossary).
+- **Deterministic claims:** `claim_template` is formatted with `name`, `value` (formatted),
+  `signed` (formatted, with sign) and `raw` (the float). Default `"{name}: {value}"`.
+- **Provenance:** a verdict records `cite_units` (each cited field path, or `input.column` for a
+  cited frame, to its `Unit`), so the run view formats cited values from the index and blobs
+  alone, with no domain import.
+- **Memoization:** a lens's memo salt covers its bound unit map and the source of
+  `lensgraph.units` and `lensgraph.context`, so changing a unit or the formatter reruns the lenses
+  that show it, and nothing else.
+
 ## Deterministic lenses
 
 - Built from named **scored components**: `Component(name, calc input, scorer, weight)`.
@@ -452,7 +504,8 @@ reformatting entries):
 - Conviction comes from the distance of the score to the nearest threshold (configurable).
 - `stance_mean` is the score interpolated between threshold centres (`numpy.interp`), so it is
   monotone in the score; the integer stance still comes from the thresholds.
-- Claims are generated from templates per component, citing the calc fields used.
+- Claims are generated from templates per component, citing the calc fields used; values are
+  formatted by the cited field's unit (see Units).
   `Component.evidence` lists extra citable ids (e.g. a chart) appended to the claim's cites,
   each only if it is in `citables`; an unavailable evidence input never fails the claim.
 - `scorer_overrides` (param, `{component name: LinearScorer}`) replaces a component's default

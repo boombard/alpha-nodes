@@ -160,8 +160,10 @@ Five principles:
    instead: statement line items, prices, dividends, share counts. Compute every ratio in
    our own calc nodes. This is the guard-rail principle applied to data.
 2. **Units and currency are data, not convention.**
-   - Each canonical field declares its kind: `money`, `per_share`, `shares`, `ratio`
-     (always a fraction), `count`.
+   - Each numeric canonical field declares its unit (core.md, Units): money and per-share money
+     (prefixed from the row's currency column), shares, a fraction for ratios, count. Every
+     numeric result field declares one too. The units live in `alpha_nodes.units`; they replace
+     the earlier `metadata={"kind": ...}` tags (TASK-69).
    - Monetary columns are stored in **major units** with an explicit `currency` column.
    - Every instrument carries **two currencies**: `trading_currency` (prices, market cap)
      and `reporting_currency` (statements; Yahoo's `financialCurrency`). Examples: BP.L
