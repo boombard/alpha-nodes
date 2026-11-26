@@ -459,8 +459,13 @@ with no reporting currency (`no_currency`). `tag_conflict` as above.
 - **Earnings consistency:** `loss_years` = periods with net income < 0;
   `net_income_cv` = std / mean (None when mean ≤ 0 or fewer than 3 periods).
 - **Growth** (`growth(prev, cur)`) = `(cur − prev) / |prev|`, None when `prev == 0`; CAGR needs
-  both ends > 0. `revenue_growth_1y`, `revenue_cagr_3y` (4 periods), `eps_growth_1y`,
+  both ends > 0. `revenue_growth_1y`, `revenue_cagr_3y`, `eps_growth_1y`,
   `fcf_growth_1y`; `op_margin_change_1y` is the difference in margin (fraction points).
+  Spans are measured on `period_end` dates (`years_between` = days / 365.25, also used by the
+  share-count CAGR). The "1y" fields compare the latest two periods and are None when their
+  `period_end`s are more than 18 months apart. The `revenue_cagr_3y` base is the period whose
+  `period_end` is closest to three years before the latest, within 6 months (else None), and
+  it compounds over the actual span.
 - **Market cap** = close on the day × `shares_outstanding` of the latest known period, in the
   trading currency, converted to the reporting currency through `fx` on that day
   (`alpha_nodes.money`; mixing currencies without fx raises `CurrencyMismatch`). It is

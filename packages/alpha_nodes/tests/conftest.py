@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import yfinance as yf
+from alpha_nodes.datasets import FundamentalsSchema
 from alpha_nodes.providers.yfinance.history import YFHistoryPayload
 from lensgraph.sources import FakeClock
 
@@ -16,6 +17,7 @@ if TYPE_CHECKING:
     from .edgar_replay import EdgarReplay
     from .yf_replay import YFReplay
 
+_FUNDAMENTALS_KEYS = ["period_type", "period_end", "filed_at", "currency"]
 YF_FIXTURES = Path(__file__).parent / "fixtures" / "yfinance"
 
 
@@ -142,6 +144,27 @@ def fundamentals_frame() -> pd.DataFrame:
             "shares_outstanding": [100.0, 98.0],
         }
     )
+
+
+@pytest.fixture
+def fundamentals_rows() -> Callable[..., pd.DataFrame]:
+    """Factory: `fundamentals_rows({...}, {...})` is a `Fundamentals` fetch frame, one row per dict.
+
+    Each dict holds column overrides (dates as strings); everything else defaults to an annual GBP
+    row with `quality == "ok"`, no filing date and every line item missing.
+    """
+    items = [c for c in FundamentalsSchema.to_schema().columns if c not in _FUNDAMENTALS_KEYS]
+
+    def make(*rows: dict) -> pd.DataFrame:
+        base = {"period_type": "annual", "currency": "GBP", "quality": "ok", "filed_at": None}
+        frame = pd.DataFrame([{**base, **{c: float("nan") for c in items}, **row} for row in rows])
+        if frame.empty:
+            frame = pd.DataFrame(columns=[*_FUNDAMENTALS_KEYS, *items, "quality"])
+        for col in ("period_end", "filed_at"):
+            frame[col] = pd.to_datetime(frame[col])
+        return frame
+
+    return make
 
 
 @pytest.fixture
