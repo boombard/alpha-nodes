@@ -1,10 +1,10 @@
 ---
 id: TASK-64
 title: 'Finance glossary: seed entries for every price and fundamentals field'
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-26T00:28:00Z'
-updated_date: '2026-11-26T04:09:09Z'
+updated_date: '2026-11-26T04:12:25Z'
 labels:
   - finance
 milestone: m-5
@@ -126,5 +126,5 @@ Review round 2 (user ruling 2026-11-26): fold the core fetch-contract gap into T
 ## Final Summary
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
-Worker (ctx_1ed3c5c919f0, follow-up ctx_6584a99a984a): 54 draft finance glossary entries + FINANCE_GLOSSARY_DIR; both AI lenses set glossary and declare no terms; field_periods definition dropped from the 3 prompts (instruction kept); finance.md per-term formulas moved into entries and linked, new Glossary section; README link. Commits b186408, 5821637, b7e9e59 (squash on landing). pytest 1135 passed, ruff clean, pyright 0; the wheel ships 54 glossary .md files (no pyproject change). Review: 1 round, 4 findings, all resolved: (1) the TR-index recursion was lost from finance.md, so a new total-return-index entry claims the TotalReturnSchema columns; (2) the lens test contracts now come from the node classes' outputs, with stand-ins only for valuation/valuation_change until TASK-54; (3) test cleanup; (4) the wheel contents were verified. Accepted outside Files: ai_lens_helpers.py, test_quality_value_lens.py, test_price_vs_fundamentals_lens.py (the lens tests must bind the glossary). Verdict: approve. Open points: (a) a core gap: graph.py:180 binds the fetch nodes' output (bare pd.DataFrame), so in real plans the profile columns are neither checked nor put in the data dictionary; (b) the Valuation/ValuationChange entries have an empty implemented_by, and the test helper's stand-ins are for TASK-54 to fill and drop; (c) both AI lens prompts change, so their verdicts miss the cache once.
+Worker (ctx_1ed3c5c919f0; follow-ups ctx_6584a99a984a, ctx_f1d3e34c7d52): 54 draft finance glossary entries + FINANCE_GLOSSARY_DIR; both AI lenses set glossary and declare no terms; field_periods definition dropped from the 3 prompts; finance.md formulas moved into linked entries, new Glossary section; README link. Round 2 (user ruling): Node.contract() (default output), used by build_plan's binding; DatasetFetch/DatasetFetchMany.frame_schema is their contract; finance fetch nodes set it from DATASETS; core.md Glossary documents it. Commits b186408, 5821637, b7e9e59, 7051798 (squash on landing). pytest 1139 passed, ruff clean, pyright 0; the wheel ships the glossary .md files. Review: 2 rounds, 9 findings, all resolved. Accepted outside Files: ai_lens_helpers.py, the two AI lens test files, lensgraph test_ai_lens.py, lensgraph-ui fixtures/toy-run.json (regenerated: only hash fields changed; TASK-43 precedent). Verdict: approve. Open points: (a) Node's source changed, so every hash_source node (calcs, lenses; not fetch nodes) misses the cache once, and both AI prompts change too; (b) the fact meta columns of fetched slices are not in the data dictionary (by design, core.md); (c) TASK-54 AC #5 fills the valuation entries' implemented_by and drops the test helper stand-ins.
 <!-- SECTION:FINAL_SUMMARY:END -->
