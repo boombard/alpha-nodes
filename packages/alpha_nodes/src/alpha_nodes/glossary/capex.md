@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Capital expenditure for the annual period; positive means cash spent, in the reporting currency's major unit. Null when unreported.
+Capital expenditure for the annual period; positive means cash spent. Null when unreported.

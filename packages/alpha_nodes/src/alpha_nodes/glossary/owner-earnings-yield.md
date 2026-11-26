@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Owner earnings over market cap at the latest known period; 0.08 means 8%. Inherits the maintenance-capex assumption of owner earnings. Negative when owner earnings are negative.
+Owner earnings over market cap at the latest known period. Inherits the maintenance-capex assumption of owner earnings. Negative when owner earnings are negative.

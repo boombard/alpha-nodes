@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Interest-bearing debt at period end, in the reporting currency's major unit, including finance leases; operating lease liabilities are excluded. Composed from several tags, so it can be partial.
+Interest-bearing debt at period end, including finance leases; operating lease liabilities are excluded. Composed from several tags, so it can be partial.

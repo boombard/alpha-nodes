@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Net income to common over common equity for each annual period; 0.15 means 15%. Fields give the mean, minimum and standard deviation across the window (spread needs 3 or more periods). Periods with non-positive equity are skipped. Read with debt_to_equity: leverage inflates ROE.
+Net income to common over common equity for each annual period. Fields give the mean, minimum and standard deviation across the window (spread needs 3 or more periods). Periods with non-positive equity are skipped. Read with debt_to_equity: leverage inflates ROE.

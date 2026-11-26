@@ -164,6 +164,10 @@ Five principles:
      (prefixed from the row's currency column), shares, a fraction for ratios, count. Every
      numeric result field declares one too. The units live in `alpha_nodes.units`; they replace
      the earlier `metadata={"kind": ...}` tags (TASK-69).
+   - Money units are `MONEY` / `MONEY_PER_SHARE` (prefix: the sibling `currency`) and
+     `TRADING_MONEY_PER_SHARE` (prefix: `trading_currency`, used by `ValuationResult.close`).
+     Price results carry their window's trading currency (`PriceWindow.currency`, from the price frame),
+     so `TrendResult.close` and `ma` are `MONEY_PER_SHARE` like the price columns.
    - Monetary columns are stored in **major units** with an explicit `currency` column.
    - Every instrument carries **two currencies**: `trading_currency` (prices, market cap)
      and `reporting_currency` (statements; Yahoo's `financialCurrency`). Examples: BP.L

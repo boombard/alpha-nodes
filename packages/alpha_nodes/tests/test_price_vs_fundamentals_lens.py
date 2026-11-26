@@ -45,6 +45,7 @@ def _pricewindow() -> dict[str, Any]:
         "start": date(2025, 6, 30),
         "end": date(2026, 6, 30),
         "suspect_bars": 0,
+        "currency": "GBP",
     }
 
 

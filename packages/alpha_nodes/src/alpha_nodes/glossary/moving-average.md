@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Simple average of the last 200 split-adjusted closes, in the trading currency's major unit. A slow trend reference. Null when history is too short.
+Simple average of the last 200 split-adjusted closes. A slow trend reference. Null when history is too short.

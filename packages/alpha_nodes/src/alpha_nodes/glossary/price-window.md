@@ -15,7 +15,7 @@ category: window
 
 ## Definition
 
-Every price metric result reports the daily bars it used: `bars`, the first and last bar dates (`start`, `end`) and `suspect_bars`.
+Every price metric result reports the daily bars it used: `bars`, the first and last bar dates (`start`, `end`), `suspect_bars` and the `currency` the bars trade in.
 
 ## How we calculate it
 
@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-`bars` is how many trading sessions the number used; fewer than the nominal window means short history. `start` and `end` are the first and last bar dates. `suspect_bars` counts bars flagged unreliable by data checks. A metric is null when the history is too short.
+`bars` is how many trading sessions the number used; fewer than the nominal window means short history. `start` and `end` are the first and last bar dates. `suspect_bars` counts bars flagged unreliable by data checks. `currency` is the trading currency of the bars, which prefixes price values. A metric is null when the history is too short.

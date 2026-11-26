@@ -63,7 +63,6 @@ class QualityValue(AINode):
 
     name: ClassVar[str] = "quality_value"
     lens_name: ClassVar[str] = "quality_value"
-    require_units: ClassVar[bool] = False  # TASK-69
     glossary: ClassVar[Path | None] = FINANCE_GLOSSARY_DIR
     prompt: ClassVar[Path] = PROMPTS / "quality_value.md.j2"
     variants: ClassVar[dict[str, Path]] = {

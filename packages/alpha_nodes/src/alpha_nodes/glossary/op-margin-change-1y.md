@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Latest operating margin minus the previous one, in fraction points; 0.02 means the margin rose 2 percentage points, negative means it fell. Null when periods are more than 18 months apart.
+Latest operating margin minus the previous one; negative means it fell. Null when periods are more than 18 months apart.

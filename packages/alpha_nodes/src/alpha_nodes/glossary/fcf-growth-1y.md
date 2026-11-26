@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Growth of free cash flow between the latest two annual periods, relative to the earlier one's size; 0.10 means 10%. Lumpy and can swing widely; a negative base makes the sign misleading. Null when periods are more than 18 months apart.
+Growth of free cash flow between the latest two annual periods, relative to the earlier one's size. Lumpy and can swing widely; a negative base makes the sign misleading. Null when periods are more than 18 months apart.

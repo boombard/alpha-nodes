@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Equity attributable to the parent's common shareholders at period end, in the reporting currency's major unit. The denominator of ROE and debt to equity.
+Equity attributable to the parent's common shareholders at period end. The denominator of ROE and debt to equity.

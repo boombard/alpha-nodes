@@ -1,5 +1,4 @@
 from datetime import timedelta
-from typing import get_args
 
 import pandas as pd
 import pandera.pandas as pa
@@ -17,17 +16,22 @@ from alpha_nodes.datasets import (
     PriceSchema,
     ProfileSchema,
 )
-from alpha_nodes.units import FieldKind
+from alpha_nodes.statements import AnnualFundamentalsSchema
+from alpha_nodes.units import MONEY, MONEY_PER_SHARE, SHARES
+from lensgraph.units import COUNT, Unit, is_numeric_field, unit_of
 
 SCHEMAS = [PriceSchema, ProfileSchema, FxSchema, FundamentalsSchema, NewsSchema]
 
 
-@pytest.mark.parametrize("schema", SCHEMAS)
-def test_every_column_declares_a_kind(schema: type[pa.DataFrameModel]) -> None:
-    columns = schema.to_schema().columns
-    assert columns
-    for name, col in columns.items():
-        assert (col.metadata or {}).get("kind") in get_args(FieldKind), name
+@pytest.mark.parametrize("schema", [*SCHEMAS, AnnualFundamentalsSchema])
+def test_every_numeric_dataset_column_has_a_unit(schema: type[pa.DataFrameModel]) -> None:
+    for name in schema.to_schema().columns:
+        unit = unit_of(schema, name)
+        if is_numeric_field(schema, name):
+            assert isinstance(unit, Unit), f"{schema.__name__}.{name}"
+        else:
+            assert unit is None, f"{schema.__name__}.{name}"
+        assert "kind" not in (schema.to_schema().columns[name].metadata or {})
 
 
 def test_prices_valid(prices_frame: pd.DataFrame) -> None:
@@ -89,12 +93,11 @@ def test_datasets_registry_has_fundamentals_and_news() -> None:
     assert (NEWS.ttl, NEWS.empty_ttl) == (timedelta(days=1), timedelta(days=7))
 
 
-def test_every_fundamentals_column_declares_a_kind() -> None:
-    columns = FundamentalsSchema.to_schema().columns
-    assert columns["capex"].metadata == {"kind": "money"}
-    assert columns["shares_diluted"].metadata == {"kind": "shares"}
-    assert columns["filed_at"].metadata == {"kind": "date"}
-    assert columns["period_type"].metadata == {"kind": "code"}
+def test_fundamentals_money_and_shares_units() -> None:
+    assert unit_of(FundamentalsSchema, "capex") == MONEY
+    assert unit_of(FundamentalsSchema, "shares_diluted") == SHARES
+    assert unit_of(PriceSchema, "close") == MONEY_PER_SHARE
+    assert unit_of(PriceSchema, "volume") == COUNT
 
 
 def test_fundamentals_schema_accepts_canonical_frame(fundamentals_frame: pd.DataFrame) -> None:

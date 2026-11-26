@@ -15,7 +15,7 @@ from typing import Any, Literal
 
 import pandas as pd
 import pandera.pandas as pa
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from .graph import GraphError
 
@@ -46,9 +46,13 @@ class Unit(BaseModel):
 
     Args:
         id: stable label, e.g. "fraction"; shown in run-view headers.
-        style: `percent` multiplies by 100, `multiple` is a ratio, `number` plain, `integer`
-            exact, `compact` uses k/m/bn/tn.
+        style: `percent` multiplies by 100 and adds "%", `points` multiplies by 100 with no "%"
+            (a difference between two fractions, with a suffix such as " pp"), `multiple` is a
+            ratio, `number` plain, `integer` exact, `compact` uses k/m/bn/tn.
         suffix: appended after the number, e.g. "/yr" or " bars".
+        decimals: for `number` style, show exactly this many decimal places instead of 3
+            significant figures (a non-zero value that would round to zero falls back to
+            significant figures). None keeps significant figures.
         prefix_field: sibling field (or frame column) whose value prefixes the number, e.g. a
             currency code.
     """
@@ -57,13 +61,15 @@ class Unit(BaseModel):
     __get_pydantic_core_schema__ = _SchemaHook()  # type: ignore[assignment]  # pyright: ignore[reportAssignmentType]
 
     id: str
-    style: Literal["percent", "multiple", "number", "integer", "compact"]
+    style: Literal["percent", "points", "multiple", "number", "integer", "compact"]
     suffix: str = ""
+    decimals: int | None = Field(default=None, ge=0)
     prefix_field: str | None = None
 
 
 FRACTION = Unit(id="fraction", style="percent")
 FRACTION_PER_YEAR = Unit(id="fraction_per_year", style="percent", suffix="/yr")
+PERCENTAGE_POINTS = Unit(id="percentage_points", style="points", suffix=" pp")
 MULTIPLE = Unit(id="multiple", style="multiple", suffix="×")
 NUMBER = Unit(id="number", style="number")
 COUNT = Unit(id="count", style="integer")
@@ -90,6 +96,8 @@ def _body(value: float, unit: Unit) -> str:
     """The number part of a formatted value (sign included, prefix and suffix excluded)."""
     if unit.style == "percent":
         return _sig(value * 100) + "%"
+    if unit.style == "points":
+        return _sig(value * 100)
     if unit.style == "integer":
         return str(round(value))
     if unit.style == "compact":
@@ -99,6 +107,10 @@ def _body(value: float, unit: Unit) -> str:
                     scale, name = _COMPACT[i - 1]
                 return _sig(value / scale) + name
         return _sig(value)
+    if unit.decimals is not None and unit.style == "number":
+        fixed = f"{value:.{unit.decimals}f}"
+        if float(fixed) != 0 or value == 0:
+            return fixed
     return _sig(value)  # "number" and "multiple" (its "×" is the unit's suffix)
 
 

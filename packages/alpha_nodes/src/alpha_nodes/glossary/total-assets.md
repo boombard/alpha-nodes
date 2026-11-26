@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Total assets at period end, in the reporting currency's major unit. Null when unreported.
+Total assets at period end. Null when unreported.

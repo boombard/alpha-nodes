@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Latest close of the trend window, split-adjusted, in the trading currency's major unit. The price that the moving average is compared with. Null when history is too short.
+Latest close of the trend window, split-adjusted. The price that the moving average is compared with. Null when history is too short.

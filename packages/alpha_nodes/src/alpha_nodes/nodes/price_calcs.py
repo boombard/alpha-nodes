@@ -36,14 +36,10 @@ from alpha_nodes.metrics import (
     TrendResult,
     VolatilityResult,
 )
+from alpha_nodes.scalars import opt
 from alpha_nodes.series import TotalReturnSchema, total_return, trailing, window_info
 
 _WINDOW_DEPS = (trailing, window_info)
-
-
-def _opt(value: float) -> float | None:
-    """A kernel's `nan` ("not enough history") as None; the field is then skipped by the lens."""
-    return None if np.isnan(value) else float(value)
 
 
 class TotalReturn(TransformNode):
@@ -72,7 +68,7 @@ class Momentum(CalcNode):
     memoize: ClassVar[bool] = False  # see module docstring
     inputs: ClassVar[dict[str, str]] = {"tr": "total_return"}
     output: ClassVar = MomentumResult
-    code_deps: ClassVar = (skip_return, _opt, *_WINDOW_DEPS)
+    code_deps: ClassVar = (skip_return, opt, *_WINDOW_DEPS)
     lookback: int = BARS_PER_YEAR
     skip: int = BARS_PER_MONTH
 
@@ -84,7 +80,7 @@ class Momentum(CalcNode):
             if len(window) > self.lookback
             else float("nan")
         )
-        return MomentumResult(**window_info(window).model_dump(), total_return=_opt(value))
+        return MomentumResult(**window_info(window).model_dump(), total_return=opt(value))
 
 
 class Trend(CalcNode):
@@ -99,7 +95,7 @@ class Trend(CalcNode):
     memoize: ClassVar[bool] = False  # see module docstring
     inputs: ClassVar[dict[str, str]] = {"tr": "total_return"}
     output: ClassVar = TrendResult
-    code_deps: ClassVar = (sma, linreg_slope, _opt, *_WINDOW_DEPS)
+    code_deps: ClassVar = (sma, linreg_slope, opt, *_WINDOW_DEPS)
     ma_window: int = 200
     slope_window: int = 20
 
@@ -119,7 +115,7 @@ class Trend(CalcNode):
             close=float(close[-1]),
             ma=float(ma[-1]),
             pct_above_ma=float(close[-1] / ma[-1] - 1.0),
-            ma_slope=_opt(slope),
+            ma_slope=opt(slope),
         )
 
 
@@ -135,7 +131,7 @@ class Volatility(CalcNode):
     memoize: ClassVar[bool] = False  # see module docstring
     inputs: ClassVar[dict[str, str]] = {"tr": "total_return"}
     output: ClassVar = VolatilityResult
-    code_deps: ClassVar = (log_returns, realised_volatility, _opt, *_WINDOW_DEPS)
+    code_deps: ClassVar = (log_returns, realised_volatility, opt, *_WINDOW_DEPS)
     window: int = BARS_PER_YEAR
     min_returns: int = 63
 
@@ -146,7 +142,7 @@ class Volatility(CalcNode):
         if len(bars) - 1 >= self.min_returns:
             returns = log_returns(bars["tr_index"].to_numpy())
             value = realised_volatility(returns, BARS_PER_YEAR)
-        return VolatilityResult(**window_info(bars).model_dump(), annualised=_opt(value))
+        return VolatilityResult(**window_info(bars).model_dump(), annualised=opt(value))
 
 
 class Drawdown(CalcNode):
@@ -161,7 +157,7 @@ class Drawdown(CalcNode):
     memoize: ClassVar[bool] = False  # see module docstring
     inputs: ClassVar[dict[str, str]] = {"tr": "total_return"}
     output: ClassVar = DrawdownResult
-    code_deps: ClassVar = (max_drawdown, drawdown_extent, _opt, *_WINDOW_DEPS)
+    code_deps: ClassVar = (max_drawdown, drawdown_extent, opt, *_WINDOW_DEPS)
     window: int = 3 * BARS_PER_YEAR
     min_bars: int = BARS_PER_YEAR
 
@@ -172,7 +168,7 @@ class Drawdown(CalcNode):
         if len(bars) < max(self.min_bars, 1):
             return DrawdownResult(**info, max_drawdown=None, peak_date=None, trough_date=None)
         index = bars["tr_index"].to_numpy()
-        worst = _opt(max_drawdown(index))
+        worst = opt(max_drawdown(index))
         if not worst:  # None or 0.0: the series never fell, so there is no peak-to-trough
             return DrawdownResult(**info, max_drawdown=worst, peak_date=None, trough_date=None)
         peak, trough = drawdown_extent(index)
@@ -196,7 +192,7 @@ class PriceChart(CalcNode):
     memoize: ClassVar[bool] = False  # see module docstring
     inputs: ClassVar[dict[str, str]] = {"tr": "total_return"}
     output: ClassVar = LineChart
-    code_deps: ClassVar = (sma, _opt)
+    code_deps: ClassVar = (sma, opt)
     weeks: int = 156
     ma_window: int = 200
 
@@ -213,6 +209,6 @@ class PriceChart(CalcNode):
             x=[d.date() for d in weekly["date"]],
             series={
                 "close": [float(v) for v in weekly["close"]],
-                f"ma{self.ma_window}": [_opt(v) for v in weekly["ma"]],
+                f"ma{self.ma_window}": [opt(v) for v in weekly["ma"]],
             },
         )

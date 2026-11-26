@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Total equity at period end including minority interest, in the reporting currency's major unit. Compare with common equity, which excludes minorities.
+Total equity at period end including minority interest. Compare with common equity, which excludes minorities.

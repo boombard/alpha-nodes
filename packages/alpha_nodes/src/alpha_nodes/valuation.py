@@ -10,12 +10,12 @@ market cap into the reporting currency through `fx`, and apply the kernels. All 
 from datetime import date
 from typing import Any, cast
 
-import numpy as np
 import pandas as pd
 
-from alpha_nodes.kernels import capitalised_value, owner_earnings, safe_ratio
+from alpha_nodes.kernels import capitalised_value, owner_earnings
 from alpha_nodes.metrics import ValuationResult
 from alpha_nodes.money import fx_factor
+from alpha_nodes.scalars import opt, ratio
 from alpha_nodes.series import close_on
 from alpha_nodes.statements import annual_periods, latest_complete, period_window
 
@@ -26,18 +26,6 @@ _DEPENDENTS = {
     "net_income": ("earnings_yield", "pe"),
     "owner_earnings": ("owner_earnings_yield", "value_low", "value_high", "price_to_value"),
 }
-
-
-def _opt(value: float) -> float | None:
-    """A kernel's `nan` ("cannot be computed") as None."""
-    return None if np.isnan(value) else float(value)
-
-
-def _ratio(num: float | None, den: float | None) -> float | None:
-    """`num / den` via `safe_ratio` (None when an input is None or `den <= 0`)."""
-    if num is None or den is None:
-        return None
-    return _opt(float(safe_ratio(np.array([num]), np.array([den]))[0]))
 
 
 def valuation_on(
@@ -91,7 +79,7 @@ def valuation_on(
     net_income = float(rows["net_income"]["net_income"].iloc[0]) if len(rows["net_income"]) else None
     oe_rows = rows["owner_earnings"]
     oe = (
-        _opt(float(owner_earnings(*(oe_rows[c].to_numpy(float) for c in _OE_COLUMNS))[0]))
+        opt(float(owner_earnings(*(oe_rows[c].to_numpy(float) for c in _OE_COLUMNS))[0]))
         if len(oe_rows)
         else None
     )
@@ -99,16 +87,16 @@ def valuation_on(
     market_cap = None
     if price is not None and shares is not None and fx_rate is not None:
         market_cap = price[1] * shares * fx_rate
-    low = None if oe is None else _opt(capitalised_value(oe, hurdle_high))
-    high = None if oe is None else _opt(capitalised_value(oe, hurdle_low))
+    low = None if oe is None else opt(capitalised_value(oe, hurdle_high))
+    high = None if oe is None else opt(capitalised_value(oe, hurdle_low))
     fields: dict[str, Any] = {
         "market_cap": market_cap,
-        "earnings_yield": _ratio(net_income, market_cap),
-        "pe": _ratio(market_cap, net_income),
-        "owner_earnings_yield": _ratio(oe, market_cap),
+        "earnings_yield": ratio(net_income, market_cap),
+        "pe": ratio(market_cap, net_income),
+        "owner_earnings_yield": ratio(oe, market_cap),
         "value_low": low,
         "value_high": high,
-        "price_to_value": None if low is None or high is None else _ratio(market_cap, (low + high) / 2),
+        "price_to_value": None if low is None or high is None else ratio(market_cap, (low + high) / 2),
     }
     return ValuationResult(
         **window.model_dump(exclude={"field_periods"}),

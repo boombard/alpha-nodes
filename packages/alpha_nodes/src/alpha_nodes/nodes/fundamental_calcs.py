@@ -40,6 +40,7 @@ from alpha_nodes.metrics import (
     ProfitabilityResult,
 )
 from alpha_nodes.reference import reference_day
+from alpha_nodes.scalars import opt
 from alpha_nodes.statements import (
     AnnualFundamentalsSchema,
     annual_periods,
@@ -56,11 +57,6 @@ _BASE_TOLERANCE_DAYS = 183  # the 3y base may sit up to 6 months off three years
 _OE_COLUMNS = ("net_income", "depreciation_amortization", "capex")
 _TREND_YEARS = 3  # revenue_cagr_3y base: the period about 3 years before the latest
 _LONG_BASE_YEARS = 5  # incremental ROIC prefers a base this far back, else _TREND_YEARS
-
-
-def _opt(value: float) -> float | None:
-    """A kernel's `nan` ("cannot be computed") as None."""
-    return None if np.isnan(value) else float(value)
 
 
 def _widest(*windows: PeriodWindow) -> PeriodWindow:
@@ -146,7 +142,7 @@ class Profitability(CalcNode):
     memoize: ClassVar[bool] = False  # see module docstring
     inputs: ClassVar[dict[str, str]] = {"annual": "annual_fundamentals"}
     output: ClassVar = ProfitabilityResult
-    code_deps: ClassVar = (safe_ratio, mean_std, coefficient_of_variation, _opt, *_WINDOW_DEPS)
+    code_deps: ClassVar = (safe_ratio, mean_std, coefficient_of_variation, opt, *_WINDOW_DEPS)
 
     def run(self, ctx: NodeContext, annual: pd.DataFrame) -> ProfitabilityResult:
         """Compute the profitability fields over `annual`."""
@@ -162,12 +158,12 @@ class Profitability(CalcNode):
         net_income = _col(ni_rows, "net_income")
         return ProfitabilityResult(
             **_widest(roe_win, mgn_win, ni_win).model_dump(),
-            roe_mean=_opt(roe_mean),
+            roe_mean=opt(roe_mean),
             roe_min=float(roe.min()) if roe.size else None,
-            roe_std=_opt(roe_std),
-            op_margin_mean=_opt(mgn_mean),
-            op_margin_std=_opt(mgn_std),
-            net_income_cv=_opt(coefficient_of_variation(net_income)) if net_income.size else None,
+            roe_std=opt(roe_std),
+            op_margin_mean=opt(mgn_mean),
+            op_margin_std=opt(mgn_std),
+            net_income_cv=opt(coefficient_of_variation(net_income)) if net_income.size else None,
             loss_years=int((net_income < 0).sum()) if net_income.size else None,
         )
 
@@ -185,7 +181,7 @@ class BalanceSheet(CalcNode):
     memoize: ClassVar[bool] = False  # see module docstring
     inputs: ClassVar[dict[str, str]] = {"annual": "annual_fundamentals"}
     output: ClassVar = BalanceSheetResult
-    code_deps: ClassVar = (safe_ratio, _ratio_on, _latest_point, latest_complete, _opt, *_WINDOW_DEPS)
+    code_deps: ClassVar = (safe_ratio, _ratio_on, _latest_point, latest_complete, opt, *_WINDOW_DEPS)
 
     def run(self, ctx: NodeContext, annual: pd.DataFrame) -> BalanceSheetResult:
         """Compute debt-to-equity, interest cover and net debt from their newest complete periods."""
@@ -200,8 +196,8 @@ class BalanceSheet(CalcNode):
         debt = rows["net_debt"]
         return BalanceSheetResult(
             **window.model_dump(exclude={"field_periods"}),
-            debt_to_equity=_opt(_ratio_on(rows["debt_to_equity"], "total_debt", "common_equity")),
-            interest_cover=_opt(
+            debt_to_equity=opt(_ratio_on(rows["debt_to_equity"], "total_debt", "common_equity")),
+            interest_cover=opt(
                 _ratio_on(rows["interest_cover"], "operating_income", "interest_expense")
             ),
             net_debt=float(_col(debt, "total_debt")[0] - _col(debt, "cash")[0]) if len(debt) else None,
@@ -231,7 +227,7 @@ class CashGeneration(CalcNode):
         _latest_point,
         latest_complete,
         _span,
-        _opt,
+        opt,
         *_WINDOW_DEPS,
     )
 
@@ -244,11 +240,11 @@ class CashGeneration(CalcNode):
         conv_rows, conv_win = values(annual, "operating_cash_flow", "capex", "net_income")
         share_rows, share_win = values(annual, "shares_diluted")
         oe = (
-            _opt(float(owner_earnings(*(_col(oe_rows, c) for c in _OE_COLUMNS))[0]))
+            opt(float(owner_earnings(*(_col(oe_rows, c) for c in _OE_COLUMNS))[0]))
             if len(oe_rows)
             else None
         )
-        fcf = _opt(float(_fcf(fcf_rows)[0])) if len(fcf_rows) else None
+        fcf = opt(float(_fcf(fcf_rows)[0])) if len(fcf_rows) else None
         conversion = (
             sum_ratio(_fcf(conv_rows), _col(conv_rows, "net_income"))
             if len(conv_rows)
@@ -267,8 +263,8 @@ class CashGeneration(CalcNode):
             **window.model_dump(exclude={"field_periods"}),
             owner_earnings=oe,
             fcf=fcf,
-            fcf_conversion=_opt(conversion),
-            share_count_cagr=_opt(share_cagr),
+            fcf_conversion=opt(conversion),
+            share_count_cagr=opt(share_cagr),
             field_periods=older,
         )
 
@@ -300,7 +296,7 @@ class FundamentalTrend(CalcNode):
     memoize: ClassVar[bool] = False  # see module docstring
     inputs: ClassVar[dict[str, str]] = {"annual": "annual_fundamentals"}
     output: ClassVar = FundamentalTrendResult
-    code_deps: ClassVar = (growth, cagr, safe_ratio, _fcf, years_between, _base_years_back, _opt, *_WINDOW_DEPS)
+    code_deps: ClassVar = (growth, cagr, safe_ratio, _fcf, years_between, _base_years_back, opt, *_WINDOW_DEPS)
 
     def run(self, ctx: NodeContext, annual: pd.DataFrame) -> FundamentalTrendResult:
         """Compute growth fields from the latest period against the previous one and the one ~3 years back."""
@@ -327,7 +323,7 @@ def _ratio_stats(num: np.ndarray, den: np.ndarray) -> tuple[float | None, float 
     ratio = safe_ratio(num, den)
     ratio = ratio[~np.isnan(ratio)]
     mean, std = mean_std(ratio)
-    return _opt(mean), float(ratio.min()) if ratio.size else None, _opt(std)
+    return opt(mean), float(ratio.min()) if ratio.size else None, opt(std)
 
 
 def _incremental(rows: pd.DataFrame, capital: np.ndarray) -> float | None:
@@ -336,7 +332,7 @@ def _incremental(rows: pd.DataFrame, capital: np.ndarray) -> float | None:
         base = _base_years_back(rows, years)
         if base is not None:
             op = _col(rows, "operating_income")
-            return _opt(incremental_return(op[base], op[-1], capital[base], capital[-1]))
+            return opt(incremental_return(op[base], op[-1], capital[base], capital[-1]))
     return None
 
 
@@ -363,7 +359,7 @@ class CapitalReturns(CalcNode):
         _base_years_back,
         _incremental,
         _ratio_stats,
-        _opt,
+        opt,
         *_WINDOW_DEPS,
     )
 
@@ -440,4 +436,4 @@ def _change(
     prev, cur = series[base], series[-1]
     if (max_years is not None and years > max_years) or np.isnan(prev) or np.isnan(cur):
         return None
-    return _opt(fn(float(prev), float(cur), years))
+    return opt(fn(float(prev), float(cur), years))

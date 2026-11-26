@@ -463,8 +463,9 @@ provenance and the run view and needs no domain code to render:
 ```python
 class Unit(BaseModel):                     # frozen, extra="forbid"
     id: str                                # stable label, e.g. "fraction", "money"; shown in headers
-    style: Literal["percent", "multiple", "number", "integer", "compact"]
+    style: Literal["percent", "points", "multiple", "number", "integer", "compact"]
     suffix: str = ""                       # e.g. "/yr", " bars", "/share"
+    decimals: int | None = None            # number style: exactly this many decimals instead of 3 significant figures
     prefix_field: str | None = None        # sibling field / row column whose value prefixes it (e.g. a currency code)
 
 def format_value(value: float | int | None, unit: Unit, row: Mapping[str, Any] | None = None,
@@ -473,6 +474,7 @@ def unit_of(model: type, field: str) -> Unit | None    # pydantic Annotated meta
 ```
 
 - Generic units ship with the core: `FRACTION` (percent), `FRACTION_PER_YEAR` (percent, "/yr"),
+  `PERCENTAGE_POINTS` (points, " pp": a difference between two fractions, so 0.02 signed is "+2 pp"),
   `MULTIPLE` ("×"), `NUMBER`, `COUNT` (integer), `BARS`, `DAYS`, `YEARS`. A domain defines its own
   as plain `Unit` values (finance: money and per-share money with `prefix_field` naming the
   currency field); the core never names a domain unit.
@@ -480,7 +482,7 @@ def unit_of(model: type, field: str) -> Unit | None    # pydantic Annotated meta
   `pa.Field(metadata={"unit": FRACTION})`. `unit_of` walks the MRO like glossary claims.
 - **Formatting** (one function, the only formatter): 3 significant figures, never scientific
   notation, and a non-zero value never prints as zero (precision grows instead: 0.0004 is
-  "0.04%"); `percent` multiplies by 100; `compact` uses k/m/bn/tn; `integer` is exact; `prefix_field`
+  "0.04%"); `percent` multiplies by 100; `points` multiplies by 100 with no "%"; `decimals` (number style) fixes the decimal places (189.2 with 2 is "189.20"; a non-zero value that would round to zero falls back to significant figures); `compact` uses k/m/bn/tn; `integer` is exact; `prefix_field`
   prepends the sibling value ("USD 12.3bn"); None stays None (rendered `null`). `signed` adds "+".
 - **Strict, at plan build.** `LensNode.bind_upstream` records the unit of every numeric field
   (int or float, not bool) of every input contract; one without a unit fails the plan with a

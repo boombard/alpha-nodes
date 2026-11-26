@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Weighted-average diluted shares for the annual period, in units of shares. The denominator of EPS. Null when unreported.
+Weighted-average diluted shares for the annual period, as a share count. The denominator of EPS. Null when unreported.

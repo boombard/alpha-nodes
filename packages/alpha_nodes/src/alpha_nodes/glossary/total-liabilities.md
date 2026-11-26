@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Total liabilities at period end, in the reporting currency's major unit. When a filer does not tag it, it is derived as assets less equity or left null.
+Total liabilities at period end. When a filer does not tag it, it is derived as assets less equity or left null.

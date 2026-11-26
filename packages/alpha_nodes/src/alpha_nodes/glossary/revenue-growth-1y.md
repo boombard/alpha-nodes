@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Latest annual revenue against the previous one; 0.08 means 8% growth. Null when the two periods are more than 18 months apart. Acquisitions and currency moves can drive it.
+Latest annual revenue against the previous one. Null when the two periods are more than 18 months apart. Acquisitions and currency moves can drive it.

@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Fraction of the moving average that the latest close is above it; 0.10 means 10% above, negative means below. A stretched value can mean strength or overextension. Null when history is too short.
+Fraction of the moving average that the latest close is above it; negative means below. A stretched value can mean strength or overextension. Null when history is too short.

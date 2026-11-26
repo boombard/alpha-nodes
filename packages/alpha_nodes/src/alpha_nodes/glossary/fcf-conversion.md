@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Summed free cash flow divided by summed net income over the window; 1.0 means free cash matches earnings, 0.5 means half. Null when summed net income is not positive. A growing business may legitimately be below 1.
+Summed free cash flow divided by summed net income over the window; 1 means free cash matches earnings. Null when summed net income is not positive. A growing business may legitimately be below 1.

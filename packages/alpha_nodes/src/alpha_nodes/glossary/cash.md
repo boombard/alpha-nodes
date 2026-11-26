@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Cash and cash equivalents at period end, in the reporting currency's major unit. Null when unreported.
+Cash and cash equivalents at period end. Null when unreported.

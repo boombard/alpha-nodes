@@ -11,6 +11,7 @@ from lensgraph.units import (
     FRACTION_PER_YEAR,
     MULTIPLE,
     NUMBER,
+    PERCENTAGE_POINTS,
     Unit,
     format_value,
     is_numeric_field,
@@ -172,3 +173,26 @@ def test_units_for_cite_selects_by_cite_shape():
     assert units_for_cite("n", units) == {"n.a": FRACTION, "n.b": COUNT}  # whole input
     assert units_for_cite("n[i1]", units) == {"n.a": FRACTION, "n.b": COUNT}  # list item
     assert units_for_cite("other", units) == {}
+
+
+@pytest.mark.parametrize(
+    ("value", "decimals", "expected"),
+    [(189.2, 2, "189.20"), (1234.567, 2, "1234.57"), (0.004, 2, "0.004"), (0.0, 2, "0.00"), (-3.456, 1, "-3.5")],
+)
+def test_number_decimals_fixed_with_nonzero_fallback(value, decimals, expected):
+    unit = Unit(id="n", style="number", decimals=decimals)
+    assert format_value(value, unit) == expected
+
+
+def test_decimals_none_keeps_significant_figures():
+    assert format_value(189.2, NUMBER) == "189"
+
+
+def test_decimals_ignored_by_other_styles():
+    assert format_value(0.153, Unit(id="p", style="percent", decimals=2)) == "15.3%"
+
+
+def test_percentage_points_style():
+    assert format_value(0.02, PERCENTAGE_POINTS, signed=True) == "+2 pp"
+    assert format_value(-0.0125, PERCENTAGE_POINTS) == "-1.25 pp"
+    assert format_value(0.0004, PERCENTAGE_POINTS) == "0.04 pp"

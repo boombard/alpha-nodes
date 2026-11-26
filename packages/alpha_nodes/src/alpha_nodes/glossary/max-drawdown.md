@@ -40,4 +40,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Largest peak-to-trough fall of total return in the window, a fraction at or below zero; -0.30 means a 30% fall. Zero means it never fell. Null under 252 bars.
+Largest peak-to-trough fall of total return in the window, at or below zero. Zero means it never fell. Null under 252 bars.

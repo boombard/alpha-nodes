@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Relative change in P/E between now and about a year earlier; 0.2 means the P/E rose 20%. Positive means re-rating up, negative means de-rating. Null when either P/E is null.
+Relative change in P/E between now and about a year earlier; positive means re-rating up, negative means de-rating. Null when either P/E is null.

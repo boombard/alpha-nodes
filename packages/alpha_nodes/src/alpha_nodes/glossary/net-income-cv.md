@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Standard deviation of annual net income divided by its mean over the window; 0.3 means the spread is 30% of the mean. Lower is steadier. Null when the mean is not positive or under 3 periods. Growth also raises it.
+Standard deviation of annual net income divided by its mean over the window; lower is steadier. Null when the mean is not positive or under 3 periods. Growth also raises it.

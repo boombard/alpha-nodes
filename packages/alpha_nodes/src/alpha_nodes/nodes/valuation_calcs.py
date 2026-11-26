@@ -20,12 +20,13 @@ from alpha_nodes.kernels import capitalised_value, owner_earnings, safe_ratio
 from alpha_nodes.metrics import PeriodWindow, ValuationChangeResult, ValuationResult
 from alpha_nodes.money import fx_factor
 from alpha_nodes.reference import reference_day
+from alpha_nodes.scalars import opt, ratio
 from alpha_nodes.series import bars_back, close_on
 from alpha_nodes.statements import annual_periods, latest_complete, period_window
-from alpha_nodes.valuation import _opt, _ratio, valuation_on
+from alpha_nodes.valuation import valuation_on
 
 _VALUATION_DEPS = (valuation_on, close_on, annual_periods, latest_complete, period_window, fx_factor)
-_KERNEL_DEPS = (capitalised_value, owner_earnings, safe_ratio, _opt, _ratio)
+_KERNEL_DEPS = (capitalised_value, owner_earnings, safe_ratio, opt, ratio)
 
 
 class Valuation(CalcNode):

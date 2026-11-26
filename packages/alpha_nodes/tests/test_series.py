@@ -28,6 +28,7 @@ def _prices(
             "close": close,
             "dividends": dividends or [0.0] * n,
             "quality": quality or ["ok"] * n,
+            "currency": "GBP",
         }
     )
 
@@ -62,7 +63,7 @@ def test_trailing_and_window_info() -> None:
     assert len(tail) == 4
     assert len(trailing(frame, 50)) == 10
     info = window_info(tail)
-    assert (info.bars, info.suspect_bars) == (4, 0)
+    assert (info.bars, info.suspect_bars, info.currency) == (4, 0, "GBP")
     assert info.start == tail["date"].iloc[0].date()
     assert info.end == frame["date"].iloc[-1].date()
     assert window_info(frame).suspect_bars == 1
@@ -72,10 +73,10 @@ def test_empty_prices_give_empty_frame() -> None:
     empty = _prices([]).astype({"date": "datetime64[ns]"})
     frame = total_return(empty)
     assert frame.empty
-    assert list(frame.columns) == ["date", "close", "dividends", "tr_index", "suspect"]
+    assert list(frame.columns) == ["date", "close", "dividends", "tr_index", "suspect", "currency"]
     TotalReturnSchema.validate(frame)
     info = window_info(frame)
-    assert (info.bars, info.start, info.end, info.suspect_bars) == (0, None, None, 0)
+    assert (info.bars, info.start, info.end, info.suspect_bars, info.currency) == (0, None, None, 0, None)
 
 
 def test_dividends_on_split_basis_on_aapl_fixture(yf_payload: Loader) -> None:

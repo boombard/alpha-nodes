@@ -9,13 +9,15 @@ from datetime import timedelta
 import pandas as pd
 import pandera.pandas as pa
 from lensgraph import Dataset
+from lensgraph.units import COUNT, NUMBER, Unit
 from pandera.typing.pandas import DateTime, Series
 
-from alpha_nodes.units import FieldKind, is_major_iso
+from alpha_nodes.units import MONEY, MONEY_PER_SHARE, SHARES, is_major_iso
 
 
-def _kind(kind: FieldKind) -> dict[str, str]:
-    return {"kind": kind}
+def _unit(unit: Unit) -> dict[str, Unit]:
+    """Column metadata declaring `unit` (see documentation/design/core.md, Units)."""
+    return {"unit": unit}
 
 
 def _major_iso(series: Series[str]) -> Series[bool]:
@@ -29,15 +31,15 @@ class PriceSchema(pa.DataFrameModel):
     adjustment is our own calc). `date` is the tz-naive exchange-local trading date.
     """
 
-    date: Series[DateTime] = pa.Field(metadata=_kind("date"))
-    open: Series[float] = pa.Field(gt=0, metadata=_kind("money"))
-    high: Series[float] = pa.Field(gt=0, metadata=_kind("money"))
-    low: Series[float] = pa.Field(gt=0, metadata=_kind("money"))
-    close: Series[float] = pa.Field(gt=0, metadata=_kind("money"))
-    volume: Series[pd.Int64Dtype] = pa.Field(ge=0, nullable=True, metadata=_kind("count"))
-    dividends: Series[float] = pa.Field(ge=0, metadata=_kind("per_share"))  # 0.0 when none
-    split_ratio: Series[float] = pa.Field(gt=0, metadata=_kind("ratio"))  # 1.0 when none
-    currency: Series[str] = pa.Field(metadata=_kind("code"))
+    date: Series[DateTime] = pa.Field()
+    open: Series[float] = pa.Field(gt=0, metadata=_unit(MONEY_PER_SHARE))
+    high: Series[float] = pa.Field(gt=0, metadata=_unit(MONEY_PER_SHARE))
+    low: Series[float] = pa.Field(gt=0, metadata=_unit(MONEY_PER_SHARE))
+    close: Series[float] = pa.Field(gt=0, metadata=_unit(MONEY_PER_SHARE))
+    volume: Series[pd.Int64Dtype] = pa.Field(ge=0, nullable=True, metadata=_unit(COUNT))
+    dividends: Series[float] = pa.Field(ge=0, metadata=_unit(MONEY_PER_SHARE))  # 0.0 when none
+    split_ratio: Series[float] = pa.Field(gt=0, metadata=_unit(NUMBER))  # 1.0 when none
+    currency: Series[str] = pa.Field()
 
     @pa.check("currency", name="is_major_iso")
     @classmethod
@@ -51,17 +53,17 @@ class ProfileSchema(pa.DataFrameModel):
     Holds shares outstanding, not market cap; market cap is computed as price x shares.
     """
 
-    name: Series[str] = pa.Field(metadata=_kind("text"))
-    isin: Series[str] = pa.Field(nullable=True, metadata=_kind("code"))
-    exchange: Series[str] = pa.Field(metadata=_kind("code"))  # MIC, e.g. "XLON"
-    country: Series[str] = pa.Field(nullable=True, metadata=_kind("code"))
-    trading_currency: Series[str] = pa.Field(metadata=_kind("code"))
-    reporting_currency: Series[str] = pa.Field(nullable=True, metadata=_kind("code"))
-    sector: Series[str] = pa.Field(nullable=True, metadata=_kind("text"))
-    industry: Series[str] = pa.Field(nullable=True, metadata=_kind("text"))
-    shares_outstanding: Series[float] = pa.Field(gt=0, nullable=True, metadata=_kind("shares"))
-    listing_date: Series[DateTime] = pa.Field(nullable=True, metadata=_kind("date"))
-    business_summary: Series[str] = pa.Field(nullable=True, metadata=_kind("text"))
+    name: Series[str] = pa.Field()
+    isin: Series[str] = pa.Field(nullable=True)
+    exchange: Series[str] = pa.Field()  # MIC, e.g. "XLON"
+    country: Series[str] = pa.Field(nullable=True)
+    trading_currency: Series[str] = pa.Field()
+    reporting_currency: Series[str] = pa.Field(nullable=True)
+    sector: Series[str] = pa.Field(nullable=True)
+    industry: Series[str] = pa.Field(nullable=True)
+    shares_outstanding: Series[float] = pa.Field(gt=0, nullable=True, metadata=_unit(SHARES))
+    listing_date: Series[DateTime] = pa.Field(nullable=True)
+    business_summary: Series[str] = pa.Field(nullable=True)
 
     @pa.check("trading_currency", name="is_major_iso")
     @classmethod
@@ -77,8 +79,8 @@ class ProfileSchema(pa.DataFrameModel):
 class FxSchema(pa.DataFrameModel):
     """Daily FX rate to USD; the entity is the currency code (e.g. "GBP")."""
 
-    date: Series[DateTime] = pa.Field(metadata=_kind("date"))
-    usd_per_unit: Series[float] = pa.Field(gt=0, metadata=_kind("ratio"))
+    date: Series[DateTime] = pa.Field()
+    usd_per_unit: Series[float] = pa.Field(gt=0, metadata=_unit(NUMBER))
 
 
 class FundamentalsSchema(pa.DataFrameModel):
@@ -90,26 +92,26 @@ class FundamentalsSchema(pa.DataFrameModel):
     Fundamentals: datasets, providers and pinned conventions.
     """
 
-    period_type: Series[str] = pa.Field(isin=["annual"], metadata=_kind("code"))
-    period_end: Series[DateTime] = pa.Field(metadata=_kind("date"))
-    filed_at: Series[DateTime] = pa.Field(nullable=True, metadata=_kind("date"))
+    period_type: Series[str] = pa.Field(isin=["annual"])
+    period_end: Series[DateTime] = pa.Field()
+    filed_at: Series[DateTime] = pa.Field(nullable=True)
     # reporting currency; null only on rows rejected for a missing or unknown currency
-    currency: Series[str] = pa.Field(nullable=True, metadata=_kind("code"))
-    revenue: Series[float] = pa.Field(nullable=True, metadata=_kind("money"))
-    operating_income: Series[float] = pa.Field(nullable=True, metadata=_kind("money"))
-    net_income: Series[float] = pa.Field(nullable=True, metadata=_kind("money"))  # attributable to common
-    interest_expense: Series[float] = pa.Field(nullable=True, metadata=_kind("money"))  # positive = cost
-    depreciation_amortization: Series[float] = pa.Field(nullable=True, metadata=_kind("money"))
-    operating_cash_flow: Series[float] = pa.Field(nullable=True, metadata=_kind("money"))
-    capex: Series[float] = pa.Field(ge=0, nullable=True, metadata=_kind("money"))  # positive = cash spent
-    total_assets: Series[float] = pa.Field(nullable=True, metadata=_kind("money"))
-    total_liabilities: Series[float] = pa.Field(nullable=True, metadata=_kind("money"))
-    total_equity: Series[float] = pa.Field(nullable=True, metadata=_kind("money"))  # incl. minority interest
-    common_equity: Series[float] = pa.Field(nullable=True, metadata=_kind("money"))  # attributable to parent
-    total_debt: Series[float] = pa.Field(nullable=True, metadata=_kind("money"))
-    cash: Series[float] = pa.Field(nullable=True, metadata=_kind("money"))
-    shares_diluted: Series[float] = pa.Field(gt=0, nullable=True, metadata=_kind("shares"))  # weighted average
-    shares_outstanding: Series[float] = pa.Field(gt=0, nullable=True, metadata=_kind("shares"))  # period end
+    currency: Series[str] = pa.Field(nullable=True)
+    revenue: Series[float] = pa.Field(nullable=True, metadata=_unit(MONEY))
+    operating_income: Series[float] = pa.Field(nullable=True, metadata=_unit(MONEY))
+    net_income: Series[float] = pa.Field(nullable=True, metadata=_unit(MONEY))  # attributable to common
+    interest_expense: Series[float] = pa.Field(nullable=True, metadata=_unit(MONEY))  # positive = cost
+    depreciation_amortization: Series[float] = pa.Field(nullable=True, metadata=_unit(MONEY))
+    operating_cash_flow: Series[float] = pa.Field(nullable=True, metadata=_unit(MONEY))
+    capex: Series[float] = pa.Field(ge=0, nullable=True, metadata=_unit(MONEY))  # positive = cash spent
+    total_assets: Series[float] = pa.Field(nullable=True, metadata=_unit(MONEY))
+    total_liabilities: Series[float] = pa.Field(nullable=True, metadata=_unit(MONEY))
+    total_equity: Series[float] = pa.Field(nullable=True, metadata=_unit(MONEY))  # incl. minority interest
+    common_equity: Series[float] = pa.Field(nullable=True, metadata=_unit(MONEY))  # attributable to parent
+    total_debt: Series[float] = pa.Field(nullable=True, metadata=_unit(MONEY))
+    cash: Series[float] = pa.Field(nullable=True, metadata=_unit(MONEY))
+    shares_diluted: Series[float] = pa.Field(gt=0, nullable=True, metadata=_unit(SHARES))  # weighted average
+    shares_outstanding: Series[float] = pa.Field(gt=0, nullable=True, metadata=_unit(SHARES))  # period end
 
     @pa.check("currency", name="is_major_iso")
     @classmethod
@@ -123,14 +125,14 @@ class NewsSchema(pa.DataFrameModel):
     See documentation/design/finance.md, Fundamentals: datasets, providers and pinned conventions.
     """
 
-    id: Series[str] = pa.Field(metadata=_kind("code"))
+    id: Series[str] = pa.Field()
     published_at: Series[pd.DatetimeTZDtype] = pa.Field(  # tz-aware UTC, ns like the store's own timestamps
-        dtype_kwargs={"unit": "ns", "tz": "UTC"}, metadata=_kind("date")
+        dtype_kwargs={"unit": "ns", "tz": "UTC"}
     )
-    headline: Series[str] = pa.Field(metadata=_kind("text"))
-    source: Series[str] = pa.Field(nullable=True, metadata=_kind("text"))
-    url: Series[str] = pa.Field(nullable=True, metadata=_kind("text"))
-    summary: Series[str] = pa.Field(nullable=True, metadata=_kind("text"))
+    headline: Series[str] = pa.Field()
+    source: Series[str] = pa.Field(nullable=True)
+    url: Series[str] = pa.Field(nullable=True)
+    summary: Series[str] = pa.Field(nullable=True)
 
 
 _DAY = timedelta(days=1)

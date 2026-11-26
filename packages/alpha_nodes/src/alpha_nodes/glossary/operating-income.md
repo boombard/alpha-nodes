@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Operating profit for the annual period, in the reporting currency's major unit. Null when the provider reports none (banks); null is not zero.
+Operating profit for the annual period. Null when the provider reports none (banks); null is not zero.

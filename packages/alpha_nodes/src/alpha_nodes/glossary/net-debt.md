@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Total debt minus cash at the latest complete period, in the reporting currency's major unit. Negative means net cash. Not scaled by size, so judge against earnings. May come from an older period, see field_periods.
+Total debt minus cash at the latest complete period. Negative means net cash. Not scaled by size, so judge against earnings. May come from an older period, see field_periods.

@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Growth of earnings per share (net income over weighted diluted shares) between the latest two annual periods; 0.10 means 10%. Null when periods are more than 18 months apart. Growth from a loss or a tiny base is misleading.
+Growth of earnings per share (net income over weighted diluted shares) between the latest two annual periods. Null when periods are more than 18 months apart. Growth from a loss or a tiny base is misleading.

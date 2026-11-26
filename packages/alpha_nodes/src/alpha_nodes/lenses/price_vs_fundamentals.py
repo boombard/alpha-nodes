@@ -43,7 +43,6 @@ class PriceVsFundamentals(AINode):
 
     name: ClassVar[str] = "price_vs_fundamentals"
     lens_name: ClassVar[str] = "price_vs_fundamentals"
-    require_units: ClassVar[bool] = False  # TASK-69
     glossary: ClassVar[Path | None] = FINANCE_GLOSSARY_DIR
     prompt: ClassVar[Path] = PROMPTS / "price_vs_fundamentals.md.j2"
     inputs: ClassVar[dict[str, str]] = {

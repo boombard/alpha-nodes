@@ -17,6 +17,7 @@ from alpha_nodes.kernels import (
     sma,
     total_return_index,
 )
+from alpha_nodes.metrics import TrendResult
 from alpha_nodes.nodes.price_calcs import (
     Drawdown,
     Momentum,
@@ -24,10 +25,11 @@ from alpha_nodes.nodes.price_calcs import (
     TotalReturn,
     Trend,
     Volatility,
-    _opt,
+    opt,
 )
 from lensgraph.node import NodeContext
 from lensgraph.types import CandidateRef
+from lensgraph.units import format_value, unit_of
 
 G = 1.001
 Prices = Callable[..., pd.DataFrame]
@@ -49,6 +51,7 @@ def prices() -> Prices:
                 "close": 100.0 * g ** np.arange(n),
                 "dividends": 0.0,
                 "quality": "ok",
+                "currency": "GBP",
             }
         )
         for name, values in columns.items():
@@ -170,6 +173,7 @@ def test_empty_prices_give_none_results(prices, ctx) -> None:
             "close": pd.Series([], dtype=float),
             "dividends": pd.Series([], dtype=float),
             "quality": pd.Series([], dtype=str),
+            "currency": pd.Series([], dtype=str),
         }
     )
     frame = TotalReturn().run(ctx, prices=empty)
@@ -192,7 +196,7 @@ def test_calc_nodes_declare_their_kernels() -> None:
     assert {sma, linreg_slope} <= set(Trend.code_deps)
     assert {log_returns, realised_volatility} <= set(Volatility.code_deps)
     assert {max_drawdown, drawdown_extent} <= set(Drawdown.code_deps)
-    assert {sma, _opt} <= set(PriceChart.code_deps)
+    assert {sma, opt} <= set(PriceChart.code_deps)
     assert {total_return_index, series.total_return} <= set(TotalReturn.code_deps)
     for node in (Momentum, Trend, Volatility, Drawdown):
         assert {series.trailing, series.window_info} <= set(node.code_deps)
@@ -201,3 +205,11 @@ def test_calc_nodes_declare_their_kernels() -> None:
 def test_price_calc_nodes_are_not_memoized() -> None:
     nodes = (TotalReturn, Momentum, Trend, Volatility, Drawdown, PriceChart)
     assert [n.memoize for n in nodes] == [False] * 6
+
+
+def test_trend_close_renders_with_its_trading_currency(prices, ctx) -> None:
+    result = Trend().run(ctx, tr=TotalReturn().run(ctx, prices=prices(300, g=1.0, close=[189.2] * 300)))
+    assert result.currency == "GBP"
+    unit = unit_of(TrendResult, "close")
+    assert unit is not None
+    assert format_value(result.close, unit, result.model_dump()) == "GBP 189.20"

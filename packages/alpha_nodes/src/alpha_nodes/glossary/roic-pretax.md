@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Pre-tax operating income over invested capital (debt plus equity less cash) per annual period; 0.15 means 15%. Fields give mean, minimum and standard deviation across the window (spread needs 3 or more periods). Periods with non-positive capital are skipped. Null for banks and insurers.
+Pre-tax operating income over invested capital (debt plus equity less cash) per annual period. Fields give mean, minimum and standard deviation across the window (spread needs 3 or more periods). Periods with non-positive capital are skipped. Null for banks and insurers.

@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Compound annual growth of revenue from about three years before the latest period; 0.08 means 8% a year. Null when no period sits within 6 months of three years back. A depressed base flatters it.
+Compound annual growth of revenue from about three years before the latest period. Null when no period sits within 6 months of three years back. A depressed base flatters it.

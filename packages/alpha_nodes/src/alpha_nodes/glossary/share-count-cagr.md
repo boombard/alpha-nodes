@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Compound annual change in diluted share count across the window; 0.02 means 2% more shares a year (dilution), negative means buybacks. Needs 2 or more periods. An unadjusted split can distort it.
+Compound annual change in diluted share count across the window; positive means dilution, negative means buybacks. Needs 2 or more periods. An unadjusted split can distort it.

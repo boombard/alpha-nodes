@@ -40,4 +40,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Annualised standard deviation of daily log total returns over about the last year; 0.25 means 25%. Not directional: high means large swings either way. Null under 63 returns.
+Annualised standard deviation of daily log total returns over about the last year; not directional: high means large swings either way. Null under 63 returns.

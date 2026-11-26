@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Operating cash flow minus capex at the latest complete period, in the reporting currency's major unit. Negative means the business consumed cash. Lumpy year to year. May come from an older period, see field_periods.
+Operating cash flow minus capex at the latest complete period. Negative means the business consumed cash. Lumpy year to year. May come from an older period, see field_periods.

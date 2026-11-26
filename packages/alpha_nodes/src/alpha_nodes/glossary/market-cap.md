@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Close times period-end shares outstanding, converted to the reporting currency's major unit. Shares come from the latest known period, so it can lag buybacks and issuance. Null when shares are unavailable.
+Close times period-end shares outstanding, converted to the reporting currency. Shares come from the latest known period, so it can lag buybacks and issuance. Null when shares are unavailable.

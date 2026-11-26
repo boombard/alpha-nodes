@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Net income attributable to common shareholders for the annual period, in the reporting currency's major unit. A loss is negative.
+Net income attributable to common shareholders for the annual period. A loss is negative.

@@ -16,7 +16,7 @@ START, END = date(2025, 1, 2), date(2026, 1, 2)
 
 
 def _window(suspect: int = 0) -> dict[str, Any]:
-    return {"bars": 300, "start": START, "end": END, "suspect_bars": suspect}
+    return {"bars": 300, "start": START, "end": END, "suspect_bars": suspect, "currency": "GBP"}
 
 
 def make_inputs(
@@ -48,7 +48,9 @@ def chart() -> LineChart:
 
 async def run_lens(lens: PriceBehaviour | None = None, **inputs: Any) -> LensVerdict:
     inputs.setdefault("price_chart", Absent(reason="not built"))
-    return await (lens or PriceBehaviour()).run(NodeContext(run_id="r", candidate=None), **inputs)
+    lens = lens or PriceBehaviour()
+    lens.bind_upstream({n: type(v) for n, v in inputs.items() if not isinstance(v, Absent | LineChart)})
+    return await lens.run(NodeContext(run_id="r", candidate=None), **inputs)
 
 
 async def test_strong_uptrend_is_strongly_bullish():
@@ -136,4 +138,14 @@ def test_lens_reads_only_calc_nodes():
 
 async def test_claim_texts_render():
     v = await run_lens(**make_inputs(momentum=0.25))
-    assert "12-1 month total return +25.0%" in {c.text for c in v.claims}
+    assert "12-1 month total return +25%" in {c.text for c in v.claims}
+
+
+async def test_price_behaviour_claim_text():
+    v = await run_lens(**make_inputs(momentum=0.153, pct=0.042, slope=0.081, vol=0.3, dd=-0.375))
+    texts = {c.text for c in v.claims}
+    assert "12-1 month total return +15.3%" in texts
+    assert "Close +4.2% vs its 200-day average" in texts
+    assert "200-day average moving +8.1%/yr" in texts
+    assert "Realised volatility 30%/yr" in texts
+    assert "Max drawdown -37.5% over the window" in texts

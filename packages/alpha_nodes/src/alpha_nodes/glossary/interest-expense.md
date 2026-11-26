@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Interest expense for the annual period; positive means a cost, in the reporting currency's major unit. Null when unreported.
+Interest expense for the annual period; positive means a cost. Null when unreported.

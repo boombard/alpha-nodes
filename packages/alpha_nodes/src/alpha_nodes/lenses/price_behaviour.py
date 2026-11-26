@@ -27,7 +27,6 @@ class PriceBehaviour(DeterministicLens):
 
     name: ClassVar[str] = "price_behaviour"
     lens_name: ClassVar[str] = "price_behaviour"
-    require_units: ClassVar[bool] = False  # TASK-69
     inputs: ClassVar[dict[str, str]] = {n: n for n in _CALC_INPUTS}
     optional_inputs: ClassVar[dict[str, str]] = {"price_chart": "price_chart"}
     input_weights: ClassVar[dict[str, float]] = {"price_chart": 0.0}  # evidence only
@@ -37,7 +36,7 @@ class PriceBehaviour(DeterministicLens):
             source="momentum.total_return",
             scorer=LinearScorer(lo=-0.20, hi=0.40),
             weight=1.0,
-            claim_template="12-1 month total return {raw:+.1%}",
+            claim_template="12-1 month total return {signed}",
             evidence=("price_chart",),
         ),
         Component(
@@ -45,7 +44,7 @@ class PriceBehaviour(DeterministicLens):
             source="trend.pct_above_ma",
             scorer=LinearScorer(lo=-0.10, hi=0.10),
             weight=0.5,
-            claim_template="Close {raw:+.1%} vs its 200-day average",
+            claim_template="Close {signed} vs its 200-day average",
             evidence=("price_chart",),
         ),
         Component(
@@ -53,21 +52,21 @@ class PriceBehaviour(DeterministicLens):
             source="trend.ma_slope",
             scorer=LinearScorer(lo=-0.20, hi=0.20),
             weight=0.5,
-            claim_template="200-day average rising {raw:+.1%} a year",
+            claim_template="200-day average moving {signed}",
         ),
         Component(
             name="volatility",
             source="volatility.annualised",
             scorer=LinearScorer(lo=0.15, hi=0.45, higher_is_better=False),
             weight=0.5,
-            claim_template="Realised volatility {raw:.0%} a year",
+            claim_template="Realised volatility {value}",
         ),
         Component(
             name="drawdown",
             source="drawdown.max_drawdown",
             scorer=LinearScorer(lo=-0.60, hi=-0.15),
             weight=0.5,
-            claim_template="Max drawdown {raw:.0%} over the window",
+            claim_template="Max drawdown {value} over the window",
         ),
     ]
 

@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-The close used for valuation, its date and the currency it trades in (major unit). It is the latest market price, not a target or fair value. Check price_date for staleness.
+The close used for valuation, its date and the currency it trades in. It is the latest market price, not a target or fair value. Check price_date for staleness.

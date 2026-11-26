@@ -40,4 +40,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Total return with dividends reinvested from twelve months ago to one month ago, skipping the latest month; 0.15 means 15%. Null under 253 bars. Context about the price path, not a verdict on the business.
+Total return with dividends reinvested from twelve months ago to one month ago, skipping the latest month. Null under 253 bars. Context about the price path, not a verdict on the business.

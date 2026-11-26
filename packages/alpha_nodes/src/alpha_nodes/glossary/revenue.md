@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Total sales for the annual period, in the reporting currency's major unit. For some filers it includes leasing and finance income. Null when unavailable.
+Total sales for the annual period. For some filers it includes leasing and finance income. Null when unavailable.

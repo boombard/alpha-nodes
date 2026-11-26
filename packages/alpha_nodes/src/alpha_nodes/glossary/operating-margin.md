@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Operating income over revenue per annual period; 0.20 means 20%. Fields give the mean and standard deviation across the window. Compare with the company's own history, not across industries. Null when operating income is not reported (for example banks).
+Operating income over revenue per annual period. Fields give the mean and standard deviation across the window. Compare with the company's own history, not across industries. Null when operating income is not reported (for example banks).

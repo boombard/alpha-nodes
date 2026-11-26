@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Mean annual capex over revenue (0.05 means 5% of sales), and mean capex over depreciation and amortisation (above 1 means spending beyond maintenance). Periods with a non-positive denominator are skipped. Capex is lumpy.
+Mean annual capex over revenue, and mean capex over depreciation and amortisation (above 1 means spending beyond maintenance). Periods with a non-positive denominator are skipped. Capex is lumpy.

@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Depreciation and amortisation for the annual period, in the reporting currency's major unit; a non-cash charge. Null when unreported.
+Depreciation and amortisation for the annual period; a non-cash charge. Null when unreported.

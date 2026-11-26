@@ -27,6 +27,7 @@ class TotalReturnSchema(pa.DataFrameModel):
     dividends: Series[float] = pa.Field(ge=0)
     tr_index: Series[float] = pa.Field(gt=0)  # 1.0 on the first bar; see `total_return_index`
     suspect: Series[bool]  # the source bar was labelled `suspect`
+    currency: Series[str]  # trading currency of the bars (major unit), carried into every price window
 
 
 def total_return(prices: pd.DataFrame) -> pd.DataFrame:
@@ -47,6 +48,7 @@ def total_return(prices: pd.DataFrame) -> pd.DataFrame:
             "dividends": frame["dividends"].astype(float),
             "tr_index": index,
             "suspect": (quality == "suspect").astype(bool),
+            "currency": frame["currency"].astype(str),
         }
     )
 
@@ -57,13 +59,14 @@ def trailing(frame: pd.DataFrame, bars: int) -> pd.DataFrame:
 
 
 def window_info(frame: pd.DataFrame) -> PriceWindow:
-    """Describe `frame` as a price window: bar count, first and last date, suspect bar count."""
+    """Describe `frame` as a price window: bar count, first and last date, suspect bar count, trading currency."""
     empty = frame.empty
     return PriceWindow(
         bars=len(frame),
         start=None if empty else frame["date"].iloc[0].date(),
         end=None if empty else frame["date"].iloc[-1].date(),
         suspect_bars=int(frame["suspect"].to_numpy().sum()),
+        currency=None if empty else str(frame["currency"].iloc[-1]),
     )
 
 

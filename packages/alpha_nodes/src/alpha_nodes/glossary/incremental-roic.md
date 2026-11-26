@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Rise in operating income over rise in invested capital, latest period against a base about 5 years back (else about 3); 0.20 means 20% pre-tax. Null when no base exists or capital did not grow. Two end points, so cycles distort it.
+Rise in operating income over rise in invested capital, latest period against a base about 5 years back (else about 3), pre-tax. Null when no base exists or capital did not grow. Two end points, so cycles distort it.

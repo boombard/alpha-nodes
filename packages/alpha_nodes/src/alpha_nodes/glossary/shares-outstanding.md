@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Shares outstanding at period end, in units of shares. Used for market cap. Null when a company has several share classes with no single count.
+Shares outstanding at period end, as a share count. Used for market cap. Null when a company has several share classes with no single count.

@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Net cash from operating activities for the annual period, in the reporting currency's major unit. Null when unreported.
+Net cash from operating activities for the annual period. Null when unreported.

@@ -117,3 +117,11 @@ def test_fetch_nodes_declare_frame_schema() -> None:
     assert {n.dataset for n in nodes} == set(DATASETS)
     for node in nodes:
         assert node.contract() is DATASETS[node.dataset].frame_schema
+
+
+UNIT_RESTATEMENT = re.compile(r"\d+(\.\d+)? means \d+(\.\d+)?%|major unit")
+
+
+def test_prompt_notes_restate_no_units(glossary: Glossary) -> None:
+    offenders = [e.id for e in glossary.entries.values() if UNIT_RESTATEMENT.search(e.prompt_note)]
+    assert offenders == []

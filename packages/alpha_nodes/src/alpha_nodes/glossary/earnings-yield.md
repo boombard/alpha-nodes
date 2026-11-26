@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-Latest annual net income over market cap; 0.05 means 5%. The _now and _then fields are the same measure at the two comparison dates. Annual, not trailing-twelve-month. Negative when earnings were negative.
+Latest annual net income over market cap. The _now and _then fields are the same measure at the two comparison dates. Annual, not trailing-twelve-month. Negative when earnings were negative.

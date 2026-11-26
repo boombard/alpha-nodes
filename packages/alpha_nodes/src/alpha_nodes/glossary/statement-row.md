@@ -39,4 +39,4 @@ Draft, written from model knowledge; not yet researched.
 
 ## Prompt note
 
-One row per annual period, ascending. period_end is the fiscal year end; filed_at is when it was filed (null where the provider has no filing dates); currency is the reporting currency and all money columns use its major unit; suspect true means data checks doubted the row.
+One row per annual period, ascending. period_end is the fiscal year end; filed_at is when it was filed (null where the provider has no filing dates); currency is the reporting currency of the money columns; suspect true means data checks doubted the row.
