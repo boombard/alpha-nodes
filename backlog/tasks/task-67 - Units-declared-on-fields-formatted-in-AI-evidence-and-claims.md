@@ -1,10 +1,10 @@
 ---
 id: TASK-67
 title: 'Units: declared on fields, formatted in AI evidence and claims'
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-26T04:34:59Z'
-updated_date: '2026-11-26T04:57:40Z'
+updated_date: '2026-11-26T05:03:59Z'
 labels:
   - core
 milestone: m-5
@@ -60,19 +60,19 @@ Expected side effect: every lens's memo salt changes, so lens verdicts miss the 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Unit is pure data; format_value is the only formatter (3 s.f., no scientific notation, non-zero never prints zero)
-- [ ] #2 A numeric field reaching a lens (AI input or deterministic component) without a unit fails the plan with UnitError naming lens, input and field
-- [ ] #3 AI evidence shows unit fields formatted; frame headers unchanged
-- [ ] #4 Claim templates get value, signed and raw; provenance records cite_units
-- [ ] #5 Changing a used unit or the renderer changes that lens's memo salt only
+- [x] #1 Unit is pure data; format_value is the only formatter (3 s.f., no scientific notation, non-zero never prints zero)
+- [x] #2 A numeric field reaching a lens (AI input or deterministic component) without a unit fails the plan with UnitError naming lens, input and field
+- [x] #3 AI evidence shows unit fields formatted; frame headers unchanged
+- [x] #4 Claim templates get value, signed and raw; provenance records cite_units
+- [x] #5 Changing a used unit or the renderer changes that lens's memo salt only
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -87,4 +87,6 @@ Worker: dispatch ctx_5e2b5f6545e1, worktree task-67
 Worker: core units in lensgraph.units (Unit, 8 generic constants, format_value, unit_of, is_numeric_field, UnitError). LensNode.bind_upstream records the input.field -> Unit map and fails the plan on a unitless numeric field (AI: every field of every input; deterministic: component sources only). render_context formats model fields, list items and frame cells (headers unchanged). Claim templates get value/signed/raw. Provenance.cite_units. memo_salt = unit map + cached renderer fingerprint (AI salt combines). Finance lenses have require_units=False # TASK-69. price_behaviour templates switched {value:+.1%} -> {raw:+.1%} (TASK-69 converts them). Regenerated run-view.ts, toy-run.json, BUILD_INFO.json. Commits 596e74d, 5e362b7; pytest 1189 passed, ruff and pyright clean. Review: 2 rounds. Round 1 had 4 findings (no _SchemaHook test, list items without ids unformatted, memo_salt reads source on every call, format_value signature), all resolved in 5e362b7. Verdict: approve. Open points: bare scalar contracts (e.g. toy growth_rate: float) are not unit-checked and fall back to NUMBER; _SchemaHook depends on pydantic internals (now tested).
 
 Round 2 (doc only, as the human ruled): core.md Units now states the check scope (AI: every numeric input field; deterministic: component sources) and that bare scalar contracts aren't unit-checked (wrap the number in a model). Commit 8f68b1e. 3 commits ahead of main. Verdict: approve, no open findings.
+
+Landed 67cdaec (squashed, 1 commit) on main.
 <!-- SECTION:FINAL_SUMMARY:END -->
