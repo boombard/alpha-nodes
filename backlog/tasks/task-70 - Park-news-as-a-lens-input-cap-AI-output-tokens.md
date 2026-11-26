@@ -1,10 +1,10 @@
 ---
 id: TASK-70
 title: Park news as a lens input; cap AI output tokens
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-26T09:25:35Z'
-updated_date: '2026-11-26T09:33:57Z'
+updated_date: '2026-11-26T09:34:52Z'
 labels:
   - finance
   - core
@@ -68,3 +68,9 @@ Worker: dispatch ctx_ee1f2bee3060, worktree task-70 (Orca run run_5e68c868c3a6).
 
 Worker done 9d59975 (1285 passed). Round 1 sent (follow-up dispatch ctx_f51cfd4e7fb4): prompt grammar 'them'->'it'. toy-run.json regenerated outside Files (accepted: toy prompt hash changed).
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker: quality_value drops recent_news (prompts, run yaml; news code and tests kept, TASK-71 sketch for the redesign); default profiles cap output tokens per response (max_tokens dev/local 2500, quality 4000) and per call (output_tokens_limit 6000/10000); AINode params max_claims=5, max_claim_chars=300 go into the output schema (assessment_schema) and a system-prompt line for every AI lens; caps and truncation fail the node; core.md + finance.md updated. 1285 passed, ruff/pyright clean. Review: 1 round (prompt grammar). Verdict: approve. Single commit b9cfb52. Rulings accepted: Haiku/Sonnet 5.5 use adaptive thinking (verified in pydantic-ai profiles), so no budget_tokens to fit; toy-run.json regenerated outside Files. Expected: every AI verdict misses the cache once. Open: real token saving to be measured on the M6 demo re-run.
+<!-- SECTION:FINAL_SUMMARY:END -->
