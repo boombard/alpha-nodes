@@ -1,10 +1,10 @@
 ---
 id: TASK-56
 title: M6.9 price_vs_fundamentals AI lens (divergence check)
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-25T08:18:00Z'
-updated_date: '2026-11-26T00:57:04Z'
+updated_date: '2026-11-26T01:00:45Z'
 labels:
   - finance
 milestone: m-5
@@ -64,17 +64,17 @@ Out of scope: registering nodes (M6.10); quarterly trends.
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 PriceVsFundamentals exists as specified with the four flag codes; severities are set from FLAG_SEVERITY, not by the model
-- [ ] #2 Fewer than 2 known annual periods abstains with no model call; depth note rendered
-- [ ] #3 The prompt states the divergence framing and the stance scale
+- [x] #1 PriceVsFundamentals exists as specified with the four flag codes; severities are set from FLAG_SEVERITY, not by the model
+- [x] #2 Fewer than 2 known annual periods abstains with no model call; depth note rendered
+- [x] #3 The prompt states the divergence framing and the stance scale
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -91,4 +91,6 @@ Human review round 1 resolved in 6e2eaea: fundamentals(periods, *, revenue_step=
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 Worker: PriceVsFundamentals AINode + FLAG_SEVERITY (severity overwritten from code in assess after the guard rail rejects unknown codes via ModelRetry), divergence-framing prompt with stance scale, flag list and the TASK-61 field_periods line; 9 tests (FunctionModel, real requests forbidden). Review: 1 round. Finding 1 (DRY: test scaffolding copied from test_quality_value_lens.py) resolved in 142a4a6: shared helpers moved to tests/ai_lens_helpers.py, make_model and opt-in forbid_real_model_requests fixtures in tests/conftest.py, both AI-lens test modules use them. Files beyond the list (cleared by coordinator): tests/ai_lens_helpers.py (new), tests/conftest.py, tests/test_quality_value_lens.py. Commits: 559d0e9, 142a4a6. pytest 1000 passed, ruff and pyright clean. Verdict: approve. Open points: field_periods is prompt text only until TASK-61 adds it to result models; the shared window()/fundamentals() helpers use fixed 2018-2025 dates and rising revenue regardless of periods, so the PvF frame no longer matches its negative fundamental_trend (no test depends on it); TASK-61 edits test_quality_value_lens.py and must start from this version.
+
+Landed b392782 on main (squashed from 559d0e9, 142a4a6, 6e2eaea).
 <!-- SECTION:FINAL_SUMMARY:END -->
