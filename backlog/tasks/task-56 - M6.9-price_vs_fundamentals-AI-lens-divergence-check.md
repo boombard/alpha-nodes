@@ -1,10 +1,10 @@
 ---
 id: TASK-56
 title: M6.9 price_vs_fundamentals AI lens (divergence check)
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T08:18:00Z'
-updated_date: '2026-11-26T00:41:15Z'
+updated_date: '2026-11-26T00:45:11Z'
 labels:
   - finance
 milestone: m-5
@@ -82,3 +82,9 @@ Out of scope: registering nodes (M6.10); quarterly trends.
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_1bb7f1d2447d, worktree task-56
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker: PriceVsFundamentals AINode + FLAG_SEVERITY (severity overwritten from code in assess after the guard rail rejects unknown codes via ModelRetry), divergence-framing prompt with stance scale, flag list and the TASK-61 field_periods line; 9 tests (FunctionModel, real requests forbidden). Review: 1 round. Finding 1 (DRY: test scaffolding copied from test_quality_value_lens.py) resolved in 142a4a6: shared helpers moved to tests/ai_lens_helpers.py, make_model and opt-in forbid_real_model_requests fixtures in tests/conftest.py, both AI-lens test modules use them. Files beyond the list (cleared by coordinator): tests/ai_lens_helpers.py (new), tests/conftest.py, tests/test_quality_value_lens.py. Commits: 559d0e9, 142a4a6. pytest 1000 passed, ruff and pyright clean. Verdict: approve. Open points: field_periods is prompt text only until TASK-61 adds it to result models; the shared window()/fundamentals() helpers use fixed 2018-2025 dates and rising revenue regardless of periods, so the PvF frame no longer matches its negative fundamental_trend (no test depends on it); TASK-61 edits test_quality_value_lens.py and must start from this version.
+<!-- SECTION:FINAL_SUMMARY:END -->
