@@ -1,10 +1,10 @@
 ---
 id: TASK-62
 title: 'M6.6c Capital-returns calcs: measurable signatures of a durable advantage'
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-26T00:19:44Z'
-updated_date: '2026-11-26T06:00:11Z'
+updated_date: '2026-11-26T07:48:44Z'
 labels:
   - finance
 milestone: m-5
@@ -84,19 +84,19 @@ Out of scope: gross margin (gross profit not ingested); after-tax ROIC (tax expe
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 invested_capital and incremental_return kernels with tests; no maths in the node beyond kernel calls
-- [ ] #2 CapitalReturns gives pre-tax ROIC level/min/std, incremental ROIC, margin floor and capex ratios, None where not applicable (no operating income, invested capital <= 0)
-- [ ] #3 quality_value takes capital_returns as an input and both prompts point the durable-advantage principle at it, as signs not proof
-- [ ] #4 finance.md lists the new calc inputs and their conventions
-- [ ] #5 The new fields have glossary entries (draft); the finance glossary coverage tests and the quality_value plan-build test pass
+- [x] #1 invested_capital and incremental_return kernels with tests; no maths in the node beyond kernel calls
+- [x] #2 CapitalReturns gives pre-tax ROIC level/min/std, incremental ROIC, margin floor and capex ratios, None where not applicable (no operating income, invested capital <= 0)
+- [x] #3 quality_value takes capital_returns as an input and both prompts point the durable-advantage principle at it, as signs not proof
+- [x] #4 finance.md lists the new calc inputs and their conventions
+- [x] #5 The new fields have glossary entries (draft); the finance glossary coverage tests and the quality_value plan-build test pass
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -109,4 +109,6 @@ Worker: dispatch ctx_81cf77ad2f51, worktree task-62 (run run_579c5584161b). Runs
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 Worker: invested_capital and incremental_return kernels; CapitalReturnsResult (pre-tax ROIC mean/min/std, incremental ROIC over a ~5y base else ~3y, worst operating margin, capex/revenue and capex/D&A); CapitalReturns calc node; quality_value gains the capital_returns input and both prompts point the durable-advantage principle at it ('signs, not proof'); 4 draft glossary entries; finance.md edited in the quality_value calc inputs and pinned-conventions sections only. Commits 7a3e634, d62ca23, 589c6f5 (squash on landing); 1216 passed, ruff and pyright clean. Review: 1 round, 2 findings (_incremental missing from code_deps; _base_three_years_back renamed _base_years_back), both resolved. FundamentalTrend's code_deps now also lists the base helper (code hash changes once; memoize=False). Accepted outside Files: kernels/__init__.py re-export; one line in tests/ai_lens_helpers.py (conflicts trivially with TASK-54's edit to the same tuple; keep both). Verdict: approve.
+
+Landed 327181c on main (squashed from 3 commits, tree verified equal; rebase resolved the expected ai_lens_helpers.py tuple conflict by keeping both sides; 1237 passed on the rebased tree).
 <!-- SECTION:FINAL_SUMMARY:END -->
