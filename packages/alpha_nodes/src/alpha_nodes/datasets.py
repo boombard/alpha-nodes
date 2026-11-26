@@ -93,7 +93,8 @@ class FundamentalsSchema(pa.DataFrameModel):
     period_type: Series[str] = pa.Field(isin=["annual"], metadata=_kind("code"))
     period_end: Series[DateTime] = pa.Field(metadata=_kind("date"))
     filed_at: Series[DateTime] = pa.Field(nullable=True, metadata=_kind("date"))
-    currency: Series[str] = pa.Field(metadata=_kind("code"))  # reporting currency
+    # reporting currency; null only on rows rejected for a missing or unknown currency
+    currency: Series[str] = pa.Field(nullable=True, metadata=_kind("code"))
     revenue: Series[float] = pa.Field(nullable=True, metadata=_kind("money"))
     operating_income: Series[float] = pa.Field(nullable=True, metadata=_kind("money"))
     net_income: Series[float] = pa.Field(nullable=True, metadata=_kind("money"))  # attributable to common
@@ -113,7 +114,7 @@ class FundamentalsSchema(pa.DataFrameModel):
     @pa.check("currency", name="is_major_iso")
     @classmethod
     def _currency_is_major(cls, series: Series[str]) -> Series[bool]:
-        return _major_iso(series)
+        return Series[bool](series.isna() | _major_iso(series.fillna("USD")))
 
 
 class NewsSchema(pa.DataFrameModel):

@@ -1,0 +1,1138 @@
+{
+"symbol": "NESN.SW",
+"items": [
+{
+"id": "e0aa6840-1d17-3e35-a628-b1e6a6e62fba",
+"content": {
+"id": "e0aa6840-1d17-3e35-a628-b1e6a6e62fba",
+"contentType": "STORY",
+"title": "Chocolate, Cigarettes, and Pest Control. These Anti-AI Stocks Are Dodging the Tech Slump.",
+"description": null,
+"summary": "Hershey, Altria, and Rollins gained Wednesday as the tech selloff deepened. Consumer staples have pulled ahead of tech since October.",
+"pubDate": "2026-11-25T16:39:00Z",
+"displayTime": "2026-11-25T16:39:00Z",
+"isHosted": false,
+"previewUrl": "https://finance.yahoo.com/m/e0aa6840-1d17-3e35-a628-b1e6a6e62fba/chocolate-cigarettes-and.html",
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/Barrons.com/fc8812685b250ea7ad11bdb8e026b437.jpg_up.jpg",
+"originalWidth": 1440,
+"originalHeight": 720,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/Barrons.com/fc8812685b250ea7ad11bdb8e026b437.jpg_up.jpg",
+"width": 1440,
+"height": 720,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/efe589a124a0fa48ebc2e471ad6542a2fc020eb0720d80ff12ba27ebc905db52/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2FBarrons.com%2Ffc8812685b250ea7ad11bdb8e026b437.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Barrons.com",
+"url": "http://www.barrons.com/"
+},
+"canonicalUrl": {
+"url": "https://www.barrons.com/articles/defensive-stocks-hershey-altria-rollins-ai-selloff-89682c26?siteid=yhoof2&yptr=yahoo"
+},
+"clickThroughUrl": null,
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "NESN.SW"
+},
+{
+"symbol": "NVDA"
+},
+{
+"symbol": "BF-B"
+},
+{
+"symbol": "CL"
+},
+{
+"symbol": "IP"
+},
+{
+"symbol": "KR"
+},
+{
+"symbol": "MO"
+},
+{
+"symbol": "HSY"
+},
+{
+"symbol": "CC=F"
+}
+]
+}
+}
+},
+{
+"id": "ad6a8533-609c-3378-ad28-131cfef1d7f5",
+"content": {
+"id": "ad6a8533-609c-3378-ad28-131cfef1d7f5",
+"contentType": "STORY",
+"title": "Nestle Eyes Wearable Tech to Match Consumers With Nutrition Products",
+"description": null,
+"summary": "The maker of Orgain protein powder and Pure Encapsulations supplements has begun using wearables to monitor participants in clinical trials, eyeing a future where smartwatch data suggest nutritional products to consumers.",
+"pubDate": "2026-11-25T11:34:00Z",
+"displayTime": "2026-11-25T11:34:00Z",
+"isHosted": false,
+"previewUrl": "https://finance.yahoo.com/m/ad6a8533-609c-3378-ad28-131cfef1d7f5/nestle-eyes-wearable-tech-to.html",
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/wsj.com/a4a647d459e1e02c03e7c09cfd75473d.jpg_up.jpg",
+"originalWidth": 1440,
+"originalHeight": 720,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/wsj.com/a4a647d459e1e02c03e7c09cfd75473d.jpg_up.jpg",
+"width": 1440,
+"height": 720,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/0c8a1fcc823e2a8bb1e4db06776474ef4d00d85629de339ce25691ea1d7bb8f1/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fwsj.com%2Fa4a647d459e1e02c03e7c09cfd75473d.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "The Wall Street Journal",
+"url": "http://www.wsj.com/"
+},
+"canonicalUrl": {
+"url": "https://www.wsj.com/business/nestle-eyes-wearable-tech-to-match-consumers-with-nutrition-products-c3ca7bb3?siteid=yhoof2&yptr=yahoo"
+},
+"clickThroughUrl": null,
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "NESN.SW"
+}
+]
+}
+}
+},
+{
+"id": "c4adaace-81e2-3ffe-aa56-551347bb7d55",
+"content": {
+"id": "c4adaace-81e2-3ffe-aa56-551347bb7d55",
+"contentType": "STORY",
+"title": "Nestl\u00e9 turns to AI and robotics to stoke growth",
+"description": null,
+"summary": "The world\u2019s largest food company said a deep tech center will help it develop and test ideas faster, maintain consistent quality and improve efficiency.",
+"pubDate": "2026-11-24T15:00:00Z",
+"displayTime": "2026-11-24T15:00:00Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/food_dive_848/21d3f1dee96120aacbef6182abbb7eb8",
+"originalWidth": 1600,
+"originalHeight": 900,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/food_dive_848/21d3f1dee96120aacbef6182abbb7eb8",
+"width": 1600,
+"height": 900,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/703836a3b367a160387ce3abb246bfd5964302b511c47ebb957ff78ab7b8221a/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Ffood_dive_848%2F21d3f1dee96120aacbef6182abbb7eb8",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Food Dive",
+"url": "https://fooddive.com/"
+},
+"canonicalUrl": {
+"url": "https://www.fooddive.com/news/nestle-grows-artificial-intelligence-robotics-innovation/875604/"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/technology/ai/articles/nestl-turns-ai-robotics-stoke-150000525.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "NESN.SW"
+}
+]
+}
+}
+},
+{
+"id": "c9e605b0-e442-34ac-a801-d762ac71648d",
+"content": {
+"id": "c9e605b0-e442-34ac-a801-d762ac71648d",
+"contentType": "STORY",
+"title": "The Dating App Tapping A24 to Keep Users Coming Back for More",
+"description": null,
+"summary": "Plus, Robert Pattinson\u2019s bare wrist sparks 007 watch sponsorship rumors.",
+"pubDate": "2026-11-23T14:11:00Z",
+"displayTime": "2026-11-23T14:11:00Z",
+"isHosted": false,
+"previewUrl": "https://finance.yahoo.com/m/c9e605b0-e442-34ac-a801-d762ac71648d/the-dating-app-tapping-a24-to.html",
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/wsj.com/9b1958c54ae03f58ef640a89f82a91fe.jpg_up.jpg",
+"originalWidth": 1440,
+"originalHeight": 720,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/wsj.com/9b1958c54ae03f58ef640a89f82a91fe.jpg_up.jpg",
+"width": 1440,
+"height": 720,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/543128af29ce6390fa6e5c46908019be06fbd8b14e5e7ab760d423b96593a788/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fwsj.com%2F9b1958c54ae03f58ef640a89f82a91fe.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "The Wall Street Journal",
+"url": "http://www.wsj.com/"
+},
+"canonicalUrl": {
+"url": "https://www.wsj.com/cmo-today/the-dating-app-tapping-a24-to-keep-users-coming-back-for-more-49f63f8b?siteid=yhoof2&yptr=yahoo"
+},
+"clickThroughUrl": null,
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "UHR.SW"
+},
+{
+"symbol": "NESN.SW"
+}
+]
+}
+}
+},
+{
+"id": "9ac42310-8673-3286-99a6-ec79a14630d5",
+"content": {
+"id": "9ac42310-8673-3286-99a6-ec79a14630d5",
+"contentType": "STORY",
+"title": "Nestle\u2019s CEO Sees Limits to Recipe Reworks Amid Ultraprocessed Food Pushback",
+"description": null,
+"summary": "With a portfolio built on repeat snacking, the redevelopment of well-known recipes has one key constraint: the taste can\u2019t change too much.",
+"pubDate": "2026-11-23T12:57:00Z",
+"displayTime": "2026-11-23T12:57:00Z",
+"isHosted": false,
+"previewUrl": "https://finance.yahoo.com/m/9ac42310-8673-3286-99a6-ec79a14630d5/nestle-s-ceo-sees-limits-to.html",
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/wsj.com/2b39cbc7949e5c215630ab1141dbe7c2.jpg_up.jpg",
+"originalWidth": 1440,
+"originalHeight": 720,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/wsj.com/2b39cbc7949e5c215630ab1141dbe7c2.jpg_up.jpg",
+"width": 1440,
+"height": 720,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/013b474616441d9b0e0116638900932e879a397a67a5839bb5ab35364ae67de9/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fwsj.com%2F2b39cbc7949e5c215630ab1141dbe7c2.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "The Wall Street Journal",
+"url": "http://www.wsj.com/"
+},
+"canonicalUrl": {
+"url": "https://www.wsj.com/business/nestles-ceo-sees-limits-to-recipe-reworks-amid-ultraprocessed-food-pushback-f02fb6ec?siteid=yhoof2&yptr=yahoo"
+},
+"clickThroughUrl": null,
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "NESN.SW"
+}
+]
+}
+}
+},
+{
+"id": "850ad2b4-abdf-3c3b-a838-fc503824ebec",
+"content": {
+"id": "850ad2b4-abdf-3c3b-a838-fc503824ebec",
+"contentType": "STORY",
+"title": "Nestl\u00e9 (SWX:NESN) Stock Looks Reasonable Relative To Its Cash Flow Outlook",
+"description": null,
+"summary": "Nestl\u00e9 has delivered a mixed share price story over the past few years, and that uneven path puts the focus squarely on whether today's valuation lines up with the cash the business can generate. After a return over 5 years that leaves long term holders behind where they started, the key issue is how much of Nestl\u00e9's future cash flows are already baked into the current price. The stock has declined 17.0% over 5 years, which raises a direct question about how the market currently weighs...",
+"pubDate": "2026-11-21T04:27:07Z",
+"displayTime": "2026-11-21T04:27:07Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/simply_wall_st__316/67e88aacd116101fa9220e1ae3fc56f8.jpg",
+"originalWidth": 1600,
+"originalHeight": 900,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/simply_wall_st__316/67e88aacd116101fa9220e1ae3fc56f8.jpg",
+"width": 1600,
+"height": 900,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/8dd3570719c22b9617d9ec04115389f8b34179426934ce2062e8a1271ed4f37c/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fsimply_wall_st__316%2F67e88aacd116101fa9220e1ae3fc56f8.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Simply Wall St.",
+"url": "https://simplywall.st/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/nestl-swx-nesn-stock-looks-042707340.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/nestl-swx-nesn-stock-looks-042707340.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "NESN.SW"
+},
+{
+"symbol": "NESN"
+}
+]
+}
+}
+},
+{
+"id": "1eaf297c-4fa6-321e-a3a4-75294697aed0",
+"content": {
+"id": "1eaf297c-4fa6-321e-a3a4-75294697aed0",
+"contentType": "STORY",
+"title": "Nestle Eyes Autonomous Factory Lines and Looks to Google, Microsoft as Partners",
+"description": null,
+"summary": "A new Deep Tech facility in Switzerland will allow the company to use AI, smart sensors and robotics to improve efficiency in its operations.",
+"pubDate": "2026-11-20T17:01:00Z",
+"displayTime": "2026-11-20T17:01:00Z",
+"isHosted": false,
+"previewUrl": "https://finance.yahoo.com/m/1eaf297c-4fa6-321e-a3a4-75294697aed0/nestle-eyes-autonomous.html",
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/wsj.com/330da27ed574b0d1bc0b8794a5cb93a1.jpg_up.jpg",
+"originalWidth": 1440,
+"originalHeight": 720,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/wsj.com/330da27ed574b0d1bc0b8794a5cb93a1.jpg_up.jpg",
+"width": 1440,
+"height": 720,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/b7fae48d2860aa8f8f8068913bdad7ab9ae0c0a1bcaa6f3e9f9336fc165f4678/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fwsj.com%2F330da27ed574b0d1bc0b8794a5cb93a1.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "The Wall Street Journal",
+"url": "http://www.wsj.com/"
+},
+"canonicalUrl": {
+"url": "https://www.wsj.com/tech/ai/nestle-teams-up-with-microsoft-boston-dynamics-on-ai-in-factories-and-products-05bfb028?siteid=yhoof2&yptr=yahoo"
+},
+"clickThroughUrl": null,
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "NESN.SW"
+},
+{
+"symbol": "MSFT"
+}
+]
+}
+}
+},
+{
+"id": "39cc885e-7e86-304a-a0aa-792c202038b5",
+"content": {
+"id": "39cc885e-7e86-304a-a0aa-792c202038b5",
+"contentType": "STORY",
+"title": "Out now: Just Food\u2019s digital magazine explores Scope 3, AI and retail cyberattacks",
+"description": null,
+"summary": "The latest edition examines how major food manufacturers are tackling value-chain emissions and adapting to the rise of AI shopping agents.",
+"pubDate": "2026-11-20T16:16:31Z",
+"displayTime": "2026-11-20T16:16:31Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/just_food_692/2a46fb06f2184829aa1ee3a098fe69dc.jpg",
+"originalWidth": 1905,
+"originalHeight": 1076,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/just_food_692/2a46fb06f2184829aa1ee3a098fe69dc.jpg",
+"width": 1905,
+"height": 1076,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/f38f617e9e9ef3a2ddac3d9c427d28a65f33b6fcb9b4412165f46ff5c4540596/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fjust_food_692%2F2a46fb06f2184829aa1ee3a098fe69dc.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Just Food",
+"url": "https://www.globaldata.com/"
+},
+"canonicalUrl": {
+"url": "https://www.just-food.com/news/out-now-just-foods-digital-magazine-explores-scope-3-ai-and-retail-cyberattacks/"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/technology/ai/articles/now-just-food-digital-magazine-161631589.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "NESN.SW"
+},
+{
+"symbol": "MDLZ"
+},
+{
+"symbol": "UL"
+},
+{
+"symbol": "BN.PA"
+}
+]
+}
+}
+},
+{
+"id": "52edc440-42b9-3c69-a3ad-ea51ae1ee4ce",
+"content": {
+"id": "52edc440-42b9-3c69-a3ad-ea51ae1ee4ce",
+"contentType": "STORY",
+"title": "Does the Nestle AI Deal Matter for Microsoft Shareholders?",
+"description": null,
+"summary": "Nestle just tapped Microsoft and Boston Dynamics to put AI on the factory floor, yet no dollar figure, product, or timeline came with it. One missing detail will decide whether this partnership ever reaches shareholders.",
+"pubDate": "2026-11-20T12:07:30Z",
+"displayTime": "2026-11-20T12:07:30Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/24_7_wall_st__718/cbbef842b9f6b1955a748d6d1d987b15.jpg",
+"originalWidth": 1366,
+"originalHeight": 768,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/24_7_wall_st__718/cbbef842b9f6b1955a748d6d1d987b15.jpg",
+"width": 1366,
+"height": 768,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/c665a39bddc1d00d925512c30db576e7eaadf46c7b277a75053707314faf8b88/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2F24_7_wall_st__718%2Fcbbef842b9f6b1955a748d6d1d987b15.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "24/7 Wall St.",
+"url": "https://247wallst.com/"
+},
+"canonicalUrl": {
+"url": "https://247wallst.com/investing/2026/11/20/does-the-nestle-ai-deal-matter-for-microsoft-shareholders/"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/technology/ai/articles/does-nestle-ai-deal-matter-120730174.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "MSFT"
+},
+{
+"symbol": "NESN.SW"
+},
+{
+"symbol": "STLA"
+},
+{
+"symbol": "CAG"
+},
+{
+"symbol": "CRM"
+},
+{
+"symbol": "STLA"
+}
+]
+}
+}
+},
+{
+"id": "64c4fbd9-6468-3c3d-8298-e97f6d483db0",
+"content": {
+"id": "64c4fbd9-6468-3c3d-8298-e97f6d483db0",
+"contentType": "STORY",
+"title": "Food, drinks majors sign regenerative agriculture initiative",
+"description": null,
+"summary": "The Regen Compact initiative looks \u201cto scale regenerative solutions that already work\u201d and provide \u201cfarmers with the support to make the necessary changes\u201d.",
+"pubDate": "2026-11-17T13:45:13Z",
+"displayTime": "2026-11-17T13:45:13Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/just_drinks_442/352027e27e8176b33e1e9683cccec85c.jpg",
+"originalWidth": 1440,
+"originalHeight": 810,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/just_drinks_442/352027e27e8176b33e1e9683cccec85c.jpg",
+"width": 1440,
+"height": 810,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/9e6ecabdf4a0b4053897aa019bec2c43961eb8abbef67e1770be4c1c36af95b7/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fjust_drinks_442%2F352027e27e8176b33e1e9683cccec85c.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Just Drinks",
+"url": "https://www.globaldata.com/"
+},
+"canonicalUrl": {
+"url": "https://www.just-drinks.com/news/food-drinks-majors-sign-regenerative-agriculture-initiative/"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/economy/policy/articles/food-drinks-majors-sign-regenerative-134513304.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "BN.PA"
+},
+{
+"symbol": "NESN.SW"
+}
+]
+}
+}
+},
+{
+"id": "4eb0383c-dc0f-370c-96ea-fa458ffc6efb",
+"content": {
+"id": "4eb0383c-dc0f-370c-96ea-fa458ffc6efb",
+"contentType": "STORY",
+"title": "Food, drinks majors sign regenerative agriculture initiative",
+"description": null,
+"summary": "The Regen Compact initiative looks \u201cto scale regenerative solutions that already work\u201d and provide \u201cfarmers with the support to make the necessary changes\u201d.",
+"pubDate": "2026-11-17T13:45:13Z",
+"displayTime": "2026-11-17T13:45:13Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/just_food_692/b6e486349e7df60085a19006fde6f3f7.jpg",
+"originalWidth": 1440,
+"originalHeight": 810,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/just_food_692/b6e486349e7df60085a19006fde6f3f7.jpg",
+"width": 1440,
+"height": 810,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/1ca132b3ea4915bafe94e5e3db685032052c456c51ee8c4083b69690197d2d5a/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fjust_food_692%2Fb6e486349e7df60085a19006fde6f3f7.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Just Food",
+"url": "https://www.globaldata.com/"
+},
+"canonicalUrl": {
+"url": "https://www.just-food.com/news/food-drinks-majors-sign-regenerative-agriculture-initiative/"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/economy/policy/articles/food-drinks-majors-sign-regenerative-134513211.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "BN.PA"
+},
+{
+"symbol": "NESN.SW"
+}
+]
+}
+}
+},
+{
+"id": "21e123c8-e78f-3be7-a712-2fb594455a2a",
+"content": {
+"id": "21e123c8-e78f-3be7-a712-2fb594455a2a",
+"contentType": "STORY",
+"title": "Ferrara to shutter Chicago plant, lay off more than 150 workers",
+"description": null,
+"summary": "The closure, expected to occur in April 2027, comes as the Laffy Taffy and Jelly Belly maker assesses market conditions and its long-term innovation plans.",
+"pubDate": "2026-11-10T20:54:00Z",
+"displayTime": "2026-11-10T20:54:00Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/food_dive_848/48dfb9012d47d6aab45e86e3ff835308",
+"originalWidth": 1600,
+"originalHeight": 900,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/food_dive_848/48dfb9012d47d6aab45e86e3ff835308",
+"width": 1600,
+"height": 900,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/f2557a81d4845b797754bc868d4b4680633dcffdbe3e993e75aa43570dcb649f/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Ffood_dive_848%2F48dfb9012d47d6aab45e86e3ff835308",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Food Dive",
+"url": "https://fooddive.com/"
+},
+"canonicalUrl": {
+"url": "https://www.fooddive.com/news/ferrara-closing-chicago-plant-jobs-snacking/874294/"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/small-business/articles/ferrara-shutter-chicago-plant-impacting-205400034.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "PEP"
+},
+{
+"symbol": "NESN.SW"
+},
+{
+"symbol": "DEO"
+}
+]
+}
+}
+},
+{
+"id": "e43e63d3-5fe0-3436-9f55-2df0007d3eac",
+"content": {
+"id": "e43e63d3-5fe0-3436-9f55-2df0007d3eac",
+"contentType": "STORY",
+"title": "Three deals carry French PE as deal count hits lowest since 2020",
+"description": null,
+"summary": "Ibrahim Ezzat/Anadolu via Getty Images PE deal count in France fell to its lowest level in six years in Q3, as a handful of large deals carried the quarter. According to PitchBook\u2019s Q3 2026 France Market Snapshot, PE deal value stayed flat year-on-year at \u20ac16.7 billion ($18.7 billion). However, the deal count fell by almost 20%, from 252 to 204, suggesting activity is increasingly concentrated in larger transactions. Sign up for The Europe Pitch Get our daily digest of private capital markets in",
+"pubDate": "2026-11-06T12:27:42Z",
+"displayTime": "2026-11-06T12:27:42Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/pitchbook_790/9f175f4714936b964ea0740adf8fea46.jpg",
+"originalWidth": 1440,
+"originalHeight": 960,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/pitchbook_790/9f175f4714936b964ea0740adf8fea46.jpg",
+"width": 1440,
+"height": 960,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/3c25a4f06af428580adca894536fa567019a6e3de5fde8af4a5bafdc9f695e54/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fpitchbook_790%2F9f175f4714936b964ea0740adf8fea46.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Pitchbook",
+"url": "https://pitchbook.com/"
+},
+"canonicalUrl": {
+"url": "https://pitchbook.com/news/articles/three-deals-carry-french-pe-as-deal-count-hits-lowest-since-2020"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/three-deals-carry-french-pe-122742548.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "NESN.SW"
+}
+]
+}
+}
+},
+{
+"id": "0ddc1725-7004-3e75-ac9e-171ff109b7e6",
+"content": {
+"id": "0ddc1725-7004-3e75-ac9e-171ff109b7e6",
+"contentType": "STORY",
+"title": "General Mills \u2018mulling future of H\u00e4agen-Dazs\u2019",
+"description": null,
+"summary": "The US food giant owns and operates the H\u00e4agen-Dazs brand outside North America.",
+"pubDate": "2026-11-06T09:44:38Z",
+"displayTime": "2026-11-06T09:44:38Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/just_food_692/b7abf077d10d1a1b71f26258680268b3.jpg",
+"originalWidth": 1440,
+"originalHeight": 810,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/just_food_692/b7abf077d10d1a1b71f26258680268b3.jpg",
+"width": 1440,
+"height": 810,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/a95c45bee7bd3f3a9365842b5231f0eafad0d7d4d2ee6209d67a5733e512f9db/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fjust_food_692%2Fb7abf077d10d1a1b71f26258680268b3.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Just Food",
+"url": "https://www.globaldata.com/"
+},
+"canonicalUrl": {
+"url": "https://www.just-food.com/news/general-mills-haagen-dazs-options/"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/general-mills-mulling-future-h-094438230.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "GIS"
+},
+{
+"symbol": "NESN.SW"
+}
+]
+}
+}
+},
+{
+"id": "89d7ce1e-9701-30ef-86d7-873353e73d39",
+"content": {
+"id": "89d7ce1e-9701-30ef-86d7-873353e73d39",
+"contentType": "STORY",
+"title": "General Mills Considering Separation of Haagen-Dazs Business Outside North America",
+"description": null,
+"summary": "Planning is at an early stage and General Mills, best known for such brands as Cheerios and Lucky Charms, could ultimately retain the business, according to people familiar with the matter.",
+"pubDate": "2026-11-05T17:38:00Z",
+"displayTime": "2026-11-05T17:38:00Z",
+"isHosted": false,
+"previewUrl": "https://finance.yahoo.com/m/89d7ce1e-9701-30ef-86d7-873353e73d39/general-mills-considering.html",
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/wsj.com/a0a4d16d241d0d465b0fcd9d426c16e2.jpg",
+"originalWidth": 1280,
+"originalHeight": 640,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/wsj.com/a0a4d16d241d0d465b0fcd9d426c16e2.jpg",
+"width": 1280,
+"height": 640,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/c5563bf22e95403d643380fc027eb38f74c54ce7934fb321a5aa100887f78e65/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fwsj.com%2Fa0a4d16d241d0d465b0fcd9d426c16e2.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "The Wall Street Journal",
+"url": "http://www.wsj.com/"
+},
+"canonicalUrl": {
+"url": "https://www.wsj.com/business/general-mills-considering-separation-of-haagen-dazs-business-outside-north-america-7f110a77?siteid=yhoof2&yptr=yahoo"
+},
+"clickThroughUrl": null,
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "GIS"
+},
+{
+"symbol": "NESN.SW"
+}
+]
+}
+}
+},
+{
+"id": "933f9b0c-1151-3b59-9036-b1e02f1821d0",
+"content": {
+"id": "933f9b0c-1151-3b59-9036-b1e02f1821d0",
+"contentType": "STORY",
+"title": "Kraft Heinz is Selling Its Coffee Business. Its Stock is Brewing.",
+"description": null,
+"summary": "Private equity firm One Rock Capital Partners is buying the operation at an enterprise value of $650 million.",
+"pubDate": "2026-11-04T19:10:00Z",
+"displayTime": "2026-11-04T19:10:00Z",
+"isHosted": false,
+"previewUrl": "https://finance.yahoo.com/m/933f9b0c-1151-3b59-9036-b1e02f1821d0/kraft-heinz-is-selling-its.html",
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/Barrons.com/2efbee9dc37e3e7d36b9216bff5fffc5.jpg",
+"originalWidth": 1280,
+"originalHeight": 640,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/Barrons.com/2efbee9dc37e3e7d36b9216bff5fffc5.jpg",
+"width": 1280,
+"height": 640,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/24302c83e083a4da95481b468bde068e372cb3c3425c7327fef090ed9b22b6d5/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2FBarrons.com%2F2efbee9dc37e3e7d36b9216bff5fffc5.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Barrons.com",
+"url": "http://www.barrons.com/"
+},
+"canonicalUrl": {
+"url": "https://www.barrons.com/articles/kraft-heinz-selling-coffee-business-earnings-stock-d98c37cc?siteid=yhoof2&yptr=yahoo"
+},
+"clickThroughUrl": null,
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "KHC"
+},
+{
+"symbol": "KDP"
+},
+{
+"symbol": "NESN.SW"
+},
+{
+"symbol": "SBUX"
+},
+{
+"symbol": "SJM"
+}
+]
+}
+}
+},
+{
+"id": "f6a5dc23-812c-35f4-a95d-ac76a38be2ec",
+"content": {
+"id": "f6a5dc23-812c-35f4-a95d-ac76a38be2ec",
+"contentType": "STORY",
+"title": "Nestl\u00e9 sells UK meal-kit firm SimplyCook",
+"description": null,
+"summary": "The Swiss food giant said the disposal supports its ongoing focus on \u201csimplifying our business to drive growth\u201d.",
+"pubDate": "2026-11-04T13:10:33Z",
+"displayTime": "2026-11-04T13:10:33Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/just_food_692/c1a55887f6515a994cf65d6ece72c49d.jpg",
+"originalWidth": 1440,
+"originalHeight": 810,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/just_food_692/c1a55887f6515a994cf65d6ece72c49d.jpg",
+"width": 1440,
+"height": 810,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/037301fc8cce548c2c65c279303b8a892c79a7f8e8c0316e4530a7cfb94da93d/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fjust_food_692%2Fc1a55887f6515a994cf65d6ece72c49d.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Just Food",
+"url": "https://www.globaldata.com/"
+},
+"canonicalUrl": {
+"url": "https://www.just-food.com/news/nestle-sells-uk-firm-simplycook/"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/nestl-sells-uk-meal-hit-131033372.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "NESN.SW"
+}
+]
+}
+}
+},
+{
+"id": "a8557f49-4605-412e-ab0e-0099c8d7657d",
+"content": {
+"id": "a8557f49-4605-412e-ab0e-0099c8d7657d",
+"contentType": "VIDEO",
+"title": "Why raising your first $1M is the hardest: Little Spoon CEO",
+"description": "<p>Little Spoon Co-Founder and CEO Ben Lewis explains how a single \"yes\" at a trade show sparked an investor FOMO domino effect to raise the company's first $1 million.</p>",
+"summary": "Little Spoon Co-Founder and CEO Ben Lewis explains how a single \"yes\" at a trade show sparked an investor FOMO domino effect to raise the company's first $1 million.",
+"pubDate": "2026-10-30T11:00:00Z",
+"displayTime": "2026-10-30T11:00:00Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://d29szjachogqwa.cloudfront.net/images/user-uploaded/bd-thumbnail-benlewis2-1028_8400.png",
+"originalWidth": 1920,
+"originalHeight": 1080,
+"resolutions": [
+{
+"url": "https://d29szjachogqwa.cloudfront.net/images/user-uploaded/bd-thumbnail-benlewis2-1028_8400.png",
+"width": 1920,
+"height": 1080,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/27b1cdd8f91be3209902c53256812c8750eca20672ec847e31d07b746c306943/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fd29szjachogqwa.cloudfront.net%2Fimages%2Fuser-uploaded%2Fbd-thumbnail-benlewis2-1028_8400.png",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Yahoo Finance Video",
+"url": "https://finance.yahoo.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/video/why-raising-first-1m-hardest-110000813.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/video/why-raising-first-1m-hardest-110000813.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "AMZN"
+},
+{
+"symbol": "TGT"
+},
+{
+"symbol": "NSRGY"
+}
+]
+}
+}
+},
+{
+"id": "eb19ae0c-0e9e-488a-837e-6f4a7af2e693",
+"content": {
+"id": "eb19ae0c-0e9e-488a-837e-6f4a7af2e693",
+"contentType": "VIDEO",
+"title": "How a failed Whole Foods deal built Little Spoon: Founder and CEO",
+"description": "<p>Little Spoon Co-Founder and CEO Ben Lewis discusses how a devastating 11th-hour rejection from Whole Foods ultimately saved his fresh baby food startup, and opens up about the challenges of launching a parenting brand before having children of his own.</p>",
+"summary": "Little Spoon Co-Founder and CEO Ben Lewis discusses how a devastating 11th-hour rejection from Whole Foods ultimately saved his fresh baby food startup, and opens up about the challenges of launching a parenting brand before having children of his own.",
+"pubDate": "2026-10-30T10:00:00Z",
+"displayTime": "2026-10-30T10:00:00Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://d29szjachogqwa.cloudfront.net/images/user-uploaded/bd-thumbnail-benlewis1-1027_1434.png",
+"originalWidth": 1920,
+"originalHeight": 1080,
+"resolutions": [
+{
+"url": "https://d29szjachogqwa.cloudfront.net/images/user-uploaded/bd-thumbnail-benlewis1-1027_1434.png",
+"width": 1920,
+"height": 1080,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/ecb8c8fc02a4111d61ceb17f9148d0bdbc5f49bcf5ff5e8bc77a1f14e463d50f/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fd29szjachogqwa.cloudfront.net%2Fimages%2Fuser-uploaded%2Fbd-thumbnail-benlewis1-1027_1434.png",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Yahoo Finance Video",
+"url": "https://finance.yahoo.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/video/failed-whole-foods-deal-built-100000691.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/video/failed-whole-foods-deal-built-100000691.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "TGT"
+},
+{
+"symbol": "AMZN"
+},
+{
+"symbol": "NSRGY"
+}
+]
+}
+}
+},
+{
+"id": "dd771702-21d0-3dc7-9f69-43272463b677",
+"content": {
+"id": "dd771702-21d0-3dc7-9f69-43272463b677",
+"contentType": "STORY",
+"title": "Supplements brand Rho Nutrition explores sale, sources say",
+"description": null,
+"summary": "NEW YORK, Oct 28 (Reuters) - Rho Nutrition, a maker of liquid supplements and vitamins, \u200cis exploring a sale that could value \u200cthe company at over $500 million, according to people familiar with the matter. The \u200bprivately held company is working with investment bank Rothschild on the sale process, which is at an early stage, said the people, who requested anonymity since the matter \u200cis private.",
+"pubDate": "2026-10-28T15:56:07Z",
+"displayTime": "2026-10-28T15:56:07Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": null,
+"provider": {
+"displayName": "Reuters",
+"url": "https://www.reuters.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/healthcare/articles/supplements-brand-rho-nutrition-explores-155607047.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/healthcare/articles/supplements-brand-rho-nutrition-explores-155607047.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "PG"
+},
+{
+"symbol": "UL"
+},
+{
+"symbol": "NESN.SW"
+}
+]
+}
+}
+}
+]
+}

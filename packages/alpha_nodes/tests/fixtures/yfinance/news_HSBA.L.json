@@ -1,0 +1,1167 @@
+{
+"symbol": "HSBA.L",
+"items": [
+{
+"id": "2e4e6861-9220-30f7-8873-0f5222c17611",
+"content": {
+"id": "2e4e6861-9220-30f7-8873-0f5222c17611",
+"contentType": "STORY",
+"title": "Why HSBC Thinks Stocks Are in a Sweet Spot",
+"description": null,
+"summary": "HSBC strategist Alastair Pinder says recent AI-led volatility in global equities has improved the risk/reward for 2027.",
+"pubDate": "2026-11-25T19:05:00Z",
+"displayTime": "2026-11-25T19:05:00Z",
+"isHosted": false,
+"previewUrl": "https://finance.yahoo.com/m/2e4e6861-9220-30f7-8873-0f5222c17611/why-hsbc-thinks-stocks-are-in.html",
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/Barrons.com/383d1d413164b68f4feb8a8775f0cee6.jpg_up.jpg",
+"originalWidth": 1440,
+"originalHeight": 720,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/Barrons.com/383d1d413164b68f4feb8a8775f0cee6.jpg_up.jpg",
+"width": 1440,
+"height": 720,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/d2a709ccbb9db2f3281443fa6da613f383fcfa162a5d31c1811b27bd337f91b1/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2FBarrons.com%2F383d1d413164b68f4feb8a8775f0cee6.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Barrons.com",
+"url": "http://www.barrons.com/"
+},
+"canonicalUrl": {
+"url": "https://www.barrons.com/articles/hsbc-stocks-market-ai-rate-hikes-e1bfef1a?siteid=yhoof2&yptr=yahoo"
+},
+"clickThroughUrl": null,
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "HSBC"
+},
+{
+"symbol": "^GSPC"
+}
+]
+}
+}
+},
+{
+"id": "fa3db7c1-344d-38d0-9669-87076f2a1801",
+"content": {
+"id": "fa3db7c1-344d-38d0-9669-87076f2a1801",
+"contentType": "STORY",
+"title": "U.S. 7-Year Treasury Auction Shows Softer Demand",
+"description": null,
+"summary": "Treasury yields remained in the red after the government\u2019s seven-year note auction drew soft demand.",
+"pubDate": "2026-11-25T17:08:00Z",
+"displayTime": "2026-11-25T17:08:00Z",
+"isHosted": false,
+"previewUrl": "https://finance.yahoo.com/m/fa3db7c1-344d-38d0-9669-87076f2a1801/u-s-7-year-treasury-auction.html",
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/wsj.com/7b2c285183be07ca3c4e8242b25a59a8.png_up.jpg",
+"originalWidth": 1372,
+"originalHeight": 721,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/wsj.com/7b2c285183be07ca3c4e8242b25a59a8.png_up.jpg",
+"width": 1372,
+"height": 721,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/741fa49619a3dc2a1a0efb35ad8b1a469c00cc258c52646e4f1c5af5a030eca5/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fwsj.com%2F7b2c285183be07ca3c4e8242b25a59a8.png_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "The Wall Street Journal",
+"url": "http://www.wsj.com/"
+},
+"canonicalUrl": {
+"url": "https://www.wsj.com/finance/long-term-jgb-yields-fall-amid-chip-stock-selloffs-ab4ead3e?siteid=yhoof2&yptr=yahoo"
+},
+"clickThroughUrl": null,
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "HSBC"
+}
+]
+}
+}
+},
+{
+"id": "ea8d977c-bf84-39ca-a23c-2436988c6fca",
+"content": {
+"id": "ea8d977c-bf84-39ca-a23c-2436988c6fca",
+"contentType": "STORY",
+"title": "Citigroup Eyes Venezuela Re-Entry: Can It Grow Cross-Border Payments?",
+"description": null,
+"summary": "C is weighing a Venezuela return to expand cross-border payments, earn transaction fees and deepen its Latin American banking business.",
+"pubDate": "2026-11-25T14:20:00Z",
+"displayTime": "2026-11-25T14:20:00Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/zacks.com/fcbe2006ed596c11475d4d73efcc61dc.jpg_up.jpg",
+"originalWidth": 1280,
+"originalHeight": 807,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/zacks.com/fcbe2006ed596c11475d4d73efcc61dc.jpg_up.jpg",
+"width": 1280,
+"height": 807,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/64337a6daebfce2a52e1eac1387c1757458628deee416293d39df1845cff5174/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fzacks.com%2Ffcbe2006ed596c11475d4d73efcc61dc.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Zacks",
+"url": "http://www.zacks.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/markets/currencies/articles/citigroup-eyes-venezuela-entry-grow-142000834.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/currencies/articles/citigroup-eyes-venezuela-entry-grow-142000834.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "C"
+},
+{
+"symbol": "JPM"
+},
+{
+"symbol": "HSBC"
+}
+]
+}
+}
+},
+{
+"id": "81fa366b-56ee-33c7-bf73-3987e8a0c5d9",
+"content": {
+"id": "81fa366b-56ee-33c7-bf73-3987e8a0c5d9",
+"contentType": "STORY",
+"title": "3 \"peaks\" that could spark a rally in S&P 500: HSBC",
+"description": null,
+"summary": "Investing.com -- HSBC told clients in a new note that the risk-reward balance for equities has improved materially heading into 2027, highlighting three \"peaks\" that could drive a re-rating, or a rise in valuations.",
+"pubDate": "2026-11-25T13:13:37Z",
+"displayTime": "2026-11-25T13:13:37Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": null,
+"provider": {
+"displayName": "Investing.com",
+"url": "https://www.investing.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/3-peaks-could-spark-rally-131337833.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/3-peaks-could-spark-rally-131337833.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "HSBC"
+},
+{
+"symbol": "US500"
+}
+]
+}
+}
+},
+{
+"id": "fc6bfa6b-df96-434f-b6dc-a62a2157bfec",
+"content": {
+"id": "fc6bfa6b-df96-434f-b6dc-a62a2157bfec",
+"contentType": "VIDEO",
+"title": "Bitcoin now counts as collateral: From the CFTC to the ECB",
+"description": "<p>The Daily Wolf host Scott Melker, the Wolf of All Streets, looks past the whiplash in global markets to the quieter changes in how Bitcoin and crypto are being used. Including new CFTC staff guidance letting exchanges count Bitcoin, ether and stablecoins toward their financial resource requirements, Cross River Bank launching Bitcoin-backed consumer loans of up to $250,000, and BTCS selling more than half its ether to repay an Aave loan in a warning sign for crypto treasury companies.</p>",
+"summary": "The Daily Wolf host Scott Melker, the Wolf of All Streets, looks past the whiplash in global markets to the quieter changes in how Bitcoin and crypto are being used. Including new CFTC staff guidance letting exchanges count Bitcoin, ether and stablecoins toward their financial resource requirements, Cross River Bank launching Bitcoin-backed consumer loans of up to $250,000, and BTCS selling more than half its ether to repay an Aave loan in a warning sign for crypto treasury companies.",
+"pubDate": "2026-11-24T17:37:02Z",
+"displayTime": "2026-11-24T17:37:02Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://d29szjachogqwa.cloudfront.net/images/user-uploaded/dailywolf-thumbnail-website-1124_7772.png",
+"originalWidth": 1920,
+"originalHeight": 1080,
+"resolutions": [
+{
+"url": "https://d29szjachogqwa.cloudfront.net/images/user-uploaded/dailywolf-thumbnail-website-1124_7772.png",
+"width": 1920,
+"height": 1080,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/121ebb7b61ac3e762d39e935354ff0ebf31e86f67b5043e3c1eb8cac0a124041/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fd29szjachogqwa.cloudfront.net%2Fimages%2Fuser-uploaded%2Fdailywolf-thumbnail-website-1124_7772.png",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Yahoo Finance Video",
+"url": "https://finance.yahoo.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/video/bitcoin-now-counts-as-collateral-from-the-cftc-to-the-ecb-173702372.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/video/bitcoin-now-counts-as-collateral-from-the-cftc-to-the-ecb-173702372.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "NVDA"
+},
+{
+"symbol": "BLK"
+},
+{
+"symbol": "HSBC"
+},
+{
+"symbol": "JPM"
+},
+{
+"symbol": "USDC"
+},
+{
+"symbol": "BNB-USD"
+},
+{
+"symbol": "AAVE-USD"
+},
+{
+"symbol": "ETH-USD"
+},
+{
+"symbol": "BTC-USD"
+},
+{
+"symbol": "CRCL"
+},
+{
+"symbol": "NAKA"
+},
+{
+"symbol": "BTCS"
+}
+]
+}
+}
+},
+{
+"id": "5e46bab6-0c31-313e-ae48-78e7a2876d7a",
+"content": {
+"id": "5e46bab6-0c31-313e-ae48-78e7a2876d7a",
+"contentType": "STORY",
+"title": "HSBC Holdings (LSE:HSBA) Appoints Neha Ghai To Global Private Bank Role",
+"description": null,
+"summary": "HSBC Holdings (LSE:HSBA) has appointed Neha Ghai as director, global private bank, within its private banking arm. Ghai brings international wealth experience from markets such as India, Singapore, and China to the global private banking team. The move follows a series of regional leadership reshuffles across HSBC's private banking operations. The appointment of Neha Ghai to lead the global private bank is only one piece of the wider HSBC story. Take a look at 2 warning signs we have...",
+"pubDate": "2026-11-24T16:11:50Z",
+"displayTime": "2026-11-24T16:11:50Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/simply_wall_st__316/265c65a8142b72bff2003b5eab57352d.jpg",
+"originalWidth": 1600,
+"originalHeight": 900,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/simply_wall_st__316/265c65a8142b72bff2003b5eab57352d.jpg",
+"width": 1600,
+"height": 900,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/c20cb9f6ef28f034ac76c9980db394e5a10d53770eccb3d3852645b945a02380/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fsimply_wall_st__316%2F265c65a8142b72bff2003b5eab57352d.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Simply Wall St.",
+"url": "https://simplywall.st/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/hsbc-holdings-lse-hsba-appoints-161150554.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/hsbc-holdings-lse-hsba-appoints-161150554.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "HSBC"
+},
+{
+"symbol": "HSBC"
+}
+]
+}
+}
+},
+{
+"id": "0b8788b3-23b1-3489-8642-6643fe4e925f",
+"content": {
+"id": "0b8788b3-23b1-3489-8642-6643fe4e925f",
+"contentType": "STORY",
+"title": "BlackRock Launches $100M Tokenized Money Market Fund in Hong Kong",
+"description": null,
+"summary": "BlackRock (NYSE: $BLK) has launched a $100 million tokenized money market fund in Hong Kong, expanding its digital ...",
+"pubDate": "2026-11-24T16:09:00Z",
+"displayTime": "2026-11-24T16:09:00Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/cryptoprowl_304/13aeb092a23aa4acb5506527c6b28bff.jpg_up.jpg",
+"originalWidth": 1280,
+"originalHeight": 768,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/cryptoprowl_304/13aeb092a23aa4acb5506527c6b28bff.jpg_up.jpg",
+"width": 1280,
+"height": 768,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/00548789f9ddcc3e467ce05f137d7fcbf7d0bfe605d3d803c625a661b676a567/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fcryptoprowl_304%2F13aeb092a23aa4acb5506527c6b28bff.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "CryptoProwl",
+"url": "https://www.cryptoprowl.com/"
+},
+"canonicalUrl": {
+"url": "https://www.cryptoprowl.com/releases/blackrock-launches-100m-tokenized-money-market-fund-in-hong-kong-8053"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/crypto/articles/blackrock-launches-100m-tokenized-money-160900159.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "BLK"
+},
+{
+"symbol": "HKD=X"
+},
+{
+"symbol": "HSBC"
+}
+]
+}
+}
+},
+{
+"id": "4c014713-5b8a-3c5a-8368-ae745db626f8",
+"content": {
+"id": "4c014713-5b8a-3c5a-8368-ae745db626f8",
+"contentType": "STORY",
+"title": "JPMorgan And HSBC Complete First Digital Gold Trade",
+"description": null,
+"summary": "Leading banks JPMorgan Chase (NYSE: $JPM) and HSBC (NYSE: $HSBC) have completed the first trades involving digital ...",
+"pubDate": "2026-11-24T14:26:00Z",
+"displayTime": "2026-11-24T14:26:00Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/cryptoprowl_304/aa49e31ba6db830c5eeb01aab8a3812d.jpg_up.jpg",
+"originalWidth": 1280,
+"originalHeight": 768,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/cryptoprowl_304/aa49e31ba6db830c5eeb01aab8a3812d.jpg_up.jpg",
+"width": 1280,
+"height": 768,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/982250122255344b14fc237b716bdaf7dbcb39ebf9257787de2651dea2339281/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fcryptoprowl_304%2Faa49e31ba6db830c5eeb01aab8a3812d.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "CryptoProwl",
+"url": "https://www.cryptoprowl.com/"
+},
+"canonicalUrl": {
+"url": "https://www.cryptoprowl.com/releases/jpmorgan-and-hsbc-complete-first-digital-gold-trade-8041"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/commodities/articles/jpmorgan-hsbc-complete-first-digital-142600792.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "GC=F"
+},
+{
+"symbol": "HSBC"
+},
+{
+"symbol": "SNEX"
+},
+{
+"symbol": "JPM"
+},
+{
+"symbol": "HSBC"
+}
+]
+}
+}
+},
+{
+"id": "9e3ff954-4256-329f-90e9-5c391d87a53a",
+"content": {
+"id": "9e3ff954-4256-329f-90e9-5c391d87a53a",
+"contentType": "STORY",
+"title": "HSBC Values Tesla at Just $212 Without SpaceX Merger",
+"description": null,
+"summary": "Cathie Wood expects Tesla shareholders to demand a premium, while HSBC raises its price target to $359.",
+"pubDate": "2026-11-23T16:22:21Z",
+"displayTime": "2026-11-23T16:22:21Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": null,
+"provider": {
+"displayName": "GuruFocus.com",
+"url": "http://www.gurufocus.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/hsbc-values-tesla-just-212-162221658.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/hsbc-values-tesla-just-212-162221658.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "TSLA"
+},
+{
+"symbol": "SPCX"
+},
+{
+"symbol": "HSBC"
+}
+]
+}
+}
+},
+{
+"id": "2330e1b0-add8-3047-ad60-d028f67d73dc",
+"content": {
+"id": "2330e1b0-add8-3047-ad60-d028f67d73dc",
+"contentType": "STORY",
+"title": "HSBC Issues Strong Warning on XPeng Stock Despite Rally",
+"description": null,
+"summary": "Wall Street's caution clashes with renewed investor optimism.",
+"pubDate": "2026-11-23T15:23:48Z",
+"displayTime": "2026-11-23T15:23:48Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": null,
+"provider": {
+"displayName": "GuruFocus.com",
+"url": "http://www.gurufocus.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/hsbc-issues-strong-warning-xpeng-152348300.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/hsbc-issues-strong-warning-xpeng-152348300.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "XPEV"
+},
+{
+"symbol": "HSBC"
+},
+{
+"symbol": "XPEV"
+}
+]
+}
+}
+},
+{
+"id": "d1d55166-244f-323f-b102-d6fb4c3b09aa",
+"content": {
+"id": "d1d55166-244f-323f-b102-d6fb4c3b09aa",
+"contentType": "STORY",
+"title": "Top bank resets Tesla stock target, yet standalone value is alarming",
+"description": null,
+"summary": "One big upgrade comes with a catch.",
+"pubDate": "2026-11-22T18:47:00Z",
+"displayTime": "2026-11-22T18:47:00Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/thestreet_881/d9e218b3ad09dfa5018fca7e7c752e9b.jpg",
+"originalWidth": 3840,
+"originalHeight": 2560,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/thestreet_881/d9e218b3ad09dfa5018fca7e7c752e9b.jpg",
+"width": 3840,
+"height": 2560,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/2d1e6827369a0b783e57ec76dc951aed5a169a7c93e4c6bcec9ce7d78022ad58/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fthestreet_881%2Fd9e218b3ad09dfa5018fca7e7c752e9b.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "TheStreet",
+"url": "https://www.thestreet.com/"
+},
+"canonicalUrl": {
+"url": "https://www.thestreet.com/investing/stocks/top-bank-resets-tesla-stock-target-yet-standalone-value-is-alarming"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/top-bank-resets-tesla-stock-184700786.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "TSLA"
+},
+{
+"symbol": "^GSPC"
+},
+{
+"symbol": "^IXIC"
+},
+{
+"symbol": "HSBC"
+}
+]
+}
+}
+},
+{
+"id": "1ddd910a-80eb-3639-80d9-161d0e396d0e",
+"content": {
+"id": "1ddd910a-80eb-3639-80d9-161d0e396d0e",
+"contentType": "STORY",
+"title": "What Does HSBC Holdings (LSE:HSBA) Crypto Theft Code Exposure Mean For Investors?",
+"description": null,
+"summary": "HSBC Holdings (LSE:HSBA) was listed among 178 major websites hit by crypto-stealing code, according to a recent security report. The malicious script was reportedly embedded in live web pages, raising questions about how long user interactions may have been exposed. Security researchers linked the incident to a coordinated campaign targeting financial and cryptocurrency related platforms worldwide. The discovery of crypto stealing code on HSBC related sites is important, but it should not...",
+"pubDate": "2026-11-20T17:11:44Z",
+"displayTime": "2026-11-20T17:11:44Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/simply_wall_st__316/265c65a8142b72bff2003b5eab57352d.jpg",
+"originalWidth": 1600,
+"originalHeight": 900,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/simply_wall_st__316/265c65a8142b72bff2003b5eab57352d.jpg",
+"width": 1600,
+"height": 900,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/c20cb9f6ef28f034ac76c9980db394e5a10d53770eccb3d3852645b945a02380/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fsimply_wall_st__316%2F265c65a8142b72bff2003b5eab57352d.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Simply Wall St.",
+"url": "https://simplywall.st/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/markets/crypto/articles/does-hsbc-holdings-lse-hsba-171144134.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/crypto/articles/does-hsbc-holdings-lse-hsba-171144134.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "HSBC"
+},
+{
+"symbol": "HSBC"
+}
+]
+}
+}
+},
+{
+"id": "36418856-2a6b-390b-a08c-3ca4de157c5a",
+"content": {
+"id": "36418856-2a6b-390b-a08c-3ca4de157c5a",
+"contentType": "STORY",
+"title": "Tesla Stock Gets An HSBC Upgrade \u2014 But Analyst Says Strategic Logic Of TSLA-SPCX Merger Is \u2018Limited\u2019",
+"description": null,
+"summary": "Analyst Michael Tyndall raised Tesla\u2019s rating to \u2018Hold\u2019 from \u2018Reduce\u2019 and increased its price target by 129% to $359, according to The Fly.",
+"pubDate": "2026-11-20T11:02:42Z",
+"displayTime": "2026-11-20T11:02:42Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/stocktwits_383/7a16c430235d3088c8a4758c155b0cc0",
+"originalWidth": 1280,
+"originalHeight": 887,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/stocktwits_383/7a16c430235d3088c8a4758c155b0cc0",
+"width": 1280,
+"height": 887,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/b8c2d695add4a6cc227712b4b41e909d49ed8a715269c820bfd3257ec7d76e56/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fstocktwits_383%2F7a16c430235d3088c8a4758c155b0cc0",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Stocktwits",
+"url": "https://stocktwits.com/"
+},
+"canonicalUrl": {
+"url": "https://stocktwits.com/news-articles/markets/equity/tesla-stock-gets-an-hsbc-upgrade-but-analyst-says-strategic-logic-of-tsla-spcx-merger-is-limited/cNbSgTfR9Ko"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/tesla-stock-gets-hsbc-upgrade-110242794.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "TSLA"
+},
+{
+"symbol": "HSBC"
+},
+{
+"symbol": "SPCX"
+}
+]
+}
+}
+},
+{
+"id": "01324d6e-fd3f-3d98-bc19-58a144fe7136",
+"content": {
+"id": "01324d6e-fd3f-3d98-bc19-58a144fe7136",
+"contentType": "STORY",
+"title": "HSBC CEO Sees Deposit Growth and Asian Wealth as Bank Bets on AI",
+"description": null,
+"summary": "HSBC (NYSE:HSBC) Chief Executive Officer Georges Elhedery said the bank has room to compete for deposits in Hong Kong and the U.K. while investing in wealth management, transaction banking and artificial intelligence. Speaking at a JPMorgan financial conference in London, Elhedery said Hong Kong de",
+"pubDate": "2026-11-20T01:13:08Z",
+"displayTime": "2026-11-20T01:13:08Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/marketbeat_955/8351a492fead4d0ec3adc9506ed6613d.png_up.jpg",
+"originalWidth": 1280,
+"originalHeight": 720,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/marketbeat_955/8351a492fead4d0ec3adc9506ed6613d.png_up.jpg",
+"width": 1280,
+"height": 720,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/d7bc4d365075749f20d6260d2bef260a37ef555968a27ca0a2f922a695936dbd/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fmarketbeat_955%2F8351a492fead4d0ec3adc9506ed6613d.png_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "MarketBeat",
+"url": "https://www.marketbeat.com/"
+},
+"canonicalUrl": {
+"url": "https://www.marketbeat.com/instant-alerts/event-hsbc-ceo-sees-deposit-growth-and-asian-wealth-as-bank-bets-on-ai-2026-11-19/?utm_source=yahoofinance&utm_medium=yahoofinance"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/hsbc-ceo-sees-deposit-growth-011308038.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "HSBC"
+},
+{
+"symbol": "HSBC"
+}
+]
+}
+}
+},
+{
+"id": "ecabce12-85e0-32f6-91ff-c4d4b8b8fcdd",
+"content": {
+"id": "ecabce12-85e0-32f6-91ff-c4d4b8b8fcdd",
+"contentType": "STORY",
+"title": "HSBC Just Turned Bullish on Cisco Stock Again. Here\u2019s Why It Expects 40% Upside.",
+"description": null,
+"summary": "Cisco's strongest growth in more than 15 years has caught Wall Street's attention, and now HSBC has turned bullish.",
+"pubDate": "2026-11-19T22:57:46Z",
+"displayTime": "2026-11-19T22:57:46Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/barchart_com_477/bec27416fdbe79bd1eb29e2bdbc3efb1.jpg_up.jpg",
+"originalWidth": 1280,
+"originalHeight": 854,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/barchart_com_477/bec27416fdbe79bd1eb29e2bdbc3efb1.jpg_up.jpg",
+"width": 1280,
+"height": 854,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/13b1df3da5b2917a86fc066d681886eaebc7a051ba2bcfa7cb5f469b6df06c93/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fbarchart_com_477%2Fbec27416fdbe79bd1eb29e2bdbc3efb1.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Barchart",
+"url": "https://www.barchart.com/"
+},
+"canonicalUrl": {
+"url": "https://www.barchart.com/story/news/8926885/hsbc-just-turned-bullish-on-cisco-stock-again-heres-why-it-expects-40-upside"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/hsbc-just-turned-bullish-cisco-225746853.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "HSBC"
+},
+{
+"symbol": "CSCO"
+}
+]
+}
+}
+},
+{
+"id": "5dff2e85-3447-3829-8612-43cf356583c6",
+"content": {
+"id": "5dff2e85-3447-3829-8612-43cf356583c6",
+"contentType": "STORY",
+"title": "HSBC Launches Ethereum-Based Money Market Fund",
+"description": null,
+"summary": "British bank HSBC (NYSE: $HSBC) has launched an Ethereum-based (CRYPTO: $ETH) money market fund in Hong Kong. ...",
+"pubDate": "2026-11-19T14:41:00Z",
+"displayTime": "2026-11-19T14:41:00Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/cryptoprowl_304/5827aa6b551e40ddf5c68d4b2b1e3d2a.jpg",
+"originalWidth": 1000,
+"originalHeight": 600,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/cryptoprowl_304/5827aa6b551e40ddf5c68d4b2b1e3d2a.jpg",
+"width": 1000,
+"height": 600,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/265a435ea1512b920e8efe1eacd728ee0e30bf485f22d46407aff50a18429f68/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fcryptoprowl_304%2F5827aa6b551e40ddf5c68d4b2b1e3d2a.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "CryptoProwl",
+"url": "https://www.cryptoprowl.com/"
+},
+"canonicalUrl": {
+"url": "https://www.cryptoprowl.com/releases/hsbc-launches-ethereum-based-money-market-fund-7987"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/crypto/articles/hsbc-launches-ethereum-based-money-144100926.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "HSBC"
+},
+{
+"symbol": "ETH-USD"
+},
+{
+"symbol": "HSBC"
+},
+{
+"symbol": "ETH"
+},
+{
+"symbol": "RCHKD"
+}
+]
+}
+}
+},
+{
+"id": "83d7946f-ff54-3274-968e-0ea67aab389d",
+"content": {
+"id": "83d7946f-ff54-3274-968e-0ea67aab389d",
+"contentType": "STORY",
+"title": "Top 3 British Dividend Stocks To Watch In November 2026",
+"description": null,
+"summary": "With the dollar holding near a 19 month high as traders brace for further US interest rate moves, income investors are again reminded how choppy markets can feel when policy headlines dominate. Reliable cash payouts start to look more appealing when prices swing. This article focuses on a group of United Kingdom dividend stocks yielding more than 3%, then highlights three of the strongest candidates from that list. The three stocks highlighted here offer a compelling starting point if you...",
+"pubDate": "2026-11-18T03:11:24Z",
+"displayTime": "2026-11-18T03:11:24Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/simply_wall_st__316/05b2f4551ab73ea67b15e17c10719313.jpg",
+"originalWidth": 1600,
+"originalHeight": 900,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/simply_wall_st__316/05b2f4551ab73ea67b15e17c10719313.jpg",
+"width": 1600,
+"height": 900,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/00afada20bbd41a9eaf96b9a82a10b0c84207bab7dee993e5a791ce3fc740525/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fsimply_wall_st__316%2F05b2f4551ab73ea67b15e17c10719313.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Simply Wall St.",
+"url": "https://simplywall.st/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/top-3-british-dividend-stocks-031124133.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/top-3-british-dividend-stocks-031124133.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "EMG.L"
+},
+{
+"symbol": "DX-Y.NYB"
+},
+{
+"symbol": "HSBC"
+},
+{
+"symbol": "OSB.L"
+}
+]
+}
+}
+},
+{
+"id": "25874842-2c95-34bf-bc3e-193eb80e44f8",
+"content": {
+"id": "25874842-2c95-34bf-bc3e-193eb80e44f8",
+"contentType": "STORY",
+"title": "Health Care Roundup: Market Talk",
+"description": null,
+"summary": "Find insights on Siemens Healthineers, Roche Holding and more in the latest Market Talks covering the health care sector.",
+"pubDate": "2026-11-17T22:03:00Z",
+"displayTime": "2026-11-17T22:03:00Z",
+"isHosted": false,
+"previewUrl": "https://finance.yahoo.com/m/25874842-2c95-34bf-bc3e-193eb80e44f8/health-care-roundup-market.html",
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/wsj.com/ac7e55440418fa23e3ea324f3e098c9c.jpg",
+"originalWidth": 1280,
+"originalHeight": 640,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/wsj.com/ac7e55440418fa23e3ea324f3e098c9c.jpg",
+"width": 1280,
+"height": 640,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/0b72983caf342d5e2cb482b9b9a46d10319718b1a11419fb22a444890493d0dc/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fwsj.com%2Fac7e55440418fa23e3ea324f3e098c9c.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "The Wall Street Journal",
+"url": "http://www.wsj.com/"
+},
+"canonicalUrl": {
+"url": "https://www.wsj.com/health/pharma/health-care-roundup-market-talk-1fae9968?siteid=yhoof2&yptr=yahoo"
+},
+"clickThroughUrl": null,
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "HSBC"
+},
+{
+"symbol": "EL.PA"
+},
+{
+"symbol": "SHL.DE"
+}
+]
+}
+}
+},
+{
+"id": "684752b3-f104-4123-a49a-ce78f45e21f1",
+"content": {
+"id": "684752b3-f104-4123-a49a-ce78f45e21f1",
+"contentType": "VIDEO",
+"title": "Hackers target 178 major websites with crypto-stealing code",
+"description": "<p>Scott Melker breaks down reports of malicious cryptocurrency-stealing code discovered across 178 major websites, including those associated with HSBC (<a target=\"_blank\" rel=\"\" class=\"link\" href=\"https://finance.yahoo.com/quote/HSBC/\" data-i13n=\"slk:HSBC;cpos:1;pos:1\">HSBC</a>), Salesforce (<a target=\"_blank\" rel=\"\" class=\"link\" href=\"https://finance.yahoo.com/quote/CRM/\" data-i13n=\"slk:CRM;cpos:2;pos:1\">CRM</a>), Zoom (<a target=\"_blank\" rel=\"\" class=\"link\" href=\"https://finance.yahoo.com/quote/ZM/\" data-i13n=\"slk:ZM;cpos:3;pos:1\">ZM</a>), and Ledger.</p>\n<p>\"<a target=\"_blank\" rel=\"\" class=\"link\" href=\"https://finance.yahoo.com/videos/series/daily-wolf/?fr=sycsrp_catchall\" data-i13n=\"slk:The Daily Wolf with Scott Melker;cpos:4;pos:1\">The Daily Wolf with Scott Melker</a>\" airs every day at 12:00 p.m. Tune in for your daily dose of all things crypto.</p>",
+"summary": "Scott Melker breaks down reports of malicious cryptocurrency-stealing code discovered across 178 major websites, including those associated with HSBC (HSBC), Salesforce (CRM), Zoom (ZM), and Ledger.\n\n\"The Daily Wolf with Scott Melker\" airs every day at 12:00 p.m. Tune in for your daily dose of all things crypto.",
+"pubDate": "2026-11-17T20:00:00Z",
+"displayTime": "2026-11-17T20:00:00Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://d29szjachogqwa.cloudfront.net/images/2026-11/0d61917f-0f97-4448-bc86-0b897365b897",
+"originalWidth": 6000,
+"originalHeight": 4000,
+"resolutions": [
+{
+"url": "https://d29szjachogqwa.cloudfront.net/images/2026-11/0d61917f-0f97-4448-bc86-0b897365b897",
+"width": 6000,
+"height": 4000,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/3b9e80be208dd000165f4dfbd26af064acb07c6b569858d0b3afb0a0411afa27/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fd29szjachogqwa.cloudfront.net%2Fimages%2F2026-11%2F0d61917f-0f97-4448-bc86-0b897365b897",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Yahoo Finance Video",
+"url": "https://finance.yahoo.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/video/hackers-target-178-major-websites-with-crypto-stealing-code-203311636.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/video/hackers-target-178-major-websites-with-crypto-stealing-code-203311636.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "HSBC"
+},
+{
+"symbol": "CRM"
+},
+{
+"symbol": "ZM"
+},
+{
+"symbol": "BTC-USD"
+},
+{
+"symbol": "ETH-USD"
+},
+{
+"symbol": "SOL-USD"
+},
+{
+"symbol": "TRX-USD"
+}
+]
+}
+}
+},
+{
+"id": "a5b9b223-9163-3644-8d98-71999a032c74",
+"content": {
+"id": "a5b9b223-9163-3644-8d98-71999a032c74",
+"contentType": "STORY",
+"title": "Hong Kong, Swift and Major Banks Test Blockchain-Based Cross-Border Payments",
+"description": null,
+"summary": "Hong Kong\u2019s central bank and Swift are working with major banks to test cross-border payments using tokenized...",
+"pubDate": "2026-11-17T15:49:00Z",
+"displayTime": "2026-11-17T15:49:00Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/cryptoprowl_304/066bbf9424ff7fcf8d7669308dad41d7.jpg",
+"originalWidth": 1000,
+"originalHeight": 600,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/cryptoprowl_304/066bbf9424ff7fcf8d7669308dad41d7.jpg",
+"width": 1000,
+"height": 600,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/453a2b04416f67987ae081ecd82eb887fc0ad58a0e5078af0715912101ccdd56/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fcryptoprowl_304%2F066bbf9424ff7fcf8d7669308dad41d7.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "CryptoProwl",
+"url": "https://www.cryptoprowl.com/"
+},
+"canonicalUrl": {
+"url": "https://www.cryptoprowl.com/releases/hong-kong-swift-and-major-banks-test-blockchain-based-cross-border-payments-7951"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/crypto/articles/hong-kong-swift-major-banks-154900340.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "HSBC"
+},
+{
+"symbol": "601988.SS"
+},
+{
+"symbol": "HSBC"
+},
+{
+"symbol": "LINK"
+},
+{
+"symbol": "JPM"
+},
+{
+"symbol": "C"
+}
+]
+}
+}
+}
+]
+}

@@ -13,7 +13,9 @@ import yfinance._http as yf_http
 import yfinance.cache as yf_cache
 from alpha_nodes import datasets, markets
 from alpha_nodes.providers.yfinance import provider as provider_mod
+from alpha_nodes.providers.yfinance.fundamentals import YFStatementsPayload
 from alpha_nodes.providers.yfinance.history import YFHistoryPayload
+from alpha_nodes.providers.yfinance.profile import YFProfilePayload
 from alpha_nodes.providers.yfinance.provider import (
     YF_POLICY,
     YFinanceProvider,
@@ -25,13 +27,16 @@ from curl_cffi.requests.exceptions import HTTPError as CurlHTTPError
 from curl_cffi.requests.exceptions import Timeout as CurlTimeout
 from lensgraph.sources import (
     DateInterval,
+    DuckDBSourceStore,
     FakeClock,
     RawResponse,
     WorkItem,
 )
+from lensgraph.store.memory import InMemoryBlobStore
 from yfinance.exceptions import YFPricesMissingError, YFRateLimitError, YFTzMissingError
 
 from .conftest import yf_frame
+from .yf_replay import YFReplay
 
 Loader = Callable[[str], YFHistoryPayload]
 NOW = datetime(2026, 11, 25, 12, 0, tzinfo=UTC)  # after the LSE close... see tests for overrides
@@ -133,10 +138,16 @@ def test_symbol_mic_and_fx_symbol() -> None:
 def test_capabilities_declared(provider: YFinanceProvider) -> None:
     caps = provider.capabilities
     assert provider.name == "yfinance"
-    assert caps.datasets == {"prices", "fx", "profile"}
+    assert caps.datasets == {"prices", "fx", "profile", "fundamentals", "news"}
     assert caps.max_batch == 1
     assert caps.rate_limit == YF_POLICY
-    assert caps.pit_reliable == {"prices": True, "fx": True, "profile": False}
+    assert caps.pit_reliable == {
+        "prices": True,
+        "fx": True,
+        "profile": False,
+        "fundamentals": False,
+        "news": False,
+    }
     assert (YF_POLICY.concurrency, YF_POLICY.per_second, YF_POLICY.burst) == (4, 2, 4)
     assert YF_POLICY.backoff_s == (30, 60, 120, 240)
     assert provider.library_version == yf.__version__
@@ -444,3 +455,119 @@ def test_normalise_accepts_stored_dict_payload(
     item = _item("BP.L", date(2026, 11, 1), date(2026, 11, 24))
     frame = provider.normalise(datasets.PRICES, _raw(item), payload.model_dump(mode="json"))
     assert set(frame["currency"]) == {"GBP"}
+
+
+def test_capabilities_include_fundamentals_and_news_not_pit_reliable(
+    provider: YFinanceProvider,
+) -> None:
+    caps = provider.capabilities
+    assert {"fundamentals", "news"} <= caps.datasets
+    assert caps.pit_reliable["fundamentals"] is False
+    assert caps.pit_reliable["news"] is False
+    assert provider.normaliser_version("fundamentals") == "1"
+    assert provider.normaliser_version("news") == "1"
+
+
+def _entity_item(dataset: str, entity: str) -> WorkItem:
+    return WorkItem(dataset=dataset, entity=entity, interval=None)
+
+
+def test_fundamentals_fetch_and_normalise_round_trip(replay: YFReplay, tmp_path: Path) -> None:
+    provider = YFinanceProvider(tmp_path, FakeClock(NOW))
+    outcome = _fetch(provider, _entity_item("fundamentals", "BP.L"))
+    assert outcome.kind == "ok"
+    assert outcome.settled_through is None
+    frame = provider.normalise(
+        datasets.FUNDAMENTALS, _raw(outcome.item), outcome.payload.model_dump(mode="json")
+    )
+    assert set(frame["currency"]) == {"USD"}
+    assert bool((frame["capex"].dropna() >= 0).all())
+    assert {c.kind for c in replay.calls} == {"info", "statements"}
+
+
+def test_fundamentals_all_empty_statements_is_error(replay: YFReplay, tmp_path: Path) -> None:
+    """Known symbol (`.info` has a currency) but Yahoo returned no statements: retry, never cache."""
+    empty = {"columns": [], "index": [], "data": []}
+    replay.statements["BP.L"] = YFStatementsPayload(
+        symbol="BP.L",
+        income=empty,
+        balance=empty,
+        cashflow=empty,
+        financial_currency="USD",
+        info_net_income=None,
+    )
+    outcome = _fetch(
+        YFinanceProvider(tmp_path, FakeClock(NOW)), _entity_item("fundamentals", "BP.L")
+    )
+    assert outcome.kind == "error"
+    assert "empty" in outcome.message
+
+
+def test_fundamentals_one_empty_statement_is_still_ok(replay: YFReplay, tmp_path: Path) -> None:
+    """BP.L's yearly balance sheet can be short, but only all three empty is the transient quirk."""
+    empty = {"columns": [], "index": [], "data": []}
+    payload = replay._statements("BP.L")
+    assert payload is not None
+    replay.statements["BP.L"] = payload.model_copy(update={"balance": empty})
+    outcome = _fetch(
+        YFinanceProvider(tmp_path, FakeClock(NOW)), _entity_item("fundamentals", "BP.L")
+    )
+    assert outcome.kind == "ok"
+
+
+def test_fundamentals_unknown_symbol_is_empty(replay: YFReplay, tmp_path: Path) -> None:
+    provider = YFinanceProvider(tmp_path, FakeClock(NOW))
+    assert _fetch(provider, _entity_item("fundamentals", "NOSUCH.L")).kind == "empty"  # HTTP 404
+    replay.profiles["GONE.L"] = YFProfilePayload(
+        symbol="GONE.L", info={"trailingPegRatio": None}, isin=None
+    )
+    stub = _fetch(provider, _entity_item("fundamentals", "GONE.L"))  # Yahoo's currency-less stub
+    assert stub.kind == "empty"
+
+
+def test_news_fetch_ok_and_empty_news_is_ok(replay: YFReplay, tmp_path: Path) -> None:
+    provider = YFinanceProvider(tmp_path, FakeClock(NOW))
+    outcome = _fetch(provider, _entity_item("news", "AAPL"))
+    assert outcome.kind == "ok"
+    assert len(provider.normalise(datasets.NEWS, _raw(outcome.item), outcome.payload)) > 0
+    quiet = _fetch(provider, _entity_item("news", "QUIET.L"))  # no fixture: get_news returns []
+    assert quiet.kind == "ok"
+    assert provider.normalise(datasets.NEWS, _raw(quiet.item), quiet.payload).empty
+
+
+def test_news_errors_are_classified(
+    provider: YFinanceProvider, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    class _Ticker:
+        def get_news(self, **_: Any) -> list[dict[str, Any]]:
+            raise YFRateLimitError()
+
+    monkeypatch.setattr(provider_mod.yf, "Ticker", lambda _symbol: _Ticker())
+    assert _fetch(provider, _entity_item("news", "AAPL")).kind == "rate_limited"
+
+
+async def test_rejected_null_currency_rows_round_trip_through_the_store(
+    replay: YFReplay, tmp_path: Path
+) -> None:
+    """A payload with no `financialCurrency` is stored as rejected rows with a null currency."""
+    payload = replay._statements("BP.L")
+    assert payload is not None
+    replay.statements["BP.L"] = payload.model_copy(update={"financial_currency": None})
+    provider = YFinanceProvider(tmp_path, FakeClock(NOW))
+    store = DuckDBSourceStore(
+        tmp_path / "sources.duckdb",
+        InMemoryBlobStore(),
+        {"fundamentals": datasets.FUNDAMENTALS},
+        {"fundamentals": [provider]},
+        clock=FakeClock(NOW),
+    )
+    try:
+        await store.get("fundamentals", "BP.L", None)
+        assert store.query("fundamentals", "BP.L", None).frame.empty  # rejected rows are hidden
+        got = store.query("fundamentals", "BP.L", None, include_rejected=True).frame
+    finally:
+        store.close()
+    assert len(got) == 5  # four annual periods plus Yahoo's sparse fifth column, also rejected
+    assert bool(got["currency"].isna().all())
+    assert set(got["quality"]) == {"rejected"}
+    assert all("no_currency" in r for r in got["quality_reasons"])

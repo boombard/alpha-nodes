@@ -1,0 +1,1258 @@
+{
+"symbol": "AAPL",
+"items": [
+{
+"id": "5d88061c-5e5b-4400-9f5b-2abb33f7fdb0",
+"content": {
+"id": "5d88061c-5e5b-4400-9f5b-2abb33f7fdb0",
+"contentType": "VIDEO",
+"title": "Is the market experiencing a 'dead cat' bounce?",
+"description": "<p>Interactive Brokers Chief Strategist Steve Sosnick joins Yahoo Finance Data and Markets Editor Jared Blikre to discuss the recent volatility in the market (<a target=\"_blank\" rel=\"\" class=\"link\" href=\"https://finance.yahoo.com/quote/^GSPC/\" data-i13n=\"slk:^GSPC;cpos:1;pos:1\">^GSPC</a>, <a target=\"_blank\" rel=\"\" class=\"link\" href=\"https://finance.yahoo.com/quote/^IXIC/\" data-i13n=\"slk:^IXIC;cpos:2;pos:1\">^IXIC</a>) and the tech sell-off.</p>",
+"summary": "Interactive Brokers Chief Strategist Steve Sosnick joins Yahoo Finance Data and Markets Editor Jared Blikre to discuss the recent volatility in the market (^GSPC, ^IXIC) and the tech sell-off.",
+"pubDate": "2026-11-25T21:27:04Z",
+"displayTime": "2026-11-25T21:27:04Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://s.yimg.com/os/creatr-uploaded-images/2021-11/d13af5d0-4892-11ec-bfde-cfc156abe567",
+"originalWidth": 3000,
+"originalHeight": 2000,
+"resolutions": [
+{
+"url": "https://s.yimg.com/os/creatr-uploaded-images/2021-11/d13af5d0-4892-11ec-bfde-cfc156abe567",
+"width": 3000,
+"height": 2000,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/cfcf4d1cb6ec8d9ec772e6be9d1aa16ff47d5113a8c0666170ad137ced719c6e/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fs.yimg.com%2Fos%2Fcreatr-uploaded-images%2F2021-11%2Fd13af5d0-4892-11ec-bfde-cfc156abe567",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Yahoo Finance Video",
+"url": "https://finance.yahoo.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/video/is-the-market-experiencing-a-dead-cat-bounce-212704552.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/video/is-the-market-experiencing-a-dead-cat-bounce-212704552.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "AAPL"
+},
+{
+"symbol": "^GSPC"
+},
+{
+"symbol": "^IXIC"
+}
+]
+}
+}
+},
+{
+"id": "158e82fc-b889-34b6-8704-99a49e9a83ae",
+"content": {
+"id": "158e82fc-b889-34b6-8704-99a49e9a83ae",
+"contentType": "STORY",
+"title": "Dow Jones Futures: Market Goes On Wild Ride. Nasdaq, Nvidia Slash Losses While Anthropic Reverses Higher.",
+"description": null,
+"summary": "The market went on a wild ride before Thanksgiving, but the Dow and Anthropic reversed higher while the Nasdaq and Nvidia came well off lows.",
+"pubDate": "2026-11-26T00:29:23Z",
+"displayTime": "2026-11-26T00:29:23Z",
+"isHosted": false,
+"previewUrl": "https://finance.yahoo.com/m/158e82fc-b889-34b6-8704-99a49e9a83ae/dow-jones-futures-market.html",
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/ibd.com/de1499c86a99f3de5df98446b9417e48.jpg_up.jpg",
+"originalWidth": 1280,
+"originalHeight": 724,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/ibd.com/de1499c86a99f3de5df98446b9417e48.jpg_up.jpg",
+"width": 1280,
+"height": 724,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/5f0cf8f08c3d5a4413a1ce5137a2270e12d4de4a2c19fc15f46b8b9a8bc59e74/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fibd.com%2Fde1499c86a99f3de5df98446b9417e48.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Investor's Business Daily",
+"url": "http://www.investors.com/"
+},
+"canonicalUrl": {
+"url": "https://www.investors.com/market-trend/stock-market-today/dow-jones-futures-market-wild-ride-nasdaq-nvidia-slash-losses-anthropic-higher/?src=A00220&yptr=yahoo"
+},
+"clickThroughUrl": null,
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "ANT"
+},
+{
+"symbol": "^DJI"
+},
+{
+"symbol": "NVDA"
+},
+{
+"symbol": "LLY"
+},
+{
+"symbol": "^RUT"
+},
+{
+"symbol": "EXEL"
+},
+{
+"symbol": "^GSPC"
+},
+{
+"symbol": "^IXIC"
+},
+{
+"symbol": "FROG"
+},
+{
+"symbol": "PAYC"
+},
+{
+"symbol": "AAPL"
+},
+{
+"symbol": "TGT"
+},
+{
+"symbol": "TRV"
+},
+{
+"symbol": "DUK"
+},
+{
+"symbol": "VIK"
+},
+{
+"symbol": "NTSK"
+},
+{
+"symbol": "CHYM"
+},
+{
+"symbol": "CDNA"
+},
+{
+"symbol": "MU"
+},
+{
+"symbol": "WELL"
+}
+]
+}
+}
+},
+{
+"id": "dfc3aabf-d571-301c-8b7a-ff843b5c45e7",
+"content": {
+"id": "dfc3aabf-d571-301c-8b7a-ff843b5c45e7",
+"contentType": "STORY",
+"title": "Qualcomm vs. Sandisk: Which Technology Stock Is a Better Buy for 2027?",
+"description": null,
+"summary": "Sandisk's revenue surged over 270%, driven by demand for cloud memory, while Qualcomm is branching into automotive and satellite connectivity. Which chip stock holds up better?",
+"pubDate": "2026-11-25T21:20:02Z",
+"displayTime": "2026-11-25T21:20:02Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/motleyfool.com/22665e2ff2083c4bd1a2ecb28010db1e.jpg",
+"originalWidth": 1290,
+"originalHeight": 860,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/motleyfool.com/22665e2ff2083c4bd1a2ecb28010db1e.jpg",
+"width": 1290,
+"height": 860,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/38925f4d90364e5835599bbbc6d8177d130c48b14e264361b372e4ffc4024b80/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fmotleyfool.com%2F22665e2ff2083c4bd1a2ecb28010db1e.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Motley Fool",
+"url": "http://www.fool.com/"
+},
+"canonicalUrl": {
+"url": "https://www.fool.com/coverage/better-buy/2026/11/25/qualcomm-vs-sandisk-which-technology-stock-is-a-better-buy-for-2027/"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/qualcomm-vs-sandisk-technology-stock-212002575.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "QCOM"
+},
+{
+"symbol": "SNDK"
+},
+{
+"symbol": "005930.KS"
+},
+{
+"symbol": "AAPL"
+}
+]
+}
+}
+},
+{
+"id": "bdd955e8-ebb1-3948-b2fc-7c5cd6a31d52",
+"content": {
+"id": "bdd955e8-ebb1-3948-b2fc-7c5cd6a31d52",
+"contentType": "STORY",
+"title": "Apple (AAPL) Pushes Back As 24 7 Tokenized Shares Trading Opens",
+"description": null,
+"summary": "Apple (NasdaqGS:AAPL) is challenging the trading of tokenized versions of its shares on newly expanded blockchain-based markets. Crypto exchange OKX and the New York Stock Exchange parent have launched a 24/7 tokenized U.S. securities venue that includes Apple, Nvidia, and Tesla. Apple and other issuers are raising questions over control of their equity's digital representation, shareholder rights, and regulatory oversight. The clash over 24/7 tokenized Apple shares trading comes alongside...",
+"pubDate": "2026-11-25T21:11:47Z",
+"displayTime": "2026-11-25T21:11:47Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/simply_wall_st__316/e310d00bc0394cb83a4f9bd140ba5422.jpg",
+"originalWidth": 1600,
+"originalHeight": 900,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/simply_wall_st__316/e310d00bc0394cb83a4f9bd140ba5422.jpg",
+"width": 1600,
+"height": 900,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/a8115d13caf915defe9aceb9fcc43181bf54df3a1ef00f7b21aa421688b07de9/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fsimply_wall_st__316%2Fe310d00bc0394cb83a4f9bd140ba5422.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Simply Wall St.",
+"url": "https://simplywall.st/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/markets/crypto/articles/apple-aapl-pushes-back-24-211147818.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/crypto/articles/apple-aapl-pushes-back-24-211147818.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "AAPL"
+},
+{
+"symbol": "NVDA"
+},
+{
+"symbol": "TSLA"
+}
+]
+}
+}
+},
+{
+"id": "fed0ba1a-1835-3234-b475-4ad6bcc3e25d",
+"content": {
+"id": "fed0ba1a-1835-3234-b475-4ad6bcc3e25d",
+"contentType": "STORY",
+"title": "Chips and iPhones Are Safe From New Tariffs. Here\u2019s What Isn\u2019t.",
+"description": null,
+"summary": "Tariff exemptions cover servers, smartphones, PCs and chips, but items like headphones, lithium-ion batteries and printers are left off the list.",
+"pubDate": "2026-11-25T20:47:00Z",
+"displayTime": "2026-11-25T20:47:00Z",
+"isHosted": false,
+"previewUrl": "https://finance.yahoo.com/m/fed0ba1a-1835-3234-b475-4ad6bcc3e25d/chips-and-iphones-are-safe.html",
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/Barrons.com/d4f22c400d9caef61982569a8455eb71.jpg_up.jpg",
+"originalWidth": 1440,
+"originalHeight": 720,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/Barrons.com/d4f22c400d9caef61982569a8455eb71.jpg_up.jpg",
+"width": 1440,
+"height": 720,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/1ddb083658930e94fae24bb1f1fc6d0c4b805e751332fd03d275cb34fa4c1592/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2FBarrons.com%2Fd4f22c400d9caef61982569a8455eb71.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Barrons.com",
+"url": "http://www.barrons.com/"
+},
+"canonicalUrl": {
+"url": "https://www.barrons.com/articles/apple-micron-tariffs-tech-stocks-trump-58a58e8d?siteid=yhoof2&yptr=yahoo"
+},
+"clickThroughUrl": null,
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "AAPL"
+},
+{
+"symbol": "MU"
+},
+{
+"symbol": "ASML"
+},
+{
+"symbol": "HPQ"
+},
+{
+"symbol": "SKHY"
+}
+]
+}
+}
+},
+{
+"id": "07121a48-2e2f-306a-bf15-152405fb1cff",
+"content": {
+"id": "07121a48-2e2f-306a-bf15-152405fb1cff",
+"contentType": "STORY",
+"title": "Tech Stock Sell-Off: Here's Why Apple Has Been Immune",
+"description": null,
+"summary": "While rivals pour billions into data centers, Apple is putting AI into the devices people already own, and its cash flow shows the difference.",
+"pubDate": "2026-11-25T20:20:02Z",
+"displayTime": "2026-11-25T20:20:02Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/motleyfool.com/fb983decb432a667db70b6dc0862c200.jpg",
+"originalWidth": 1290,
+"originalHeight": 860,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/motleyfool.com/fb983decb432a667db70b6dc0862c200.jpg",
+"width": 1290,
+"height": 860,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/b3df0bc0f45742d1ff64f56b51f1989cc68d28b032092e960f02f4d76d81b4ac/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fmotleyfool.com%2Ffb983decb432a667db70b6dc0862c200.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Motley Fool",
+"url": "http://www.fool.com/"
+},
+"canonicalUrl": {
+"url": "https://www.fool.com/investing/2026/11/25/tech-stock-sell-off-here-s-why-apple-has-been-immune/"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/tech-stock-sell-off-heres-202002463.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "AAPL"
+},
+{
+"symbol": "NVDA"
+}
+]
+}
+}
+},
+{
+"id": "8aeaf1c0-c1ee-3c23-bc92-f0c4d9bf0df6",
+"content": {
+"id": "8aeaf1c0-c1ee-3c23-bc92-f0c4d9bf0df6",
+"contentType": "STORY",
+"title": "What's Behind Dell Stock's Fall?",
+"description": null,
+"summary": "Today's big story: Anthropic Below Its IPO Price: Do Giants Come Back.",
+"pubDate": "2026-11-25T20:06:53Z",
+"displayTime": "2026-11-25T20:06:53Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": null,
+"provider": {
+"displayName": "Trefis",
+"url": "https://www.trefis.com/"
+},
+"canonicalUrl": {
+"url": "https://www.trefis.com/stock/dell/articles/628977/what-s-behind-dell-stock-s-fall/2026-11-25"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/whats-behind-dell-stocks-fall-200653158.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "DELL"
+},
+{
+"symbol": "^GSPC"
+},
+{
+"symbol": "HPE"
+},
+{
+"symbol": "CSCO"
+},
+{
+"symbol": "HPQ"
+},
+{
+"symbol": "IBM"
+},
+{
+"symbol": "AAPL"
+}
+]
+}
+}
+},
+{
+"id": "6d0b01cd-d51f-3416-a0d6-85d461907666",
+"content": {
+"id": "6d0b01cd-d51f-3416-a0d6-85d461907666",
+"contentType": "STORY",
+"title": "Stocks Pare Losses as Anthropic Shares Swing Higher",
+"description": null,
+"summary": "Stocks were paring their losses heading into the Thanksgiving holiday.",
+"pubDate": "2026-11-25T19:30:00Z",
+"displayTime": "2026-11-25T19:30:00Z",
+"isHosted": false,
+"previewUrl": "https://finance.yahoo.com/m/6d0b01cd-d51f-3416-a0d6-85d461907666/stocks-pare-losses-as.html",
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/wsj.com/5b7253da9bfba400cbe792e0a4041f84.jpg_up.jpg",
+"originalWidth": 1440,
+"originalHeight": 720,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/wsj.com/5b7253da9bfba400cbe792e0a4041f84.jpg_up.jpg",
+"width": 1440,
+"height": 720,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/036686586ef96b2940a0f4dfe453febb0412e71cf600ee952bc8ee5a81392ba6/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fwsj.com%2F5b7253da9bfba400cbe792e0a4041f84.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "The Wall Street Journal",
+"url": "http://www.wsj.com/"
+},
+"canonicalUrl": {
+"url": "https://www.wsj.com/finance/stocks/nasdaq-futures-slide-as-ai-growth-fears-return-to-center-stage-ff9a6d6b?siteid=yhoof2&yptr=yahoo"
+},
+"clickThroughUrl": null,
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "ANT"
+},
+{
+"symbol": "^IXIC"
+},
+{
+"symbol": "META"
+},
+{
+"symbol": "AAPL"
+},
+{
+"symbol": "NVDA"
+}
+]
+}
+}
+},
+{
+"id": "16a32eff-a74c-3cae-93e6-ecf1ca3d7950",
+"content": {
+"id": "16a32eff-a74c-3cae-93e6-ecf1ca3d7950",
+"contentType": "STORY",
+"title": "Stocks Pare Losses as Anthropic Shares Swing Higher",
+"description": null,
+"summary": "Stocks were paring their losses heading into the Thanksgiving holiday.",
+"pubDate": "2026-11-25T19:30:00Z",
+"displayTime": "2026-11-25T19:30:00Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/the_wall_street_journal_hosted_996/5b7253da9bfba400cbe792e0a4041f84.jpg_up.jpg",
+"originalWidth": 1440,
+"originalHeight": 720,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/the_wall_street_journal_hosted_996/5b7253da9bfba400cbe792e0a4041f84.jpg_up.jpg",
+"width": 1440,
+"height": 720,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/dc1ee43983f517801f667a033bdbbc24c1a633db38fe723c3b83818dc3a5c98f/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fthe_wall_street_journal_hosted_996%2F5b7253da9bfba400cbe792e0a4041f84.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "The Wall Street Journal",
+"url": "http://www.wsj.com/"
+},
+"canonicalUrl": {
+"url": "https://www.wsj.com/finance/stocks/nasdaq-futures-slide-as-ai-growth-fears-return-to-center-stage-ff9a6d6b"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/technology/ai/articles/nasdaq-futures-slide-ai-growth-093600736.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "META"
+},
+{
+"symbol": "^IXIC"
+},
+{
+"symbol": "ANT"
+},
+{
+"symbol": "AAPL"
+},
+{
+"symbol": "NVDA"
+}
+]
+}
+}
+},
+{
+"id": "11080324-5ab9-3439-86d0-245288ea5f00",
+"content": {
+"id": "11080324-5ab9-3439-86d0-245288ea5f00",
+"contentType": "STORY",
+"title": "How Warren Buffett Makes Billions from Dividends: Top 10 Stocks",
+"description": null,
+"summary": "Warren Buffett and dividends are an old love story that continues to this day, as Berkshire\u2019s latest 13F filing shows. The filing also reveals portfolio changes as CEO Greg Abel reshapes Berkshire\u2019s stock holdings after succeeding Buffett in January as the Omaha, Nebraska-based conglomerate\u2019s leader. Berkshire bought $2.37 billion worth of stocks in the third [\u2026]",
+"pubDate": "2026-11-25T19:12:20Z",
+"displayTime": "2026-11-25T19:12:20Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/insidermonkey.com/b21c8ff3286195599e045454a7378156.jpg",
+"originalWidth": 1672,
+"originalHeight": 941,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/insidermonkey.com/b21c8ff3286195599e045454a7378156.jpg",
+"width": 1672,
+"height": 941,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/dfa804f077cd320bfb923749eff6f76aa8fdac87ca6c516794347c56f6f5065f/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Finsidermonkey.com%2Fb21c8ff3286195599e045454a7378156.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Insider Monkey",
+"url": "http://www.insidermonkey.com"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/warren-buffett-makes-billions-dividends-161220808.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/warren-buffett-makes-billions-dividends-161220808.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "BRK-B"
+},
+{
+"symbol": "OXY"
+},
+{
+"symbol": "AAPL"
+},
+{
+"symbol": "CB"
+},
+{
+"symbol": "GOOG"
+},
+{
+"symbol": "KR"
+}
+]
+}
+}
+},
+{
+"id": "a0def6b9-0de6-31fa-81c8-1e11a5ecd16a",
+"content": {
+"id": "a0def6b9-0de6-31fa-81c8-1e11a5ecd16a",
+"contentType": "STORY",
+"title": "Jim Cramer\u2019s 5 Long-Term Stock Picks",
+"description": null,
+"summary": "A caller asked CNBC Mad Money\u2019s Jim Cramer in November whether to buy a stock near $140 or wait. Cramer thought the difference between paying $130 and $150 would look small on a chart 10 or 15 years later. Warren Buffett made a similar point in his 1996 shareholder letter. He looked for businesses he [\u2026]",
+"pubDate": "2026-11-25T18:49:14Z",
+"displayTime": "2026-11-25T18:49:14Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/insidermonkey.com/396d53f42433092ef3192a6bd39ed6ea.jpg",
+"originalWidth": 1920,
+"originalHeight": 1279,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/insidermonkey.com/396d53f42433092ef3192a6bd39ed6ea.jpg",
+"width": 1920,
+"height": 1279,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/748cfcb1d249abf2def3323d3cde9bc9636c21b2a6bc973e0a77e229a3685e9b/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Finsidermonkey.com%2F396d53f42433092ef3192a6bd39ed6ea.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Insider Monkey",
+"url": "http://www.insidermonkey.com"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/jim-cramer-5-long-term-184914882.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/jim-cramer-5-long-term-184914882.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "META"
+},
+{
+"symbol": "AAPL"
+},
+{
+"symbol": "LLY"
+},
+{
+"symbol": "SPCX"
+},
+{
+"symbol": "AMAT"
+}
+]
+}
+}
+},
+{
+"id": "4fd60553-cedd-391e-9849-9c6fc3ef1903",
+"content": {
+"id": "4fd60553-cedd-391e-9849-9c6fc3ef1903",
+"contentType": "STORY",
+"title": "Broadcom vs. Qualcomm: Which Technology Stock Is a Better Buy for 2027?",
+"description": null,
+"summary": "Broadcom's AI and software push and Qualcomm's mobile dominance pull in very different directions, and their valuations tell a surprisingly close story.",
+"pubDate": "2026-11-25T16:52:01Z",
+"displayTime": "2026-11-25T16:52:01Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/motleyfool.com/2762c3d03950ef871e07ac59bb9626c2.jpg",
+"originalWidth": 1290,
+"originalHeight": 860,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/motleyfool.com/2762c3d03950ef871e07ac59bb9626c2.jpg",
+"width": 1290,
+"height": 860,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/540279ccf4d3d5bb33fef4d0c6a1ccfaea9f9f82dcd653ce0bb787025737670d/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fmotleyfool.com%2F2762c3d03950ef871e07ac59bb9626c2.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Motley Fool",
+"url": "http://www.fool.com/"
+},
+"canonicalUrl": {
+"url": "https://www.fool.com/coverage/better-buy/2026/11/25/broadcom-vs-qualcomm-which-technology-stock-is-a-better-buy-for-2027/"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/broadcom-vs-qualcomm-technology-stock-165201299.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "AVGO"
+},
+{
+"symbol": "QCOM"
+},
+{
+"symbol": "AAPL"
+},
+{
+"symbol": "005930.KS"
+}
+]
+}
+}
+},
+{
+"id": "c0f5187b-4c48-3bdf-bace-f60bd53791d7",
+"content": {
+"id": "c0f5187b-4c48-3bdf-bace-f60bd53791d7",
+"contentType": "STORY",
+"title": "How 2 Quick Calls Sealed Berkshire Hathaway\u2019s $930M Bending Spoons Investment",
+"description": null,
+"summary": "Berkshire Hathaway owns a 4% stake in Bending Spoons, having purchased $930 million in equity across July and October.",
+"pubDate": "2026-11-25T16:33:00Z",
+"displayTime": "2026-11-25T16:33:00Z",
+"isHosted": false,
+"previewUrl": "https://finance.yahoo.com/m/c0f5187b-4c48-3bdf-bace-f60bd53791d7/how-2-quick-calls-sealed.html",
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/Barrons.com/b3d12d71555bb8c9cf1bc36ee8ca43bf.jpg_up.jpg",
+"originalWidth": 1440,
+"originalHeight": 720,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/Barrons.com/b3d12d71555bb8c9cf1bc36ee8ca43bf.jpg_up.jpg",
+"width": 1440,
+"height": 720,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/e4e8ddd0a159ba511fa12ae8fb42537aebb348793b69831a3016391ae2a47f94/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2FBarrons.com%2Fb3d12d71555bb8c9cf1bc36ee8ca43bf.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Barrons.com",
+"url": "http://www.barrons.com/"
+},
+"canonicalUrl": {
+"url": "https://www.barrons.com/articles/berkshire-hathaway-bending-spoons-stock-tech-24baeda6?siteid=yhoof2&yptr=yahoo"
+},
+"clickThroughUrl": null,
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "BRK-B"
+},
+{
+"symbol": "BSP"
+},
+{
+"symbol": "AAPL"
+},
+{
+"symbol": "INTU"
+}
+]
+}
+}
+},
+{
+"id": "62930963-1432-3b46-997b-975e4058e8bc",
+"content": {
+"id": "62930963-1432-3b46-997b-975e4058e8bc",
+"contentType": "STORY",
+"title": "Nvidia Chipmaker TSMC Sends $22.6 Billion AI Signal",
+"description": null,
+"summary": "Wedbush sees another sign that the AI spending boom remains intact.",
+"pubDate": "2026-11-25T16:27:25Z",
+"displayTime": "2026-11-25T16:27:25Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": null,
+"provider": {
+"displayName": "GuruFocus.com",
+"url": "http://www.gurufocus.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/technology/ai/articles/nvidia-chipmaker-tsmc-sends-22-162725540.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/technology/ai/articles/nvidia-chipmaker-tsmc-sends-22-162725540.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "TSM"
+},
+{
+"symbol": "NVDA"
+},
+{
+"symbol": "AMD"
+},
+{
+"symbol": "AAPL"
+},
+{
+"symbol": "TSM"
+}
+]
+}
+}
+},
+{
+"id": "75fcd594-b9ae-3df9-8ed9-c8ee3519abe5",
+"content": {
+"id": "75fcd594-b9ae-3df9-8ed9-c8ee3519abe5",
+"contentType": "STORY",
+"title": "How Qualcomm\u2019s CMO is reshaping his team for its post-Apple era",
+"description": null,
+"summary": "After losing a key partnership with Apple, U.S. chipmaker Qualcomm is shifting its focus to data centers and laptops. Its CMO, Don McGuire, is reshaping the company\u2019s marketing strategy to support the transition.",
+"pubDate": "2026-11-25T16:01:55Z",
+"displayTime": "2026-11-25T16:01:55Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/fortune_175/5077037ae3e61d9ebe1c8dad03814abe.jpg",
+"originalWidth": 2048,
+"originalHeight": 1365,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/fortune_175/5077037ae3e61d9ebe1c8dad03814abe.jpg",
+"width": 2048,
+"height": 1365,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/ab8a7e143a7d13aa84945297d13112872b786890f7dbc4189f662501e4c998be/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Ffortune_175%2F5077037ae3e61d9ebe1c8dad03814abe.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Fortune",
+"url": "http://fortune.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/technology/ai/articles/qualcomm-cmo-reshaping-team-post-160155309.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/technology/ai/articles/qualcomm-cmo-reshaping-team-post-160155309.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "QCOM"
+},
+{
+"symbol": "AAPL"
+}
+]
+}
+}
+},
+{
+"id": "3bda862c-2cc2-3bc2-8cc9-f6136faa7f1a",
+"content": {
+"id": "3bda862c-2cc2-3bc2-8cc9-f6136faa7f1a",
+"contentType": "STORY",
+"title": "Top AI Spenders Pay Nearly $10K Monthly Per Worker. Typical Firm Pays $16. Cathie Wood Says, \u2018That\u2019s How Early We Are In This Cycle\u2019",
+"description": null,
+"summary": "Quick Read The top 1% of AI spenders pay nearly $10,000 per employee monthly, while Ramp\u2019s October median was $16.32. Cathie Wood expects productivity gains and falling AI costs to encourage broader adoption. Sponsored: Bito is building tools to give...",
+"pubDate": "2026-11-25T15:27:40Z",
+"displayTime": "2026-11-25T15:27:40Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/benzinga_79/ae3c426cf6a3d0fd5eecae482b137941.jpg",
+"originalWidth": 1920,
+"originalHeight": 1080,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/benzinga_79/ae3c426cf6a3d0fd5eecae482b137941.jpg",
+"width": 1920,
+"height": 1080,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/465e9754328ed54556c9254939ed575f8c3661bdb19463b0bddba4f471bd486b/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fbenzinga_79%2Fae3c426cf6a3d0fd5eecae482b137941.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Benzinga",
+"url": "https://www.benzinga.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/technology/ai/articles/top-ai-spenders-pay-nearly-152740066.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/technology/ai/articles/top-ai-spenders-pay-nearly-152740066.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "RAMP.PVT"
+},
+{
+"symbol": "AAPL"
+}
+]
+}
+}
+},
+{
+"id": "faa3159f-fc89-3636-a8e0-60c0984aecee",
+"content": {
+"id": "faa3159f-fc89-3636-a8e0-60c0984aecee",
+"contentType": "STORY",
+"title": "Alphabet Is Most Beat Down AI Company",
+"description": null,
+"summary": "Search worries are old news for Alphabet. A shaky Apple deal, a rival chatbot gaining ground, and a massive data center bet are stacking new risks on Google, and the pile keeps growing.",
+"pubDate": "2026-11-25T15:27:15Z",
+"displayTime": "2026-11-25T15:27:15Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/24_7_wall_st__718/bd9141737277c7a43bd51847e4aa96b4.jpg",
+"originalWidth": 1366,
+"originalHeight": 767,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/24_7_wall_st__718/bd9141737277c7a43bd51847e4aa96b4.jpg",
+"width": 1366,
+"height": 767,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/04b409d356bfa5e19d1ac117ad761f7c62e9d9197513e47e873f5640badd4419/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2F24_7_wall_st__718%2Fbd9141737277c7a43bd51847e4aa96b4.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "24/7 Wall St.",
+"url": "https://247wallst.com/"
+},
+"canonicalUrl": {
+"url": "https://247wallst.com/investing/2026/11/25/alphabet-is-most-beat-down-ai-company/"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/technology/ai/articles/alphabet-most-beat-down-ai-152715150.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "GOOGN"
+},
+{
+"symbol": "AAPL"
+},
+{
+"symbol": "GOOG"
+},
+{
+"symbol": "TSLA"
+}
+]
+}
+}
+},
+{
+"id": "85570485-6030-3696-bb2c-3b61c60b7aea",
+"content": {
+"id": "85570485-6030-3696-bb2c-3b61c60b7aea",
+"contentType": "STORY",
+"title": "The Next Big Healthcare Revolution Is Already Here. This Stock Could Cash In.",
+"description": null,
+"summary": "Quest Diagnostics runs the labs behind some of the hottest consumer health brands.",
+"pubDate": "2026-11-25T15:27:02Z",
+"displayTime": "2026-11-25T15:27:02Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/motleyfool.com/1e824926223c307da6276fab87d6c551.jpg",
+"originalWidth": 1290,
+"originalHeight": 860,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/motleyfool.com/1e824926223c307da6276fab87d6c551.jpg",
+"width": 1290,
+"height": 860,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/a429d0f40cf89891e579dbdf052ade28883ebe7f0d386ce66092b3c34613025b/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fmotleyfool.com%2F1e824926223c307da6276fab87d6c551.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Motley Fool",
+"url": "http://www.fool.com/"
+},
+"canonicalUrl": {
+"url": "https://www.fool.com/investing/2026/11/25/the-next-big-healthcare-revolution-is-already-here-this-stock-could-cash-in/"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/healthcare/articles/next-big-healthcare-revolution-already-152702042.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "DGX"
+},
+{
+"symbol": "AAPL"
+},
+{
+"symbol": "NVDA"
+}
+]
+}
+}
+},
+{
+"id": "49aa09b1-5733-3925-b43b-6586d4992775",
+"content": {
+"id": "49aa09b1-5733-3925-b43b-6586d4992775",
+"contentType": "STORY",
+"title": "The Zacks Analyst Blog Highlights Apple, Philip Morris, Intel and Crimson Wine",
+"description": null,
+"summary": "Apple's expanding Services business, Philip Morris' smoke-free transition and Intel's manufacturing recovery and AI opportunities headline top analyst reports.",
+"pubDate": "2026-11-25T15:25:00Z",
+"displayTime": "2026-11-25T15:25:00Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/zacks.com/bd614b5b4cd86d012677e26365ef58e3.jpg_up.jpg",
+"originalWidth": 1280,
+"originalHeight": 807,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/zacks.com/bd614b5b4cd86d012677e26365ef58e3.jpg_up.jpg",
+"width": 1280,
+"height": 807,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/73fd60584936343f491ae55f054a4d18ac65aa78a07a791fa19052742cda5417/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fzacks.com%2Fbd614b5b4cd86d012677e26365ef58e3.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Zacks",
+"url": "http://www.zacks.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/zacks-analyst-blog-highlights-apple-152500421.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/zacks-analyst-blog-highlights-apple-152500421.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "AAPL"
+},
+{
+"symbol": "INTC"
+},
+{
+"symbol": "PM"
+},
+{
+"symbol": "CWGL"
+}
+]
+}
+}
+},
+{
+"id": "ca725621-45bb-3dc0-b8cc-1568e8ef3678",
+"content": {
+"id": "ca725621-45bb-3dc0-b8cc-1568e8ef3678",
+"contentType": "STORY",
+"title": "Warren Buffett and Greg Abel Collect Billions From These Untouchable Berkshire Hathaway Dividend Stocks",
+"description": null,
+"summary": "Five Berkshire holdings never budged in the latest 13F, yet their yields range from a sliver to a hefty payout. Which ones actually deliver income for retirees, and which carry risks that could trim the checks?",
+"pubDate": "2026-11-25T14:19:14Z",
+"displayTime": "2026-11-25T14:19:14Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/24_7_wall_st__718/530f0d49214d2e5a61895f62d3e38660.png",
+"originalWidth": 1681,
+"originalHeight": 936,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/24_7_wall_st__718/530f0d49214d2e5a61895f62d3e38660.png",
+"width": 1681,
+"height": 936,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/4cb1b606a37b6b843f62d1991838ddf934f5dc3e0c405af05e62599c84319331/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2F24_7_wall_st__718%2F530f0d49214d2e5a61895f62d3e38660.png",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "24/7 Wall St.",
+"url": "https://247wallst.com/"
+},
+"canonicalUrl": {
+"url": "https://247wallst.com/investing/2026/11/25/warren-buffett-and-greg-abel-collect-billions-from-these-untouchable-berkshire-hathaway-dividend-stocks/"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/warren-buffett-greg-abel-collect-141914552.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "BRK-B"
+},
+{
+"symbol": "CVX"
+},
+{
+"symbol": "AAPL"
+},
+{
+"symbol": "AXP"
+},
+{
+"symbol": "KO"
+},
+{
+"symbol": "MCO"
+}
+]
+}
+}
+}
+]
+}

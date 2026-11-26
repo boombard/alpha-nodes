@@ -1,0 +1,1185 @@
+{
+"symbol": "BP.L",
+"items": [
+{
+"id": "ca0bf888-ffec-3bec-a67a-cd9c2699235f",
+"content": {
+"id": "ca0bf888-ffec-3bec-a67a-cd9c2699235f",
+"contentType": "STORY",
+"title": "How Nvidia's Jensen Huang Survived the Kind of Scandal That Ends CEO Careers",
+"description": null,
+"summary": "Nvidia (NASDAQ:NVDA) CEO Jensen Huang got his job back on Monday after resigning amid reports of undisclosed relationships with employees. Other CEOs haven\u2019t been so fortunate. Similar scandals have ended careers at McDonald\u2019s, BP and Intel, costing some executives tens...",
+"pubDate": "2026-11-25T18:55:08Z",
+"displayTime": "2026-11-25T18:55:08Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/benzinga_prediction_markets_613/5bed865656f15966448c22b29fb1ec41.jpg",
+"originalWidth": 1920,
+"originalHeight": 1080,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/benzinga_prediction_markets_613/5bed865656f15966448c22b29fb1ec41.jpg",
+"width": 1920,
+"height": 1080,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/182336ad04596bb17b7fc47b7f26b56c16514029a3fd32c300d0352073161995/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fbenzinga_prediction_markets_613%2F5bed865656f15966448c22b29fb1ec41.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Benzinga Prediction Markets",
+"url": "https://www.benzinga.com/"
+},
+"canonicalUrl": {
+"url": "https://www.benzinga.com/markets/prediction-markets/26/11/63647697/jensen-huang-sex-scandal-ceo?utm_source=yahooFinance&utm_campaign=partner_feed&utm_medium=referral"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/nvidias-jensen-huang-survived-kind-185508263.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "NVDA"
+},
+{
+"symbol": "MCD"
+},
+{
+"symbol": "INTC"
+},
+{
+"symbol": "BP"
+}
+]
+}
+}
+},
+{
+"id": "3b547d9f-197a-3cdb-a3b4-a29bd3caff63",
+"content": {
+"id": "3b547d9f-197a-3cdb-a3b4-a29bd3caff63",
+"contentType": "STORY",
+"title": "Zacks.com featured highlights include NVIDIA, Arrow Electronics, Super Micro Computer, BP and Ingram Micro",
+"description": null,
+"summary": "As NVIDIA reignites Wall Street's rally, Arrow Electronics, Super Micro Computer, BP and Ingram Micro stand out as PEG-based value stocks with growth potential.",
+"pubDate": "2026-11-25T16:20:00Z",
+"displayTime": "2026-11-25T16:20:00Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/zacks.com/8c4a41f088bf9120715db42cb7535f5f.jpg_up.jpg",
+"originalWidth": 1280,
+"originalHeight": 807,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/zacks.com/8c4a41f088bf9120715db42cb7535f5f.jpg_up.jpg",
+"width": 1280,
+"height": 807,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/402e978272d31a8e34aeef436984f501189854f585db479bdd906af58f933f83/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fzacks.com%2F8c4a41f088bf9120715db42cb7535f5f.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Zacks",
+"url": "http://www.zacks.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/zacks-com-featured-highlights-nvidia-162000475.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/zacks-com-featured-highlights-nvidia-162000475.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "NVDA"
+},
+{
+"symbol": "SMCI"
+},
+{
+"symbol": "BP"
+},
+{
+"symbol": "INGM"
+},
+{
+"symbol": "ARW"
+},
+{
+"symbol": "^GSPC"
+},
+{
+"symbol": "^DJI"
+},
+{
+"symbol": "^IXIC"
+},
+{
+"symbol": "BP"
+}
+]
+}
+}
+},
+{
+"id": "867cdbaf-2d24-3fa7-9538-067f1de2477d",
+"content": {
+"id": "867cdbaf-2d24-3fa7-9538-067f1de2477d",
+"contentType": "STORY",
+"title": "Sector Update: Energy Stocks Lean Lower Pre-Bell Wednesday",
+"description": null,
+"summary": "Energy stocks were leaning lower pre-bell Wednesday, with the State Street Energy Select Sector SPDR",
+"pubDate": "2026-11-25T14:21:58Z",
+"displayTime": "2026-11-25T14:21:58Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": null,
+"provider": {
+"displayName": "MT Newswires",
+"url": "https://www.mtnewswires.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/energy/articles/sector-energy-stocks-lean-lower-142158117.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/energy/articles/sector-energy-stocks-lean-lower-142158117.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": true
+},
+"stockTickers": [
+{
+"symbol": "CL=F"
+},
+{
+"symbol": "EQNR"
+},
+{
+"symbol": "BP"
+},
+{
+"symbol": "XLE"
+},
+{
+"symbol": "USO"
+},
+{
+"symbol": "NG=F"
+},
+{
+"symbol": "WIT"
+}
+]
+}
+}
+},
+{
+"id": "86eb6116-47d9-372b-b9f1-e022a069e4b3",
+"content": {
+"id": "86eb6116-47d9-372b-b9f1-e022a069e4b3",
+"contentType": "STORY",
+"title": "BP (LSE:BP.) Turns To Quantum Computing For Oil And Gas Discovery",
+"description": null,
+"summary": "BP (LSE:BP.) has partnered with quantum computing firm Quantinuum to apply quantum methods to oil and gas discovery projects. The collaboration targets use cases such as battery chemistry research, advanced materials modelling, and subsurface imaging for exploration work. The Quantinuum partnership on quantum computing is important, but investors need to look beyond this single technology move. We have also flagged 3 warning signs (1 major) for BP. For readers interested in more ways...",
+"pubDate": "2026-11-25T11:09:38Z",
+"displayTime": "2026-11-25T11:09:38Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/simply_wall_st__316/03913810992fb05a90718b2c7abb4bed.jpg",
+"originalWidth": 1600,
+"originalHeight": 900,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/simply_wall_st__316/03913810992fb05a90718b2c7abb4bed.jpg",
+"width": 1600,
+"height": 900,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/5c9401e9d90639df640874370fb383d96e08f7bfb003520b7b6fa122aef72200/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fsimply_wall_st__316%2F03913810992fb05a90718b2c7abb4bed.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Simply Wall St.",
+"url": "https://simplywall.st/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/energy/articles/bp-lse-bp-turns-quantum-110938155.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/energy/articles/bp-lse-bp-turns-quantum-110938155.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "BP"
+},
+{
+"symbol": "QNT"
+},
+{
+"symbol": "BP"
+}
+]
+}
+}
+},
+{
+"id": "f10a116d-1900-3a86-a3da-7cbdc81b288f",
+"content": {
+"id": "f10a116d-1900-3a86-a3da-7cbdc81b288f",
+"contentType": "STORY",
+"title": "Equinor Inks 18-Year Gas Supply Agreement With German Energy Firm VNG",
+"description": null,
+"summary": "EQNR's 18-year gas supply deal with Germany's VNG strengthens its European market position, enhances revenue visibility and boosts cash flow.",
+"pubDate": "2026-11-25T10:55:00Z",
+"displayTime": "2026-11-25T10:55:00Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": null,
+"provider": {
+"displayName": "Zacks",
+"url": "http://www.zacks.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/energy/articles/equinor-inks-18-gas-supply-105500783.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/energy/articles/equinor-inks-18-gas-supply-105500783.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "NG=F"
+},
+{
+"symbol": "EQNR"
+},
+{
+"symbol": "EQNR"
+},
+{
+"symbol": "BP"
+},
+{
+"symbol": "YPF"
+},
+{
+"symbol": "TTE"
+}
+]
+}
+}
+},
+{
+"id": "56acc12e-2b63-348b-b711-267e347fe30d",
+"content": {
+"id": "56acc12e-2b63-348b-b711-267e347fe30d",
+"contentType": "STORY",
+"title": "4 PEG-Based Value Stocks to Buy as NVIDIA Leads Wall Street Rebound",
+"description": null,
+"summary": "Four stocks, ARW, SMCI, BP & INGM pass key PEG-based screening criteria, combining discounted valuations, improving earnings estimates & strong growth prospects.",
+"pubDate": "2026-11-24T19:00:00Z",
+"displayTime": "2026-11-24T19:00:00Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/zacks.com/696fa8f12afc3dcf864056481006551c.jpg_up.jpg",
+"originalWidth": 1280,
+"originalHeight": 853,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/zacks.com/696fa8f12afc3dcf864056481006551c.jpg_up.jpg",
+"width": 1280,
+"height": 853,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/2156be295af16816423e393b67f12cf03ffc537bd3aae85ae3b32a52d975651e/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fzacks.com%2F696fa8f12afc3dcf864056481006551c.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Zacks",
+"url": "http://www.zacks.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/4-peg-based-value-stocks-190000893.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/4-peg-based-value-stocks-190000893.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "NVDA"
+},
+{
+"symbol": "^GSPC"
+},
+{
+"symbol": "^DJI"
+},
+{
+"symbol": "^IXIC"
+},
+{
+"symbol": "BP"
+},
+{
+"symbol": "ARW"
+},
+{
+"symbol": "SMCI"
+},
+{
+"symbol": "INGM"
+}
+]
+}
+}
+},
+{
+"id": "24ddaea1-08d7-3e7b-a71c-e1d6e06a8645",
+"content": {
+"id": "24ddaea1-08d7-3e7b-a71c-e1d6e06a8645",
+"contentType": "STORY",
+"title": "ConocoPhillips' $4.425B Asset Sale: Can It Boost Shareholder Returns?",
+"description": null,
+"summary": "COP's $4.425 billion asset sale unlocks value from mature assets, reduces future liabilities and creates room for additional share repurchases in 2027.",
+"pubDate": "2026-11-24T16:25:00Z",
+"displayTime": "2026-11-24T16:25:00Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/zacks.com/3f7e2cd734268b1404c6667a0ad5934e.jpg_up.jpg",
+"originalWidth": 1467,
+"originalHeight": 721,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/zacks.com/3f7e2cd734268b1404c6667a0ad5934e.jpg_up.jpg",
+"width": 1467,
+"height": 721,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/0a74e225195edae2132976ca5603b2808397ddcb6a2ca85f92046a92583f2fe8/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fzacks.com%2F3f7e2cd734268b1404c6667a0ad5934e.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Zacks",
+"url": "http://www.zacks.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/energy/articles/conocophillips-4-425b-asset-sale-162500237.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/energy/articles/conocophillips-4-425b-asset-sale-162500237.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "COP"
+},
+{
+"symbol": "VAR.OL"
+},
+{
+"symbol": "BP"
+},
+{
+"symbol": "SHEL"
+}
+]
+}
+}
+},
+{
+"id": "daf8946c-95f7-3821-90fc-90d2fc2a3e59",
+"content": {
+"id": "daf8946c-95f7-3821-90fc-90d2fc2a3e59",
+"contentType": "STORY",
+"title": "Sector Update: Energy Stocks Edge Higher Pre-Bell Tuesday",
+"description": null,
+"summary": "Energy stocks were edging higher pre-bell Tuesday, with the State Street Energy Select Sector SPDR E",
+"pubDate": "2026-11-24T14:24:01Z",
+"displayTime": "2026-11-24T14:24:01Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": null,
+"provider": {
+"displayName": "MT Newswires",
+"url": "https://www.mtnewswires.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/energy/articles/sector-energy-stocks-edge-higher-142401057.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/energy/articles/sector-energy-stocks-edge-higher-142401057.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": true
+},
+"stockTickers": [
+{
+"symbol": "CL=F"
+},
+{
+"symbol": "BP"
+},
+{
+"symbol": "XLE"
+},
+{
+"symbol": "USO"
+},
+{
+"symbol": "NG=F"
+},
+{
+"symbol": "BWLP"
+},
+{
+"symbol": "CMBT"
+}
+]
+}
+}
+},
+{
+"id": "2b51edb2-2b95-346d-8791-cf08583a0193",
+"content": {
+"id": "2b51edb2-2b95-346d-8791-cf08583a0193",
+"contentType": "STORY",
+"title": "WEX Stock Rises 18.1% in Six Months: Here's What You Should Know",
+"description": null,
+"summary": "WEX stock jumps 18.1% in six months, fueled by accelerating Mobility growth, payment diversification, expanding HSA adoption and operating efficiencies.",
+"pubDate": "2026-11-24T12:29:00Z",
+"displayTime": "2026-11-24T12:29:00Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/zacks.com/19da45d507c88a0c84f0c509e2d41d29.jpg_up.jpg",
+"originalWidth": 1280,
+"originalHeight": 807,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/zacks.com/19da45d507c88a0c84f0c509e2d41d29.jpg_up.jpg",
+"width": 1280,
+"height": 807,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/9a8c093a7345f1e5a1901d929f47be046e444f3e98b77dbe687eeb2df23a7c0b/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fzacks.com%2F19da45d507c88a0c84f0c509e2d41d29.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Zacks",
+"url": "http://www.zacks.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/wex-stock-rises-18-1-122900091.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/wex-stock-rises-18-1-122900091.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "^GSPC"
+},
+{
+"symbol": "BP"
+},
+{
+"symbol": "WEX"
+},
+{
+"symbol": "DLX"
+},
+{
+"symbol": "VLTO"
+}
+]
+}
+}
+},
+{
+"id": "a404d9ea-eb5f-3cad-9f2b-4d4a0dedb850",
+"content": {
+"id": "a404d9ea-eb5f-3cad-9f2b-4d4a0dedb850",
+"contentType": "STORY",
+"title": "A $6.9 Billion Fund Just Bought These 3 Stocks",
+"description": null,
+"summary": "Key TakeawaysMerewether Investment Management, a $6. 9 billion fund, made BP, Phillips 66 and Suncor Energy its three biggest buys of the third quarter, its latest 13F shows.",
+"pubDate": "2026-11-23T22:25:07Z",
+"displayTime": "2026-11-23T22:25:07Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/tikr_258/1f336f0431dfef15119d115578929c4e",
+"originalWidth": 1280,
+"originalHeight": 720,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/tikr_258/1f336f0431dfef15119d115578929c4e",
+"width": 1280,
+"height": 720,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/076998f04901313a1b66ea25336c5df1c18f8c31ed309636b2bc70bbc87fdb5e/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Ftikr_258%2F1f336f0431dfef15119d115578929c4e",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "TIKR",
+"url": "https://www.tikr.com/"
+},
+"canonicalUrl": {
+"url": "https://www.tikr.com/blog/a-6-9-billion-fund-just-bought-these-3-stocks?ref=yahoofinance&tlnk=yf-261124-rhm85c49"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/6-9-billion-fund-just-222507864.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "BP"
+},
+{
+"symbol": "PSX"
+},
+{
+"symbol": "SU"
+}
+]
+}
+}
+},
+{
+"id": "f6c47169-335d-3929-8d69-093f0b8fa868",
+"content": {
+"id": "f6c47169-335d-3929-8d69-093f0b8fa868",
+"contentType": "STORY",
+"title": "$350,000 in Shell, BP and TotalEnergies Could Pay $15,000 a Year in Dividends",
+"description": null,
+"summary": "Europe's oil giants just posted blockbuster quarters, yet their shares keep sliding. One of the three has a currency quirk that can shrink your check without a dividend cut, and the 2020 payout slashes still loom over all of them.",
+"pubDate": "2026-11-23T12:17:51Z",
+"displayTime": "2026-11-23T12:17:51Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/24_7_wall_st__718/afcdbbbc90dbab84627071f4d0d25221.jpg",
+"originalWidth": 1366,
+"originalHeight": 768,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/24_7_wall_st__718/afcdbbbc90dbab84627071f4d0d25221.jpg",
+"width": 1366,
+"height": 768,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/8c1f923a6a7966a53c9cd7c999d8c6753994a9bb22062d281b4630deeeff7b3f/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2F24_7_wall_st__718%2Fafcdbbbc90dbab84627071f4d0d25221.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "24/7 Wall St.",
+"url": "https://247wallst.com/"
+},
+"canonicalUrl": {
+"url": "https://247wallst.com/investing/2026/11/23/350000-in-shell-bp-and-totalenergies-could-pay-15000-a-year-in-dividends/"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/350-000-shell-bp-totalenergies-121751376.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "BP"
+},
+{
+"symbol": "SHEL"
+},
+{
+"symbol": "TTE"
+},
+{
+"symbol": "EUR=X"
+},
+{
+"symbol": "CL=F"
+},
+{
+"symbol": "BP"
+},
+{
+"symbol": "SHEL"
+},
+{
+"symbol": "TTE"
+}
+]
+}
+}
+},
+{
+"id": "e8bc2875-9ca8-364c-939c-0dae3784ecec",
+"content": {
+"id": "e8bc2875-9ca8-364c-939c-0dae3784ecec",
+"contentType": "STORY",
+"title": "3 Top Energy Stocks Riding the Integrated Oil & Gas Rally",
+"description": null,
+"summary": "Integrated Oil & Gas stocks are surging in 2026. Discover why TTE, BP and EC stand out with attractive valuations and rising earnings estimates.",
+"pubDate": "2026-11-23T11:11:00Z",
+"displayTime": "2026-11-23T11:11:00Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/zacks.com/8c4a41f088bf9120715db42cb7535f5f.jpg_up.jpg",
+"originalWidth": 1280,
+"originalHeight": 807,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/zacks.com/8c4a41f088bf9120715db42cb7535f5f.jpg_up.jpg",
+"width": 1280,
+"height": 807,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/402e978272d31a8e34aeef436984f501189854f585db479bdd906af58f933f83/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fzacks.com%2F8c4a41f088bf9120715db42cb7535f5f.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Zacks",
+"url": "http://www.zacks.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/energy/articles/3-top-energy-stocks-riding-111100140.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/energy/articles/3-top-energy-stocks-riding-111100140.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "CL=F"
+},
+{
+"symbol": "TTE"
+},
+{
+"symbol": "EC"
+},
+{
+"symbol": "BP"
+},
+{
+"symbol": "BP"
+},
+{
+"symbol": "EC"
+},
+{
+"symbol": "TTE"
+}
+]
+}
+}
+},
+{
+"id": "d881d545-07e2-3227-86b0-9bf56607ee63",
+"content": {
+"id": "d881d545-07e2-3227-86b0-9bf56607ee63",
+"contentType": "STORY",
+"title": "BP (LSE:BP.) Enters Talks On Brazil Oil Block Stake Move",
+"description": null,
+"summary": "BP (LSE:BP.) is in talks to sell a stake in the offshore Bumerangue oil block in Brazil to Petrobras. The discussions focus on Petrobras taking a partner role in the Bumerangue field, which lies in Brazilian deepwater acreage. The negotiations could reshape BP's portfolio exposure in Brazil if a Bumerangue stake sale to Petrobras goes ahead. The potential Bumerangue stake sale to Petrobras matters, but it should not dominate every decision you make on BP. We have also spotted 3 warning signs...",
+"pubDate": "2026-11-21T05:11:06Z",
+"displayTime": "2026-11-21T05:11:06Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/simply_wall_st__316/03913810992fb05a90718b2c7abb4bed.jpg",
+"originalWidth": 1600,
+"originalHeight": 900,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/simply_wall_st__316/03913810992fb05a90718b2c7abb4bed.jpg",
+"width": 1600,
+"height": 900,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/5c9401e9d90639df640874370fb383d96e08f7bfb003520b7b6fa122aef72200/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fsimply_wall_st__316%2F03913810992fb05a90718b2c7abb4bed.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Simply Wall St.",
+"url": "https://simplywall.st/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/energy/articles/bp-lse-bp-enters-talks-051106875.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/energy/articles/bp-lse-bp-enters-talks-051106875.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "BP"
+}
+]
+}
+}
+},
+{
+"id": "fe25a7a5-8113-37f8-bea2-8caa19f8c27b",
+"content": {
+"id": "fe25a7a5-8113-37f8-bea2-8caa19f8c27b",
+"contentType": "STORY",
+"title": "BP Steps Up Deleveraging With Strong Cash Flows and Divestments",
+"description": null,
+"summary": "BP's strong cash flows, debt reduction and planned divestments are advancing its deleveraging push and supporting a stronger balance sheet.",
+"pubDate": "2026-11-20T17:06:00Z",
+"displayTime": "2026-11-20T17:06:00Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/zacks.com/8c4a41f088bf9120715db42cb7535f5f.jpg_up.jpg",
+"originalWidth": 1280,
+"originalHeight": 807,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/zacks.com/8c4a41f088bf9120715db42cb7535f5f.jpg_up.jpg",
+"width": 1280,
+"height": 807,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/402e978272d31a8e34aeef436984f501189854f585db479bdd906af58f933f83/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fzacks.com%2F8c4a41f088bf9120715db42cb7535f5f.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Zacks",
+"url": "http://www.zacks.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/energy/articles/bp-steps-deleveraging-strong-cash-170600771.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/energy/articles/bp-steps-deleveraging-strong-cash-170600771.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "BP"
+},
+{
+"symbol": "BP"
+},
+{
+"symbol": "COP"
+},
+{
+"symbol": "PSX"
+}
+]
+}
+}
+},
+{
+"id": "14740aac-1a9c-3bbe-b533-c474a3751400",
+"content": {
+"id": "14740aac-1a9c-3bbe-b533-c474a3751400",
+"contentType": "STORY",
+"title": "Better High-Yield Dividend Stock: BP vs. General Mills",
+"description": null,
+"summary": "Key TakeawaysGeneral Mills yields 7. 2% and BP yields 4.",
+"pubDate": "2026-11-20T16:28:04Z",
+"displayTime": "2026-11-20T16:28:04Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/tikr_258/440000b26db1b32baf03cc6ec3898f0a",
+"originalWidth": 1280,
+"originalHeight": 720,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/tikr_258/440000b26db1b32baf03cc6ec3898f0a",
+"width": 1280,
+"height": 720,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/d5da1f6e3fe4852e8338cc64d3e5c91ec828c8ef7a231fd21f74c0aa3682eacd/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Ftikr_258%2F440000b26db1b32baf03cc6ec3898f0a",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "TIKR",
+"url": "https://www.tikr.com/"
+},
+"canonicalUrl": {
+"url": "https://www.tikr.com/blog/better-high-yield-dividend-stock-bp-vs-general-mills?ref=yahoofinancedividend&tlnk=yf-261120-553vcj66"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/better-high-yield-dividend-stock-162804968.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "BP"
+},
+{
+"symbol": "GIS"
+}
+]
+}
+}
+},
+{
+"id": "b6240de9-33cb-3db9-a652-ad3b38712116",
+"content": {
+"id": "b6240de9-33cb-3db9-a652-ad3b38712116",
+"contentType": "STORY",
+"title": "BP vs TotalEnergies: why TotalEnergies comes out ahead",
+"description": null,
+"summary": "Investing.com -- For a European energy giant, TotalEnergies SE (TTEF) looks stronger overall: lower valuation, less leverage, higher profitability, and better shareholder returns. BP PLC (BP) offers more upside on the fair-value model, but carries materially more balance-sheet risk.",
+"pubDate": "2026-11-20T16:23:19Z",
+"displayTime": "2026-11-20T16:23:19Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": null,
+"provider": {
+"displayName": "Investing.com",
+"url": "https://www.investing.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/energy/articles/bp-vs-totalenergies-why-totalenergies-162319798.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/energy/articles/bp-vs-totalenergies-why-totalenergies-162319798.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "BP"
+},
+{
+"symbol": "TTE"
+},
+{
+"symbol": "BP"
+},
+{
+"symbol": "TTEF"
+}
+]
+}
+}
+},
+{
+"id": "da96c566-3616-3249-bc63-c726cc2a29a8",
+"content": {
+"id": "da96c566-3616-3249-bc63-c726cc2a29a8",
+"contentType": "STORY",
+"title": "Is BP (BP) Stock Undervalued Right Now?",
+"description": null,
+"summary": "Here at Zacks, our focus is on the proven Zacks Rank system, which emphasizes earnings estimates and estimate revisions to find great stocks. Nevertheless, we are always paying attention to the latest value, growth, and momentum trends to underscore strong picks.",
+"pubDate": "2026-11-20T13:40:02Z",
+"displayTime": "2026-11-20T13:40:02Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/zacks.com/090f58c1efbe3555b861102525e50b39.jpg_up.jpg",
+"originalWidth": 1280,
+"originalHeight": 855,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/zacks.com/090f58c1efbe3555b861102525e50b39.jpg_up.jpg",
+"width": 1280,
+"height": 855,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/5b1a83b2eb0563129dad137304a40ae32b97903b396f55ab9351fa4c40c65007/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fzacks.com%2F090f58c1efbe3555b861102525e50b39.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Zacks",
+"url": "http://www.zacks.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/bp-bp-stock-undervalued-now-134002880.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/bp-bp-stock-undervalued-now-134002880.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "BP"
+}
+]
+}
+}
+},
+{
+"id": "f9ca8490-d997-39b8-8484-78838ff80211",
+"content": {
+"id": "f9ca8490-d997-39b8-8484-78838ff80211",
+"contentType": "STORY",
+"title": "Is BP (BP) a Buy as Wall Street Analysts Look Optimistic?",
+"description": null,
+"summary": "Based on the average brokerage recommendation (ABR), BP (BP) should be added to one's portfolio. Wall Street analysts' overly optimistic recommendations cast doubt on the effectiveness of this highly sought-after metric. So, is the stock worth buying?",
+"pubDate": "2026-11-20T13:30:04Z",
+"displayTime": "2026-11-20T13:30:04Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/zacks.com/5ecaf2a9bf082a5f3a554e6526b34be0.jpg_up.jpg",
+"originalWidth": 1280,
+"originalHeight": 855,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/zacks.com/5ecaf2a9bf082a5f3a554e6526b34be0.jpg_up.jpg",
+"width": 1280,
+"height": 855,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/0ac6f6a5c8fa0f177fb7c5427e08a60b51fcfad915aa57a79fa6461113e6cc1d/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fzacks.com%2F5ecaf2a9bf082a5f3a554e6526b34be0.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Zacks",
+"url": "http://www.zacks.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/bp-bp-buy-wall-street-133004441.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/bp-bp-buy-wall-street-133004441.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "BP"
+},
+{
+"symbol": "BP"
+}
+]
+}
+}
+},
+{
+"id": "4f05ec13-0f97-35f3-aac1-764137d10775",
+"content": {
+"id": "4f05ec13-0f97-35f3-aac1-764137d10775",
+"contentType": "STORY",
+"title": "BP weighs divesting West Africa LNG stake to streamline portfolio, Bloomberg says",
+"description": null,
+"summary": "Investing.com -- BP PLC (NYSE:BP) is reportedly evaluating a potential exit from its majority stake and operatorship in the Greater Tortue Ahmeyim (GTA) liquefied natural gas facility off the coast of West Africa, according to a Bloomberg report. The prospective sale comes as Chief Executive Officer Meg O\u2019Neill works to streamline the energy major\u2019s asset base ahead of unveiling her formal strategic vision next month.",
+"pubDate": "2026-11-19T18:46:47Z",
+"displayTime": "2026-11-19T18:46:47Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": null,
+"provider": {
+"displayName": "Investing.com",
+"url": "https://www.investing.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/energy/articles/bp-weighs-divesting-west-africa-184647485.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/energy/articles/bp-weighs-divesting-west-africa-184647485.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "BP"
+},
+{
+"symbol": "BP"
+}
+]
+}
+}
+},
+{
+"id": "a31e5cd0-f0d9-3227-9512-8151d7e41902",
+"content": {
+"id": "a31e5cd0-f0d9-3227-9512-8151d7e41902",
+"contentType": "STORY",
+"title": "European Equities Traded in the US as American Depositary Receipts Decline in Thursday Trading",
+"description": null,
+"summary": "European equities traded in the US as American depositary receipts were sliding late Thursday mornin",
+"pubDate": "2026-11-19T16:10:06Z",
+"displayTime": "2026-11-19T16:10:06Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": null,
+"provider": {
+"displayName": "MT Newswires",
+"url": "https://www.mtnewswires.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/european-equities-traded-us-american-161006986.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/european-equities-traded-us-american-161006986.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": true
+},
+"stockTickers": [
+{
+"symbol": "BP"
+},
+{
+"symbol": "NOK"
+},
+{
+"symbol": "CLLS"
+},
+{
+"symbol": "FOCL"
+},
+{
+"symbol": "DBVT"
+},
+{
+"symbol": "EVAX"
+},
+{
+"symbol": "BUD"
+},
+{
+"symbol": "UL"
+},
+{
+"symbol": "LYG"
+}
+]
+}
+}
+}
+]
+}

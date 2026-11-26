@@ -1,10 +1,11 @@
-"""`YFinanceProvider`: prices, fx and profile from Yahoo via yfinance 1.8.0.
+"""`YFinanceProvider`: prices, fx, profile, fundamentals and news from Yahoo via yfinance 1.8.0.
 
 The only code that knows yfinance names, Yahoo symbols and Yahoo quirks. The core sees
 just the declared capabilities. See documentation/design/finance.md, "yfinance fetching
 and throttling", and core.md, Source store.
 """
 
+import json
 from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
@@ -29,7 +30,13 @@ from lensgraph.sources import (
 from yfinance.exceptions import YFPricesMissingError, YFRateLimitError, YFTzMissingError
 
 from alpha_nodes import markets
-from alpha_nodes.datasets import FX, PRICES, PROFILE
+from alpha_nodes.datasets import FUNDAMENTALS, FX, NEWS, PRICES, PROFILE
+from alpha_nodes.providers.yfinance.fundamentals import (
+    FUNDAMENTALS_NORMALISER_VERSION,
+    YFStatementsPayload,
+    normalise_fundamentals,
+    payload_from_ticker_statements,
+)
 from alpha_nodes.providers.yfinance.history import (
     FX_NORMALISER_VERSION,
     PRICES_NORMALISER_VERSION,
@@ -37,6 +44,11 @@ from alpha_nodes.providers.yfinance.history import (
     normalise_fx,
     normalise_prices,
     payload_from_history,
+)
+from alpha_nodes.providers.yfinance.news import (
+    NEWS_NORMALISER_VERSION,
+    YFNewsPayload,
+    normalise_news,
 )
 from alpha_nodes.providers.yfinance.profile import (
     PROFILE_NORMALISER_VERSION,
@@ -89,6 +101,8 @@ _TRUNCATION_SESSIONS = 5
 """First bar later than this many sessions after the expected start means truncated history."""
 
 _SPLIT_RESTATEMENT_WINDOW = timedelta(days=730)
+NEWS_COUNT = 20
+"""Items requested per `Ticker.get_news` call."""
 _TIMEOUT_S = 15
 _RETRIES = 2
 _UNREACHABLE = (CurlConnectionError, CurlTimeout, ConnectionError, TimeoutError)
@@ -117,12 +131,13 @@ def _known_timezone(symbol: str) -> str | None:
 
 
 class YFinanceProvider:
-    """Provider for `prices`, `fx` and `profile`; fetch is one yfinance call group per item.
+    """Provider for `prices`, `fx`, `profile`, `fundamentals` and `news`; one yfinance call group per item.
 
     Entities are Yahoo symbols for prices and profile (e.g. "BP.L") and currency codes for
     fx ("GBP"). Prices and fx fetch one `Ticker.history` and store a `YFHistoryPayload`;
     profile reads `Ticker.info` and `.isin` (about 3 requests, finance.md "Profile cost") and
-    stores a `YFProfilePayload`. Payloads are stored verbatim and normalised by `normalise`.
+    stores a `YFProfilePayload`; fundamentals reads the yearly statements plus two `.info`
+    facts (`YFStatementsPayload`); news reads `get_news` (`YFNewsPayload`). Payloads are stored verbatim and normalised by `normalise`.
 
     Args:
         cache_dir: where yfinance keeps its timezone, cookie and ISIN caches.
@@ -148,10 +163,16 @@ class YFinanceProvider:
         self._min_window = timedelta(days=min_window_days)
         self.library_version = yf.__version__
         self.capabilities = ProviderCapabilities(
-            datasets=frozenset({PRICES.name, FX.name, PROFILE.name}),
+            datasets=frozenset({PRICES.name, FX.name, PROFILE.name, FUNDAMENTALS.name, NEWS.name}),
             max_batch=1,
             rate_limit=YF_POLICY,
-            pit_reliable={PRICES.name: True, FX.name: True, PROFILE.name: False},
+            pit_reliable={
+                PRICES.name: True,
+                FX.name: True,
+                PROFILE.name: False,
+                FUNDAMENTALS.name: False,
+                NEWS.name: False,
+            },
         )
 
     def normaliser_version(self, dataset: str) -> str:
@@ -160,6 +181,8 @@ class YFinanceProvider:
             PRICES.name: PRICES_NORMALISER_VERSION,
             FX.name: FX_NORMALISER_VERSION,
             PROFILE.name: PROFILE_NORMALISER_VERSION,
+            FUNDAMENTALS.name: FUNDAMENTALS_NORMALISER_VERSION,
+            NEWS.name: NEWS_NORMALISER_VERSION,
         }[dataset]
 
     def fetch(self, dataset: Dataset, items: list[WorkItem]) -> list[FetchOutcome]:
@@ -167,7 +190,11 @@ class YFinanceProvider:
         return [self._fetch_one(dataset.name, item) for item in items]
 
     def normalise(self, dataset: Dataset, raw: RawResponse, payload: Any) -> pd.DataFrame:
-        """Map a stored payload (`YFHistoryPayload` or `YFProfilePayload`, model or JSON dict)."""
+        """Map a stored payload (a `YF*Payload` model or its JSON dict) to the dataset's frame."""
+        if dataset.name == FUNDAMENTALS.name:
+            return normalise_fundamentals(YFStatementsPayload.model_validate(payload))
+        if dataset.name == NEWS.name:
+            return normalise_news(YFNewsPayload.model_validate(payload))
         if dataset.name == PROFILE.name:
             profile = YFProfilePayload.model_validate(payload)
             return normalise_profile(profile, symbol_mic(profile.symbol))
@@ -201,9 +228,48 @@ class YFinanceProvider:
             return _classify(item, exc, known_tz=_known_timezone(symbol) is not None)
         return FetchOutcome(item=item, kind="ok", payload=payload)
 
+    def _fetch_fundamentals(self, item: WorkItem) -> FetchOutcome:
+        """Yearly income statement, balance sheet and cash flow plus `.info` for one symbol.
+
+        `.info` goes first: Yahoo's stub answer (no `currency`) marks an unknown symbol, which is
+        `empty` as for profile. For a known symbol, all three statements empty is a transient
+        Yahoo failure (finance.md quirk table), so a retryable `error`, never cached as empty.
+        """
+        symbol = item.entity
+        try:
+            ticker = yf.Ticker(symbol)
+            info = ticker.info
+            if not info or info.get("currency") is None:
+                return FetchOutcome(
+                    item=item, kind="empty", message="no currency in info: unknown symbol"
+                )
+            income, balance, cashflow = ticker.income_stmt, ticker.balance_sheet, ticker.cashflow
+            if income.empty and balance.empty and cashflow.empty:
+                return FetchOutcome(
+                    item=item, kind="error", message="all three yearly statements are empty"
+                )
+            payload = payload_from_ticker_statements(symbol, income, balance, cashflow, dict(info))
+        except Exception as exc:  # noqa: BLE001 - classified below
+            return _classify(item, exc, known_tz=_known_timezone(symbol) is not None)
+        return FetchOutcome(item=item, kind="ok", payload=payload)
+
+    def _fetch_news(self, item: WorkItem) -> FetchOutcome:
+        """`Ticker.get_news(count=20)`; no items is `ok` with an empty payload (a quiet week)."""
+        symbol = item.entity
+        try:
+            items = yf.Ticker(symbol).get_news(count=NEWS_COUNT)
+            payload = YFNewsPayload(symbol=symbol, items=json.loads(json.dumps(items, default=str)))
+        except Exception as exc:  # noqa: BLE001 - classified below
+            return _classify(item, exc, known_tz=_known_timezone(symbol) is not None)
+        return FetchOutcome(item=item, kind="ok", payload=payload)
+
     def _fetch_one(self, dataset: str, item: WorkItem) -> FetchOutcome:
         if dataset == PROFILE.name:
             return self._fetch_profile(item)
+        if dataset == FUNDAMENTALS.name:
+            return self._fetch_fundamentals(item)
+        if dataset == NEWS.name:
+            return self._fetch_news(item)
         interval = item.interval
         if interval is None:
             raise ValueError(f"{dataset} is date-axis; item has no interval")

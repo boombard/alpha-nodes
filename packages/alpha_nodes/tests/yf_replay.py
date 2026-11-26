@@ -13,7 +13,9 @@ import pandas as pd
 import pytest
 import yfinance.cache as yf_cache
 from alpha_nodes.providers.yfinance import provider as provider_mod
+from alpha_nodes.providers.yfinance.fundamentals import YFStatementsPayload
 from alpha_nodes.providers.yfinance.history import YFHistoryPayload
+from alpha_nodes.providers.yfinance.news import YFNewsPayload
 from alpha_nodes.providers.yfinance.profile import YFProfilePayload
 from curl_cffi.requests.exceptions import HTTPError as CurlHTTPError
 from pydantic import BaseModel
@@ -28,14 +30,14 @@ class ReplayCall(BaseModel):
     """One yfinance access served by the replay."""
 
     symbol: str
-    kind: str  # "history" or "info"
+    kind: str  # "history", "info", "statements" or "news"
 
 
 class YFReplay:
     """Serves recorded payloads as `yfinance.Ticker`; unknown symbols answer HTTP 404.
 
     Args:
-        fixtures: directory of `prices_*`, `fx_*` and `profile_*` payload files.
+        fixtures: directory of `prices_*`, `fx_*`, `profile_*`, `fundamentals_*` and `news_*` payload files.
 
     Attributes:
         calls: every history/info access, in order; empty means the network was never needed.
@@ -46,6 +48,24 @@ class YFReplay:
         self.calls: list[ReplayCall] = []
         self.histories: dict[str, YFHistoryPayload] = {}
         self.profiles: dict[str, YFProfilePayload] = {}
+        self.statements: dict[str, YFStatementsPayload] = {}
+        self.news: dict[str, YFNewsPayload] = {}
+
+    def _statements(self, symbol: str) -> YFStatementsPayload | None:
+        if symbol not in self.statements:
+            path = self.fixtures / f"fundamentals_{symbol}.json"
+            if not path.exists():
+                return None
+            self.statements[symbol] = YFStatementsPayload.model_validate_json(path.read_text())
+        return self.statements[symbol]
+
+    def _news(self, symbol: str) -> YFNewsPayload | None:
+        if symbol not in self.news:
+            path = self.fixtures / f"news_{symbol}.json"
+            if not path.exists():
+                return None
+            self.news[symbol] = YFNewsPayload.model_validate_json(path.read_text())
+        return self.news[symbol]
 
     def _history(self, symbol: str) -> YFHistoryPayload | None:
         if symbol not in self.histories:
@@ -127,7 +147,42 @@ class _ReplayTicker:
         profile = self.replay._profile(self.symbol)
         if profile is None:
             raise _not_found()
-        return profile.info
+        statements = self.replay._statements(self.symbol)
+        if statements is None:
+            return profile.info
+        return {  # the two facts the fundamentals fetch reads agree with the statements fixture
+            **profile.info,
+            "financialCurrency": statements.financial_currency,
+            "netIncomeToCommon": statements.info_net_income,
+        }
+
+    def _statement(self, attribute: str) -> pd.DataFrame:
+        """A recorded statement as the frame yfinance returns (line items x period ends)."""
+        self.replay.calls.append(ReplayCall(symbol=self.symbol, kind="statements"))
+        statements = self.replay._statements(self.symbol)
+        if statements is None:
+            return pd.DataFrame()
+        dump = getattr(statements, attribute)
+        return pd.DataFrame(
+            dump["data"], index=dump["index"], columns=pd.to_datetime(dump["columns"]), dtype=float
+        )
+
+    @property
+    def income_stmt(self) -> pd.DataFrame:
+        return self._statement("income")
+
+    @property
+    def balance_sheet(self) -> pd.DataFrame:
+        return self._statement("balance")
+
+    @property
+    def cashflow(self) -> pd.DataFrame:
+        return self._statement("cashflow")
+
+    def get_news(self, count: int = 10, **_: Any) -> list[dict[str, Any]]:
+        self.replay.calls.append(ReplayCall(symbol=self.symbol, kind="news"))
+        news = self.replay._news(self.symbol)
+        return [] if news is None else news.items[:count]
 
     @property
     def isin(self) -> str:

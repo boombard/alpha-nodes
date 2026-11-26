@@ -19,7 +19,9 @@ from pathlib import Path
 
 import yfinance as yf
 import yfinance.cache as yf_cache
+from alpha_nodes.providers.yfinance.fundamentals import payload_from_ticker_statements
 from alpha_nodes.providers.yfinance.history import YFHistoryPayload, payload_from_history
+from alpha_nodes.providers.yfinance.news import YFNewsPayload
 from alpha_nodes.providers.yfinance.profile import payload_from_ticker
 from alpha_nodes.providers.yfinance.stats import price_stats
 
@@ -32,6 +34,19 @@ ILLIQUID_SYMBOLS = ["BMT.L"]
 """Prices only, not canaries: an AIM micro-cap with many no-trade days (TASK-37 gap evidence)."""
 PRICE_SYMBOLS = CORE_SYMBOLS + NEW_CANARIES + ILLIQUID_SYMBOLS
 PROFILE_SYMBOLS = CORE_SYMBOLS + NEW_CANARIES
+FUNDAMENTALS_SYMBOLS = [
+    "BP.L",
+    "HSBA.L",
+    "VOD.L",
+    "BOOT.L",
+    "ASML.AS",
+    "SAP.DE",
+    "NESN.SW",
+    "NOVO-B.CO",
+    "AAPL",
+]
+"""TASK-52: statements and news canaries (no VUSD.L, an ETF; no ALCLS.PA)."""
+NEWS_COUNT = 20
 FX_SYMBOLS = ["GBPUSD=X", "EURUSD=X", "CHFUSD=X", "DKKUSD=X"]
 SPLIT = ("AAPL", date(2020, 8, 28), date(2020, 9, 3))  # 4:1 split effective 2020-08-31
 MISSING_PROBES = {  # name -> (symbol, start, end): provoke the two "missing" exceptions
@@ -82,6 +97,33 @@ def record_profile(symbol: str, name: str) -> str | None:
     return doc.get("exception")
 
 
+def record_fundamentals(symbol: str, name: str) -> str | None:
+    """Fetch the yearly statements and `.info` the way the provider does; write a `YFStatementsPayload`."""
+    ticker = yf.Ticker(symbol)
+    try:
+        doc = payload_from_ticker_statements(
+            symbol, ticker.income_stmt, ticker.balance_sheet, ticker.cashflow, ticker.info
+        ).model_dump(mode="json")
+    except Exception as exc:  # noqa: BLE001 - recorded verbatim
+        doc = {"exception": type(exc).__name__, "message": str(exc), "symbol": symbol}
+        print(f"{name}: {type(exc).__name__}: {exc}")
+    (OUT / f"{name}.json").write_text(json.dumps(doc, indent=0) + "\n")
+    return doc.get("exception")
+
+
+def record_news(symbol: str, name: str) -> str | None:
+    """Fetch `Ticker.get_news(count=20)` and write a `YFNewsPayload` (or the error)."""
+    ticker = yf.Ticker(symbol)
+    try:
+        items = json.loads(json.dumps(ticker.get_news(count=NEWS_COUNT), default=str))
+        doc = YFNewsPayload(symbol=symbol, items=items).model_dump(mode="json")
+    except Exception as exc:  # noqa: BLE001 - recorded verbatim
+        doc = {"exception": type(exc).__name__, "message": str(exc), "symbol": symbol}
+        print(f"{name}: {type(exc).__name__}: {exc}")
+    (OUT / f"{name}.json").write_text(json.dumps(doc, indent=0) + "\n")
+    return doc.get("exception")
+
+
 def print_price_stats() -> None:
     """Print a markdown table of `price_stats` for every recorded prices fixture."""
     print("| Fixture | bars | missing sessions | zero-volume | duplicate dates | non-session |")
@@ -92,7 +134,7 @@ def print_price_stats() -> None:
 
 
 def targets() -> dict[str, Callable[[], str | None]]:
-    """Every price/fx/profile fixture by file stem, as a zero-argument recorder."""
+    """Every price/fx/profile/fundamentals/news fixture by file stem, as a zero-argument recorder."""
     today = date.today()
     out: dict[str, Callable[[], str | None]] = {}
     for sym in PRICE_SYMBOLS:
@@ -106,6 +148,9 @@ def targets() -> dict[str, Callable[[], str | None]]:
     out[f"split_{SPLIT[0]}"] = lambda: record(SPLIT[0], SPLIT[1], SPLIT[2], f"split_{SPLIT[0]}")
     for sym in PROFILE_SYMBOLS:
         out[f"profile_{sym}"] = lambda sym=sym: record_profile(sym, f"profile_{sym}")
+    for sym in FUNDAMENTALS_SYMBOLS:
+        out[f"fundamentals_{sym}"] = lambda sym=sym: record_fundamentals(sym, f"fundamentals_{sym}")
+        out[f"news_{sym}"] = lambda sym=sym: record_news(sym, f"news_{sym}")
     return out
 
 

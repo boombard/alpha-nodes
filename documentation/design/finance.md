@@ -186,10 +186,10 @@ Five principles:
 | GBp/GBX (pence) vs GBP: 100× errors in prices, market cap, dividends (dividends often in pounds while prices are in pence) | yfinance #280, #2866, #2924; `fast_info.market_cap` 100× bug (PR #3047, Nov 2026); alpha-capture fixture HSBA.L | repair: normalise GBp/GBX/ZAc/ILA → major unit using `history_metadata['currency']`. Check: day-over-day close ratio ≈100 or ≈0.01; dividend/price yield > 25% ⇒ suspect |
 | Reporting currency ≠ trading currency; Yahoo's own P/B etc. mix them | yfinance #1976 (maintainer: use `financialCurrency`), PR #2632 (open) | principle 2: two currencies per instrument + fx conversion in calc helpers |
 | Price history errors: missing split/dividend adjustment, bad ticks, missing days | yfinance price-repair docs; #2621, #2964 | fetch with `repair=True`; record the `Repaired?` column as a repair; check trading-day count against an exchange calendar; widen ranges when repairing |
-| Statement columns misaligned / oldest period sparse | yfinance #2584 | check: drop period columns >70% NaN (recorded); check Assets ≈ Liabilities + Equity per period ⇒ suspect |
-| Only ~4 annual / ~5 quarterly periods | yfinance #1747 (weak) | depth-aware coverage (see Known data limitations) |
+| Statement columns misaligned / oldest period sparse | yfinance #2584 | check: period columns >70% NaN in any statement become `rejected` rows (`sparse_period`, recorded, hidden from default reads); check Assets ≈ Liabilities + Equity per period ⇒ suspect |
+| Only ~4 annual / ~5 quarterly periods | yfinance #1747; *confirmed 2026-11-26*: every canary statement has 5 yearly columns (BP.L's balance sheet 4), the oldest 85-98% NaN, so exactly 4 annual periods survive the 70% rule | depth-aware coverage (see Known data limitations) |
 | Empty statement frames (transient) | yfinance #2790/#2791 | classify as `error` (retry), not `empty` |
-| Capex reported negative | convention, unverified | canonical schema fixes the sign (capex stored positive = cash spent); adapter maps it explicitly; contract test on a canary |
+| Capex reported negative | *verified 2026-11-26*: `Capital Expenditure` is negative on all nine canaries | canonical schema fixes the sign (capex stored positive = cash spent); adapter maps it explicitly; contract test on a canary |
 | Share counts: multi-class / dual-listed (`sharesOutstanding` vs `impliedSharesOutstanding`) | Yahoo AU feedback (weak) | check: price × shares vs reported market cap within tolerance ⇒ else suspect |
 | Duplicate bars (two bars on one local date) | yfinance chart quirk | collapse to one row per date: the last with a non-NaN close, carrying non-zero dividends/splits from any row; reason `duplicate_bar` |
 | Single missing sessions | fixtures have none, even for illiquid BMT.L (Yahoo carries the close forward) | reason `missing_sessions:<n>` for n ≥ 1 (was ≥ 3) |
@@ -430,8 +430,17 @@ EPS is computed (`net_income / shares_diluted`), never ingested (data quality pr
 - `YFinanceProvider` adds `fundamentals` (annual income statement, balance sheet and cash
   flow merged on `period_end`, plus `financialCurrency` and `.info` net income for the scale
   check) and `news`. An empty statement set is a transient `error`; an unknown symbol `empty`.
-  Period columns more than 70% NaN are dropped (recorded on the payload, finance quirk table);
-  capex is mapped to positive. `pit_reliable=false` for both.
+  Period columns more than 70% NaN become `rejected` `sparse_period` rows (finance quirk table);
+  capex is mapped to positive (`capex_sign` repair). `pit_reliable=false` for both.
+  *Verified 2026-11-26 on nine recorded canaries (tests/fixtures/yfinance/README.md):* the statements carry no
+  currency, so the reporting currency is `.info` `financialCurrency` (present on all nine; none a minor unit);
+  a period that is sparse in any one statement is rejected (`sparse_period`) for all three, kept as a mostly-NaN row, not dropped; HSBA.L (a bank) has
+  no operating income row (null, not 0); `.info` `netIncomeToCommon` is trailing-twelve-month, so the scale check
+  only trips near 1e3/1e6, never on the tens-of-percent TTM gap. Rows rejected for a missing currency (`no_currency`) or an unrecognised
+  code (`unknown_currency:<code>`) carry a null `currency` (nullable in the schema for exactly these rows; no guess). The fetch reads
+  `.info` first: no `currency` there is an unknown symbol (`empty`), and only then are all three empty statements
+  a transient `error`. News: `get_news(count=20)` returns nested `content` items (title, `pubDate`, provider,
+  click-through URL, summary); `[]` is `ok` with no items.
 - Run configs use `providers: {fundamentals: [edgar, yfinance]}`: US names come from EDGAR,
   the rest fall back to yfinance (per entity, core.md Source store).
 

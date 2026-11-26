@@ -147,3 +147,48 @@ normalised `repairs` column all-empty-lists except its last row, which DuckDB's 
 sampling missed (it inferred `NULL[]`), so the facts insert failed. The shorter
 `prices_SAP.DE.json` / `prices_MC.PA.json` do not trigger it. Used by `test_m4_e2e.py`
 (`test_ten_year_history_with_only_its_newest_bar_repaired_is_stored`).
+
+## TASK-52: fundamentals and news
+
+Recorded 2026-11-26 (yfinance 1.8.0) with `record_yfinance_fixtures.py --only fundamentals_<sym> news_<sym>`
+for BP.L, HSBA.L, VOD.L, BOOT.L, ASML.AS, SAP.DE, NESN.SW, NOVO-B.CO and AAPL. No fundamentals or news
+fixtures for the ETF VUSD.L or ALCLS.PA (not part of this task).
+
+- `fundamentals_<sym>.json` is a `YFStatementsPayload` (`alpha_nodes/providers/yfinance/fundamentals.py`):
+  `Ticker.income_stmt`, `.balance_sheet` and `.cashflow` (yearly) as frame dumps, plus `.info`
+  `financialCurrency` and `netIncomeToCommon`. Only those two `.info` fields are ever read.
+- `news_<sym>.json` is a `YFNewsPayload`: `Ticker.get_news(count=20)` verbatim.
+
+### Fundamentals findings
+
+- **Capex is reported negative** (`Capital Expenditure`, cash out) on all nine; the adapter stores it positive
+  and records the `capex_sign` repair. `test_capex_positive_on_every_fixture` pins this.
+- **Four usable annual periods per symbol, not "~4" by luck**: every statement has five columns (BP.L's balance
+  sheet only four), but the oldest column is 85-98% NaN on all nine and is rejected as `sparse_period` by the 70% rule (kept as a row, not dropped). NOVO-B.CO and
+  SAP.DE income statements carry only four columns to begin with. So the adapter yields exactly 4 non-rejected rows per symbol, plus the rejected sparse one where a fifth column exists.
+- **Statements carry no currency.** The frames are bare numbers; the reporting currency is `.info`
+  `financialCurrency`, present on all nine: USD for BP.L, HSBA.L and AAPL, EUR for VOD.L, ASML.AS and SAP.DE,
+  GBP for BOOT.L (a major unit, not GBp), CHF, DKK. No minor-unit financial currency was seen; the pence path is
+  covered only by a constructed test.
+- Fiscal years differ: AAPL ends 30 Sep (its FY2026 column is already present), VOD.L 31 Mar, the rest 31 Dec.
+- **HSBA.L (a bank) has no `Operating Income` row** at all: `operating_income` is null on every period.
+  Revenue, net income, assets and equity are present; its total assets are ~3e12 USD.
+- `.info` `netIncomeToCommon` is trailing-twelve-month, so it differs from the latest fiscal net income by
+  tens of percent (VOD.L: negative in both). The scale check only trips at ratios near 1e3/1e6.
+- All nine pass `balance_mismatch` (assets within 2% of liabilities + equity) and `scale_mismatch`.
+- Live cost: fundamentals is `.info` + three statements, 5 requests on first sight and 2 warm; news is 1.
+
+### News findings
+
+- Every item is `{"id", "content": {...}}`; the useful fields are nested: `content.title`, `content.pubDate`
+  (ISO, UTC), `content.provider.displayName`, `content.clickThroughUrl.url` (else `canonicalUrl.url`),
+  `content.summary` (`description` may be None). `contentType` is `STORY` or `VIDEO`; both are kept.
+- Exactly 20 items per symbol (the `count`). Depth varies: AAPL's 20 items span one day, NESN.SW's about a month.
+  Items are often aggregator stories about other tickers (a BP.L item is about Nvidia's CEO), so relevance is
+  the lens's job, not the adapter's.
+- Item ids are UUIDs, unique within every fixture.
+
+### Canary (2026-11-26, `--concurrency 4`)
+
+Exit 0, all 11 symbols ok. New invariants (fundamentals, for the nine symbols with fixtures): capex >= 0 after
+mapping, >= 3 annual periods, `financialCurrency` present, no rejected rows. News must fetch and normalise.

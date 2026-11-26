@@ -1,0 +1,1095 @@
+{
+"symbol": "NOVO-B.CO",
+"items": [
+{
+"id": "1d5e5ffd-af93-3574-9f29-3b9197515a63",
+"content": {
+"id": "1d5e5ffd-af93-3574-9f29-3b9197515a63",
+"contentType": "STORY",
+"title": "2 Bargain Stocks to Buy With $1,000 in November",
+"description": null,
+"summary": "A drug maker and a food maker, both of which have attractive yields and strong businesses backing their dividends.",
+"pubDate": "2026-11-25T22:47:01Z",
+"displayTime": "2026-11-25T22:47:01Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/motleyfool.com/6d6fee1616aaf865bf7db693979d7164.jpg",
+"originalWidth": 1400,
+"originalHeight": 934,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/motleyfool.com/6d6fee1616aaf865bf7db693979d7164.jpg",
+"width": 1400,
+"height": 934,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/86caa37b6e4385057d0df8d8f9f1fa43106cb9d4bda9accbe21f45ed82029f6f/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fmotleyfool.com%2F6d6fee1616aaf865bf7db693979d7164.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Motley Fool",
+"url": "http://www.fool.com/"
+},
+"canonicalUrl": {
+"url": "https://www.fool.com/investing/2026/11/25/2-bargain-stocks-to-buy-with-usd1-000-in-november/"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/2-bargain-stocks-buy-1-224701867.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "NVO"
+},
+{
+"symbol": "PEP"
+},
+{
+"symbol": "^GSPC"
+}
+]
+}
+}
+},
+{
+"id": "8b9e6f95-54de-3fe7-9e27-d99bab222e6e",
+"content": {
+"id": "8b9e6f95-54de-3fe7-9e27-d99bab222e6e",
+"contentType": "STORY",
+"title": "Novo Nordisk (CPSE:NOVO B), What Is Driving Attention Now?",
+"description": null,
+"summary": "Parker Waichman LLP\u2019s new product liability lawsuit over Ozempic and alleged vision loss puts Novo Nordisk (CPSE:NOVO B) and its GLP-1 franchise under closer legal and risk-management scrutiny for investors. Against a backdrop of steady product news, including Sogroya\u2019s label expansion and new haemophilia and sickle cell therapies, Novo Nordisk\u2019s short-term momentum has cooled, with a 30-day share price return of 5.55%, a year-to-date share price decline of 16.76%, and a 3-year total...",
+"pubDate": "2026-11-25T21:15:05Z",
+"displayTime": "2026-11-25T21:15:05Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/simply_wall_st__316/727bb87a0fc6bc29552922380ee3e9f5.jpg",
+"originalWidth": 1600,
+"originalHeight": 900,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/simply_wall_st__316/727bb87a0fc6bc29552922380ee3e9f5.jpg",
+"width": 1600,
+"height": 900,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/068fd43055b3f5a491440c79f5df992bad0690561706015cae433e86daf8f877/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fsimply_wall_st__316%2F727bb87a0fc6bc29552922380ee3e9f5.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Simply Wall St.",
+"url": "https://simplywall.st/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/healthcare/articles/novo-nordisk-cpse-novo-b-211505782.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/healthcare/articles/novo-nordisk-cpse-novo-b-211505782.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "NVO"
+},
+{
+"symbol": "NVO"
+}
+]
+}
+}
+},
+{
+"id": "271703ee-1146-32ca-af70-a18a40931834",
+"content": {
+"id": "271703ee-1146-32ca-af70-a18a40931834",
+"contentType": "STORY",
+"title": "Sector Update: Healthcare Stocks Fall Late Afternoon",
+"description": null,
+"summary": "Healthcare stocks fell late Wednesday afternoon with the NYSE Healthcare Index dropping 0.2% and the",
+"pubDate": "2026-11-25T20:57:19Z",
+"displayTime": "2026-11-25T20:57:19Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": null,
+"provider": {
+"displayName": "MT Newswires",
+"url": "https://www.mtnewswires.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/healthcare/articles/sector-healthcare-stocks-fall-afternoon-205719060.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/healthcare/articles/sector-healthcare-stocks-fall-afternoon-205719060.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": true
+},
+"stockTickers": [
+{
+"symbol": "TNDM"
+},
+{
+"symbol": "NVO"
+},
+{
+"symbol": "LLY"
+},
+{
+"symbol": "GDRX"
+},
+{
+"symbol": "XLV"
+},
+{
+"symbol": "PHAR"
+}
+]
+}
+}
+},
+{
+"id": "3940277c-133e-3513-8a72-a94c3f935e67",
+"content": {
+"id": "3940277c-133e-3513-8a72-a94c3f935e67",
+"contentType": "STORY",
+"title": "Will Vision Warning Labels Change Novo Nordisk's (CPSE:NOVO B) Narrative",
+"description": null,
+"summary": "In November 2026, the FDA required new warnings about a potential risk of non arteritic anterior ischemic optic neuropathy on GLP 1 drugs, prompting Novo Nordisk and Eli Lilly to add safety language to labels for Ozempic, Wegovy and other incretin treatments. This tighter safety messaging, together with ongoing NAION multidistrict litigation involving Ozempic and Wegovy, puts fresh attention on how much Novo Nordisk\u2019s incretin driven engine depends on maintaining regulator and patient...",
+"pubDate": "2026-11-25T20:15:54Z",
+"displayTime": "2026-11-25T20:15:54Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/simply_wall_st__316/727bb87a0fc6bc29552922380ee3e9f5.jpg",
+"originalWidth": 1600,
+"originalHeight": 900,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/simply_wall_st__316/727bb87a0fc6bc29552922380ee3e9f5.jpg",
+"width": 1600,
+"height": 900,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/068fd43055b3f5a491440c79f5df992bad0690561706015cae433e86daf8f877/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fsimply_wall_st__316%2F727bb87a0fc6bc29552922380ee3e9f5.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Simply Wall St.",
+"url": "https://simplywall.st/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/healthcare/articles/vision-warning-labels-change-novo-201554991.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/healthcare/articles/vision-warning-labels-change-novo-201554991.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "NVO"
+},
+{
+"symbol": "VSN37322-USD"
+},
+{
+"symbol": "LLY"
+},
+{
+"symbol": "NVO"
+}
+]
+}
+}
+},
+{
+"id": "4c1391ab-a491-348e-a931-2e1aca418e6a",
+"content": {
+"id": "4c1391ab-a491-348e-a931-2e1aca418e6a",
+"contentType": "STORY",
+"title": "Sector Update: Healthcare Stocks Mixed Wednesday Afternoon",
+"description": null,
+"summary": "Healthcare stocks were mixed Wednesday afternoon, with the NYSE Healthcare Index rising 0.3% and the",
+"pubDate": "2026-11-25T18:38:51Z",
+"displayTime": "2026-11-25T18:38:51Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": null,
+"provider": {
+"displayName": "MT Newswires",
+"url": "https://www.mtnewswires.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/healthcare/articles/sector-healthcare-stocks-mixed-wednesday-183851394.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/healthcare/articles/sector-healthcare-stocks-mixed-wednesday-183851394.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": true
+},
+"stockTickers": [
+{
+"symbol": "NVO"
+},
+{
+"symbol": "LLY"
+},
+{
+"symbol": "XLV"
+},
+{
+"symbol": "ZTS"
+},
+{
+"symbol": "PHAR"
+}
+]
+}
+}
+},
+{
+"id": "96933861-960a-3f60-a0a5-f513564c4803",
+"content": {
+"id": "96933861-960a-3f60-a0a5-f513564c4803",
+"contentType": "STORY",
+"title": "European Stocks Close Lower Wednesday; German GDP Growth Slows More Than Expected",
+"description": null,
+"summary": "European stock markets closed lower Wednesday as German economic growth slowed more than expected.",
+"pubDate": "2026-11-25T16:59:12Z",
+"displayTime": "2026-11-25T16:59:12Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": null,
+"provider": {
+"displayName": "MT Newswires",
+"url": "https://www.mtnewswires.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/markets/world-indices/articles/european-stocks-close-lower-wednesday-165912635.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/world-indices/articles/european-stocks-close-lower-wednesday-165912635.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": true
+},
+"stockTickers": [
+{
+"symbol": "STLA"
+},
+{
+"symbol": "NVO"
+},
+{
+"symbol": "LLY"
+},
+{
+"symbol": "^STOXX"
+},
+{
+"symbol": "^GDAXI"
+},
+{
+"symbol": "^FTSE"
+}
+]
+}
+}
+},
+{
+"id": "68788bef-4ac2-3672-8d15-87bf2c7a26e3",
+"content": {
+"id": "68788bef-4ac2-3672-8d15-87bf2c7a26e3",
+"contentType": "STORY",
+"title": "Update: Market Chatter: Novo Nordisk and Eli Lilly Prepare New Warning Labels for GLP-1 Drugs Over Eye Condition Risk",
+"description": null,
+"summary": "(Updates to include statements from Novo Nordisk and Eli Lilly in the last two paragraphs.) Novo",
+"pubDate": "2026-11-25T15:07:08Z",
+"displayTime": "2026-11-25T15:07:08Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": null,
+"provider": {
+"displayName": "MT Newswires",
+"url": "https://www.mtnewswires.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/healthcare/articles/market-chatter-novo-nordisk-eli-150708947.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/healthcare/articles/market-chatter-novo-nordisk-eli-150708947.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": true
+},
+"stockTickers": [
+{
+"symbol": "NVO"
+},
+{
+"symbol": "LLY"
+}
+]
+}
+}
+},
+{
+"id": "7a67af2e-2663-3820-88b7-1f26c3fcf9bb",
+"content": {
+"id": "7a67af2e-2663-3820-88b7-1f26c3fcf9bb",
+"contentType": "STORY",
+"title": "Market Chatter: Novo Nordisk and Eli Lilly Prepare New Warning Labels for GLP-1 Drugs Over Eye Condition Risk",
+"description": null,
+"summary": "Novo Nordisk (NVO) and Eli Lilly (LLY) are preparing to add a new federally required warning label t",
+"pubDate": "2026-11-25T13:22:30Z",
+"displayTime": "2026-11-25T13:22:30Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": null,
+"provider": {
+"displayName": "MT Newswires",
+"url": "https://www.mtnewswires.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/healthcare/articles/market-chatter-novo-nordisk-eli-132230427.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/healthcare/articles/market-chatter-novo-nordisk-eli-132230427.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": true
+},
+"stockTickers": [
+{
+"symbol": "NVO"
+},
+{
+"symbol": "LLY"
+}
+]
+}
+}
+},
+{
+"id": "6f7a4b4b-e042-3f1d-8e80-aa71503a7608",
+"content": {
+"id": "6f7a4b4b-e042-3f1d-8e80-aa71503a7608",
+"contentType": "STORY",
+"title": "3 Stocks With Dividend Yields of 4% or More to Buy in November",
+"description": null,
+"summary": "Novo Nordisk, McCormick, and Realty Income are all worth looking at in November; here's why.",
+"pubDate": "2026-11-25T13:21:02Z",
+"displayTime": "2026-11-25T13:21:02Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/motleyfool.com/816bd550928b50d669653bec970259b5.jpg",
+"originalWidth": 1281,
+"originalHeight": 851,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/motleyfool.com/816bd550928b50d669653bec970259b5.jpg",
+"width": 1281,
+"height": 851,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/6aa7e99f70a257f83eecb336c290fb78b66d58ba46ef7d412beec392755aae76/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fmotleyfool.com%2F816bd550928b50d669653bec970259b5.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Motley Fool",
+"url": "http://www.fool.com/"
+},
+"canonicalUrl": {
+"url": "https://www.fool.com/investing/2026/11/25/3-stocks-with-dividend-yields-of-4-or-more-to-buy-in-november/"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/3-stocks-dividend-yields-4-132102752.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "NVO"
+},
+{
+"symbol": "MKC"
+},
+{
+"symbol": "O"
+},
+{
+"symbol": "LLY"
+}
+]
+}
+}
+},
+{
+"id": "aed9a39a-34d5-38ef-a416-6c554e50ba47",
+"content": {
+"id": "aed9a39a-34d5-38ef-a416-6c554e50ba47",
+"contentType": "STORY",
+"title": "Update: Market Chatter: Anthropic Expanding in Zurich to Advance AI Research",
+"description": null,
+"summary": "(Updates with Anthropic's response in the fourth paragraph and most recent stock move in the last pa",
+"pubDate": "2026-11-25T13:04:16Z",
+"displayTime": "2026-11-25T13:04:16Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": null,
+"provider": {
+"displayName": "MT Newswires",
+"url": "https://www.mtnewswires.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/technology/ai/articles/market-chatter-anthropic-expanding-zurich-130416327.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/technology/ai/articles/market-chatter-anthropic-expanding-zurich-130416327.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": true
+},
+"stockTickers": [
+{
+"symbol": "ANT"
+},
+{
+"symbol": "NVS"
+},
+{
+"symbol": "NVO"
+}
+]
+}
+}
+},
+{
+"id": "3900d88f-09b8-3f55-97bc-812a7917ea60",
+"content": {
+"id": "3900d88f-09b8-3f55-97bc-812a7917ea60",
+"contentType": "STORY",
+"title": "Eli Lilly vs. Novo Nordisk: Not Every GLP-1 Maker Is Enjoying Booming Sales Trends",
+"description": null,
+"summary": "Eli Lilly's quarterly sales have outpaced Novo Nordisk's since late 2024, with the gap widening sharply through 2026. Here is how the numbers stack up.",
+"pubDate": "2026-11-24T20:50:02Z",
+"displayTime": "2026-11-24T20:50:02Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/motleyfool.com/ae1392e164f22dfb1a085a91f999c224.jpg",
+"originalWidth": 1400,
+"originalHeight": 787,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/motleyfool.com/ae1392e164f22dfb1a085a91f999c224.jpg",
+"width": 1400,
+"height": 787,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/27d99994a779724554cd007bef45348a9e9809ed3bd94185ad5a3950b4e48e4c/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fmotleyfool.com%2Fae1392e164f22dfb1a085a91f999c224.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Motley Fool",
+"url": "http://www.fool.com/"
+},
+"canonicalUrl": {
+"url": "https://www.fool.com/coverage/charts/2026/11/24/eli-lilly-vs-novo-nordisk-not-every-glp-1-maker-is-enjoying-booming-sales-trends/"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/healthcare/articles/eli-lilly-vs-novo-nordisk-205002096.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "LLY"
+},
+{
+"symbol": "NVO"
+}
+]
+}
+}
+},
+{
+"id": "724dbec3-afb2-3c2d-9bb8-1f643bd65d75",
+"content": {
+"id": "724dbec3-afb2-3c2d-9bb8-1f643bd65d75",
+"contentType": "STORY",
+"title": "Novo vs. Amgen: Which Healthcare Stock Is the Better Buy Now?",
+"description": null,
+"summary": "NVO and AMGN offer different paths to obesity-market growth, with contrasting earnings trends, pipeline prospects and valuations shaping their investment appeal.",
+"pubDate": "2026-11-24T16:21:00Z",
+"displayTime": "2026-11-24T16:21:00Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/zacks.com/723b414aa10600faf58f7a232ec73364.jpg_up.jpg",
+"originalWidth": 1280,
+"originalHeight": 807,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/zacks.com/723b414aa10600faf58f7a232ec73364.jpg_up.jpg",
+"width": 1280,
+"height": 807,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/0685f1fd192c8872fb5666d40e9ab38947ee741612ca04c94ec241c5b2213132/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fzacks.com%2F723b414aa10600faf58f7a232ec73364.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Zacks",
+"url": "http://www.zacks.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/healthcare/articles/novo-vs-amgen-healthcare-stock-162100037.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/healthcare/articles/novo-vs-amgen-healthcare-stock-162100037.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "AMGN"
+},
+{
+"symbol": "NVO"
+},
+{
+"symbol": "LLY"
+}
+]
+}
+}
+},
+{
+"id": "210252cf-9fec-324a-a35e-3dbc2d3a2a6c",
+"content": {
+"id": "210252cf-9fec-324a-a35e-3dbc2d3a2a6c",
+"contentType": "STORY",
+"title": "Novo Nordisk A/S (NVO) Is a Trending Stock: Facts to Know Before Betting on It",
+"description": null,
+"summary": "Novo Nordisk (NVO) has been one of the stocks most watched by Zacks.com users lately. So, it is worth exploring what lies ahead for the stock.",
+"pubDate": "2026-11-24T13:00:04Z",
+"displayTime": "2026-11-24T13:00:04Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/zacks.com/b9775f315e7b6c4ada6e36d0048a929a.jpg_up.jpg",
+"originalWidth": 1280,
+"originalHeight": 1036,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/zacks.com/b9775f315e7b6c4ada6e36d0048a929a.jpg_up.jpg",
+"width": 1280,
+"height": 1036,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/0fd612f8a89acad1efa9664461c81d4208f6aa58c09aea73f4b49ae37838fa10/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fzacks.com%2Fb9775f315e7b6c4ada6e36d0048a929a.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Zacks",
+"url": "http://www.zacks.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/novo-nordisk-nvo-trending-stock-130004772.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/novo-nordisk-nvo-trending-stock-130004772.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "NVO"
+},
+{
+"symbol": "^GSPC"
+},
+{
+"symbol": "NVO"
+}
+]
+}
+}
+},
+{
+"id": "04b206b5-44a4-31c5-b1e1-494d2ae58a04",
+"content": {
+"id": "04b206b5-44a4-31c5-b1e1-494d2ae58a04",
+"contentType": "STORY",
+"title": "Hims & Hers Sinks 17% in a Week as BofA Cuts Its Target to $21. Is It Time to Load Up?",
+"description": null,
+"summary": "Key TakeawaysHims & Hers shares fell 17% in a week as Bank of America cut its target to $21 after Kentucky refused to allow compounding of six peptides. Growth runs through Eli Lilly\u2019s and Novo Nordisk\u2019s branded weight-loss drugs, which pushed gross margin down to 57% from 74%.",
+"pubDate": "2026-11-24T00:22:10Z",
+"displayTime": "2026-11-24T00:22:10Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/tikr_258/f4ee90a5cadea62c34525235a7d0a407",
+"originalWidth": 1280,
+"originalHeight": 720,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/tikr_258/f4ee90a5cadea62c34525235a7d0a407",
+"width": 1280,
+"height": 720,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/5b7a5f72df62e6c8947c0f420f08c2ac46b33917a991c3857b0ee1160d38d940/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Ftikr_258%2Ff4ee90a5cadea62c34525235a7d0a407",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "TIKR",
+"url": "https://www.tikr.com/"
+},
+"canonicalUrl": {
+"url": "https://www.tikr.com/blog/hims-hers-sinks-17-in-a-week-as-bofa-cuts-its-target-to-21-is-it-time-to-load-up?ref=yahoofinance&tlnk=yf-261124-6r282vwf"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/hims-hers-sinks-17-week-002210292.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "HIMS"
+},
+{
+"symbol": "BAC"
+},
+{
+"symbol": "LLY"
+},
+{
+"symbol": "NVO"
+}
+]
+}
+}
+},
+{
+"id": "a2cc21ea-5a9b-357f-a8b4-5951099f6476",
+"content": {
+"id": "a2cc21ea-5a9b-357f-a8b4-5951099f6476",
+"contentType": "STORY",
+"title": "Novo Nordisk (CPSE:NOVO B) Wins FDA Nod For First Weekly Turner Syndrome Therapy",
+"description": null,
+"summary": "Novo Nordisk (CPSE:NOVO B) received FDA approval for Sogroya as a once-weekly growth hormone treatment for children with Turner Syndrome. The authorization makes Sogroya the first long-acting, once-weekly growth hormone cleared in the United States for this pediatric group. The decision expands Novo Nordisk's pediatric endocrinology portfolio, adding a new option alongside existing daily growth hormone therapies. The new FDA approval for once-weekly Sogroya in Turner Syndrome is important,...",
+"pubDate": "2026-11-23T18:11:55Z",
+"displayTime": "2026-11-23T18:11:55Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/simply_wall_st__316/727bb87a0fc6bc29552922380ee3e9f5.jpg",
+"originalWidth": 1600,
+"originalHeight": 900,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/simply_wall_st__316/727bb87a0fc6bc29552922380ee3e9f5.jpg",
+"width": 1600,
+"height": 900,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/068fd43055b3f5a491440c79f5df992bad0690561706015cae433e86daf8f877/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fsimply_wall_st__316%2F727bb87a0fc6bc29552922380ee3e9f5.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Simply Wall St.",
+"url": "https://simplywall.st/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/healthcare/articles/novo-nordisk-cpse-novo-b-181155742.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/healthcare/articles/novo-nordisk-cpse-novo-b-181155742.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "NVO"
+},
+{
+"symbol": "NVO"
+}
+]
+}
+}
+},
+{
+"id": "5781ee21-0ccd-3f0c-bc94-89822dfb0315",
+"content": {
+"id": "5781ee21-0ccd-3f0c-bc94-89822dfb0315",
+"contentType": "STORY",
+"title": "Novo's Sogroya Gets FDA Label Expansion for Pediatric Turner Syndrome",
+"description": null,
+"summary": "NVO's Sogroya wins FDA label expansion for pediatric Turner syndrome, becoming the first once-weekly growth hormone approved for this condition in the United States.",
+"pubDate": "2026-11-23T16:06:00Z",
+"displayTime": "2026-11-23T16:06:00Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/zacks.com/723b414aa10600faf58f7a232ec73364.jpg_up.jpg",
+"originalWidth": 1280,
+"originalHeight": 807,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/zacks.com/723b414aa10600faf58f7a232ec73364.jpg_up.jpg",
+"width": 1280,
+"height": 807,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/0685f1fd192c8872fb5666d40e9ab38947ee741612ca04c94ec241c5b2213132/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fzacks.com%2F723b414aa10600faf58f7a232ec73364.jpg_up.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Zacks",
+"url": "http://www.zacks.com/"
+},
+"canonicalUrl": {
+"url": "https://finance.yahoo.com/healthcare/articles/novos-sogroya-gets-fda-label-160600277.html"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/healthcare/articles/novos-sogroya-gets-fda-label-160600277.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "NVO"
+},
+{
+"symbol": "ADPT"
+},
+{
+"symbol": "ACIU"
+},
+{
+"symbol": "AMRX"
+}
+]
+}
+}
+},
+{
+"id": "e37e3af1-ccd4-3577-b85f-12100d6c03e8",
+"content": {
+"id": "e37e3af1-ccd4-3577-b85f-12100d6c03e8",
+"contentType": "STORY",
+"title": "Bristol Myers Squibb vs. Novo Nordisk: Which Healthcare Stock Is a Better Buy for 2027?",
+"description": null,
+"summary": "Novo Nordisk's profit margins are running far above Bristol Myers, yet the cheaper valuation tells a different story about where the value sits.",
+"pubDate": "2026-11-22T18:04:01Z",
+"displayTime": "2026-11-22T18:04:01Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/motleyfool.com/4b6472fee4712002208d29f3307c6e5e.jpg",
+"originalWidth": 2000,
+"originalHeight": 1333,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/motleyfool.com/4b6472fee4712002208d29f3307c6e5e.jpg",
+"width": 2000,
+"height": 1333,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/bc68122b6e70b00c5e939f4cf9e97bb565e29a76c691c573f68e01b06605df60/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fmotleyfool.com%2F4b6472fee4712002208d29f3307c6e5e.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Motley Fool",
+"url": "http://www.fool.com/"
+},
+"canonicalUrl": {
+"url": "https://www.fool.com/coverage/better-buy/2026/11/22/bristol-myers-squibb-vs-novo-nordisk-which-healthcare-stock-is-a-better-buy-for-2027/"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/healthcare/articles/bristol-myers-squibb-vs-novo-180401624.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "BMY"
+},
+{
+"symbol": "NVO"
+},
+{
+"symbol": "JNJ"
+},
+{
+"symbol": "MRK"
+},
+{
+"symbol": "ZLAB"
+}
+]
+}
+}
+},
+{
+"id": "441e351f-db4b-3a76-8c0f-81a2c2810b3c",
+"content": {
+"id": "441e351f-db4b-3a76-8c0f-81a2c2810b3c",
+"contentType": "STORY",
+"title": "Novo Nordisk's Wegovy Pill Is Capturing 80% of New Oral Obesity Prescriptions. Is NVO Stock a Buy?",
+"description": null,
+"summary": "Novo Nordisk's GLP-1 pill is performing incredibly well, which is a good sign if you are considering buying the stock.",
+"pubDate": "2026-11-21T22:35:02Z",
+"displayTime": "2026-11-21T22:35:02Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/motleyfool.com/41ab40133c40ce499c183462f13078f9.jpg",
+"originalWidth": 1400,
+"originalHeight": 840,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/motleyfool.com/41ab40133c40ce499c183462f13078f9.jpg",
+"width": 1400,
+"height": 840,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/6bab4e31b516ce83a5d47c3c63bb4f77842e77164c5d3315a7490f389e3be3c3/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fmotleyfool.com%2F41ab40133c40ce499c183462f13078f9.jpg",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Motley Fool",
+"url": "http://www.fool.com/"
+},
+"canonicalUrl": {
+"url": "https://www.fool.com/investing/2026/11/21/novo-nordisks-wegovy-pill-is-capturing-80-of-new-oral-obesity-prescriptions-is-nvo-stock-a-buy/"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/healthcare/articles/novo-nordisks-wegovy-pill-capturing-223502692.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "NVO"
+},
+{
+"symbol": "NVDA"
+}
+]
+}
+}
+},
+{
+"id": "08cafb9d-f8b9-36b4-980b-97d1cc0accbe",
+"content": {
+"id": "08cafb9d-f8b9-36b4-980b-97d1cc0accbe",
+"contentType": "STORY",
+"title": "Eli Lilly Is Near Its High. Bank of America Sees Another 19%",
+"description": null,
+"summary": "Key TakeawaysBank of America raised its Eli Lilly price target to $1,600 from $1,557 on Nov. 19 and kept its Buy rating.",
+"pubDate": "2026-11-21T14:09:54Z",
+"displayTime": "2026-11-21T14:09:54Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/tikr_258/b794e4f73951d64a7cbed773eb513891",
+"originalWidth": 1280,
+"originalHeight": 720,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/tikr_258/b794e4f73951d64a7cbed773eb513891",
+"width": 1280,
+"height": 720,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/a51b003b036246209848a7720876e413e0f8f1633c9328c95457f3023d65de14/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Ftikr_258%2Fb794e4f73951d64a7cbed773eb513891",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "TIKR",
+"url": "https://www.tikr.com/"
+},
+"canonicalUrl": {
+"url": "https://www.tikr.com/blog/eli-lilly-is-near-its-high-bank-of-america-sees-another-19?ref=yahoofinance&tlnk=yf-261121-xqv3g997"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/markets/stocks/articles/eli-lilly-near-high-bank-140954046.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "LLY"
+},
+{
+"symbol": "BAC"
+},
+{
+"symbol": "NVO"
+}
+]
+}
+}
+},
+{
+"id": "a1c111be-e0f2-3d7d-81a0-197e94e73098",
+"content": {
+"id": "a1c111be-e0f2-3d7d-81a0-197e94e73098",
+"contentType": "STORY",
+"title": "Novo Gets FDA Approval For First-Of-Its-Kind Weekly Growth Hormone Treatment For Children With Turner Syndrome",
+"description": null,
+"summary": "The approval was supported by Novo\u2019s Phase 3 Real8 trial involving 105 children with Turner syndrome.",
+"pubDate": "2026-11-20T18:06:17Z",
+"displayTime": "2026-11-20T18:06:17Z",
+"isHosted": true,
+"previewUrl": null,
+"thumbnail": {
+"originalUrl": "https://media.zenfs.com/en/stocktwits_383/a2cc0843b9fc023755fa34273c7abf2a",
+"originalWidth": 1280,
+"originalHeight": 853,
+"resolutions": [
+{
+"url": "https://media.zenfs.com/en/stocktwits_383/a2cc0843b9fc023755fa34273c7abf2a",
+"width": 1280,
+"height": 853,
+"tag": "original"
+},
+{
+"url": "https://s.yimg.com/lo/mysterio/api/61716266b3cd06a5d83082ea57764614e2136776d2d32cdb01b3bec3a03c9a50/lightyear_networkapi/resizefill_w170_h128/https%3A%2F%2Fmedia.zenfs.com%2Fen%2Fstocktwits_383%2Fa2cc0843b9fc023755fa34273c7abf2a",
+"width": 170,
+"height": 128,
+"tag": "170x128"
+}
+]
+},
+"provider": {
+"displayName": "Stocktwits",
+"url": "https://stocktwits.com/"
+},
+"canonicalUrl": {
+"url": "https://stocktwits.com/news-articles/markets/equity/novo-gets-fda-approval-for-first-of-its-kind-weekly-growth-hormone-treatment-for-children-with-turner-syndrome/cNbS8XhR91I"
+},
+"clickThroughUrl": {
+"url": "https://finance.yahoo.com/healthcare/articles/novo-gets-fda-approval-first-180617592.html"
+},
+"finance": {
+"premiumFinance": {
+"isPremiumNews": false
+},
+"stockTickers": [
+{
+"symbol": "NVO"
+}
+]
+}
+}
+}
+]
+}

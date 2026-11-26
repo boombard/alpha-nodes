@@ -5,7 +5,7 @@ quality principle 5). Usage:
     uv run python packages/alpha_nodes/scripts/canary.py [--symbols BP.L AAPL ...] [--concurrency 4]
 
 Steps: a health check (AAPL over 5 days), then each canary symbol fetched live through
-`YFinanceProvider` (no store) for prices and profile, normalised and compared with the
+`YFinanceProvider` (no store) for prices, profile, fundamentals and news, normalised and compared with the
 fixtures; then the same fetches through a thread pool (the scheduler's shape) twice, cold
 (fresh tz/cookie caches, so first sights race) and warm, to surface cache-lock and crumb errors; then a `repair=True` vs `repair=False` request count.
 HTTP requests are counted by wrapping `curl_cffi.requests.Session.request`, the single
@@ -28,8 +28,10 @@ from typing import Any
 
 import pandas as pd
 import yfinance as yf
-from alpha_nodes.datasets import PRICES, PROFILE
+from alpha_nodes.datasets import DATASETS
+from alpha_nodes.providers.yfinance.fundamentals import YFStatementsPayload, normalise_fundamentals
 from alpha_nodes.providers.yfinance.history import YFHistoryPayload, normalise_prices
+from alpha_nodes.providers.yfinance.news import YFNewsPayload, normalise_news
 from alpha_nodes.providers.yfinance.profile import YFProfilePayload, normalise_profile
 from alpha_nodes.providers.yfinance.provider import YFinanceProvider, symbol_mic
 from curl_cffi.requests import Session
@@ -102,6 +104,38 @@ def compare_profile(fixture: pd.DataFrame, live: pd.DataFrame) -> list[str]:
     ]
 
 
+MIN_ANNUAL_PERIODS = 3
+"""Fewer annual periods than this from live statements is drift (fixtures show four)."""
+
+
+def fundamentals_invariants(payload: YFStatementsPayload, frame: pd.DataFrame) -> list[str]:
+    """Violated invariants of live statements and their normalised frame; [] when all hold.
+
+    Capex is non-negative after mapping (Yahoo's raw sign flipping must not leak through), at
+    least `MIN_ANNUAL_PERIODS` non-rejected annual periods exist (the sparse oldest column is
+    a rejected `sparse_period` row and does not count), and the equity reports a currency
+    (`financialCurrency`; no row is then rejected for any other reason). Pure; the live
+    fetch is not unit-tested.
+    """
+    problems: list[str] = []
+    live = frame[frame["quality"] != "rejected"]
+    if bool((frame["capex"].dropna() < 0).any()):
+        problems.append("capex negative after mapping")
+    if len(live) < MIN_ANNUAL_PERIODS:
+        problems.append(f"{len(live)} annual periods < {MIN_ANNUAL_PERIODS}")
+    if payload.financial_currency is None:
+        problems.append("financialCurrency missing")
+    reasons = {
+        r
+        for rs in frame.loc[frame["quality"] == "rejected", "quality_reasons"]
+        for r in rs
+        if r != "sparse_period"
+    }
+    if reasons:
+        problems.append(f"rows rejected: {sorted(reasons)}")
+    return problems
+
+
 class RequestCounter:
     """Counts HTTP requests per labelled call by wrapping `curl_cffi.requests.Session.request`.
 
@@ -155,20 +189,28 @@ def _fetch(
     """One provider fetch; returns the outcome and the HTTP requests it made."""
     before = counter.counts[label]
     with counter.label(label):
-        (outcome,) = provider.fetch(PRICES if dataset == "prices" else PROFILE, [item])
+        (outcome,) = provider.fetch(DATASETS[dataset], [item])
     return outcome, counter.counts[label] - before
 
 
-def _items(symbol: str) -> tuple[WorkItem, WorkItem]:
-    """Live work items for a canary: prices over the fixture's last 30 days, and its profile."""
+def _items(symbol: str) -> dict[str, WorkItem]:
+    """Live work items for a canary by dataset.
+
+    Prices over the fixture's last 30 days, its profile, and (for symbols with a
+    `fundamentals_*` fixture) fundamentals and news.
+    """
     end = YFHistoryPayload.model_validate_json(
         (FIXTURES / f"prices_{symbol}.json").read_text()
     ).requested_end
     interval = DateInterval(start=end - timedelta(days=WINDOW_DAYS), end=end)
-    return (
-        WorkItem(dataset="prices", entity=symbol, interval=interval),
-        WorkItem(dataset="profile", entity=symbol, interval=None),
-    )
+    items = {
+        "prices": WorkItem(dataset="prices", entity=symbol, interval=interval),
+        "profile": WorkItem(dataset="profile", entity=symbol, interval=None),
+    }
+    if (FIXTURES / f"fundamentals_{symbol}.json").exists():
+        items["fundamentals"] = WorkItem(dataset="fundamentals", entity=symbol, interval=None)
+        items["news"] = WorkItem(dataset="news", entity=symbol, interval=None)
+    return items
 
 
 def check_health() -> str | None:
@@ -183,11 +225,10 @@ def check_health() -> str | None:
 def check_symbol(
     provider: YFinanceProvider, counter: RequestCounter, symbol: str, tag: str
 ) -> tuple[list[str], dict[str, int]]:
-    """Fetch prices and profile live, compare with fixtures; (problems, requests per dataset)."""
+    """Fetch every dataset live, compare with fixtures; (problems, requests per dataset)."""
     problems: list[str] = []
     requests: dict[str, int] = {}
-    prices_item, profile_item = _items(symbol)
-    for dataset, item in (("prices", prices_item), ("profile", profile_item)):
+    for dataset, item in _items(symbol).items():
         outcome, requests[dataset] = _fetch(
             provider, counter, f"{tag}:{dataset}:{symbol}", dataset, item
         )
@@ -199,6 +240,16 @@ def check_symbol(
                 YFHistoryPayload.model_validate(outcome.payload), symbol_mic(symbol)
             )
             problems += [f"prices {p}" for p in compare_prices(_fixture_prices(symbol)[1], live)]
+        elif dataset == "fundamentals":
+            statements = YFStatementsPayload.model_validate(outcome.payload)
+            problems += [
+                f"fundamentals {p}"
+                for p in fundamentals_invariants(statements, normalise_fundamentals(statements))
+            ]
+        elif dataset == "news":
+            normalise_news(
+                YFNewsPayload.model_validate(outcome.payload)
+            )  # raises on a format change
         else:
             live = normalise_profile(
                 YFProfilePayload.model_validate(outcome.payload), symbol_mic(symbol)
