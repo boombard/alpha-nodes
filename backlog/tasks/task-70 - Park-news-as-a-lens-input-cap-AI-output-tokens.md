@@ -4,7 +4,7 @@ title: Park news as a lens input; cap AI output tokens
 status: In Review
 assignee: []
 created_date: '2026-11-26T09:25:35Z'
-updated_date: '2026-11-26T09:34:52Z'
+updated_date: '2026-11-26T09:35:03Z'
 labels:
   - finance
   - core
@@ -67,6 +67,8 @@ Expected side effect: the prompts, output schema and profile fingerprints change
 Worker: dispatch ctx_ee1f2bee3060, worktree task-70 (Orca run run_5e68c868c3a6). Stale base 7454545 fast-forwarded to ba53f3d at start.
 
 Worker done 9d59975 (1285 passed). Round 1 sent (follow-up dispatch ctx_f51cfd4e7fb4): prompt grammar 'them'->'it'. toy-run.json regenerated outside Files (accepted: toy prompt hash changed).
+
+Round 2 sent: same prompt line, 'found in them' -> 'found in it'.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
