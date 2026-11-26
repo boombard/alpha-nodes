@@ -8,6 +8,7 @@ deterministic (sorted keys, stable ordering) so it can be diffed and snapshotted
 import json
 import math
 from collections import Counter
+from collections.abc import Mapping
 from datetime import date, datetime
 from enum import Enum
 from pathlib import Path
@@ -22,6 +23,7 @@ from ..lineage import CitedValue, UnresolvedCitation, resolve_citation
 from ..plan import NodeResult, NodeStatus
 from ..records import DossierRecord
 from ..store.base import BlobStore, RunIndex
+from ..units import Unit, format_value, units_for_cite
 from ..verdict import Dossier, DossierReview, LensVerdict
 from .models import CandidateView, CitedView, ClaimRef, FlagRef, RunSummary, RunView, TableData
 
@@ -56,6 +58,41 @@ def json_safe(value: Any) -> Any:
     return str(value)
 
 
+def _with_display(table: TableData, units: Mapping[str, Unit]) -> TableData:
+    """`table` plus the unit ids and formatted cells of the columns that have a unit.
+
+    Each row is the formatting context, so a unit's `prefix_field` finds its sibling column. A
+    table with no unit column is returned unchanged (`display_rows` stays None).
+    """
+    unit_cols = {c: units[c] for c in table.columns if c in units}
+    if not unit_cols:
+        return table
+    display = [
+        [
+            format_value(v, unit_cols[c], dict(zip(table.columns, row, strict=True)))
+            if c in unit_cols and isinstance(v, int | float) and not isinstance(v, bool)
+            else None
+            for c, v in zip(table.columns, row, strict=True)
+        ]
+        for row in table.rows
+    ]
+    return table.model_copy(
+        update={"units": {c: u.id for c, u in unit_cols.items()}, "display_rows": display}
+    )
+
+
+def _display_fields(fields: Mapping[str, Any], units: Mapping[str, Unit]) -> dict[str, str] | None:
+    """Formatted strings of the numeric `fields` that have a unit (siblings give the prefix)."""
+    out: dict[str, str] = {}
+    for name, unit in units.items():
+        value = fields.get(name)
+        if isinstance(value, int | float) and not isinstance(value, bool):
+            text = format_value(value, unit, fields)
+            if text is not None:
+                out[name] = text
+    return out or None
+
+
 def frame_table(frame: pd.DataFrame, *, max_rows: int) -> TableData:
     """A frame as a `TableData` of its last `max_rows` rows; a non-default index becomes columns."""
     if not isinstance(frame.index, pd.RangeIndex):
@@ -83,24 +120,47 @@ def _models_table(items: list[BaseModel], *, max_rows: int) -> TableData:
     )
 
 
-def cited_view(cited: CitedValue, *, max_rows: int) -> CitedView:
-    """The JSON-safe `CitedView` of a resolved citation (frames and model lists become tables)."""
+def _units_for(cite: str, cite_units: Mapping[str, Unit]) -> dict[str, Unit]:
+    """Field/column -> unit for `cite` out of a verdict's `cite_units` (`input.field` keys)."""
+    return {path.split(".", 1)[1]: u for path, u in units_for_cite(cite, cite_units).items()}
+
+
+def cited_view(
+    cited: CitedValue,
+    *,
+    max_rows: int,
+    cite_units: Mapping[str, Unit] | None = None,
+    row: Mapping[str, Any] | None = None,
+) -> CitedView:
+    """The JSON-safe `CitedView` of a resolved citation (frames and model lists become tables).
+
+    `cite_units` (from the verdict's provenance) adds display strings and table units, formatted
+    by `lensgraph.units.format_value` so the UI has no formatter of its own; with none, the view
+    is as before. `row` is the cited field's parent model, giving a field its `prefix_field`.
+    """
+    units = _units_for(cited.cite, cite_units or {})
     value = cited.value
     table: TableData | None = None
     json_value: Any = None
+    display: dict[str, str] | None = None
     chart: LineChart | None = None
     if isinstance(value, LineChart):
         chart = value
     elif isinstance(value, pd.DataFrame):
-        table = frame_table(value, max_rows=max_rows)
+        table = _with_display(frame_table(value, max_rows=max_rows), units)
     elif (
         isinstance(value, list)
         and value
         and all(isinstance(v, BaseModel) and type(v) is type(value[0]) for v in value)
     ):
-        table = _models_table(value, max_rows=max_rows)
+        table = _with_display(_models_table(value, max_rows=max_rows), units)
     else:
         json_value = json_safe(value)
+        if cited.kind == "field":
+            name = cited.cite.split(".", 1)[1]
+            display = _display_fields({**(row or {}), name: json_value}, units)
+        elif isinstance(json_value, dict):
+            display = _display_fields(json_value, units)
     return CitedView(
         id=f"{cited.source_hash[:16]}:{cited.cite}",
         cite=cited.cite,
@@ -108,6 +168,7 @@ def cited_view(cited: CitedValue, *, max_rows: int) -> CitedView:
         kind=cited.kind,
         table=table,
         json_value=json_value,
+        display=display,
         chart=chart,
     )
 
@@ -130,6 +191,14 @@ def _output(result: NodeResult | None, blobs: BlobStore) -> Any:
         return None
 
 
+def _parent_row(cited: CitedValue, blobs: BlobStore) -> dict[str, Any] | None:
+    """For a single-field cite, its parent model as a dict (the field's `prefix_field` context)."""
+    if cited.kind != "field":
+        return None
+    parent = blobs.get(cited.source_hash)
+    return json_safe(parent) if isinstance(parent, BaseModel) else None
+
+
 def _resolve_cites(
     verdict: LensVerdict,
     cites: list[str],
@@ -141,7 +210,13 @@ def _resolve_cites(
     ids: dict[str, str | None] = {}
     for cite in dict.fromkeys(cites):
         try:
-            view = cited_view(resolve_citation(verdict, cite, blobs), max_rows=max_rows)
+            resolved = resolve_citation(verdict, cite, blobs)
+            view = cited_view(
+                resolved,
+                max_rows=max_rows,
+                cite_units=verdict.provenance.cite_units,
+                row=_parent_row(resolved, blobs),
+            )
         except UnresolvedCitation:
             ids[cite] = None
             continue

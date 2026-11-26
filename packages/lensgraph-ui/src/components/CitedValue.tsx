@@ -9,6 +9,7 @@ import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
+import type { GridColDef } from "@mui/x-data-grid";
 import type { ReactNode } from "react";
 import { DataTable } from "./DataTable";
 import { LineChartView } from "./LineChartView";
@@ -17,19 +18,24 @@ import type { CitedView } from "../types/run-view";
 /** A renderer for one kind of cited value. */
 export type CitedRenderer = (cited: CitedView) => ReactNode;
 
-/** A capped table (frames and lists of models) in a read-only grid. */
+/**
+ * A capped table (frames and lists of models) in a read-only grid. Cells keep their raw values, so
+ * columns sort on them; Python's `display_rows` strings are only what a cell shows, and a column's
+ * unit id is added to its header (the UI formats nothing itself).
+ */
 function TableView({ cited }: { cited: CitedView }) {
   const table = cited.table!;
-  const columns = table.columns.map((name, j) => ({
+  const columns: GridColDef[] = table.columns.map((name, j) => ({
     field: `c${j}`,
-    headerName: name,
+    headerName: table.units?.[name] ? `${name} (${table.units[name]})` : name,
     flex: 1,
     minWidth: 90,
-    sortable: false,
+    valueFormatter: (value: unknown, row: { id: number }) =>
+      table.display_rows?.[row.id]?.[j] ?? (value == null ? "—" : String(value)),
   }));
   const rows = table.rows.map((row, i) => ({
     id: i,
-    ...Object.fromEntries(row.map((v, j) => [`c${j}`, v == null ? "—" : String(v)])),
+    ...Object.fromEntries(row.map((v, j) => [`c${j}`, v])),
   }));
   return (
     <Box>
@@ -60,7 +66,7 @@ function isFlat(value: unknown): value is Record<string, unknown> {
   );
 }
 
-/** A flat model as a two-column field/value table. */
+/** A flat model as a two-column field/value table; a field with a `display` string shows that. */
 function FieldTable({ cited, fields }: { cited: CitedView; fields: Record<string, unknown> }) {
   return (
     <Table size="small" aria-label={`Fields of ${cited.cite}`}>
@@ -70,7 +76,7 @@ function FieldTable({ cited, fields }: { cited: CitedView; fields: Record<string
             <TableCell component="th" scope="row">
               {k}
             </TableCell>
-            <TableCell>{v == null ? "—" : String(v)}</TableCell>
+            <TableCell>{cited.display?.[k] ?? (v == null ? "—" : String(v))}</TableCell>
           </TableRow>
         ))}
       </TableBody>
@@ -88,6 +94,9 @@ export function CitedValue({ cited }: { cited: CitedView }) {
   const custom = renderers[cited.kind];
   if (custom) return <>{custom(cited)}</>;
   if (cited.table) return <TableView cited={cited} />;
+  if (cited.kind === "field" && cited.display) {
+    return <FieldTable cited={cited} fields={cited.display} />;
+  }
   if (cited.kind === "model" && isFlat(cited.json_value)) {
     return <FieldTable cited={cited} fields={cited.json_value} />;
   }

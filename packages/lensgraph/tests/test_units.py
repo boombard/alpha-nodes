@@ -161,3 +161,14 @@ def test_unit_as_field_type_round_trips_in_provenance():
     prov = Provenance(lens_version="v", cite_units={"a.x": FRACTION})
     again = Provenance.model_validate_json(prov.model_dump_json())
     assert again.cite_units == {"a.x": FRACTION}
+
+
+def test_units_for_cite_selects_by_cite_shape():
+    from lensgraph.units import COUNT, FRACTION, units_for_cite
+
+    units = {"n.a": FRACTION, "n.b": COUNT, "m.a": FRACTION}
+    assert units_for_cite("n.a", units) == {"n.a": FRACTION}  # one field: exact path
+    assert units_for_cite("n.zz", units) == {}
+    assert units_for_cite("n", units) == {"n.a": FRACTION, "n.b": COUNT}  # whole input
+    assert units_for_cite("n[i1]", units) == {"n.a": FRACTION, "n.b": COUNT}  # list item
+    assert units_for_cite("other", units) == {}

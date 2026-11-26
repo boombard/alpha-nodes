@@ -31,12 +31,17 @@ class TableData(_ViewModel):
     Args:
         total_rows: row count before capping.
         truncated: True if rows were dropped to respect `max_rows`.
+        units: column -> `Unit.id`, for columns whose cite recorded a unit (shown in headers).
+        display_rows: formatted strings parallel to `rows` (None per cell without a unit or
+            value), or None when no column has a unit. The UI shows these and sorts on `rows`.
     """
 
     columns: list[str]
     rows: list[list[Any]]
     total_rows: int
     truncated: bool
+    units: dict[str, str] = {}
+    display_rows: list[list[str | None]] | None = None
 
 
 class CitedView(_ViewModel):
@@ -49,6 +54,8 @@ class CitedView(_ViewModel):
         kind: as `lineage.CitedValue.kind`.
         table: frames and lists of models.
         json_value: models, fields, items and scalars.
+        display: model/field/item cites only: field -> its value formatted by the unit the
+            verdict recorded in `Provenance.cite_units`; None if no cited field has a unit.
         chart: set iff kind == "chart" (dates serialise as ISO strings, missing y values as null).
     """
 
@@ -58,6 +65,7 @@ class CitedView(_ViewModel):
     kind: Literal["frame", "model", "field", "item", "value", "chart"]
     table: TableData | None = None
     json_value: Any = None
+    display: dict[str, str] | None = None
     chart: LineChart | None = None
 
 

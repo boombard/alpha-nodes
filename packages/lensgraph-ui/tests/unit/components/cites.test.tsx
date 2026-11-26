@@ -19,7 +19,7 @@ test("a table cite renders as a table", async () => {
     ...run.cited[id],
     kind: "frame",
     json_value: {},
-    table: { columns: ["t", "v"], rows: [[1, 2.5]], total_rows: 9, truncated: true },
+    table: { columns: ["t", "v"], rows: [[1, 2.5]], total_rows: 9, truncated: true, units: {}, display_rows: null },
   };
   renderWithRun(<CandidatePage id="S1" />, run);
   await userEvent.click(screen.getAllByRole("button", { name: "growth_rate" })[0]);

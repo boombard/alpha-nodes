@@ -797,6 +797,12 @@ reading **the same data contract**.
     (`RunInfo`); each `DossierRecord.created_at` is the run's `finished_at`, else `started_at`,
     and a run with neither is an error (times are never invented). Wall-clock times are the only
     volatile fields, so tests pin them in the index before comparing views.
+  - **Units:** the builder formats cited values from each verdict's `Provenance.cite_units` with
+    `format_value` (no domain import): `CitedView.display` (field -> string, model/field/item
+    cites) and `TableData.units` (column -> unit id) with `display_rows` (formatted cells, a row
+    giving `prefix_field` its sibling). Raw values stay in `rows`/`json_value`; the UI shows the
+    display strings, sorts on the raw values and adds unit ids to headers, so there is no second
+    formatter in TypeScript. A cite without `cite_units` has no display (old runs render as before).
   - Claim and flag cites are resolved into `cited` (`ClaimRef`, `FlagRef`); a review's cites name
     verdicts, claims and flags rather than stored values, so they are left unresolved.
   - Types: `scripts/gen-types.mjs` (Node, `pnpm dlx json-schema-to-typescript`) writes

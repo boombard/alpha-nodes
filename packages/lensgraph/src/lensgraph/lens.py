@@ -17,7 +17,7 @@ from .glossary import contract_model, model_fields
 from .hashing import content_hash
 from .node import Node, NodeContext
 from .types import Absent, ContractViolation, Failed
-from .units import Unit, UnitError, is_numeric_field, unit_of
+from .units import Unit, UnitError, is_numeric_field, unit_of, units_for_cite
 from .verdict import Claim, Conviction, Flag, LensVerdict, Provenance, Stance
 
 
@@ -136,10 +136,7 @@ class LensNode(Node):
         """Units of the cited fields; a cited whole input (or list item) brings all its fields' units."""
         out: dict[str, Unit] = {}
         for cite in cites:
-            head = cite.split("[")[0].split(".")[0]
-            for path, unit in self._units.items():
-                if path == cite or ((cite == head or "[" in cite) and path.startswith(f"{head}.")):
-                    out[path] = unit
+            out.update(units_for_cite(cite, self._units))
         return dict(sorted(out.items()))
 
     @model_validator(mode="after")

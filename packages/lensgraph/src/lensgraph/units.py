@@ -171,3 +171,16 @@ def is_numeric_field(model: type, field: str) -> bool:
         return dtype is not None and pd.api.types.is_numeric_dtype(dtype) and not pd.api.types.is_bool_dtype(dtype)
     info = model.model_fields[field]  # type: ignore[attr-defined]
     return _is_numeric_annotation(info.annotation)
+
+
+def units_for_cite(cite: str, units: Mapping[str, Unit]) -> dict[str, Unit]:
+    """The entries of `units` (full `input.field` paths) that a cite brings along.
+
+    `n.f` selects exactly that path; a whole input `n` or a list item `n[id]` selects every
+    `n.*` path. Shared by the lens (verdict `cite_units`) and the run view builder; see
+    documentation/design/core.md, Units (Provenance).
+    """
+    head = cite.split("[")[0].split(".")[0]
+    if "." in cite and "[" not in cite:
+        return {cite: units[cite]} if cite in units else {}
+    return {path: unit for path, unit in units.items() if path.startswith(f"{head}.")}

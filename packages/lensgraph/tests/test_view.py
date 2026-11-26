@@ -4,6 +4,7 @@ import json
 import math
 from datetime import UTC, date, datetime
 from pathlib import Path
+from typing import Annotated
 
 import pandas as pd
 import pytest
@@ -15,9 +16,11 @@ from lensgraph.records import LLMCall, RunInfo
 from lensgraph.store.duckdb_index import DuckDBRunIndex
 from lensgraph.store.memory import InMemoryBlobStore, InMemoryRunIndex
 from lensgraph.types import CandidateRef
+from lensgraph.units import FRACTION, Unit
 from lensgraph.verdict import Claim, Flag, LensVerdict, Provenance
 from lensgraph.view.build import build_run_view, render_run_json, write_run_view
 from lensgraph.view.models import RunView
+from pydantic import BaseModel
 from toy.nodes import ToxNote
 from toy.toy_view import ToyRun, run_toy_panel
 
@@ -304,3 +307,103 @@ def test_cited_model_unchanged():
 
     cited = _view_citing(ToxNote(id="n", text="t"))
     assert cited.kind == "model" and cited.json_value == {"id": "n", "text": "t"} and cited.chart is None
+
+
+# --- cited values shown with their units (core.md, Units; TASK-68) ---
+
+MONEY = Unit(id="money", style="compact", prefix_field="ccy")
+
+
+class _Metrics(BaseModel):
+    """A flat model with a unit-bearing field, a money field prefixed by a sibling, and plain text."""
+
+    roe: Annotated[float | None, FRACTION]
+    revenue: Annotated[float, MONEY]
+    ccy: str
+    name: str
+
+
+def _view_citing_with_units(value, cite: str, units: dict[str, Unit]):
+    """Like `_view_citing`, but the verdict's provenance records `cite_units`."""
+    blobs, index = InMemoryBlobStore(), InMemoryRunIndex()
+    verdict = LensVerdict(
+        lens="l", status="ok", stance=1, conviction="high", stance_mean=1.0, coverage=1.0,
+        claims=[Claim(text="c", direction=1, cites=[cite])],
+        provenance=Provenance(lens_version="v", input_hashes={"x": blobs.put(value)}, cite_units=units),
+    )
+    dossier = ShrunkMeanAggregator().combine(CandidateRef(id="S1"), [verdict])
+    index.start_run("r", {"panel": {"aggregator": "dossier"}})
+    index.finish_run("r", "ok")
+    index._plans["r"] = PlanGraph(nodes=[], edges=[])
+    index.record_node(
+        "r", NodeResult(key=NodeKey(name="dossier", candidate="S1"), status="ok", output_hash=blobs.put(dossier))
+    )
+    return next(iter(build_run_view("r", index, blobs).cited.values()))
+
+
+def test_cited_field_has_display():
+    cited = _view_citing_with_units(
+        _Metrics(roe=0.153, revenue=12.3e9, ccy="USD", name="n"), "x",
+        {"x.roe": FRACTION, "x.revenue": MONEY},
+    )
+    assert cited.display == {"roe": "15.3%", "revenue": "USD 12.3bn"}  # money takes its row prefix
+    assert cited.json_value["roe"] == 0.153  # raw values stay
+
+
+def test_cited_single_field_has_display():
+    cited = _view_citing_with_units(
+        _Metrics(roe=0.153, revenue=1.0, ccy="USD", name="n"), "x.roe", {"x.roe": FRACTION}
+    )
+    assert cited.display == {"roe": "15.3%"} and cited.json_value == 0.153
+
+
+def test_cited_frame_display_rows_and_units():
+    frame = pd.DataFrame({"date": ["d1", "d2"], "ret": [0.0123, None], "ccy": ["USD", "USD"]})
+    cited = _view_citing_with_units(frame, "x", {"x.ret": FRACTION})
+    assert cited.table is not None
+    assert cited.table.units == {"ret": "fraction"}
+    assert cited.table.display_rows == [[None, "1.23%", None], [None, None, None]]
+    assert cited.table.rows[0][1] == 0.0123  # raw values stay for sorting
+
+
+def test_money_display_uses_row_prefix():
+    frame = pd.DataFrame({"revenue": [12.3e9, 4.5e6], "ccy": ["USD", "EUR"]})
+    cited = _view_citing_with_units(frame, "x", {"x.revenue": MONEY})
+    assert cited.table is not None
+    assert [r[0] for r in cited.table.display_rows or []] == ["USD 12.3bn", "EUR 4.5m"]
+
+
+def test_cite_without_units_has_no_display():
+    model = _view_citing(_Metrics(roe=0.1, revenue=1.0, ccy="USD", name="n"))
+    frame = _view_citing(pd.DataFrame({"a": [1.0]}))
+    assert model.display is None
+    assert frame.table is not None and frame.table.units == {} and frame.table.display_rows is None
+
+
+def test_single_field_money_cite_takes_prefix_from_parent_row():
+    cited = _view_citing_with_units(
+        _Metrics(roe=0.1, revenue=12.3e9, ccy="USD", name="n"), "x.revenue", {"x.revenue": MONEY}
+    )
+    assert cited.display == {"revenue": "USD 12.3bn"}
+
+
+class _Item(BaseModel):
+    """An id-bearing model, so `x[<id>]` resolves."""
+
+    id: str
+    revenue: Annotated[float, MONEY]
+    ccy: str
+
+
+_ITEMS = [_Item(id="a", revenue=12.3e9, ccy="USD"), _Item(id="b", revenue=4.5e6, ccy="EUR")]
+
+
+def test_item_cite_has_display():
+    cited = _view_citing_with_units(_ITEMS, "x[b]", {"x.revenue": MONEY})
+    assert cited.kind == "item" and cited.display == {"revenue": "EUR 4.5m"}
+
+
+def test_list_of_models_cite_has_units_and_row_prefixed_display_rows():
+    cited = _view_citing_with_units(_ITEMS, "x", {"x.revenue": MONEY})
+    assert cited.table is not None and cited.table.units == {"revenue": "money"}
+    assert cited.table.display_rows == [[None, "USD 12.3bn", None], [None, "EUR 4.5m", None]]
