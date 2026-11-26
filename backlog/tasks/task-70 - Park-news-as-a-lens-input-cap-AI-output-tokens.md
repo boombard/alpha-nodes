@@ -4,7 +4,7 @@ title: Park news as a lens input; cap AI output tokens
 status: In Review
 assignee: []
 created_date: '2026-11-26T09:25:35Z'
-updated_date: '2026-11-26T09:35:03Z'
+updated_date: '2026-11-26T09:35:55Z'
 labels:
   - finance
   - core
@@ -75,4 +75,6 @@ Round 2 sent: same prompt line, 'found in them' -> 'found in it'.
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 Worker: quality_value drops recent_news (prompts, run yaml; news code and tests kept, TASK-71 sketch for the redesign); default profiles cap output tokens per response (max_tokens dev/local 2500, quality 4000) and per call (output_tokens_limit 6000/10000); AINode params max_claims=5, max_claim_chars=300 go into the output schema (assessment_schema) and a system-prompt line for every AI lens; caps and truncation fail the node; core.md + finance.md updated. 1285 passed, ruff/pyright clean. Review: 1 round (prompt grammar). Verdict: approve. Single commit b9cfb52. Rulings accepted: Haiku/Sonnet 5.5 use adaptive thinking (verified in pydantic-ai profiles), so no budget_tokens to fit; toy-run.json regenerated outside Files. Expected: every AI verdict misses the cache once. Open: real token saving to be measured on the M6 demo re-run.
+
+Round 2 resolved (rest of the prompt line); 2 rounds total; single commit 585f15a; 1285 passed.
 <!-- SECTION:FINAL_SUMMARY:END -->
