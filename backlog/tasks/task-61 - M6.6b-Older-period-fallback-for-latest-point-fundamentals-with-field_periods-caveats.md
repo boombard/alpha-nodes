@@ -6,7 +6,7 @@ title: >-
 status: In Review
 assignee: []
 created_date: '2026-11-26T00:02:56Z'
-updated_date: '2026-11-26T01:14:29Z'
+updated_date: '2026-11-26T01:18:55Z'
 labels:
   - finance
 milestone: m-5
@@ -98,5 +98,5 @@ Worker: dispatch ctx_104e86b57bc6, worktree task-61
 ## Final Summary
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
-Worker: latest_complete + MAX_STALE_PERIODS=2; BalanceSheet/CashGeneration fields each fall back to the newest complete row of the last 3 periods (one row per field, no period mixing, None past cap); PeriodWindow.field_periods records older fields, validated (known field names, dates < last_period_end); one instruction line in both quality_value prompts; finance.md pinned conventions + Lens inputs updated. pytest 1104 passed, ruff/pyright clean. Review: 2 rounds. Round 1 found (1) finance.md edit missing from branch, (2) CashGeneration crash when _widest's reported window ends before the frame's latest period (field_periods dated >= last_period_end failed validation); both fixed, regression test added. Verdict: approve. Open points / rulings: CashGeneration window is still _widest by period count, so it may not span a stale owner-earnings/FCF row (first_period_end later than that row) and a field from the reported window's last period is not flagged stale even if the frame has a newer row; BalanceSheet window now spans oldest used row to latest; window always includes the latest row even when no field qualified.
+Worker: latest_complete + MAX_STALE_PERIODS=2; BalanceSheet/CashGeneration fields each fall back to the newest complete row of the last 3 periods (one row per field, no period mixing, None past cap); PeriodWindow.field_periods records older fields, validated (known field names, dates < last_period_end); one instruction line in both quality_value prompts; finance.md pinned conventions + Lens inputs updated. pytest 1105 passed, ruff/pyright clean. Review: 3 rounds. Round 1: finance.md edit missing from branch; CashGeneration crash when _widest's window ended before the frame's latest period (field_periods failed validation). Round 2 (human-approved): CashGeneration now reports a spanning window (_span: earliest start among conv/share/latest-point windows to the frame's latest period), so field_periods always flags fields older than the newest row; _widest unchanged for Profitability. All findings resolved. Verdict: approve. Rulings: BalanceSheet and CashGeneration windows span oldest used row to latest period (periods counts rows spanned, not rows with every input); window includes the latest row even when no field qualified; other nodes leave field_periods empty; tests that dump whole results exclude field_periods.
 <!-- SECTION:FINAL_SUMMARY:END -->
