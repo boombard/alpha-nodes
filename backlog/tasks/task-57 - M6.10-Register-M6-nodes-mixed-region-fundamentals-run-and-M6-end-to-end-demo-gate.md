@@ -3,10 +3,10 @@ id: TASK-57
 title: >-
   M6.10 Register M6 nodes, mixed-region fundamentals run and M6 end-to-end (demo
   gate)
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-25T08:18:00Z'
-updated_date: '2026-11-26T08:08:38Z'
+updated_date: '2026-11-26T08:23:46Z'
 labels:
   - finance
 milestone: m-5
@@ -107,4 +107,6 @@ Out of scope: an AI reviewer in the demo; campaigns (M7); as-of fundamentals bac
 
 <!-- SECTION:NOTES:BEGIN -->
 From TASK-69 (user ruling 2026-11-26): in the real mixed-region run, click through unit-bearing cites in the run report in a browser: field tables show display strings (e.g. 15.3%, USD 12.3bn, GBP 189.20), DataGrid headers carry unit ids, columns sort on raw values.
+
+Worker: dispatch ctx_9558efe7fe03, worktree task-57
 <!-- SECTION:NOTES:END -->
