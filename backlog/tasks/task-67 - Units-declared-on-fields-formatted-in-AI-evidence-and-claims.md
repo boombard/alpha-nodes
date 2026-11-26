@@ -1,9 +1,10 @@
 ---
 id: TASK-67
 title: 'Units: declared on fields, formatted in AI evidence and claims'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-26T04:34:59Z'
+updated_date: '2026-11-26T04:44:29Z'
 labels:
   - core
 milestone: m-5
@@ -73,3 +74,9 @@ Expected side effect: every lens's memo salt changes, so lens verdicts miss the 
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_5e2b5f6545e1, worktree task-67
+<!-- SECTION:NOTES:END -->
