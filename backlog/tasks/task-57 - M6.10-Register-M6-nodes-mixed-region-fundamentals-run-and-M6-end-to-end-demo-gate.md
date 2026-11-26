@@ -17,6 +17,7 @@ dependencies:
   - TASK-55
   - TASK-56
   - TASK-61
+  - TASK-62
 references:
   - documentation/design/finance.md
 type: feature
@@ -30,7 +31,7 @@ The M6 end-to-end and its demo gate. It registers the M6 nodes and lenses, ships
 
 ## Files
 - Modify:
-  - `packages/alpha_nodes/src/alpha_nodes/registry.py`: register `Fundamentals`, `News`, `AnnualFundamentals`, `Profitability`, `BalanceSheet`, `CashGeneration`, `FundamentalTrend`, `Valuation`, `ValuationChange`, `RecentNews`, `QualityValue`, `PriceVsFundamentals`
+  - `packages/alpha_nodes/src/alpha_nodes/registry.py`: register `Fundamentals`, `News`, `AnnualFundamentals`, `Profitability`, `BalanceSheet`, `CashGeneration`, `FundamentalTrend`, `Valuation`, `ValuationChange`, `CapitalReturns`, `RecentNews`, `QualityValue`, `PriceVsFundamentals`
 - Create:
   - `runs/m6_fundamentals.yaml`
   - `packages/alpha_nodes/scripts/compare_variants.py`
@@ -43,7 +44,7 @@ Consumes: everything M6.1–M6.9 produce; M4/M5 nodes, `CATALOG`, `RunConfig`, `
 
 Produces:
 ```python
-def build_registry() -> NodeRegistry   # M4 + M5 nodes + the twelve M6 nodes and lenses
+def build_registry() -> NodeRegistry   # M4 + M5 nodes + the thirteen M6 nodes and lenses
 
 # scripts/compare_variants.py  (click; reads the run index and blobs only, never the network)
 #   uv run python packages/alpha_nodes/scripts/compare_variants.py RUN_A RUN_B [--lens quality_value] [--store PATH]
@@ -86,7 +87,7 @@ Out of scope: an AI reviewer in the demo; campaigns (M7); as-of fundamentals bac
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 build_registry registers the twelve M6 nodes and lenses; runs/m6_fundamentals.yaml has 15 unique US/UK/European tickers on dev, no reviewer
+- [ ] #1 build_registry registers the thirteen M6 nodes and lenses; runs/m6_fundamentals.yaml has 15 unique US/UK/European tickers on dev, no reviewer
 - [ ] #2 Replayed e2e: three verdicts per candidate; AAPL fundamentals from edgar, BP.L from yfinance; UK/European coverage and confidence below the US name
 - [ ] #3 An unknown ticker's AI lenses abstain without model calls; a variant change reruns only quality_value and dossier
 - [ ] #4 compare_variants.py compares two runs' quality_value verdicts from the run index
