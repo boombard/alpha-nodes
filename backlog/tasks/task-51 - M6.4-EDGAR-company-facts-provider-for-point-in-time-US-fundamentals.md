@@ -4,7 +4,7 @@ title: M6.4 EDGAR company-facts provider for point-in-time US fundamentals
 status: In Progress
 assignee: []
 created_date: '2026-11-25T08:17:58Z'
-updated_date: '2026-11-26T00:03:27Z'
+updated_date: '2026-11-26T00:09:19Z'
 labels:
   - finance
 milestone: m-5
@@ -117,6 +117,8 @@ Round 2 addendum (human-approved): derive total_liabilities (L&SE - NCI-inclusiv
 Round 2 + addendum done (8f4c07c), reviewed correct. Measurement over 22 filers: suspect rows 55.3% -> 13.6%; remaining tag_conflicts all revenue (worker proposes Revenues+SalesRevenueNet synonyms, ASC 606 + SalesRevenueGoodsNet fallbacks; pending human). All-row total_debt null 52.2% unchanged: latest-row breakdown requested.
 
 Round 3 sent (human-approved): revenue synonyms Revenues+SalesRevenueNet (ASC 606, SalesRevenueGoodsNet as fallbacks); debt paths LongTermDebtAndCapitalLeaseObligations(+current) and DebtAndCapitalLeaseObligations; known limitations for financials/REITs/pharma in finance.md. Latest-row nulls (23 filers): total_debt 22%, operating_income 39%, interest_expense 39%, capex 26%.
+
+Round 3 done (a11e267): suspect 8.9%, latest-row total_debt null 1/23 (O). Round 4 sent (human-approved): DebtCurrent for the current part with non-current long-term figures; complete paths beat partial.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

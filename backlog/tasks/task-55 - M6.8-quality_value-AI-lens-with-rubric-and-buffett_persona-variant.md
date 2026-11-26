@@ -1,10 +1,10 @@
 ---
 id: TASK-55
 title: M6.8 quality_value AI lens with rubric and buffett_persona variant
-status: In Review
+status: In Progress
 assignee: []
 created_date: '2026-11-25T08:17:59Z'
-updated_date: '2026-11-25T23:42:38Z'
+updated_date: '2026-11-26T00:09:19Z'
 labels:
   - finance
 milestone: m-5
@@ -87,9 +87,9 @@ Out of scope: registering nodes (M6.10); repeated sampling (TASK-17); 10-K text 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [ ] #1 QualityValue and RecentNews exist as specified; flag codes closed; persona variant selectable and in the memo key
-- [ ] #2 The rubric lists the seven principles with their sources, static and first; the persona prompt has the no-caricature and no-holdings rules
-- [ ] #3 Missing or too-thin annual_fundamentals abstains with no model call; 4 periods gives sufficiency 0.5 and a depth note
-- [ ] #4 The context carries no analyst ratings or price targets; the docstring records the herding and untrusted-text choices
+- [ ] #2 Missing or too-thin annual_fundamentals abstains with no model call; 4 periods gives sufficiency 0.5 and a depth note
+- [ ] #3 The context carries no analyst ratings or price targets; the docstring records the herding and untrusted-text choices
+- [ ] #4 The default rubric states the seven principles neutrally (no investor, company, letter or source names) and is static and first; sources live in the QualityValue docstring; the persona prompt has the no-caricature, no-holdings and evidence-only rules
 <!-- AC:END -->
 
 ## Definition of Done
@@ -104,6 +104,8 @@ Out of scope: registering nodes (M6.10); repeated sampling (TASK-17); 10-K text 
 
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_e7185589db01, worktree task-55 (Orca run run_09eee9a7786f)
+
+Round 1 (human review): neutral rubric without Buffett/Berkshire/letters (priming, KO/AAPL are Berkshire holdings); sources moved to the class docstring and finance.md section 2; evidence-only line; finance.md section 2 added to Files for this round. AC #2 replaced (now listed last).
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
