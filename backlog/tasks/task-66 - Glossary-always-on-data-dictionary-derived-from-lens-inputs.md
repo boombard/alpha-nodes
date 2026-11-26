@@ -1,10 +1,10 @@
 ---
 id: TASK-66
 title: 'Glossary always on: data dictionary derived from lens inputs'
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-26T03:30:50Z'
-updated_date: '2026-11-26T03:46:05Z'
+updated_date: '2026-11-26T03:50:50Z'
 labels:
   - core
 milestone: m-5
@@ -86,20 +86,20 @@ Expected side effect: every AI lens's rendered prompt changes, so cached AI verd
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 An AI lens's dictionary terms are derived from its inputs' output contracts at plan build; there is no hand-kept term list
-- [ ] #2 The block lists each entry's exact evidence paths and kind; it is static per lens
-- [ ] #3 A field reaching an AI lens without a claim, or an unknown concept id, fails the plan before any model call
-- [ ] #4 The glossary loads at plan build, not import; a plan without the AI lens is unaffected by a broken entry
-- [ ] #5 LLMProfile has no glossary setting; use_glossary defaults to true and only ablates
-- [ ] #6 Claims support Model.field and whole-model Model with an MRO walk; unresolved_claims finds stale claims
+- [x] #1 An AI lens's dictionary terms are derived from its inputs' output contracts at plan build; there is no hand-kept term list
+- [x] #2 The block lists each entry's exact evidence paths and kind; it is static per lens
+- [x] #3 A field reaching an AI lens without a claim, or an unknown concept id, fails the plan before any model call
+- [x] #4 The glossary loads at plan build, not import; a plan without the AI lens is unaffected by a broken entry
+- [x] #5 LLMProfile has no glossary setting; use_glossary defaults to true and only ablates
+- [x] #6 Claims support Model.field and whole-model Model with an MRO walk; unresolved_claims finds stale claims
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -112,4 +112,6 @@ Worker: dispatch ctx_75001e45d79b, worktree task-66
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 Worker (Sonnet, worktree task-66, commits 1a9e4e0 + 5f2be49): Glossary.term_for (MRO walk), whole-model claims, unresolved_claims, dictionary_block replacing prompt_block/by_field; Node.bind_upstream called by build_plan with resolved (replacement-aware) contracts; AINode.glossary is a directory loaded at bind, glossary_concepts, use_glossary=True ablation-only; LLMProfile.glossary removed; unbound AI node with glossary raises. Checks: pytest 1125 passed, ruff and pyright clean (worker-reported). core.md needed no changes. UI fixture toy-run.json regenerated (lens_version/dossier hashes only; AINode source is hashed). Review: 2 rounds. Round 1 fixed: pandera frame fields named by attribute (alias-safe, Index excluded) consistently across model_fields/term_for/unresolved_claims; unknown glossary_concepts error names the lens. Verdict: approve. Rulings: claims match on the class that declares the field (subclass claim on an inherited field is reported stale by unresolved_claims); concept lines '- (kind): **Name**: note' with no paths; toy glossary unchanged (toy AI lens inputs are float + bare list, no fields), tests define GrowthResult/list[ToxNote] nodes locally.
+
+Landed 73872a4..4186020 on main (squashed to one commit).
 <!-- SECTION:FINAL_SUMMARY:END -->
