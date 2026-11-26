@@ -4,7 +4,7 @@ title: M6.5 yfinance fundamentals and news adapters
 status: In Review
 assignee: []
 created_date: '2026-11-25T08:17:58Z'
-updated_date: '2026-11-26T00:56:13Z'
+updated_date: '2026-11-26T01:03:10Z'
 labels:
   - finance
 milestone: m-5
@@ -105,6 +105,8 @@ Out of scope: quarterly statements; EDGAR (M6.4); analyst recommendations or pri
 Worker: dispatch ctx_b5e3a004af37, worktree task-52
 
 Human review round 1 sent (dispatch ctx_d43424ea5a4b): currency null instead of XXX (datasets.py cleared), unknown_currency:<code> reason, sparse periods emitted as rejected sparse_period rows.
+
+Human review round 1 resolved in 44ef844: FundamentalsSchema.currency nullable (null only on rows rejected for no_currency / unknown_currency:<code>; datasets.py cleared), XXX removed, sparse periods emitted as rejected sparse_period rows (fixtures now 4 ok + 1 rejected), scale check on latest non-sparse period, canary counts non-rejected periods and ignores sparse_period (not re-run live), store round-trip test with null currency. Commits 97478e7, 44ef844. Verdict: approve. Nit: _currency_is_major uses fillna('USD') to skip nulls (pandera already ignores NA by default).
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
