@@ -1,10 +1,10 @@
 ---
 id: TASK-68
 title: 'Run view: cited values shown with their units'
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-26T04:35:00Z'
-updated_date: '2026-11-26T05:23:47Z'
+updated_date: '2026-11-26T05:48:34Z'
 labels:
   - core
   - ui
@@ -37,17 +37,17 @@ The run view formats cited values by unit (core.md "Units" and "Reporting: run v
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Cited fields and frames carry display strings formatted from cite_units, with no domain import
-- [ ] #2 UI shows the display strings, sorts on raw values, and shows units in table headers
-- [ ] #3 Runs without cite_units still render
+- [x] #1 Cited fields and frames carry display strings formatted from cite_units, with no domain import
+- [x] #2 UI shows the display strings, sorts on raw values, and shows units in table headers
+- [x] #3 Runs without cite_units still render
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -69,4 +69,6 @@ Rulings and open points:
 - A single-field cite renders as a one-row field table (field -> display).
 - Editing units.py changes _renderer_fingerprint (whole-module source hash), so every lens's lens_version changes. That means a one-time cache miss for all lenses, AI included, and a regenerated toy-run.json.
 - Not checked in a browser: the toy run has no units, so the new display strings need a unit-bearing run (finance, after TASK-69) to see.
+
+Landed c75812d..8ed70ad on main (squashed into one commit 8ed70ad; 1198 passed).
 <!-- SECTION:FINAL_SUMMARY:END -->
