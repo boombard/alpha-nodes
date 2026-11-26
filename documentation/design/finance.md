@@ -457,12 +457,20 @@ with no reporting currency (`no_currency`). `tag_conflict` as above.
 - **ROE** = `net_income / common_equity` per period (None when equity ≤ 0). Reported:
   mean, min, and std (`ddof=1`, needs ≥ 3 periods).
 - **Operating margin** = `operating_income / revenue` (None when revenue ≤ 0); mean and std.
-- **Leverage** (latest period): `debt_to_equity = total_debt / common_equity` (None when
-  equity ≤ 0); `interest_cover = operating_income / interest_expense` (None when interest
-  expense is missing or ≤ 0).
-- **Owner earnings** = `net_income + depreciation_amortization − min(capex,
+- **Latest-point fields and older-period fallback.** "Latest" for leverage, coverage, net
+  debt, owner earnings and FCF means the newest of the last `MAX_STALE_PERIODS + 1` (3) periods
+  that hold *all* of that field's inputs (`statements.latest_complete`), one row per field, so a
+  ratio never mixes periods. Past the cap the field is None. A field taken from an older period
+  is recorded in the result's `field_periods` (field name → its `period_end`), listing only
+  fields older than the reported `last_period_end`. The window of `balance_sheet` spans from the
+  oldest row used to the latest period; so does the `cash_generation` window (the oldest row any
+  of its fields used, including FCF conversion and share count).
+- **Leverage** (latest point, see above): `debt_to_equity = total_debt / common_equity` (None
+  when equity ≤ 0); `interest_cover = operating_income / interest_expense` (None when interest
+  expense is missing or ≤ 0); `net_debt = total_debt − cash`.
+- **Owner earnings** (latest point, see above) = `net_income + depreciation_amortization − min(capex,
   depreciation_amortization)`: maintenance capex is proxied by D&A, capped at actual capex.
-- **FCF** = `operating_cash_flow − capex`; **FCF conversion** = Σ FCF / Σ net income over the
+- **FCF** (latest point, see above) = `operating_cash_flow − capex`; **FCF conversion** = Σ FCF / Σ net income over the
   window (None when Σ net income ≤ 0).
 - **Share-count trend** = CAGR of `shares_diluted` from the first to the last period of the
   window, in years between their `period_end`s (needs ≥ 2 periods).
@@ -492,7 +500,10 @@ with no reporting currency (`no_currency`). `tag_conflict` as above.
 **Lens inputs and abstention.** Both AI lenses take the `annual_fundamentals` frame as a
 critical input with a depth requirement (`quality_value`: desired 8, minimum 3;
 `price_vs_fundamentals`: desired 4, minimum 2), so a name with too few periods abstains before
-any LLM call (TASK-25). Neither lens sees analyst ratings or price targets (LLM herding risk).
+any LLM call (TASK-25). The lenses also see each result's `field_periods` as a caveat: a field
+listed there comes from an older period than `last_period_end`, and the prompts tell the lens to
+weigh it accordingly and lower its conviction when key fields are stale (the lens judges; nothing
+is down-weighted deterministically). Neither lens sees analyst ratings or price targets (LLM herding risk).
 
 ### Optional later lens: `investability` (deterministic)
 

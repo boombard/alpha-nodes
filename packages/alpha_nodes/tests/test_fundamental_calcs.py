@@ -251,7 +251,7 @@ def test_trend_none_with_one_period(ctx: NodeContext, annual: Callable[..., pd.D
     out = FundamentalTrend().run(ctx, annual=annual({"revenue": 100.0, "operating_income": 10.0}))
     assert out.periods == 1
     assert out.model_dump(
-        exclude={"periods", "first_period_end", "last_period_end", "suspect_periods", "currency"}
+        exclude={"periods", "first_period_end", "last_period_end", "suspect_periods", "currency", "field_periods"}
     ) == {
         "revenue_growth_1y": None,
         "revenue_cagr_3y": None,
@@ -290,6 +290,7 @@ def test_empty_fundamentals_give_zero_period_results(
                 "last_period_end",
                 "suspect_periods",
                 "currency",
+                "field_periods",
             }
         )
         assert all(v is None for v in fields.values())
@@ -363,3 +364,89 @@ def test_trend_cagr_none_without_period_near_three_years_back(
     out = FundamentalTrend().run(ctx, annual=frame)
     assert out.revenue_cagr_3y is None
     assert out.revenue_growth_1y is None  # 2021 -> 2023 is two years
+
+
+FULL = {
+    "total_debt": 300.0, "common_equity": 200.0, "operating_income": 60.0,
+    "interest_expense": 20.0, "cash": 50.0,
+}
+
+
+def test_balance_sheet_falls_back_to_older_period_and_records_it(
+    ctx: NodeContext, annual: Callable[..., pd.DataFrame]
+) -> None:
+    latest = {k: v for k, v in FULL.items() if k != "interest_expense"}
+    out = BalanceSheet().run(ctx, annual=annual(FULL, latest))
+    assert out.interest_cover == pytest.approx(3.0)
+    assert out.debt_to_equity == pytest.approx(1.5)
+    assert out.field_periods == {"interest_cover": date(2020, 12, 31)}
+
+
+def test_ratio_inputs_from_one_period(ctx: NodeContext, annual: Callable[..., pd.DataFrame]) -> None:
+    out = BalanceSheet().run(
+        ctx,
+        annual=annual(
+            {"total_debt": 100.0, "common_equity": 50.0},
+            {"common_equity": 80.0},
+            {"total_debt": 300.0},
+        ),
+    )
+    assert out.debt_to_equity == pytest.approx(2.0)  # 2020 row only; never 300 / 80
+    assert out.field_periods == {"debt_to_equity": date(2020, 12, 31)}
+
+
+def test_fallback_beyond_max_stale_is_none(
+    ctx: NodeContext, annual: Callable[..., pd.DataFrame]
+) -> None:
+    gap = {k: v for k, v in FULL.items() if k != "interest_expense"}
+    out = BalanceSheet().run(ctx, annual=annual(FULL, gap, gap, gap))
+    assert out.interest_cover is None
+    assert "interest_cover" not in out.field_periods
+
+
+def test_cash_generation_owner_earnings_fallback(
+    ctx: NodeContext, annual: Callable[..., pd.DataFrame]
+) -> None:
+    older = {"net_income": 100.0, "depreciation_amortization": 20.0, "capex": 30.0,
+             "operating_cash_flow": 80.0}
+    latest = {"net_income": 120.0, "operating_cash_flow": 90.0, "capex": 40.0}
+    out = CashGeneration().run(ctx, annual=annual(older, latest))
+    assert out.owner_earnings == pytest.approx(100.0 + 20.0 - 20.0)
+    assert out.fcf == pytest.approx(50.0)
+    assert out.field_periods == {"owner_earnings": date(2020, 12, 31)}
+
+
+def test_window_spans_oldest_used_row(ctx: NodeContext, annual: Callable[..., pd.DataFrame]) -> None:
+    gap = {k: v for k, v in FULL.items() if k != "interest_expense"}
+    out = BalanceSheet().run(ctx, annual=annual(FULL, FULL, gap))
+    assert out.first_period_end == date(2021, 12, 31)
+    assert out.last_period_end == date(2022, 12, 31)
+    assert out.periods == 2
+
+
+CASH_ROW = {
+    "net_income": 100.0, "depreciation_amortization": 20.0, "capex": 30.0,
+    "operating_cash_flow": 80.0, "shares_diluted": 10.0,
+}
+
+
+def test_cash_generation_field_periods_consistent_with_reported_window(
+    ctx: NodeContext, annual: Callable[..., pd.DataFrame]
+) -> None:
+    out = CashGeneration().run(ctx, annual=annual(CASH_ROW, CASH_ROW, CASH_ROW, CASH_ROW, {"revenue": 1.0}))
+    assert out.last_period_end == date(2024, 12, 31)  # the frame's latest row, though it has no inputs
+    assert out.fcf == pytest.approx(50.0)
+    assert out.field_periods == {"fcf": date(2023, 12, 31), "owner_earnings": date(2023, 12, 31)}
+
+
+def test_cash_generation_window_spans_first_to_latest_when_only_fcf_stale(
+    ctx: NodeContext, annual: Callable[..., pd.DataFrame]
+) -> None:
+    latest = {k: v for k, v in CASH_ROW.items() if k != "operating_cash_flow"}
+    out = CashGeneration().run(ctx, annual=annual(CASH_ROW, CASH_ROW, latest))
+    assert (out.first_period_end, out.last_period_end, out.periods) == (
+        date(2020, 12, 31),
+        date(2022, 12, 31),
+        3,
+    )
+    assert out.field_periods == {"fcf": date(2021, 12, 31)}

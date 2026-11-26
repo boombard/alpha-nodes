@@ -12,6 +12,7 @@ milliseconds and their outputs are stored for lineage anyway (Calculation layers
 """
 
 from collections.abc import Callable
+from datetime import date
 from typing import ClassVar, cast
 
 import numpy as np
@@ -40,6 +41,7 @@ from alpha_nodes.statements import (
     AnnualFundamentalsSchema,
     annual_periods,
     known_on,
+    latest_complete,
     period_window,
     values,
     years_between,
@@ -62,6 +64,22 @@ def _widest(*windows: PeriodWindow) -> PeriodWindow:
     return max(windows, key=lambda w: w.periods)
 
 
+def _span(annual: pd.DataFrame, *windows: PeriodWindow) -> PeriodWindow:
+    """The window from the earliest start among `windows` (ignoring empty ones) to the latest period of `annual`.
+
+    Same convention as `BalanceSheet` and `FundamentalTrend`: from the oldest row any field used
+    to the latest period. An empty `annual` gives the empty window.
+    """
+    if annual.empty:
+        return period_window(annual)
+    last = annual["period_end"].iloc[-1]
+    starts = [pd.Timestamp(w.first_period_end) for w in windows if w.periods and w.first_period_end]
+    first = min(starts, default=last)
+    return period_window(
+        cast(pd.DataFrame, annual[(annual["period_end"] >= first) & (annual["period_end"] <= last)])
+    )
+
+
 def _col(frame: pd.DataFrame, name: str) -> np.ndarray:
     """A column as a float64 array."""
     return frame[name].to_numpy(float)
@@ -72,12 +90,27 @@ def _fcf(frame: pd.DataFrame) -> np.ndarray:
     return _col(frame, "operating_cash_flow") - _col(frame, "capex")
 
 
-def _ratio_at(annual: pd.DataFrame, num: str, den: str) -> float:
-    """`num / den` on the latest period via `safe_ratio`; `nan` when either is missing or `den <= 0`."""
+def _ratio_on(row: pd.DataFrame, num: str, den: str) -> float:
+    """`num / den` on a single-row frame via `safe_ratio`; `nan` when `row` is empty or `den <= 0`."""
+    return float(safe_ratio(_col(row, num), _col(row, den))[0]) if len(row) else float("nan")
+
+
+def _latest_point(
+    annual: pd.DataFrame, fields: dict[str, tuple[str, ...]]
+) -> tuple[dict[str, pd.DataFrame], dict[str, date], PeriodWindow]:
+    """Per field, its `latest_complete` row; plus `field_periods` for the older ones and the window.
+
+    `fields` maps a result field to the columns it needs. The window spans from the oldest row
+    used (or the latest period if none qualified) to the latest period.
+    """
+    rows = {name: latest_complete(annual, *cols) for name, cols in fields.items()}
     if annual.empty:
-        return float("nan")
-    last, _ = values(annual.tail(1), num, den)
-    return float(safe_ratio(_col(last, num), _col(last, den))[0]) if len(last) else float("nan")
+        return rows, {}, period_window(annual)
+    last_end = annual["period_end"].iloc[-1]
+    used = [r["period_end"].iloc[0] for r in rows.values() if len(r)]
+    oldest = min(used, default=last_end)
+    stale = {n: r["period_end"].iloc[0].date() for n, r in rows.items() if len(r) and r["period_end"].iloc[0] < last_end}
+    return rows, stale, period_window(cast(pd.DataFrame, annual[annual["period_end"] >= oldest]))
 
 
 class AnnualFundamentals(TransformNode):
@@ -136,31 +169,49 @@ class Profitability(CalcNode):
 
 
 class BalanceSheet(CalcNode):
-    """Leverage and coverage at the latest period; the window is that one period."""
+    """Leverage and coverage at the latest period, each field falling back to an older one if needed.
+
+    Each field comes from the newest of the last `MAX_STALE_PERIODS + 1` periods holding all of
+    its inputs (one row per field, so a ratio never mixes periods); a field from an older period
+    is listed in `field_periods`. The window spans from the oldest row used to the latest period,
+    as in `FundamentalTrend`.
+    """
 
     name: ClassVar[str] = "balance_sheet"
     memoize: ClassVar[bool] = False  # see module docstring
     inputs: ClassVar[dict[str, str]] = {"annual": "annual_fundamentals"}
     output: ClassVar = BalanceSheetResult
-    code_deps: ClassVar = (safe_ratio, _ratio_at, _opt, *_WINDOW_DEPS)
+    code_deps: ClassVar = (safe_ratio, _ratio_on, _latest_point, latest_complete, _opt, *_WINDOW_DEPS)
 
     def run(self, ctx: NodeContext, annual: pd.DataFrame) -> BalanceSheetResult:
-        """Compute debt-to-equity, interest cover and net debt on the latest period."""
-        latest = annual.tail(1)
-        debt, _ = values(latest, "total_debt", "cash")
-        net_debt = float(_col(debt, "total_debt")[0] - _col(debt, "cash")[0]) if len(debt) else None
+        """Compute debt-to-equity, interest cover and net debt from their newest complete periods."""
+        rows, stale, window = _latest_point(
+            annual,
+            {
+                "debt_to_equity": ("total_debt", "common_equity"),
+                "interest_cover": ("operating_income", "interest_expense"),
+                "net_debt": ("total_debt", "cash"),
+            },
+        )
+        debt = rows["net_debt"]
         return BalanceSheetResult(
-            **period_window(latest).model_dump(),
-            debt_to_equity=_opt(_ratio_at(annual, "total_debt", "common_equity")),
-            interest_cover=_opt(_ratio_at(annual, "operating_income", "interest_expense")),
-            net_debt=net_debt,
+            **window.model_dump(exclude={"field_periods"}),
+            debt_to_equity=_opt(_ratio_on(rows["debt_to_equity"], "total_debt", "common_equity")),
+            interest_cover=_opt(
+                _ratio_on(rows["interest_cover"], "operating_income", "interest_expense")
+            ),
+            net_debt=float(_col(debt, "total_debt")[0] - _col(debt, "cash")[0]) if len(debt) else None,
+            field_periods=stale,
         )
 
 
 class CashGeneration(CalcNode):
     """Owner earnings and FCF at the latest period, FCF conversion and share-count trend over the window.
 
-    The reported window is the widest of the FCF-conversion, share-count and latest-period sets.
+    Owner earnings and FCF each fall back to the newest of the last `MAX_STALE_PERIODS + 1`
+    periods holding all their inputs and are listed in `field_periods` when older. The reported
+    window spans from the oldest row any field used (FCF conversion, share count, owner earnings,
+    FCF) to the latest period, like `BalanceSheet`.
     """
 
     name: ClassVar[str] = "cash_generation"
@@ -173,14 +224,19 @@ class CashGeneration(CalcNode):
         cagr,
         _fcf,
         years_between,
+        _latest_point,
+        latest_complete,
+        _span,
         _opt,
         *_WINDOW_DEPS,
     )
 
     def run(self, ctx: NodeContext, annual: pd.DataFrame) -> CashGenerationResult:
         """Compute the cash-generation fields over `annual`."""
-        latest = annual.tail(1)
-        oe_rows, oe_win = values(latest, "net_income", "depreciation_amortization", "capex")
+        rows, stale, latest_win = _latest_point(
+            annual, {"owner_earnings": _OE_COLUMNS, "fcf": ("operating_cash_flow", "capex")}
+        )
+        oe_rows, fcf_rows = rows["owner_earnings"], rows["fcf"]
         conv_rows, conv_win = values(annual, "operating_cash_flow", "capex", "net_income")
         share_rows, share_win = values(annual, "shares_diluted")
         oe = (
@@ -188,7 +244,7 @@ class CashGeneration(CalcNode):
             if len(oe_rows)
             else None
         )
-        fcf = _opt(float(_fcf(latest)[0])) if len(latest) else None
+        fcf = _opt(float(_fcf(fcf_rows)[0])) if len(fcf_rows) else None
         conversion = (
             sum_ratio(_fcf(conv_rows), _col(conv_rows, "net_income"))
             if len(conv_rows)
@@ -200,12 +256,16 @@ class CashGeneration(CalcNode):
             years = years_between(ends.iloc[0], ends.iloc[-1])
             shares = _col(share_rows, "shares_diluted")
             share_cagr = cagr(float(shares[0]), float(shares[-1]), years)
+        window = _span(annual, conv_win, share_win, latest_win)
+        # safeguard: list only fields older than the reported window's end (drops nothing now)
+        older = {n: d for n, d in stale.items() if window.last_period_end and d < window.last_period_end}
         return CashGenerationResult(
-            **_widest(conv_win, share_win, oe_win).model_dump(),
+            **window.model_dump(exclude={"field_periods"}),
             owner_earnings=oe,
             fcf=fcf,
             fcf_conversion=_opt(conversion),
             share_count_cagr=_opt(share_cagr),
+            field_periods=older,
         )
 
 

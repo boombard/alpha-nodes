@@ -213,3 +213,20 @@ def test_class_docstring_lists_rubric_sources():
     assert "Rubric sources" in doc and "deliberately not in the default prompt" in doc
     for source in ("2014 letter", "1996 letter", "2007 letter", "1986 letter", "1992 letter", "Intelligent Investor"):
         assert source in doc
+
+
+@pytest.mark.parametrize("variant", ["default", "buffett_persona"])
+async def test_prompt_mentions_field_periods(make_model, variant):
+    model = make_model(GOOD)
+    await run_lens(model, lens=QualityValue(profile="test", variant=variant))
+    assert "field_periods" in parts(model, SystemPromptPart)
+
+
+async def test_field_periods_rendered_in_context(make_model):
+    model = make_model(GOOD)
+    stale = BalanceSheetResult(
+        debt_to_equity=0.3, interest_cover=12.0, net_debt=5.0,
+        field_periods={"interest_cover": date(2024, 12, 31)}, **window(8),
+    )
+    await run_lens(model, balance_sheet=stale)
+    assert "2024-12-31" in parts(model, UserPromptPart)

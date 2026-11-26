@@ -13,7 +13,7 @@ import pandas as pd
 import pandera.pandas as pa
 from pandera.typing.pandas import Series
 
-from alpha_nodes.conventions import FILING_LAG_DAYS, MAX_ANNUAL_PERIODS
+from alpha_nodes.conventions import FILING_LAG_DAYS, MAX_ANNUAL_PERIODS, MAX_STALE_PERIODS
 from alpha_nodes.datasets import FundamentalsSchema
 from alpha_nodes.metrics import PeriodWindow
 from alpha_nodes.money import require_same_currency
@@ -93,6 +93,20 @@ def values(annual: pd.DataFrame, *columns: str) -> tuple[pd.DataFrame, PeriodWin
     """The rows of `annual` where every named column is non-null (the periods a metric can use), and their window."""
     used = annual.dropna(subset=list(columns))
     return used, period_window(used)
+
+
+def latest_complete(
+    annual: pd.DataFrame, *columns: str, max_stale: int = MAX_STALE_PERIODS
+) -> pd.DataFrame:
+    """The newest single row of `annual` among the last `max_stale + 1` periods where every named column is non-null.
+
+    Backs the older-period fallback of latest-point fundamentals fields (finance.md, Fundamentals
+    pinned conventions); the whole field is computed from this one row, so periods never mix.
+    Empty when no row qualifies.
+    """
+    recent = annual.tail(max_stale + 1)
+    complete = recent.dropna(subset=list(columns))
+    return complete.tail(1)
 
 
 def years_between(start: pd.Timestamp, end: pd.Timestamp) -> float:

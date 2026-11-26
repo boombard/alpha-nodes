@@ -11,6 +11,7 @@ from alpha_nodes.statements import (
     AnnualFundamentalsSchema,
     annual_periods,
     known_on,
+    latest_complete,
     period_window,
     values,
 )
@@ -115,3 +116,35 @@ def test_values_drops_periods_missing_a_column(fundamentals_rows: Rows) -> None:
         date(2020, 12, 31),
         date(2022, 12, 31),
     )
+
+
+def _three_years(fundamentals_rows: Rows) -> pd.DataFrame:
+    return annual_periods(
+        fundamentals_rows(
+            {"period_end": "2020-12-31", "revenue": 1.0, "net_income": 1.0},
+            {"period_end": "2021-12-31", "revenue": 2.0, "net_income": 2.0},
+            {"period_end": "2022-12-31", "revenue": 3.0},
+        ),
+        date(2024, 1, 1),
+    )
+
+
+def test_latest_complete_takes_newest_row_with_all_columns(fundamentals_rows: Rows) -> None:
+    out = latest_complete(_three_years(fundamentals_rows), "revenue", "net_income")
+    assert len(out) == 1
+    assert out["period_end"].iloc[0].date() == date(2021, 12, 31)
+    assert len(latest_complete(_three_years(fundamentals_rows), "revenue")) == 1
+
+
+def test_latest_complete_respects_max_stale(fundamentals_rows: Rows) -> None:
+    annual = _three_years(fundamentals_rows).assign(net_income=[1.0, None, None])
+    assert latest_complete(annual, "net_income")["period_end"].iloc[0].date() == date(2020, 12, 31)
+    assert latest_complete(annual, "net_income", max_stale=1).empty
+    assert latest_complete(annual, "revenue", max_stale=0)["period_end"].iloc[0].date() == date(
+        2022, 12, 31
+    )
+
+
+def test_latest_complete_empty_frame(fundamentals_rows: Rows) -> None:
+    out = latest_complete(annual_periods(fundamentals_rows(), date(2024, 1, 1)), "revenue")
+    assert out.empty

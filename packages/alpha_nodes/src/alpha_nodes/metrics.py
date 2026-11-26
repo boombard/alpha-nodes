@@ -69,12 +69,28 @@ class PeriodWindow(BaseModel):
     last_period_end: date | None  # None when periods == 0
     suspect_periods: int = Field(ge=0)  # periods in the window labelled `suspect`
     currency: str | None  # reporting currency; None when periods == 0
+    field_periods: dict[str, date] = {}  # field -> period_end it came from; only fields older than last_period_end
 
     @model_validator(mode="after")
     def _check_suspect(self) -> Self:
         """Suspect periods are a subset of the window's periods."""
         if self.suspect_periods > self.periods:
             raise ValueError("suspect_periods must not exceed periods")
+        return self
+
+    @model_validator(mode="after")
+    def _check_field_periods(self) -> Self:
+        """Every `field_periods` key is a field of the model and every date is older than `last_period_end`.
+
+        A latest-point field that fell back to an older period is recorded here so the lens sees
+        the caveat as data; see documentation/design/finance.md, Fundamentals pinned conventions.
+        """
+        unknown = set(self.field_periods) - set(type(self).model_fields)
+        if unknown:
+            raise ValueError(f"field_periods has unknown fields: {sorted(unknown)}")
+        for name, period in self.field_periods.items():
+            if self.last_period_end is None or period >= self.last_period_end:
+                raise ValueError(f"field_periods[{name!r}] must be older than last_period_end")
         return self
 
 
