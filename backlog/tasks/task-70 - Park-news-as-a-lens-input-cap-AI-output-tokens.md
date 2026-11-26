@@ -1,10 +1,10 @@
 ---
 id: TASK-70
 title: Park news as a lens input; cap AI output tokens
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-26T09:25:35Z'
-updated_date: '2026-11-26T09:35:55Z'
+updated_date: '2026-11-26T09:39:30Z'
 labels:
   - finance
   - core
@@ -46,19 +46,19 @@ Expected side effect: the prompts, output schema and profile fingerprints change
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 quality_value no longer takes recent_news; the M6 run fetches no news; news code and tests stay
-- [ ] #2 Default profiles cap output tokens per response (max_tokens) and per call (output_tokens_limit)
-- [ ] #3 AI lens answers are bounded in claim count and claim length, in the output schema and the prompt
-- [ ] #4 Exceeding a cap or a truncated answer fails the node with no fallback
-- [ ] #5 core.md and finance.md describe the caps and the parked news input
+- [x] #1 quality_value no longer takes recent_news; the M6 run fetches no news; news code and tests stay
+- [x] #2 Default profiles cap output tokens per response (max_tokens) and per call (output_tokens_limit)
+- [x] #3 AI lens answers are bounded in claim count and claim length, in the output schema and the prompt
+- [x] #4 Exceeding a cap or a truncated answer fails the node with no fallback
+- [x] #5 core.md and finance.md describe the caps and the parked news input
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -77,4 +77,6 @@ Round 2 sent: same prompt line, 'found in them' -> 'found in it'.
 Worker: quality_value drops recent_news (prompts, run yaml; news code and tests kept, TASK-71 sketch for the redesign); default profiles cap output tokens per response (max_tokens dev/local 2500, quality 4000) and per call (output_tokens_limit 6000/10000); AINode params max_claims=5, max_claim_chars=300 go into the output schema (assessment_schema) and a system-prompt line for every AI lens; caps and truncation fail the node; core.md + finance.md updated. 1285 passed, ruff/pyright clean. Review: 1 round (prompt grammar). Verdict: approve. Single commit b9cfb52. Rulings accepted: Haiku/Sonnet 5.5 use adaptive thinking (verified in pydantic-ai profiles), so no budget_tokens to fit; toy-run.json regenerated outside Files. Expected: every AI verdict misses the cache once. Open: real token saving to be measured on the M6 demo re-run.
 
 Round 2 resolved (rest of the prompt line); 2 rounds total; single commit 585f15a; 1285 passed.
+
+Landed 6d0c4ef on main (single commit, rebased clean; 1285 passed on the rebased tree).
 <!-- SECTION:FINAL_SUMMARY:END -->
