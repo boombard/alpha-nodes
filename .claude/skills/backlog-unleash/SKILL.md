@@ -60,7 +60,7 @@ questions, the milestone gate, dropped-list reasoning and Rulings to check.
 
 ## 2. Ready set
 
-Delegate this to a **Sonnet subagent** so the bulk task-file reading stays out of
+Delegate this to a **Haiku subagent** so the bulk task-file reading stays out of  
 your context. Tell it the definitions above (ready, `plan` label, WIP cap, Files
 overlap), the user's ids if any, and to **read-only** use `BL task list --plain`,
 `BL task <id> --plain` and `ORCA worktree list --json`. It returns: in-flight
@@ -131,7 +131,7 @@ Finish with worker_done as the playbook defines.
 - **`question`:** answer it from the task, the design docs or `doc-1` if the answer
 follows from them. Otherwise relay it to the user and `reply` with their answer.
 - **`worker_done` succeeded:**
-  1. **Mechanical checks, delegated** to a Sonnet subagent (read-only): the worktree
+  1. **Mechanical checks, delegated** to a Haiku subagent (read-only): the worktree  
    is clean, has at least 1 commit ahead of `main`, every commit subject carries
    `(TASK-<n>)`, and `git diff --name-only main...task-<n>` lists no file outside
    the task's Files list (it names any that are). It returns those facts in a few
