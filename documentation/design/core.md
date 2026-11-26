@@ -368,8 +368,10 @@ a domain's tests may be stricter, e.g. no `=`).
   covered silently. `Model` is the class `__name__` of a pydantic model or a pandera
   `DataFrameModel` (frame columns are its fields).
 - A field resolves by walking its output model's MRO from the model itself up: at the first
-  class that has the field, the claim `Class.field`, else `Class`, wins; if neither, the next
-  class up. So a field inherited from a window base is claimed once, on the base.
+  class that declares the field (in its own annotations, not by inheritance), the claim
+  `Class.field`, else `Class`, wins; if neither, the next class up. So a field inherited from a
+  window base is claimed once, on the base; a subclass claim on an inherited field never
+  matches and `unresolved_claims` reports it as stale.
 - No claim appears twice (validated on load). `Glossary.term_for(model, field) -> str | None`
   is the resolver. `Glossary.unresolved_claims(models) -> list[str]` lists the claims that name
   no class or field among `models`; a domain test passes every node `output` of its registry
