@@ -16,7 +16,7 @@ from lensgraph.node import NodeContext
 from lensgraph.verdict import LensVerdict
 from pydantic_ai.messages import SystemPromptPart, UserPromptPart
 
-from .ai_lens_helpers import Scripted, fundamentals, parts, registry_for, window
+from .ai_lens_helpers import Scripted, bound, fundamentals, parts, registry_for, window
 
 pytestmark = pytest.mark.usefixtures("forbid_real_model_requests")
 
@@ -72,7 +72,7 @@ def make_inputs(periods: int = 4, **overrides: Any) -> dict[str, Any]:
 
 
 async def run_lens(model: Scripted, **overrides: Any) -> LensVerdict:
-    lens = PriceVsFundamentals(profile="test")
+    lens = bound(PriceVsFundamentals(profile="test"))
     ctx = NodeContext(run_id="r", candidate=None, services={"profiles": registry_for(model)})
     return await lens.run(ctx, **make_inputs(**overrides))
 

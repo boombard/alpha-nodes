@@ -10,6 +10,7 @@ from datetime import timedelta
 from typing import Any, ClassVar
 
 import pandas as pd
+import pandera.pandas as pa
 from pydantic import Field
 
 from ..node import FetchNode, NodeContext
@@ -31,6 +32,11 @@ def _window(store: Any, ctx: NodeContext, lookback_days: int | None) -> DateInte
     return DateInterval(start=end - timedelta(days=lookback_days), end=end)
 
 
+def _frame_contract(cls: Any) -> Any:
+    """The plan-build contract of a dataset fetch class: its `frame_schema` when set, else `output`."""
+    return cls.frame_schema if cls.frame_schema is not None else cls.output
+
+
 def _store(ctx: NodeContext) -> SourceStore:
     """The `sources` service; a clear error when the run has none."""
     try:
@@ -45,6 +51,11 @@ class DatasetFetch(FetchNode):
     Returns the slice frame (canonical plus fact meta columns). A legitimately empty slice is an
     empty frame, not a failure; `SourceUnavailable` propagates and fails the node.
 
+    `frame_schema` (optional, set by the subclass) is the dataset's canonical column model. It is
+    what consumers see at plan build (`contract()`), so its columns reach the glossary check and
+    data dictionary of AI lenses; the fact meta columns the slice also carries are not part of
+    the contract. Runtime output stays a plain frame.
+
     Args:
         lookback_days: for date-axis datasets, the window runs from `lookback_days` days before
             `ctx.as_of` (or the store clock's today) through that day, both ends included, so it
@@ -55,9 +66,15 @@ class DatasetFetch(FetchNode):
 
     dataset: ClassVar[str]
     output: ClassVar[Any] = pd.DataFrame
+    frame_schema: ClassVar[type[pa.DataFrameModel] | None] = None
     lookback_days: int | None = None
     entity_attr: str | None = None
     include_rejected: bool = False
+
+    @classmethod
+    def contract(cls) -> Any:
+        """The dataset's `frame_schema` when set, else `output`."""
+        return _frame_contract(cls)
 
     async def run(self, ctx: NodeContext) -> pd.DataFrame:  # type: ignore[override]
         """Read this candidate's slice of `dataset`, fetching gaps first."""
@@ -82,6 +99,11 @@ class DatasetFetchMany(FetchNode):
     Returns the entities' slices concatenated, with an `entity` column, sorted by entity (and
     the dataset's key columns within it).
 
+    `frame_schema` (optional, set by the subclass) is the dataset's canonical column model. It is
+    what consumers see at plan build (`contract()`), so its columns reach the glossary check and
+    data dictionary of AI lenses; the fact meta columns the slice also carries are not part of
+    the contract. Runtime output stays a plain frame.
+
     Args:
         entities: the entities to read; at least one.
         lookback_days: as for `DatasetFetch`.
@@ -90,8 +112,14 @@ class DatasetFetchMany(FetchNode):
     scope: ClassVar = "shared"
     dataset: ClassVar[str]
     output: ClassVar[Any] = pd.DataFrame
+    frame_schema: ClassVar[type[pa.DataFrameModel] | None] = None
     entities: list[str] = Field(min_length=1)  # an empty list is a params error at plan time
     lookback_days: int | None = None
+
+    @classmethod
+    def contract(cls) -> Any:
+        """The dataset's `frame_schema` when set, else `output`."""
+        return _frame_contract(cls)
 
     async def run(self, ctx: NodeContext) -> pd.DataFrame:  # type: ignore[override]
         """Ensure all entities in one store call, then read each slice."""

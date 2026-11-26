@@ -78,8 +78,17 @@ class Node(BaseModel):
         """
         raise UpstreamFailed(failure)
 
+    @classmethod
+    def contract(cls) -> Any:
+        """The output contract seen by consumers at plan build (glossary binding). Defaults to `output`.
+
+        Runtime validation (`validate_output`) always uses `output`; this only says which fields
+        downstream nodes should treat as the node's data. See documentation/design/core.md, Glossary.
+        """
+        return cls.output
+
     def bind_upstream(self, outputs: Mapping[str, Any]) -> None:
-        """Plan-build hook: told each input's upstream `output` contract (input name -> contract).
+        """Plan-build hook: told each input's upstream `contract()` (input name -> contract).
 
         Called once per instance by `build_plan` with the resolved classes (replacements
         included). A no-op by default; `AINode` overrides it to derive its data dictionary.

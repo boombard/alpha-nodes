@@ -77,3 +77,36 @@ def parts(model: Scripted, part_type: type, call: int = 0) -> str:
         for p in m.parts
         if isinstance(p, part_type)
     )
+
+
+def lens_input_contracts(lens: Any) -> dict[str, Any]:
+    """Output contract of every input (required and optional) of an AI lens, by input name.
+
+    Each contract is `contract()` of the node that produces the input (a fetch node's is its dataset's frame schema): the registry's
+    node where registered, else the node class in `fundamental_calcs` / `news` (not registered
+    yet). Only `valuation` and `valuation_change` have no node yet, so their result models stand
+    in (TASK-54 adds the nodes; then drop the stand-ins).
+    """
+    from alpha_nodes import metrics
+    from alpha_nodes.nodes import fundamental_calcs, news
+    from alpha_nodes.registry import build_registry
+
+    registry = build_registry()
+    producers: dict[str, Any] = {name: registry.get(name) for name in registry.names()}
+    for cls in (
+        fundamental_calcs.AnnualFundamentals, fundamental_calcs.Profitability,
+        fundamental_calcs.BalanceSheet, fundamental_calcs.CashGeneration,
+        fundamental_calcs.FundamentalTrend, news.RecentNews,
+    ):  # fmt: skip
+        producers.setdefault(cls.name, cls)
+    contracts = {name: node.contract() for name, node in producers.items()}
+    contracts["valuation"] = metrics.ValuationResult  # stand-in until TASK-54
+    contracts["valuation_change"] = metrics.ValuationChangeResult  # stand-in until TASK-54
+    inputs = {**lens.inputs, **lens.optional_inputs}
+    return {name: contracts[source] for name, source in inputs.items()}
+
+
+def bound[L](lens: L) -> L:
+    """`lens` after the plan-build binding step (`bind_upstream`), so its data dictionary is rendered."""
+    lens.bind_upstream(lens_input_contracts(lens))  # type: ignore[attr-defined]
+    return lens

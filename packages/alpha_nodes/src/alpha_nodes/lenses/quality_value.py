@@ -14,6 +14,8 @@ from lensgraph.node import NodeContext
 from lensgraph.types import Absent
 from pydantic import Field
 
+from alpha_nodes.glossary import FINANCE_GLOSSARY_DIR
+
 PROMPTS = Path(__file__).resolve().parent.parent / "prompts"
 
 QUALITY_VALUE_FLAGS = frozenset(
@@ -61,6 +63,7 @@ class QualityValue(AINode):
 
     name: ClassVar[str] = "quality_value"
     lens_name: ClassVar[str] = "quality_value"
+    glossary: ClassVar[Path | None] = FINANCE_GLOSSARY_DIR
     prompt: ClassVar[Path] = PROMPTS / "quality_value.md.j2"
     variants: ClassVar[dict[str, Path]] = {
         "buffett_persona": PROMPTS / "quality_value_buffett_persona.md.j2"

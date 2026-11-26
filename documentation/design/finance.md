@@ -287,27 +287,19 @@ cross-candidate ranking in v1) and exposed as params. The backtest is how they g
 
 - **Windows count bars (sessions), not calendar days:** 1 month = 21, 12 months = 252,
   3 years = 756. Annualisation uses 252 for every venue.
-- **Total-return index** (`total_return_index`): `TR_0 = 1`,
-  `TR_t = TR_{t-1} × (close_t + dividend_t) / close_{t-1}`, with the dividend on its ex-date
-  row. `split_ratio` is **not** applied, because yfinance closes are already split-adjusted.
-  Dividends are assumed to be on the same split basis as the closes. M5.3 checked what the
-  AAPL fixtures show: closes are split-adjusted through the 4:1 split of 2020-08-31 (the TR
-  index moves 3.4% that day, no 4× artefact), and the two-year AAPL fixture's eight payouts
-  (0.25–0.27) form a smooth series whose trailing-year yield is a plausible AAPL 0.2–1.5% (a ×4 basis
-  error would fall outside). The recorded split window contains no dividend, so a
-  payout straddling a split is *not* directly observed; the assumption rests on yfinance
-  adjusting both columns together.
-- **Momentum 12-1** (`skip_return`): `TR[-1-21] / TR[-1-252] - 1`. It needs ≥ 253 bars, else
-  None.
-- **Trend:** MA = `sma(close, 200)` on split-adjusted closes (price, not TR, by convention).
-  `pct_above_ma = close[-1] / MA[-1] - 1`. `ma_slope` = `linreg_slope(ln MA, 20)[-1] × 252`,
-  the annualised log growth of the MA. It needs ≥ 219 bars, else None.
-- **Realised volatility** (`realised_volatility`): std of daily log TR returns over the last
-  252 returns, `ddof=1`, × √252. TA-Lib `STDDEV` is the population std (`ddof=0`), so its
-  oracle test rescales by √(n/(n−1)). It needs ≥ 63 returns, else None.
-- **Max drawdown** (`max_drawdown`): over the last ≤ 756 bars of TR,
-  `min_t(TR_t / max_{s≤t} TR_s) − 1`, a non-positive fraction. It needs ≥ 252 bars, else
-  None. The number of bars actually used is reported.
+- **Total-return index** (`total_return_index`, glossary [`total-return-index`](../../packages/alpha_nodes/src/alpha_nodes/glossary/total-return-index.md)): $TR_0 = 1$, $TR_t = TR_{t-1} \times (\text{close}_t + \text{dividend}_t) / \text{close}_{t-1}$, the dividend on its ex-date row. `split_ratio` is **not** applied, because yfinance closes are already split-adjusted. Dividends are assumed to
+  be on the same split basis as the closes. M5.3 checked what the AAPL fixtures show: closes are split-adjusted
+  through the 4:1 split of 2020-08-31 (the TR index moves 3.4% that day, no 4× artefact), and the two-year AAPL
+  fixture's eight payouts (0.25–0.27) form a smooth series whose trailing-year yield is a plausible AAPL
+  0.2–1.5% (a ×4 basis error would fall outside). The recorded split window contains no dividend, so a payout
+  straddling a split is *not* directly observed; the assumption rests on yfinance adjusting both columns together.
+- **Momentum:** [`momentum-12-1`](../../packages/alpha_nodes/src/alpha_nodes/glossary/momentum-12-1.md) (needs ≥ 253 bars, else None).
+- **Trend:** the average is on split-adjusted closes (price, not TR, by convention): [`moving-average`](../../packages/alpha_nodes/src/alpha_nodes/glossary/moving-average.md),
+  [`pct-above-ma`](../../packages/alpha_nodes/src/alpha_nodes/glossary/pct-above-ma.md), [`ma-slope`](../../packages/alpha_nodes/src/alpha_nodes/glossary/ma-slope.md) (needs ≥ 219 bars, else None).
+- **Realised volatility:** [`volatility`](../../packages/alpha_nodes/src/alpha_nodes/glossary/volatility.md). TA-Lib `STDDEV` is the population std (`ddof=0`), so its oracle
+  test rescales by √(n/(n−1)). Needs ≥ 63 returns, else None.
+- **Max drawdown:** [`max-drawdown`](../../packages/alpha_nodes/src/alpha_nodes/glossary/max-drawdown.md) and [`drawdown-dates`](../../packages/alpha_nodes/src/alpha_nodes/glossary/drawdown-dates.md). Needs ≥ 252 bars, else None; the number of
+  bars actually used is reported ([`price-window`](../../packages/alpha_nodes/src/alpha_nodes/glossary/price-window.md)).
 - **Data quality:** rows labelled `suspect` are used, and each metric reports how many
   were in its window (`suspect_bars`). Rows labelled `rejected` never reach calcs (the fetch
   node's default). The lens raises a `data_quality` warn flag when any window had suspect
@@ -456,46 +448,35 @@ with no reporting currency (`no_currency`). `tag_conflict` as above.
 - **Known on a date:** a period counts as known on day `d` if `filed_at <= d`, or, when
   `filed_at` is null, if `period_end + FILING_LAG_DAYS (90) <= d`. Calcs use `as_of`, else the
   run's today. Windows take the last ≤ `MAX_ANNUAL_PERIODS` (10) known periods.
-- **ROE** = `net_income / common_equity` per period (None when equity ≤ 0). Reported:
-  mean, min, and std (`ddof=1`, needs ≥ 3 periods).
-- **Operating margin** = `operating_income / revenue` (None when revenue ≤ 0); mean and std.
+- **ROE and operating margin:** [`return-on-equity`](../../packages/alpha_nodes/src/alpha_nodes/glossary/return-on-equity.md) (None when equity ≤ 0; spread needs ≥ 3 periods) and
+  [`operating-margin`](../../packages/alpha_nodes/src/alpha_nodes/glossary/operating-margin.md) (None when revenue ≤ 0).
 - **Latest-point fields and older-period fallback.** "Latest" for leverage, coverage, net
   debt, owner earnings and FCF means the newest of the last `MAX_STALE_PERIODS + 1` (3) periods
   that hold *all* of that field's inputs (`statements.latest_complete`), one row per field, so a
   ratio never mixes periods. Past the cap the field is None. A field taken from an older period
   is recorded in the result's `field_periods` (field name → its `period_end`), listing only
-  fields older than the reported `last_period_end`. The window of `balance_sheet` spans from the
-  oldest row used to the latest period; so does the `cash_generation` window (the oldest row any
+  fields older than the reported `last_period_end` ([`period-window`](../../packages/alpha_nodes/src/alpha_nodes/glossary/period-window.md)). The window of `balance_sheet` spans
+  from the oldest row used to the latest period; so does the `cash_generation` window (the oldest row any
   of its fields used, including FCF conversion and share count).
-- **Leverage** (latest point, see above): `debt_to_equity = total_debt / common_equity` (None
-  when equity ≤ 0); `interest_cover = operating_income / interest_expense` (None when interest
-  expense is missing or ≤ 0); `net_debt = total_debt − cash`.
-- **Owner earnings** (latest point, see above) = `net_income + depreciation_amortization − min(capex,
-  depreciation_amortization)`: maintenance capex is proxied by D&A, capped at actual capex.
-- **FCF** (latest point, see above) = `operating_cash_flow − capex`; **FCF conversion** = Σ FCF / Σ net income over the
-  window (None when Σ net income ≤ 0).
-- **Share-count trend** = CAGR of `shares_diluted` from the first to the last period of the
-  window, in years between their `period_end`s (needs ≥ 2 periods).
-- **Earnings consistency:** `loss_years` = periods with net income < 0;
-  `net_income_cv` = std / mean (None when mean ≤ 0 or fewer than 3 periods).
-- **Growth** (`growth(prev, cur)`) = `(cur − prev) / |prev|`, None when `prev == 0`; CAGR needs
-  both ends > 0. `revenue_growth_1y`, `revenue_cagr_3y`, `eps_growth_1y`,
-  `fcf_growth_1y`; `op_margin_change_1y` is the difference in margin (fraction points).
-  Spans are measured on `period_end` dates (`years_between` = days / 365.25, also used by the
-  share-count CAGR). The "1y" fields compare the latest two periods and are None when their
+- **Leverage** (latest point): [`debt-to-equity`](../../packages/alpha_nodes/src/alpha_nodes/glossary/debt-to-equity.md), [`interest-cover`](../../packages/alpha_nodes/src/alpha_nodes/glossary/interest-cover.md), [`net-debt`](../../packages/alpha_nodes/src/alpha_nodes/glossary/net-debt.md). Total debt
+  includes finance leases and excludes operating lease liabilities (see Providers).
+- **Owner earnings** (latest point): [`owner-earnings`](../../packages/alpha_nodes/src/alpha_nodes/glossary/owner-earnings.md); maintenance capex is proxied by D&A, capped at actual capex.
+- **FCF** (latest point): [`fcf`](../../packages/alpha_nodes/src/alpha_nodes/glossary/fcf.md); capex sign pinned positive (see Providers). [`fcf-conversion`](../../packages/alpha_nodes/src/alpha_nodes/glossary/fcf-conversion.md) sums over
+  the window.
+- **Share-count trend:** [`share-count-cagr`](../../packages/alpha_nodes/src/alpha_nodes/glossary/share-count-cagr.md), in years between the `period_end`s (needs ≥ 2 periods).
+- **Earnings consistency:** [`loss-years`](../../packages/alpha_nodes/src/alpha_nodes/glossary/loss-years.md) and [`net-income-cv`](../../packages/alpha_nodes/src/alpha_nodes/glossary/net-income-cv.md) (None when fewer than 3 periods).
+- **Growth:** [`revenue-growth-1y`](../../packages/alpha_nodes/src/alpha_nodes/glossary/revenue-growth-1y.md), [`revenue-cagr-3y`](../../packages/alpha_nodes/src/alpha_nodes/glossary/revenue-cagr-3y.md), [`eps-growth-1y`](../../packages/alpha_nodes/src/alpha_nodes/glossary/eps-growth-1y.md), [`fcf-growth-1y`](../../packages/alpha_nodes/src/alpha_nodes/glossary/fcf-growth-1y.md) and
+  [`op-margin-change-1y`](../../packages/alpha_nodes/src/alpha_nodes/glossary/op-margin-change-1y.md). Spans are measured on `period_end` dates (`years_between` = days / 365.25, also used
+  by the share-count CAGR). The "1y" fields compare the latest two periods and are None when their
   `period_end`s are more than 18 months apart. The `revenue_cagr_3y` base is the period whose
   `period_end` is closest to three years before the latest, within 6 months (else None), and
   it compounds over the actual span.
-- **Market cap** = close on the day × `shares_outstanding` of the latest known period, in the
-  trading currency, converted to the reporting currency through `fx` on that day
-  (`alpha_nodes.money`; mixing currencies without fx raises `CurrencyMismatch`). It is
-  level-based (see Prices and point-in-time).
-- **Valuation** (latest known period): `owner_earnings_yield` = owner earnings / market cap;
-  intrinsic-value band = owner earnings capitalised at the hurdle rates (default 12% → low,
-  8% → high; None when owner earnings ≤ 0); `price_to_value` = market cap / band midpoint. Earnings yield and P/E use
-  net income / market cap; P/E is None when earnings ≤ 0.
-- **Valuation change:** the same at `as_of` and 252 bars earlier, each with the periods known
-  on its own day; `pe_change = pe_now / pe_then − 1`.
+- **Market cap:** [`market-cap`](../../packages/alpha_nodes/src/alpha_nodes/glossary/market-cap.md) is level-based (see Prices and point-in-time); mixing currencies without fx
+  raises `CurrencyMismatch` (`alpha_nodes.money`); see [`fx-rate`](../../packages/alpha_nodes/src/alpha_nodes/glossary/fx-rate.md).
+- **Valuation** (latest known period): [`earnings-yield`](../../packages/alpha_nodes/src/alpha_nodes/glossary/earnings-yield.md), [`pe`](../../packages/alpha_nodes/src/alpha_nodes/glossary/pe.md), [`owner-earnings-yield`](../../packages/alpha_nodes/src/alpha_nodes/glossary/owner-earnings-yield.md),
+  [`value-range`](../../packages/alpha_nodes/src/alpha_nodes/glossary/value-range.md) (hurdle rates are params, default 12% low and 8% high) and [`price-to-value`](../../packages/alpha_nodes/src/alpha_nodes/glossary/price-to-value.md).
+- **Valuation change:** the same at `as_of` and 252 bars earlier, each with the periods known on its own
+  day: [`pe-change`](../../packages/alpha_nodes/src/alpha_nodes/glossary/pe-change.md), [`valuation-dates`](../../packages/alpha_nodes/src/alpha_nodes/glossary/valuation-dates.md).
 - Every fundamentals result reports its window (`periods`, first and last `period_end`,
   `suspect_periods`, `currency`); a field that can't be computed is None, never 0.
 
@@ -511,6 +492,18 @@ is down-weighted deterministically). Neither lens sees analyst ratings or price 
 
 Liquidity, market cap, listing age, data coverage. It is likely to be more useful as a
 campaign stage-0 gate than as a lens.
+
+## Glossary
+
+The finance glossary lives in `packages/alpha_nodes/src/alpha_nodes/glossary/` (package data;
+mechanism and format in core.md, Glossary). Every field that reaches an AI lens, and every citable field
+of the price and fundamentals result models, resolves to exactly one entry: tested
+(`tests/test_glossary_finance.py`) and checked at plan build. The AI lenses get their data dictionary from
+their inputs (`glossary = FINANCE_GLOSSARY_DIR`); they declare no term lists. Window fields share the
+[`price-window`](../../packages/alpha_nodes/src/alpha_nodes/glossary/price-window.md) and [`period-window`](../../packages/alpha_nodes/src/alpha_nodes/glossary/period-window.md) entries, the `annual_fundamentals` columns have one entry per
+line item plus [`statement-row`](../../packages/alpha_nodes/src/alpha_nodes/glossary/statement-row.md), and the `profile` frame is the single [`listing-profile`](../../packages/alpha_nodes/src/alpha_nodes/glossary/listing-profile.md) entry.
+Per-term formulas live in the entries; this document keeps the policy and links them. Entries start as
+`draft` (written from model knowledge) and are upgraded to `verified` by research later.
 
 ## Calculation layers (user, 2026-11-25)
 
@@ -545,6 +538,9 @@ results from things outside the memo key (module constants, library upgrades) th
 persist indefinitely in fixed as-of runs. Lenses, AI nodes and the reviewer stay memoized.
 
 Lenses never call kernels or adapters directly. They read calc node outputs only.
+
+A new calc field, or a new column of a frame an AI lens reads, needs a glossary entry in the same change (a
+missing one fails the plan; see Glossary).
 
 ## Technical analysis and TA-Lib (user, 2026-11-25)
 

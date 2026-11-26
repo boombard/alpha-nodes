@@ -19,7 +19,7 @@ from lensgraph.verdict import LensVerdict
 from pydantic_ai.exceptions import UnexpectedModelBehavior
 from pydantic_ai.messages import SystemPromptPart, UserPromptPart
 
-from .ai_lens_helpers import Scripted, fundamentals, parts, registry_for, window
+from .ai_lens_helpers import Scripted, bound, fundamentals, parts, registry_for, window
 
 pytestmark = pytest.mark.usefixtures("forbid_real_model_requests")
 
@@ -94,7 +94,7 @@ def make_inputs(periods: int = 8, **overrides: Any) -> dict[str, Any]:
 async def run_lens(
     model: Scripted, lens: QualityValue | None = None, **overrides: Any
 ) -> LensVerdict:
-    lens = lens or QualityValue(profile="test")
+    lens = lens or bound(QualityValue(profile="test"))
     ctx = NodeContext(run_id="r", candidate=None, services={"profiles": registry_for(model)})
     return await lens.run(ctx, **make_inputs(**overrides))
 
@@ -145,7 +145,8 @@ async def test_four_periods_gives_half_sufficiency_and_depth_note(make_model):
 
 
 async def test_persona_variant_changes_prompt_hash_and_memo_salt(make_model):
-    default, persona = QualityValue(profile="test"), QualityValue(profile="test", variant="buffett_persona")
+    default = bound(QualityValue(profile="test"))
+    persona = bound(QualityValue(profile="test", variant="buffett_persona"))
     services = {"profiles": registry_for(make_model(GOOD))}
     assert default.memo_salt(services) != persona.memo_salt(services)
     v = await run_lens(make_model(GOOD), lens=persona)
@@ -187,7 +188,7 @@ async def test_rubric_is_static_and_names_no_investor(make_model):
 
 async def test_persona_prompt_has_guardrails(make_model):
     model = make_model(GOOD)
-    await run_lens(model, lens=QualityValue(profile="test", variant="buffett_persona"))
+    await run_lens(model, lens=bound(QualityValue(profile="test", variant="buffett_persona")))
     system = parts(model, SystemPromptPart)
     assert "Warren Buffett" in system and "holdings" in system and "folksy" in system
     assert "The Intelligent Investor" in system  # same rubric underneath
@@ -218,7 +219,7 @@ def test_class_docstring_lists_rubric_sources():
 @pytest.mark.parametrize("variant", ["default", "buffett_persona"])
 async def test_prompt_mentions_field_periods(make_model, variant):
     model = make_model(GOOD)
-    await run_lens(model, lens=QualityValue(profile="test", variant=variant))
+    await run_lens(model, lens=bound(QualityValue(profile="test", variant=variant)))
     assert "field_periods" in parts(model, SystemPromptPart)
 
 

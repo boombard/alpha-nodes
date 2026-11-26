@@ -16,7 +16,8 @@ Read in this order:
    execution, failure semantics, memoization, verdicts and dossiers, AI guard rails,
    campaigns, artifact store, reporting.
 3. [design/finance.md](design/finance.md): the finance package (`alpha_nodes`):
-   datasets, providers, the point-in-time source store, the v1 lenses, universe campaigns.
+   datasets, providers, the point-in-time source store, the v1 lenses, the finance glossary
+   ([entries](../packages/alpha_nodes/src/alpha_nodes/glossary/)), universe campaigns.
 4. [design/lessons.md](design/lessons.md): what we learned from alpha-capture and from
    the engine-comparison spike. It explains *why* several decisions were made.
 

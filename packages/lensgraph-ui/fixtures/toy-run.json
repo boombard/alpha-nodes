@@ -78,7 +78,7 @@
                   "growth_rate": "2ffde053d982db220b1c7b5881cc79d08ce963330f02dda2b19e4922f6ab2cfe"
                 },
                 "input_tokens": 0,
-                "lens_version": "f54bb30f675b3887",
+                "lens_version": "68da38e2e264ecaf",
                 "model": null,
                 "model_settings": {},
                 "output_tokens": 0,
@@ -122,7 +122,7 @@
                   "tox_notes": "60290af994e9abf7f8bed9a787b481324432bb09c54d7af5dbdf61804fdbd282"
                 },
                 "input_tokens": 153,
-                "lens_version": "39fd39a74dca3edb",
+                "lens_version": "9addff824d6a1f88",
                 "model": "function:_scripted:",
                 "model_settings": {},
                 "output_tokens": 20,
@@ -160,10 +160,10 @@
             "backtest_valid": true,
             "glossary_terms": [],
             "input_hashes": {
-              "dossier": "bfcda20e336640acb7925c103c615f3440e95628f40cb577edc214d292e4edd3"
+              "dossier": "1c1b3b7c5af5caa059b5aace8a949ac334a3e67904b0a7138d24226db23ee629"
             },
             "input_tokens": 219,
-            "lens_version": "e3714bd7b328b036",
+            "lens_version": "f396f830e279d30e",
             "model": "function:_scripted:",
             "model_settings": {},
             "output_tokens": 26,
@@ -247,7 +247,7 @@
                   "growth_rate": "ba11a289db070b309f4bbdd7151cf2af50703deacbc236f1fd34310fe369a312"
                 },
                 "input_tokens": 0,
-                "lens_version": "f54bb30f675b3887",
+                "lens_version": "68da38e2e264ecaf",
                 "model": null,
                 "model_settings": {},
                 "output_tokens": 0,
@@ -283,7 +283,7 @@
                   "tox_notes": "5c28d529a964745c7ba2651b5591b0935543c054e7b00d25ed2139686c4a8ede"
                 },
                 "input_tokens": 0,
-                "lens_version": "39fd39a74dca3edb",
+                "lens_version": "9addff824d6a1f88",
                 "model": null,
                 "model_settings": {},
                 "output_tokens": 0,
@@ -321,10 +321,10 @@
             "backtest_valid": true,
             "glossary_terms": [],
             "input_hashes": {
-              "dossier": "2a3c62ddbff8c961a775435f71fb571b917f41152ed4102fc643e569f5e906d7"
+              "dossier": "5f8a2e22750d85d7a1dab9ed24dd7ed807cab20b37fdbc0d906ea0ed85e29430"
             },
             "input_tokens": 209,
-            "lens_version": "e3714bd7b328b036",
+            "lens_version": "f396f830e279d30e",
             "model": "function:_scripted:",
             "model_settings": {},
             "output_tokens": 26,
@@ -386,7 +386,7 @@
                 "glossary_terms": [],
                 "input_hashes": {},
                 "input_tokens": 0,
-                "lens_version": "f54bb30f675b3887",
+                "lens_version": "68da38e2e264ecaf",
                 "model": null,
                 "model_settings": {},
                 "output_tokens": 0,
@@ -416,7 +416,7 @@
                 "glossary_terms": [],
                 "input_hashes": {},
                 "input_tokens": 0,
-                "lens_version": "39fd39a74dca3edb",
+                "lens_version": "9addff824d6a1f88",
                 "model": null,
                 "model_settings": {},
                 "output_tokens": 0,
@@ -454,10 +454,10 @@
             "backtest_valid": true,
             "glossary_terms": [],
             "input_hashes": {
-              "dossier": "f7f1b5ee34f99d3ce4c7cb52263d8db84f47668e1ee21d4aaf6f337cef7cf8fe"
+              "dossier": "7e57ec2f5e30a5008f15cbe92e53c53d1d0e727a4b7de16fb769209110594e1d"
             },
             "input_tokens": 208,
-            "lens_version": "e3714bd7b328b036",
+            "lens_version": "f396f830e279d30e",
             "model": "function:_scripted:",
             "model_settings": {},
             "output_tokens": 26,

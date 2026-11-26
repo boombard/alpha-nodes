@@ -407,6 +407,10 @@ reformatting entries):
   resolves every field of every input's contract, optional inputs included: pydantic model
   fields, pandera frame columns, and the item model of a `list[Model]` contract. Other
   contracts (a bare `list`, plain types) contribute no fields.
+- The contract binding sees is `Node.contract()` (default: `output`); runtime validation still uses `output`.
+  A dataset fetch node (`DatasetFetch`, `DatasetFetchMany`) sets `frame_schema` to the dataset's canonical
+  columns and that is its contract, so a frame an AI lens reads directly (e.g. a profile) is covered
+  column by column; the fact meta columns the slice also carries are not in the dictionary.
 - **Strict.** A field with no claim fails the plan with a `GlossaryError` naming the lens, the
   input and the field, before any model call. So does an invalid entry, but only in plans that
   contain an AI lens using that glossary; a price-only run never loads it.

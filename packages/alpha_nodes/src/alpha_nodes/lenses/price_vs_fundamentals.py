@@ -12,6 +12,8 @@ from lensgraph.lens import DepthRequirement, LensAssessment
 from lensgraph.node import NodeContext
 from pydantic import Field
 
+from alpha_nodes.glossary import FINANCE_GLOSSARY_DIR
+
 PROMPTS = Path(__file__).resolve().parent.parent / "prompts"
 
 FLAG_SEVERITY: dict[str, Literal["info", "warn"]] = {
@@ -41,6 +43,7 @@ class PriceVsFundamentals(AINode):
 
     name: ClassVar[str] = "price_vs_fundamentals"
     lens_name: ClassVar[str] = "price_vs_fundamentals"
+    glossary: ClassVar[Path | None] = FINANCE_GLOSSARY_DIR
     prompt: ClassVar[Path] = PROMPTS / "price_vs_fundamentals.md.j2"
     inputs: ClassVar[dict[str, str]] = {
         "momentum": "momentum",

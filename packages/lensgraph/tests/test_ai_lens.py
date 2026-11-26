@@ -4,15 +4,18 @@ import shutil
 from pathlib import Path
 from typing import Any, ClassVar
 
+import pandera.pandas as pa
 import pytest
 from lensgraph import RunSpec, run
-from lensgraph.ai import AIAssessmentOut
+from lensgraph.ai import AIAssessmentOut, AINode
 from lensgraph.glossary import GlossaryError
 from lensgraph.graph import build_plan
 from lensgraph.llm import DEFAULT_PROFILES, LLMProfile
 from lensgraph.node import CalcNode, FetchNode, NodeContext
 from lensgraph.plan import NodeKey, RunResult
+from lensgraph.sources import DatasetFetch
 from lensgraph.verdict import LensVerdict
+from pandera.typing import Series
 from pydantic import BaseModel
 from pydantic_ai.messages import ModelRequest, SystemPromptPart, ToolReturnPart, UserPromptPart
 from toy.nodes import ToxNote
@@ -301,6 +304,28 @@ class OtherResultNode(GrowthResultNode):
     output: ClassVar[Any] = OtherResult
 
 
+class ObsFrame(pa.DataFrameModel):
+    """Canonical columns of the toy observation dataset."""
+
+    temp: Series[float]
+    od: Series[float]
+
+
+class ObsFetch(DatasetFetch):
+    """Toy dataset fetch declaring its frame schema."""
+
+    name: ClassVar[str] = "obs"
+    dataset: ClassVar[str] = "obs"
+    frame_schema: ClassVar = ObsFrame
+
+
+class BareObsFetch(DatasetFetch):
+    """Toy dataset fetch without a frame schema: contributes no fields."""
+
+    name: ClassVar[str] = "obs"
+    dataset: ClassVar[str] = "obs"
+
+
 def _plan(registry, candidates, **kwargs):
     return build_plan(["safety_lens"], registry, candidates, node_params={"safety_lens": {"profile": "test"}}, **kwargs)
 
@@ -321,6 +346,7 @@ def glossary_registry(tmp_path):
         concepts: frozenset[str] = frozenset(),
         typed: bool = False,
         critical: bool = True,
+        obs: type | None = None,
     ):
         directory = tmp_path / f"glossary-{len(list(tmp_path.glob('glossary-*')))}"
         shutil.copytree(TOY_GLOSSARY, directory)
@@ -332,6 +358,8 @@ def glossary_registry(tmp_path):
         (optional_in if optional else required_in)["result"] = "growth_result"
         if typed:
             required_in["notes"] = "typed_notes"
+        if obs is not None:
+            required_in["observations"] = "obs"
 
         class GlossarySafety(SafetyLens):
             """SafetyLens with a toy glossary directory."""
@@ -345,6 +373,8 @@ def glossary_registry(tmp_path):
         registry = build_registry(lenses=(GlossarySafety,))
         registry.register(GrowthResultNode)
         registry.register(TypedNotes)
+        if obs is not None:
+            registry.register(obs)
         return registry
 
     return make
@@ -517,3 +547,20 @@ def test_unbound_ai_node_with_glossary_raises(glossary_registry, scripted_profil
     lens = glossary_registry().get("safety_lens")(profile="test")
     with pytest.raises(GlossaryError, match="not bound"):
         lens.memo_salt({"profiles": scripted_profiles(GOOD)})
+
+
+def test_fetch_frame_schema_columns_reach_the_glossary_check(glossary_registry, s1):
+    with pytest.raises(GlossaryError, match=r"'observations'.*'od'"):  # ObsFrame is unclaimed
+        _plan(glossary_registry(obs=ObsFetch), s1)
+
+
+def test_fetch_frame_schema_columns_appear_in_the_dictionary(glossary_registry, s1):
+    registry = glossary_registry(("toxicity-note", "fields: []", "fields: [ObsFrame]"), obs=ObsFetch)
+    plan = _plan(registry, s1)
+    lens = next(p.node for k, p in plan.nodes.items() if k.name == "safety_lens")
+    assert isinstance(lens, AINode)
+    assert "observations.{od, temp}" in lens._system_prompt()
+
+
+def test_fetch_without_frame_schema_contributes_nothing(glossary_registry, s1):
+    _plan(glossary_registry(obs=BareObsFetch), s1)  # no error: no fields to claim

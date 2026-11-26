@@ -9,6 +9,8 @@ from typing import ClassVar
 from lensgraph.sources import DatasetFetch, DatasetFetchMany
 from pydantic import Field
 
+from alpha_nodes.datasets import DATASETS
+
 
 class Prices(DatasetFetch):
     """Daily OHLCV bars for the candidate's Yahoo symbol, normalised to major currency units.
@@ -19,6 +21,7 @@ class Prices(DatasetFetch):
 
     name: ClassVar[str] = "prices"
     dataset: ClassVar[str] = "prices"
+    frame_schema = DATASETS["prices"].frame_schema
     lookback_days: int | None = 3653
 
 
@@ -27,6 +30,7 @@ class Profile(DatasetFetch):
 
     name: ClassVar[str] = "profile"
     dataset: ClassVar[str] = "profile"
+    frame_schema = DATASETS["profile"].frame_schema
 
 
 class Fundamentals(DatasetFetch):
@@ -34,6 +38,7 @@ class Fundamentals(DatasetFetch):
 
     name: ClassVar[str] = "fundamentals"
     dataset: ClassVar[str] = "fundamentals"
+    frame_schema = DATASETS["fundamentals"].frame_schema
 
 
 class News(DatasetFetch):
@@ -41,6 +46,7 @@ class News(DatasetFetch):
 
     name: ClassVar[str] = "news"
     dataset: ClassVar[str] = "news"
+    frame_schema = DATASETS["news"].frame_schema
 
 
 class FxRates(DatasetFetchMany):
@@ -53,6 +59,7 @@ class FxRates(DatasetFetchMany):
 
     name: ClassVar[str] = "fx"
     dataset: ClassVar[str] = "fx"
+    frame_schema = DATASETS["fx"].frame_schema
     entities: list[str] = Field(
         default_factory=lambda: ["GBP", "EUR", "CHF", "SEK", "NOK", "DKK", "PLN"], min_length=1
     )
