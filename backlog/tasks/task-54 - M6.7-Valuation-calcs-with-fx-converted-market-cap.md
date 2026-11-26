@@ -1,10 +1,10 @@
 ---
 id: TASK-54
 title: M6.7 Valuation calcs with fx-converted market cap
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T08:17:59Z'
-updated_date: '2026-11-26T05:53:15Z'
+updated_date: '2026-11-26T05:58:56Z'
 labels:
   - finance
 milestone: m-5
@@ -95,3 +95,9 @@ Out of scope: EV/EBIT (needs debt and cash at the price date; later); as-of warn
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_cc124c9a2f02, worktree task-54 (run run_579c5584161b). Runs in parallel with TASK-62 by user choice despite the finance.md overlap.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker: close_on/bars_back in series.py; valuation_on adapter (fx-converted market cap, missing fx -> None never 1.0, per-input latest_complete with stale inputs listed in field_periods on every dependent field); Valuation and ValuationChange calc nodes (memoize=False, code_deps; each side uses the periods known on its own day); implemented_by filled on 10 valuation glossary entries; ai_lens_helpers valuation stand-ins removed; one sentence added to the finance.md Valuation bullet. One commit f5416b4; 1219 passed, ruff and pyright clean. Review: 0 rounds; mechanical checks clean (all files in the Files list). Verdict: approve. Open points: (a) ValuationChange imports private _opt/_ratio from alpha_nodes.valuation; _opt is now defined in 3 modules (price_calcs, fundamental_calcs, valuation), a DRY follow-up. (b) Landing alongside TASK-62 conflicts trivially in tests/ai_lens_helpers.py (both add classes to the same tuple) and both touch finance.md in different sections. (c) The value band is computed even without fx (reporting currency only), per finance.md.
+<!-- SECTION:FINAL_SUMMARY:END -->
