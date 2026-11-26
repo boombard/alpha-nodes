@@ -1,0 +1,45 @@
+# M6 demo: price_behaviour, quality_value and price_vs_fundamentals over 15 US/UK/European large caps.
+# Needs ALPHA_NODES_SEC_USER_AGENT (SEC requires a contact User-Agent, e.g. "Name name@example.com")
+# and ANTHROPIC_API_KEY (the AI lenses run on the default `dev` profile).
+#   uv run lensgraph run runs/m6_fundamentals.yaml            # live; prints the run id
+#   (the run prints the report path; `uv run lensgraph report <run id>` rebuilds it)
+# UK/European names have yfinance fundamentals only (~4 annual periods); US names come from EDGAR
+# (8+). Expect lower quality_value coverage and dossier confidence for the former.
+# Persona copy: same config with the quality_value variant switched, then rerun offline
+# (fetches come from the store; only quality_value and the dossier recompute, LLM calls are live):
+# (the sed below relies on the literal line `nodes: {}` further down: do not reformat it)
+#   sed 's/^nodes: {}$/nodes: {quality_value: {variant: buffett_persona}}/' \
+#     runs/m6_fundamentals.yaml > runs/m6_persona.yaml
+#   uv run lensgraph run runs/m6_persona.yaml --offline
+#   uv run python packages/alpha_nodes/scripts/compare_variants.py <rubric run> <persona run>
+registry: alpha_nodes.registry:build_registry
+candidates:
+  # US
+  - id: AAPL
+  - id: KO
+  - id: MSFT
+  - id: JNJ
+  - id: PG
+  # UK
+  - id: BP.L
+  - id: HSBA.L
+  - id: ULVR.L
+  - id: DGE.L
+  - id: BOOT.L
+  # European
+  - id: ASML.AS
+  - id: SAP.DE
+  - id: NESN.SW
+  - id: NOVO-B.CO
+  - id: MC.PA
+panel:
+  lenses: [price_behaviour, quality_value, price_vs_fundamentals]
+nodes: {}
+sources:
+  catalog: alpha_nodes.catalog:CATALOG
+  providers:
+    prices: [yfinance]
+    profile: [yfinance]
+    fx: [yfinance]
+    news: [yfinance]
+    fundamentals: [edgar, yfinance]
