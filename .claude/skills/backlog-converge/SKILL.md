@@ -7,7 +7,7 @@ disable-model-invocation: true
 # backlog-converge
 
 Land approved work onto `main`. You are the **coordinator** (Opus, on `main`). You
-own the gates, the user conversation, the `backlog/` edits and the final
+own the gates, the user conversation, the `backlog/` edits and the git-level
 verification. The mechanical landing of each task (rebase, mechanical conflict
 resolution, checks, ff-merge, worktree removal) is delegated to a **Sonnet
 subworker**, one task at a time, to save tokens. This is the back half of the pair
@@ -37,6 +37,16 @@ Load first: `orchestration` (`ORCA skills get orchestration`), `orca-cli`. `BL` 
     intent, or when the conflict is in `documentation/`, `backlog/`, any `CLAUDE.md`,
     or a `contracts`-labelled task's interfaces.
   - The tests arbitrate. A resolution isn't done until the full suite is green.
+- **Check budget: one run per rebased tree, none otherwise.** The worker ran
+  pytest, ruff and pyright on its final HEAD before reporting done (and again
+  after every fix round). So:
+  - **0 behind `main`:** no rebase, so the tree is exactly what the worker
+    checked. Nobody runs the checks; the coordinator lands it directly.
+  - **Rebased:** the subworker runs the checks **once**, in the worktree, after
+    the rebase (again only if it then changes code to fix what the rebase broke).
+    After `--ff-only`, `main`'s tree *is* that tested tree, so nobody re-runs them
+    on `main`, and the coordinator never re-runs them. Its verification is git:
+    the sha landed is the sha that was checked.
 - **The coordinator owns `backlog/`.** Status, ACs, DoD and summary are written on
   `main` after landing, and committed.
 
@@ -72,7 +82,11 @@ For each approved task, in order:
 
 1. **Quiesce the worker (you).** If its dispatch is live and idle, `worker-release`.
    If it is mid-turn, stop and ask the user: they may still be talking to it.
-2. **Spawn the landing subworker** (Agent tool, `model: "sonnet"`, foreground). Its
+2. **Already up to date?** If `git rev-list --count task-<n>..main` is 0, skip the
+   subworker and the checks. You land it yourself: `git merge --ff-only task-<n>`,
+   then remove the worktree exactly as in step 3.4 below, and go to step 5 (close
+   the task).
+3. **Otherwise spawn the landing subworker** (Agent tool, `model: "sonnet"`, foreground). Its
    prompt must be self-contained, since it starts cold. Give it: the task id, the
    worktree path and branch, the repo root, the check commands from step 1, the
    conflict policy and the no-push rule above, and these steps:
@@ -81,30 +95,33 @@ For each approved task, in order:
       (TASK-<n>)`. On a stop-and-ask conflict: `git -C <path> rebase --abort` and
       return **STOPPED: conflict** with the files and both sides' intent. Do not
       guess.
-   2. **Verify in the worktree:** all three checks pass. If they fail, fix only what
-      the rebase broke. Anything more: return **STOPPED: post-rebase failure** with
-      the failing output, and leave the worktree as is.
-   3. **Land:** from the main checkout, `git merge --ff-only task-<n>`, then run the
-      checks on `main`.
+   2. **Verify in the worktree, once:** run all three checks. If they fail, fix only
+      what the rebase broke and re-run. Anything more: return **STOPPED:
+      post-rebase failure** with the failing output, and leave the worktree as is.
+      Record the HEAD sha the green run was on.
+   3. **Land:** from the main checkout, `git merge --ff-only task-<n>`. Do **not**
+      run the checks on `main`: after a fast-forward it is the tree you just checked.
    4. **Remove** only if `git merge-base --is-ancestor task-<n> main` holds:
       `ORCA worktree rm --worktree name:task-<n> --json`, with no `--force`. Wait
       until `git worktree list` no longer shows it, then `git branch -D task-<n>`
       if the branch still exists. If removal is refused, do not force: return
       **STOPPED: removal refused** with `git -C <path> status --porcelain -uall`.
    5. **Do not** touch `backlog/`, push, or start the next task. Return a short
-      report: outcome, commit range `<first>..<last>`, check results, any
+      report: outcome, commit range `<first>..<last>`, the checked HEAD sha, the
+      last line of each check, any
       resolutions made (file and one line each), and whether the worktree is gone.
-3. **Handle the report (you).**
+4. **Handle the report (you).**
    - **STOPPED: conflict:** tell the user, skip this task, and continue with the
      next one only if it doesn't depend on this one.
    - **STOPPED: post-rebase failure:** skip with that reason.
    - **STOPPED: removal refused:** show the status output and ask whether to move,
      delete or keep the files. Only "delete" authorises `--force`, and you run it.
-   - **Landed:** verify it yourself: `git merge-base --is-ancestor task-<n> main`
-     (or the branch is gone and the commits are on `main`) and run the checks on
-     `main`. Review any resolutions the subworker made. If a check fails or a
-     resolution touched logic, treat it as a stop-and-ask.
-4. **Close the task (you)** on `main`:
+   - **Landed:** verify with git, **not by re-running the checks**: `main`'s HEAD
+     equals the checked sha the subworker reported (so the commits are on `main`
+     and nothing moved after the green run). Review any resolutions the subworker
+     made. If the shas differ or a resolution touched logic, treat it as a
+     stop-and-ask.
+5. **Close the task (you)** on `main`:
    - `BL task edit <n> -s Done`
    - `--check-ac` for each AC that the worker's report and your review showed was met
    - check the DoD items
@@ -130,7 +147,8 @@ origin; nothing was pushed."
 
 | Mistake | Reality |
 |---|---|
-| "The worker's tests passed" / "the subworker said green" | Re-run the checks yourself on `main` after each landing. |
+| Re-running the checks "to be sure" (on `main` after the ff, or as coordinator) | A fast-forward doesn't change the tree. Compare shas: landed HEAD = checked HEAD. |
+| Running the checks on a task that was 0 behind `main` | The worker already checked that exact tree. Land it. |
 | Letting the subworker resolve a docs/contracts conflict or edit `backlog/` | It stops and reports. You decide and you write `backlog/`. |
 | Spawning landing subworkers in parallel | They share `main`. One at a time. |
 | Landing an `In Review` task the user didn't approve | `In Review` means waiting for the human. It is not approval. |

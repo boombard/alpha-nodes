@@ -41,10 +41,12 @@ worktrees. The backlog lives in the repo (Backlog.md). There is no Linear.
    (ACs, Interfaces, Global Constraints, Review Focus) and sends **one** round of feedback via
    `orchestration send` if needed. Then it sets the task `In Review` and tells the human.
 4. **Human review in Orca.** Feedback goes to the coordinator, which relays it to the worker.
-5. **Merge.** Merge in dependency order into `main`. After each merge:
+5. **Merge.** Merge in dependency order into `main` (`/backlog-converge`). For each task:
+   - rebase it onto `main`, resolving conflicts with the tests as arbiter
+   - run the full suite **once**, on the rebased tree, and only if the rebase changed
+     anything: a branch already on `main`'s tip was checked by its worker, and a
+     fast-forward lands the tree that was checked, so nothing re-runs the suite after
    - rebase in-flight worker branches
-   - run the full suite
-   - resolve conflicts with the tests as arbiter
 
    Then set the task `Done`, checking ACs and DoD in the task file (`task edit <id> --check-ac N`).
 6. **Repeat** from 1. At a milestone's last task, stop for the **demo gate** described in
@@ -84,8 +86,8 @@ Feedback on task-<id>: <what to change>. Send it to that worker, then tell me wh
 **Merge approved work**
 ```text
 task-<id> (and task-<id>) are approved. Merge them into main in dependency order. For each:
-merge the branch, run uv run pytest, ruff check and pyright, and resolve conflicts with the tests
-as arbiter (ask me if a conflict needs a design decision). Tick its ACs and DoD and mark it Done
+rebase the branch, run uv run pytest, ruff check and pyright once on the rebased tree (skip them if
+it needed no rebase), fast-forward, and resolve conflicts with the tests as arbiter (ask me if a conflict needs a design decision). Tick its ACs and DoD and mark it Done
 in the backlog, then commit. After that, rebase in-flight worker branches onto main and dispatch
 newly unblocked tasks (max 3 in flight). Stop at a milestone demo gate.
 ```
