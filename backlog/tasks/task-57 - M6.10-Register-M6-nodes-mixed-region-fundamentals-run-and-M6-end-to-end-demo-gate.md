@@ -3,10 +3,10 @@ id: TASK-57
 title: >-
   M6.10 Register M6 nodes, mixed-region fundamentals run and M6 end-to-end (demo
   gate)
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T08:18:00Z'
-updated_date: '2026-11-26T08:23:46Z'
+updated_date: '2026-11-26T08:29:58Z'
 labels:
   - finance
 milestone: m-5
@@ -110,3 +110,12 @@ From TASK-69 (user ruling 2026-11-26): in the real mixed-region run, click throu
 
 Worker: dispatch ctx_9558efe7fe03, worktree task-57
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker: registered the 13 M6 nodes/lenses in build_registry; runs/m6_fundamentals.yaml (15 US/UK/EU candidates, dev profile, no reviewer, fundamentals [edgar, yfinance]); scripts/compare_variants.py (compare() -> VariantComparison + click CLI, index/blobs only); test_m6_e2e.py (8 offline tests, yfinance+EDGAR replay, counting FunctionModel). pytest 1245 passed, ruff and pyright clean. Commits f0b2092, 3475292.
+Review: 2 rounds. Round 1 found 3 small issues (vacuous llm_profile assert, obscure elif, yaml header period count and the sed's reliance on the literal nodes: {} line); all fixed in round 2.
+Verdict: meets ACs 1-4; AC5 (demo commands) given in worker_done. The live M6 demo gate run is still for the human.
+Open points: e2e candidates are the 8 tickers with yfinance fixtures plus NOSUCH.L (KO lacks price fixtures); the HSBA.L test accepts ok or abstained; compare agreement only counts candidates that are ok in both runs; compare_variants repeats the aggregator lookup from lensgraph view/build.py (_panel_nodes is private).
+<!-- SECTION:FINAL_SUMMARY:END -->
