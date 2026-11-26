@@ -3,9 +3,10 @@ id: TASK-61
 title: >-
   M6.6b Older-period fallback for latest-point fundamentals, with field_periods
   caveats
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-26T00:02:56Z'
+updated_date: '2026-11-26T01:07:41Z'
 labels:
   - finance
 milestone: m-5
@@ -87,3 +88,9 @@ Out of scope: valuation fields (TASK-54 adopts `latest_complete` and `field_peri
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_104e86b57bc6, worktree task-61
+<!-- SECTION:NOTES:END -->
