@@ -1,9 +1,10 @@
 ---
 id: TASK-54
 title: M6.7 Valuation calcs with fx-converted market cap
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-25T08:17:59Z'
+updated_date: '2026-11-26T05:53:15Z'
 labels:
   - finance
 milestone: m-5
@@ -88,3 +89,9 @@ Out of scope: EV/EBIT (needs debt and cash at the price date; later); as-of warn
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_cc124c9a2f02, worktree task-54 (run run_579c5584161b). Runs in parallel with TASK-62 by user choice despite the finance.md overlap.
+<!-- SECTION:NOTES:END -->

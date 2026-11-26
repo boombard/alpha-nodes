@@ -1,10 +1,10 @@
 ---
 id: TASK-62
 title: 'M6.6c Capital-returns calcs: measurable signatures of a durable advantage'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-26T00:19:44Z'
-updated_date: '2026-11-26T00:28:29Z'
+updated_date: '2026-11-26T05:53:15Z'
 labels:
   - finance
 milestone: m-5
@@ -98,3 +98,9 @@ Out of scope: gross margin (gross profit not ingested); after-tax ROIC (tax expe
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_81cf77ad2f51, worktree task-62 (run run_579c5584161b). Runs in parallel with TASK-54 by user choice despite the finance.md overlap.
+<!-- SECTION:NOTES:END -->
