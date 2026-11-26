@@ -1,10 +1,10 @@
 ---
 id: TASK-55
 title: M6.8 quality_value AI lens with rubric and buffett_persona variant
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-25T08:17:59Z'
-updated_date: '2026-11-26T00:10:16Z'
+updated_date: '2026-11-26T00:36:17Z'
 labels:
   - finance
 milestone: m-5
@@ -86,18 +86,18 @@ Out of scope: registering nodes (M6.10); repeated sampling (TASK-17); 10-K text 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 QualityValue and RecentNews exist as specified; flag codes closed; persona variant selectable and in the memo key
-- [ ] #2 Missing or too-thin annual_fundamentals abstains with no model call; 4 periods gives sufficiency 0.5 and a depth note
-- [ ] #3 The context carries no analyst ratings or price targets; the docstring records the herding and untrusted-text choices
-- [ ] #4 The default rubric states the seven principles neutrally (no investor, company, letter or source names) and is static and first; sources live in the QualityValue docstring; the persona prompt has the no-caricature, no-holdings and evidence-only rules
+- [x] #1 QualityValue and RecentNews exist as specified; flag codes closed; persona variant selectable and in the memo key
+- [x] #2 Missing or too-thin annual_fundamentals abstains with no model call; 4 periods gives sufficiency 0.5 and a depth note
+- [x] #3 The context carries no analyst ratings or price targets; the docstring records the herding and untrusted-text choices
+- [x] #4 The default rubric states the seven principles neutrally (no investor, company, letter or source names) and is static and first; sources live in the QualityValue docstring; the persona prompt has the no-caricature, no-holdings and evidence-only rules
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -114,4 +114,6 @@ Round 1 done (79248c3): neutral default rubric, evidence-only line in both promp
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 Worker summary: QualityValue AI lens (rubric default + buffett_persona variant), RecentNews transform, both prompts; 16 new tests; full suite 905 passed, ruff and pyright clean. Commits 0f11217 (feat) + 3bbfb0e (pyright fix): squash on landing. Review: 0 fix rounds; verdict: approve. ACs 1-4 met (abstain with no model call when annual_fundamentals is missing or below 3 periods; 4 periods -> sufficiency 0.5 and '4 of 8' depth note; profile cut to name/sector/industry/country/business_summary so no analyst fields; persona variant changes prompt hash and memo salt). Rulings: critical_inputs as a pydantic Field default; RecentNews window [reference_day - days, end of reference_day], future items excluded; profile filter in an overridden assess (non-frame, non-Absent profile raises TypeError); finance.md untouched. Coordinator note: the two templates duplicate the rubric and instructions; kept because AINode renders with jinja from_string and hashes only the template file text, so an include would leave memo keys stale. Open for the human: verify the Buffett sources in the rubric (2014, 1996, 2007, 1986 appendix, 1992 letters; Graham ch. 20).
+
+Landed 51d03cc on main (squashed from 3 commits, clean rebase onto TASK-51/53; 991 passed, ruff and pyright clean).
 <!-- SECTION:FINAL_SUMMARY:END -->
