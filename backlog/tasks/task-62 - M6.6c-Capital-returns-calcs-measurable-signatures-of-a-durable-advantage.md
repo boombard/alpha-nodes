@@ -1,10 +1,10 @@
 ---
 id: TASK-62
 title: 'M6.6c Capital-returns calcs: measurable signatures of a durable advantage'
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-26T00:19:44Z'
-updated_date: '2026-11-26T05:53:15Z'
+updated_date: '2026-11-26T06:00:11Z'
 labels:
   - finance
 milestone: m-5
@@ -104,3 +104,9 @@ Out of scope: gross margin (gross profit not ingested); after-tax ROIC (tax expe
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_81cf77ad2f51, worktree task-62 (run run_579c5584161b). Runs in parallel with TASK-54 by user choice despite the finance.md overlap.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker: invested_capital and incremental_return kernels; CapitalReturnsResult (pre-tax ROIC mean/min/std, incremental ROIC over a ~5y base else ~3y, worst operating margin, capex/revenue and capex/D&A); CapitalReturns calc node; quality_value gains the capital_returns input and both prompts point the durable-advantage principle at it ('signs, not proof'); 4 draft glossary entries; finance.md edited in the quality_value calc inputs and pinned-conventions sections only. Commits 7a3e634, d62ca23, 589c6f5 (squash on landing); 1216 passed, ruff and pyright clean. Review: 1 round, 2 findings (_incremental missing from code_deps; _base_three_years_back renamed _base_years_back), both resolved. FundamentalTrend's code_deps now also lists the base helper (code hash changes once; memoize=False). Accepted outside Files: kernels/__init__.py re-export; one line in tests/ai_lens_helpers.py (conflicts trivially with TASK-54's edit to the same tuple; keep both). Verdict: approve.
+<!-- SECTION:FINAL_SUMMARY:END -->
