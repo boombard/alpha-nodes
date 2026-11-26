@@ -1,10 +1,10 @@
 ---
 id: TASK-55
 title: M6.8 quality_value AI lens with rubric and buffett_persona variant
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T08:17:59Z'
-updated_date: '2026-11-26T00:09:19Z'
+updated_date: '2026-11-26T00:10:16Z'
 labels:
   - finance
 milestone: m-5
@@ -106,6 +106,8 @@ Out of scope: registering nodes (M6.10); repeated sampling (TASK-17); 10-K text 
 Worker: dispatch ctx_e7185589db01, worktree task-55 (Orca run run_09eee9a7786f)
 
 Round 1 (human review): neutral rubric without Buffett/Berkshire/letters (priming, KO/AAPL are Berkshire holdings); sources moved to the class docstring and finance.md section 2; evidence-only line; finance.md section 2 added to Files for this round. AC #2 replaced (now listed last).
+
+Round 1 done (79248c3): neutral default rubric, evidence-only line in both prompts, sources in the QualityValue docstring, finance.md section 2 rewritten, tests updated (906 passed). 3 commits, squash on landing. Approved.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
