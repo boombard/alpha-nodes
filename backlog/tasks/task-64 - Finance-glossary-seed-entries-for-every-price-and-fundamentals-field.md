@@ -1,10 +1,10 @@
 ---
 id: TASK-64
 title: 'Finance glossary: seed entries for every price and fundamentals field'
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-26T00:28:00Z'
-updated_date: '2026-11-26T04:12:25Z'
+updated_date: '2026-11-26T04:39:37Z'
 labels:
   - finance
 milestone: m-5
@@ -100,19 +100,19 @@ Design text for finance.md (write it in this task): the approved draft, copied b
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Every citable price and fundamentals result field has exactly one entry; all entries validate and their implemented_by paths resolve
-- [ ] #2 Plans with quality_value and price_vs_fundamentals build: every input field, frame columns included, resolves to an entry; neither lens lists terms
-- [ ] #3 finance.md per-term formulas live in the entries; the conventions keep policy and link them
-- [ ] #5 build_plan binds a dataset fetch node's frame columns (Node.contract), so the profile columns reach the glossary check and the data dictionary
-- [ ] #4 Prompt notes are interpretive, state units, sign and window where relevant, and contain no formulas; prompt templates no longer define field_periods
+- [x] #1 Every citable price and fundamentals result field has exactly one entry; all entries validate and their implemented_by paths resolve
+- [x] #2 Plans with quality_value and price_vs_fundamentals build: every input field, frame columns included, resolves to an entry; neither lens lists terms
+- [x] #3 finance.md per-term formulas live in the entries; the conventions keep policy and link them
+- [x] #4 build_plan binds a dataset fetch node's frame columns (Node.contract), so the profile columns reach the glossary check and the data dictionary
+- [x] #5 Prompt notes are interpretive, state units, sign and window where relevant, and contain no formulas; prompt templates no longer define field_periods
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -127,4 +127,6 @@ Review round 2 (user ruling 2026-11-26): fold the core fetch-contract gap into T
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 Worker (ctx_1ed3c5c919f0; follow-ups ctx_6584a99a984a, ctx_f1d3e34c7d52): 54 draft finance glossary entries + FINANCE_GLOSSARY_DIR; both AI lenses set glossary and declare no terms; field_periods definition dropped from the 3 prompts; finance.md formulas moved into linked entries, new Glossary section; README link. Round 2 (user ruling): Node.contract() (default output), used by build_plan's binding; DatasetFetch/DatasetFetchMany.frame_schema is their contract; finance fetch nodes set it from DATASETS; core.md Glossary documents it. Commits b186408, 5821637, b7e9e59, 7051798 (squash on landing). pytest 1139 passed, ruff clean, pyright 0; the wheel ships the glossary .md files. Review: 2 rounds, 9 findings, all resolved. Accepted outside Files: ai_lens_helpers.py, the two AI lens test files, lensgraph test_ai_lens.py, lensgraph-ui fixtures/toy-run.json (regenerated: only hash fields changed; TASK-43 precedent). Verdict: approve. Open points: (a) Node's source changed, so every hash_source node (calcs, lenses; not fetch nodes) misses the cache once, and both AI prompts change too; (b) the fact meta columns of fetched slices are not in the data dictionary (by design, core.md); (c) TASK-54 AC #5 fills the valuation entries' implemented_by and drops the test helper stand-ins.
+
+Landed 69d9ab1..d140ced on main (squashed to one commit).
 <!-- SECTION:FINAL_SUMMARY:END -->
