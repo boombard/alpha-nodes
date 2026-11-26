@@ -4,7 +4,7 @@ title: Finance fields declare units
 status: In Progress
 assignee: []
 created_date: '2026-11-26T04:35:00Z'
-updated_date: '2026-11-26T07:54:49Z'
+updated_date: '2026-11-26T08:01:42Z'
 labels:
   - finance
 milestone: m-5
@@ -66,4 +66,6 @@ From TASK-67 review (2026-11-26): (1) price_behaviour claim templates were switc
 From TASK-68 (user ruling 2026-11-26): once finance fields declare units, click through unit-bearing cites in a real finance run report in a browser: field tables show display strings (e.g. 15.3%, USD 12.3bn), DataGrid headers carry unit ids, columns sort on raw values.
 
 Worker: dispatch ctx_d93667c4110d, worktree task-69
+
+User ruling 2026-11-26: PriceWindow gains a trading-currency `currency` field so TrendResult.close/ma are prefixed money (Files widened). Review round 1 sent (dispatch ctx_e2951e46125b) from head 001b877.
 <!-- SECTION:NOTES:END -->
