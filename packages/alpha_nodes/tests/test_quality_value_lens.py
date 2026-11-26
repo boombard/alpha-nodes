@@ -1,12 +1,9 @@
 """quality_value AI lens: guard rails, abstention, depth, variants and the static rubric."""
 
-import json
-from collections.abc import Callable
 from datetime import UTC, date, datetime
 from typing import Any
 
 import pandas as pd
-import pydantic_ai.models
 import pytest
 from alpha_nodes.lenses.quality_value import QUALITY_VALUE_FLAGS, QualityValue
 from alpha_nodes.metrics import (
@@ -16,21 +13,15 @@ from alpha_nodes.metrics import (
     ProfitabilityResult,
     ValuationResult,
 )
-from lensgraph.llm import LLMProfile, ProfileRegistry
 from lensgraph.node import NodeContext
 from lensgraph.types import Absent
 from lensgraph.verdict import LensVerdict
 from pydantic_ai.exceptions import UnexpectedModelBehavior
-from pydantic_ai.messages import (
-    ModelMessage,
-    ModelRequest,
-    ModelResponse,
-    SystemPromptPart,
-    TextPart,
-    ToolCallPart,
-    UserPromptPart,
-)
-from pydantic_ai.models.function import AgentInfo, FunctionModel
+from pydantic_ai.messages import SystemPromptPart, UserPromptPart
+
+from .ai_lens_helpers import Scripted, fundamentals, parts, registry_for, window
+
+pytestmark = pytest.mark.usefixtures("forbid_real_model_requests")
 
 GOOD: dict[str, Any] = {
     "status": "ok",
@@ -45,57 +36,6 @@ GOOD: dict[str, Any] = {
     ],
     "flags": [],
 }
-
-
-@pytest.fixture(autouse=True)
-def _forbid_real_model_requests(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(pydantic_ai.models, "ALLOW_MODEL_REQUESTS", False)
-
-
-class Scripted(FunctionModel):
-    """Replays canned answers (last repeats) and records each request's messages."""
-
-    def __init__(self, *payloads: dict[str, Any]) -> None:
-        self.calls: list[list[ModelMessage]] = []
-        self._payloads = payloads
-        super().__init__(self._answer)
-
-    def _answer(self, messages: list[ModelMessage], info: AgentInfo) -> ModelResponse:
-        payload = self._payloads[min(len(self.calls), len(self._payloads) - 1)]
-        self.calls.append(messages)
-        if info.output_tools:
-            return ModelResponse(parts=[ToolCallPart(info.output_tools[0].name, payload)])
-        return ModelResponse(parts=[TextPart(json.dumps(payload))])
-
-
-@pytest.fixture
-def make_model() -> Callable[..., Scripted]:
-    return Scripted
-
-
-def registry_for(model: Scripted) -> ProfileRegistry:
-    return ProfileRegistry(
-        {"test": LLMProfile(name="test", model="test")}, model_overrides={"test": model}
-    )
-
-
-def _window(periods: int) -> dict[str, Any]:
-    return {
-        "periods": periods,
-        "first_period_end": date(2018, 12, 31),
-        "last_period_end": date(2025, 12, 31),
-        "suspect_periods": 0,
-        "currency": "USD",
-    }
-
-
-def fundamentals(periods: int) -> pd.DataFrame:
-    return pd.DataFrame(
-        {
-            "period_end": pd.date_range("2018-12-31", periods=periods, freq="YE"),
-            "revenue": [100.0 + i for i in range(periods)],
-        }
-    )
 
 
 def profile_frame() -> pd.DataFrame:
@@ -131,18 +71,18 @@ def make_inputs(periods: int = 8, **overrides: Any) -> dict[str, Any]:
         "annual_fundamentals": fundamentals(periods),
         "profitability": ProfitabilityResult(
             roe_mean=0.18, roe_min=0.1, roe_std=0.03, op_margin_mean=0.2, op_margin_std=0.02,
-            net_income_cv=0.15, loss_years=0, **_window(periods),
+            net_income_cv=0.15, loss_years=0, **window(periods),
         ),
         "balance_sheet": BalanceSheetResult(
-            debt_to_equity=0.3, interest_cover=12.0, net_debt=5.0, **_window(periods)
+            debt_to_equity=0.3, interest_cover=12.0, net_debt=5.0, **window(periods)
         ),
         "cash_generation": CashGenerationResult(
-            owner_earnings=10.0, fcf=9.0, fcf_conversion=0.9, share_count_cagr=0.0, **_window(periods)
+            owner_earnings=10.0, fcf=9.0, fcf_conversion=0.9, share_count_cagr=0.0, **window(periods)
         ),
         "valuation": ValuationResult(
             price_date=date(2026, 6, 30), close=10.0, trading_currency="USD", fx_rate=1.0,
             market_cap=100.0, earnings_yield=0.07, pe=14.0, owner_earnings_yield=0.08,
-            value_low=90.0, value_high=140.0, price_to_value=0.9, **_window(periods),
+            value_low=90.0, value_high=140.0, price_to_value=0.9, **window(periods),
         ),
         "profile": profile_frame(),
         "recent_news": news_items(),
@@ -157,16 +97,6 @@ async def run_lens(
     lens = lens or QualityValue(profile="test")
     ctx = NodeContext(run_id="r", candidate=None, services={"profiles": registry_for(model)})
     return await lens.run(ctx, **make_inputs(**overrides))
-
-
-def _parts(model: Scripted, part_type: type, call: int = 0) -> str:
-    return "\n".join(
-        str(p.content)  # pyright: ignore[reportAttributeAccessIssue]
-        for m in model.calls[call]
-        if isinstance(m, ModelRequest)
-        for p in m.parts
-        if isinstance(p, part_type)
-    )
 
 
 async def test_ok_verdict_with_valid_cites(make_model):
@@ -211,7 +141,7 @@ async def test_four_periods_gives_half_sufficiency_and_depth_note(make_model):
     v = await run_lens(model, annual_fundamentals=fundamentals(4))
     assert v.status == "ok"
     assert v.input_sufficiency["annual_fundamentals"] == pytest.approx(0.5)
-    assert "4 of 8" in _parts(model, UserPromptPart)
+    assert "4 of 8" in parts(model, UserPromptPart)
 
 
 async def test_persona_variant_changes_prompt_hash_and_memo_salt(make_model):
@@ -244,7 +174,7 @@ EVIDENCE_ONLY = "Judge only from the evidence given"
 async def test_rubric_is_static_and_names_no_investor(make_model):
     model = make_model(GOOD)
     await run_lens(model)
-    system = _parts(model, SystemPromptPart)
+    system = parts(model, SystemPromptPart)
     for heading in PRINCIPLE_HEADINGS:
         assert heading in system
     for banned in ("Buffett", "Berkshire", "letter", "Graham", "Munger"):
@@ -258,7 +188,7 @@ async def test_rubric_is_static_and_names_no_investor(make_model):
 async def test_persona_prompt_has_guardrails(make_model):
     model = make_model(GOOD)
     await run_lens(model, lens=QualityValue(profile="test", variant="buffett_persona"))
-    system = _parts(model, SystemPromptPart)
+    system = parts(model, SystemPromptPart)
     assert "Warren Buffett" in system and "holdings" in system and "folksy" in system
     assert "The Intelligent Investor" in system  # same rubric underneath
     assert EVIDENCE_ONLY in system
@@ -267,7 +197,7 @@ async def test_persona_prompt_has_guardrails(make_model):
 async def test_context_has_no_analyst_fields(make_model):
     model = make_model(GOOD)
     await run_lens(model)
-    user = _parts(model, UserPromptPart)
+    user = parts(model, UserPromptPart)
     assert "Acme plc" in user and "Makes widgets." in user
     for banned in ("recommendation", "targetMeanPrice", "strong_buy", "999.0", "isin", "GB0000000001"):
         assert banned not in user

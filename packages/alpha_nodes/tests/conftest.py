@@ -7,11 +7,14 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
+import pydantic_ai.models
 import pytest
 import yfinance as yf
 from alpha_nodes.datasets import FundamentalsSchema
 from alpha_nodes.providers.yfinance.history import YFHistoryPayload
 from lensgraph.sources import FakeClock
+
+from .ai_lens_helpers import Scripted
 
 if TYPE_CHECKING:
     from .edgar_replay import EdgarReplay
@@ -190,3 +193,15 @@ def edgar_replay(monkeypatch: pytest.MonkeyPatch) -> "EdgarReplay":
     stub = EdgarReplay()
     stub.install(monkeypatch)
     return stub
+
+
+@pytest.fixture
+def make_model() -> Callable[..., Scripted]:
+    """Factory for a scripted stand-in LLM: `make_model(payload, ...)` (see ai_lens_helpers.py)."""
+    return Scripted
+
+
+@pytest.fixture
+def forbid_real_model_requests(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Make any real pydantic-ai model request raise. Opt in with `pytestmark = usefixtures(...)`."""
+    monkeypatch.setattr(pydantic_ai.models, "ALLOW_MODEL_REQUESTS", False)
