@@ -1,10 +1,10 @@
 ---
 id: TASK-51
 title: M6.4 EDGAR company-facts provider for point-in-time US fundamentals
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-25T08:17:58Z'
-updated_date: '2026-11-26T00:11:32Z'
+updated_date: '2026-11-26T00:32:02Z'
 labels:
   - finance
 milestone: m-5
@@ -88,19 +88,19 @@ Out of scope: quarterly periods; 10-K text (`filings_text`, deferred); `ifrs-ful
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 EdgarProvider maps recorded AAPL and KO company facts to FundamentalsSchema rows, one per (period_end, filed_at), known_at = filed_at
-- [ ] #2 Tag priority is explicit; a conflicting lower-priority tag marks the row suspect (tag_conflict), balance mismatch marks suspect
-- [ ] #3 Suffixed and unknown symbols are empty without a request; empty breaker off; 429/403 rate_limited; ticker map cached 7 days
-- [ ] #4 catalog registers edgar; the factory fails naming ALPHA_NODES_SEC_USER_AGENT when unset; the UA is never committed
-- [ ] #5 A store with chain [edgar, fake] serves AAPL from edgar and BP.L from the fallback; fixtures recorded once with a README
+- [x] #1 EdgarProvider maps recorded AAPL and KO company facts to FundamentalsSchema rows, one per (period_end, filed_at), known_at = filed_at
+- [x] #2 Tag priority is explicit; a conflicting lower-priority tag marks the row suspect (tag_conflict), balance mismatch marks suspect
+- [x] #3 Suffixed and unknown symbols are empty without a request; empty breaker off; 429/403 rate_limited; ticker map cached 7 days
+- [x] #4 catalog registers edgar; the factory fails naming ALPHA_NODES_SEC_USER_AGENT when unset; the UA is never committed
+- [x] #5 A store with chain [edgar, fake] serves AAPL from edgar and BP.L from the fallback; fixtures recorded once with a README
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -125,4 +125,6 @@ Round 3 done (a11e267): suspect 8.9%, latest-row total_debt null 1/23 (O). Round
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 EdgarProvider (SEC company facts; ticker->CIK map cached 7 days; suffixed/unknown symbols empty without a request; 429/403 rate_limited, 404 empty; EDGAR_POLICY with the empty breaker off; pit_reliable), companyfacts normaliser, replay fake, catalog 'edgar' factory (ValueError naming ALPHA_NODES_SEC_USER_AGENT), fixtures recorded live 2026-11-26 (AAPL, KO, LAKE; UA via env only, in no file) with a README of findings and measurements, finance.md EDGAR note and Known data limitations. pytest 948 passed, ruff and pyright clean. 7 commits 5e8aeea..5fc387d: squash on landing. Review: 4 rounds. R1: total_debt composition (long-term incl. current + short-term). R2 (human): TAG_MAP split into synonyms (conflict-checked) and fallbacks (different scope, recorded in repairs as fallback:<item>=<tag>, never compared); derived total_liabilities (L&SE - NCI-inclusive equity) and shares_outstanding (issued - treasury, else single dei cover count within 150 days; multi-class -> null with an informational multi_class reason). R3 (human): revenue synonyms Revenues + SalesRevenueNet, ASC 606 and SalesRevenueGoodsNet as fallbacks; capital-lease debt paths; limitations doc. R4 (human): DebtCurrent supplies all current debt with non-current long-term figures; complete paths before partial (9 ordered paths). Measurement over 24 US filers (1,151 rows; script and data not committed): suspect rows 55.3% (first rule) -> 4.4%; remaining tag_conflict = 27 revenue rows (TGT, GE, PG, Revenues vs SalesRevenueNet); partial:total_debt 27 rows (old GE/JNJ/CVX filings). Latest-row nulls over 23 filers: operating_income 9 and interest_expense 9 (banks, insurers, JNJ/PFE, GE, BA, AAPL), capex 6, D&A 2, total_debt 1 (O, a REIT), total_liabilities 1, shares 1; documented, not derived. CVX latest total_debt 50.7bn matches its balance sheet. Verdict: approve. Rulings: a period exists only where a full-year flow fact exists; plain LongTermDebtAndCapitalLeaseObligations before its IncludingCurrentMaturities twin (CVX tags the non-current figure under both); within complete paths the Noncurrent family before the capital-lease family; dei match window 0-150 days; multi_class reason leaves quality ok; edgar_replay fixture in tests/conftest.py (outside Files, accepted; TASK-53 also edits conftest.py elsewhere). Open: the multi-class shares path is untested on real data (no multi-class filer in the sample).
+
+Landed 520dc11 on main (squashed from 8 commits, clean rebase; 948 passed, ruff and pyright clean).
 <!-- SECTION:FINAL_SUMMARY:END -->
