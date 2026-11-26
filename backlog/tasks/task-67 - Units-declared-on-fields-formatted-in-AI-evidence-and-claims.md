@@ -4,7 +4,7 @@ title: 'Units: declared on fields, formatted in AI evidence and claims'
 status: In Review
 assignee: []
 created_date: '2026-11-26T04:34:59Z'
-updated_date: '2026-11-26T04:55:28Z'
+updated_date: '2026-11-26T04:57:40Z'
 labels:
   - core
 milestone: m-5
@@ -85,4 +85,6 @@ Worker: dispatch ctx_5e2b5f6545e1, worktree task-67
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 Worker: core units in lensgraph.units (Unit, 8 generic constants, format_value, unit_of, is_numeric_field, UnitError). LensNode.bind_upstream records the input.field -> Unit map and fails the plan on a unitless numeric field (AI: every field of every input; deterministic: component sources only). render_context formats model fields, list items and frame cells (headers unchanged). Claim templates get value/signed/raw. Provenance.cite_units. memo_salt = unit map + cached renderer fingerprint (AI salt combines). Finance lenses have require_units=False # TASK-69. price_behaviour templates switched {value:+.1%} -> {raw:+.1%} (TASK-69 converts them). Regenerated run-view.ts, toy-run.json, BUILD_INFO.json. Commits 596e74d, 5e362b7; pytest 1189 passed, ruff and pyright clean. Review: 2 rounds. Round 1 had 4 findings (no _SchemaHook test, list items without ids unformatted, memo_salt reads source on every call, format_value signature), all resolved in 5e362b7. Verdict: approve. Open points: bare scalar contracts (e.g. toy growth_rate: float) are not unit-checked and fall back to NUMBER; _SchemaHook depends on pydantic internals (now tested).
+
+Round 2 (doc only, as the human ruled): core.md Units now states the check scope (AI: every numeric input field; deterministic: component sources) and that bare scalar contracts aren't unit-checked (wrap the number in a model). Commit 8f68b1e. 3 commits ahead of main. Verdict: approve, no open findings.
 <!-- SECTION:FINAL_SUMMARY:END -->
