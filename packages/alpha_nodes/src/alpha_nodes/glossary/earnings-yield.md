@@ -5,7 +5,7 @@ abbreviations: []
 aliases: []
 kind: ratio
 fields: [ValuationResult.earnings_yield, ValuationChangeResult.earnings_yield_now, ValuationChangeResult.earnings_yield_then]
-implemented_by: []
+implemented_by: [alpha_nodes.nodes.valuation_calcs.Valuation, alpha_nodes.valuation.valuation_on, alpha_nodes.nodes.valuation_calcs.ValuationChange]
 related: [pe, owner-earnings-yield, market-cap, net-income]
 status: draft
 sources: []

@@ -5,7 +5,7 @@ abbreviations: []
 aliases: []
 kind: ratio
 fields: [ValuationChangeResult.pe_change]
-implemented_by: []
+implemented_by: [alpha_nodes.nodes.valuation_calcs.ValuationChange]
 related: [pe, valuation-dates, earnings-yield]
 status: draft
 sources: []

@@ -5,7 +5,7 @@ abbreviations: []
 aliases: []
 kind: ratio
 fields: [ValuationResult.owner_earnings_yield]
-implemented_by: []
+implemented_by: [alpha_nodes.nodes.valuation_calcs.Valuation, alpha_nodes.valuation.valuation_on]
 related: [owner-earnings, earnings-yield, market-cap]
 status: draft
 sources: []

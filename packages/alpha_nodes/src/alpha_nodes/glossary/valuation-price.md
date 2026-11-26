@@ -5,7 +5,7 @@ abbreviations: []
 aliases: []
 kind: money
 fields: [ValuationResult.price_date, ValuationResult.close, ValuationResult.trading_currency]
-implemented_by: []
+implemented_by: [alpha_nodes.nodes.valuation_calcs.Valuation, alpha_nodes.valuation.valuation_on]
 related: [fx-rate, market-cap]
 status: draft
 sources: []

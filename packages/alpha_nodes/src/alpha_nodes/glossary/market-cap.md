@@ -5,7 +5,7 @@ abbreviations: [mkt cap]
 aliases: []
 kind: money
 fields: [ValuationResult.market_cap]
-implemented_by: []
+implemented_by: [alpha_nodes.nodes.valuation_calcs.Valuation, alpha_nodes.valuation.valuation_on]
 related: [earnings-yield, owner-earnings-yield, shares-outstanding, fx-rate]
 status: draft
 sources: []

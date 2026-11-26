@@ -5,7 +5,7 @@ abbreviations: []
 aliases: []
 kind: money
 fields: [ValuationResult.value_low, ValuationResult.value_high]
-implemented_by: []
+implemented_by: [alpha_nodes.nodes.valuation_calcs.Valuation, alpha_nodes.valuation.valuation_on]
 related: [owner-earnings, price-to-value]
 status: draft
 sources: []

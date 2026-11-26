@@ -475,6 +475,7 @@ with no reporting currency (`no_currency`). `tag_conflict` as above.
   raises `CurrencyMismatch` (`alpha_nodes.money`); see [`fx-rate`](../../packages/alpha_nodes/src/alpha_nodes/glossary/fx-rate.md).
 - **Valuation** (latest known period): [`earnings-yield`](../../packages/alpha_nodes/src/alpha_nodes/glossary/earnings-yield.md), [`pe`](../../packages/alpha_nodes/src/alpha_nodes/glossary/pe.md), [`owner-earnings-yield`](../../packages/alpha_nodes/src/alpha_nodes/glossary/owner-earnings-yield.md),
   [`value-range`](../../packages/alpha_nodes/src/alpha_nodes/glossary/value-range.md) (hurdle rates are params, default 12% low and 8% high) and [`price-to-value`](../../packages/alpha_nodes/src/alpha_nodes/glossary/price-to-value.md).
+  Shares, net income and owner earnings each come from their newest complete period (as above); every valuation field built on an older one is listed in `field_periods`. A missing fx rate gives `fx_rate` and `market_cap` None and every field derived from market cap None (never 1.0); the band needs no fx.
 - **Valuation change:** the same at `as_of` and 252 bars earlier, each with the periods known on its own
   day: [`pe-change`](../../packages/alpha_nodes/src/alpha_nodes/glossary/pe-change.md), [`valuation-dates`](../../packages/alpha_nodes/src/alpha_nodes/glossary/valuation-dates.md).
 - Every fundamentals result reports its window (`periods`, first and last `period_end`,

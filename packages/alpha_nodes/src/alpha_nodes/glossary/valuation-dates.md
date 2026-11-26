@@ -5,7 +5,7 @@ abbreviations: []
 aliases: []
 kind: date
 fields: [ValuationChangeResult.date_now, ValuationChangeResult.date_then]
-implemented_by: []
+implemented_by: [alpha_nodes.nodes.valuation_calcs.ValuationChange]
 related: [pe-change]
 status: draft
 sources: []

@@ -83,12 +83,10 @@ def lens_input_contracts(lens: Any) -> dict[str, Any]:
     """Output contract of every input (required and optional) of an AI lens, by input name.
 
     Each contract is `contract()` of the node that produces the input (a fetch node's is its dataset's frame schema): the registry's
-    node where registered, else the node class in `fundamental_calcs` / `news` (not registered
-    yet). Only `valuation` and `valuation_change` have no node yet, so their result models stand
-    in (TASK-54 adds the nodes; then drop the stand-ins).
+    node where registered, else the node class in `fundamental_calcs` / `valuation_calcs` / `news`
+    (not registered yet).
     """
-    from alpha_nodes import metrics
-    from alpha_nodes.nodes import fundamental_calcs, news
+    from alpha_nodes.nodes import fundamental_calcs, news, valuation_calcs
     from alpha_nodes.registry import build_registry
 
     registry = build_registry()
@@ -96,12 +94,11 @@ def lens_input_contracts(lens: Any) -> dict[str, Any]:
     for cls in (
         fundamental_calcs.AnnualFundamentals, fundamental_calcs.Profitability,
         fundamental_calcs.BalanceSheet, fundamental_calcs.CashGeneration,
-        fundamental_calcs.FundamentalTrend, news.RecentNews,
+        fundamental_calcs.FundamentalTrend, valuation_calcs.Valuation,
+        valuation_calcs.ValuationChange, news.RecentNews,
     ):  # fmt: skip
         producers.setdefault(cls.name, cls)
     contracts = {name: node.contract() for name, node in producers.items()}
-    contracts["valuation"] = metrics.ValuationResult  # stand-in until TASK-54
-    contracts["valuation_change"] = metrics.ValuationChangeResult  # stand-in until TASK-54
     inputs = {**lens.inputs, **lens.optional_inputs}
     return {name: contracts[source] for name, source in inputs.items()}
 

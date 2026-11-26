@@ -5,7 +5,7 @@ abbreviations: []
 aliases: []
 kind: ratio
 fields: [ValuationResult.price_to_value]
-implemented_by: []
+implemented_by: [alpha_nodes.nodes.valuation_calcs.Valuation, alpha_nodes.valuation.valuation_on]
 related: [value-range, market-cap]
 status: draft
 sources: []

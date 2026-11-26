@@ -1,11 +1,19 @@
 """Tests for the price frame adapters (`alpha_nodes.series`)."""
 
 from collections.abc import Callable
+from datetime import date
 
 import pandas as pd
 import pytest
 from alpha_nodes.providers.yfinance.history import YFHistoryPayload, normalise_prices
-from alpha_nodes.series import TotalReturnSchema, total_return, trailing, window_info
+from alpha_nodes.series import (
+    TotalReturnSchema,
+    bars_back,
+    close_on,
+    total_return,
+    trailing,
+    window_info,
+)
 
 Loader = Callable[[str], YFHistoryPayload]
 
@@ -87,3 +95,23 @@ def test_dividends_on_split_basis_on_aapl_fixture(yf_payload: Loader) -> None:
     last = frame["date"].iloc[-1]
     year = frame["dividends"].to_numpy()[(frame["date"] > last - pd.DateOffset(years=1)).to_numpy()]
     assert 0.002 < year.sum() / frame["close"].iloc[-1] < 0.015
+
+
+def test_close_on_takes_last_bar_on_or_before() -> None:
+    prices = _prices([10.0, 11.0, 12.0]).assign(currency="GBP")  # Mon 5, Tue 6, Wed 7 Jan 2026
+    assert close_on(prices, date(2026, 1, 6)) == (date(2026, 1, 6), 11.0, "GBP")
+    assert close_on(prices, date(2026, 1, 10)) == (date(2026, 1, 7), 12.0, "GBP")  # Saturday
+
+
+def test_close_on_none_before_first_bar() -> None:
+    prices = _prices([10.0]).assign(currency="GBP")
+    assert close_on(prices, date(2026, 1, 4)) is None
+    assert close_on(prices.iloc[0:0], date(2026, 1, 4)) is None
+
+
+def test_bars_back() -> None:
+    prices = _prices([1.0, 2.0, 3.0, 4.0])  # 5, 6, 7, 8 Jan 2026
+    assert bars_back(prices, date(2026, 1, 8), 2) == date(2026, 1, 6)
+    assert bars_back(prices, date(2026, 1, 10), 3) == date(2026, 1, 5)  # counts from the last bar on or before
+    assert bars_back(prices, date(2026, 1, 8), 4) is None  # history too short
+    assert bars_back(prices, date(2026, 1, 1), 0) is None  # no bar yet

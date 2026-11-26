@@ -5,6 +5,9 @@ trailing windows in bars and describe a window. All maths lives in `alpha_nodes.
 See documentation/design/finance.md, Calculation layers and Pinned conventions.
 """
 
+from datetime import date
+from typing import cast
+
 import pandas as pd
 import pandera.pandas as pa
 from pandera.typing.pandas import DateTime, Series
@@ -62,3 +65,26 @@ def window_info(frame: pd.DataFrame) -> PriceWindow:
         end=None if empty else frame["date"].iloc[-1].date(),
         suspect_bars=int(frame["suspect"].to_numpy().sum()),
     )
+
+
+def close_on(prices: pd.DataFrame, day: date) -> tuple[date, float, str] | None:
+    """The last bar on or before `day` as `(date, close, currency)`; None when there is none.
+
+    Level-based: the price a valuation on `day` uses (finance.md, Prices and point-in-time).
+    """
+    rows = cast(pd.DataFrame, prices[prices["date"] <= pd.Timestamp(day)])
+    if rows.empty:
+        return None
+    last = rows.loc[rows["date"].idxmax()]
+    return cast(date, pd.Timestamp(last["date"]).date()), float(last["close"]), str(last["currency"])
+
+
+def bars_back(prices: pd.DataFrame, day: date, bars: int) -> date | None:
+    """The date of the bar `bars` sessions before the last bar on or before `day`.
+
+    None when there is no bar on or before `day` or fewer than `bars` earlier bars. Counts bars,
+    not calendar days (finance.md, Pinned conventions).
+    """
+    dates = sorted(d for d in prices["date"] if d <= pd.Timestamp(day))
+    position = len(dates) - 1 - bars
+    return None if position < 0 else cast(date, pd.Timestamp(dates[position]).date())
