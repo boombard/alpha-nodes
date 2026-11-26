@@ -1,9 +1,10 @@
 ---
 id: TASK-66
 title: 'Glossary always on: data dictionary derived from lens inputs'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-26T03:30:50Z'
+updated_date: '2026-11-26T03:36:52Z'
 labels:
   - core
 milestone: m-5
@@ -100,3 +101,9 @@ Expected side effect: every AI lens's rendered prompt changes, so cached AI verd
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_75001e45d79b, worktree task-66
+<!-- SECTION:NOTES:END -->
