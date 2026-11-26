@@ -3,10 +3,10 @@ id: TASK-63
 title: >-
   Glossary mechanism: entry model, loader, validation, export, opt-in prompt
   notes
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-26T00:27:59Z'
-updated_date: '2026-11-26T00:41:16Z'
+updated_date: '2026-11-26T00:48:48Z'
 labels:
   - core
 milestone: m-5
@@ -185,3 +185,9 @@ reformatting entries):
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_fe7fafeeab27, worktree task-63
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker: lensgraph glossary.py (GlossaryEntry, Glossary.load with validation, prompt_block, content_hash, export/GlossaryExport, by_field, check_imports), AINode glossary/glossary_terms/use_glossary with the block appended after the static template, LLMProfile.glossary (local on), lensgraph glossary CLI, 3 toy entries, core.md Glossary section, all listed tests. Files beyond the list: verdict.py (Provenance.glossary_terms, coordinator-approved), regenerated run-view.ts, lensgraph-ui fixtures/toy-run.json and view/app/BUILD_INFO.json (schema hash checks require them); AINode tests live in test_ai_lens.py. Review: 1 round, 3 findings, all resolved in 45d8c1e: (1) core.md Memoization now says rendered-system-prompt hash; (2) escaped \$ allowed in math balance and prompt notes (test_escaped_dollar_allowed, doc line); (3) CommonMark autolinks no longer flagged as HTML (test_autolink_is_not_html). Commits: 4dbf0c0, 45d8c1e. pytest 1019 passed, ruff and pyright clean. Verdict: approve. Open points: prompt hash is now over the rendered system prompt, so every cached AI verdict misses once after landing; caps 60 words (note) / 30 (summary), any unescaped $ banned in prompt notes; an escaped \$ in a prompt note reaches the LLM with its backslash; _split_sections would also split on '## ' lines inside fenced code (unlikely in entries).
+<!-- SECTION:FINAL_SUMMARY:END -->

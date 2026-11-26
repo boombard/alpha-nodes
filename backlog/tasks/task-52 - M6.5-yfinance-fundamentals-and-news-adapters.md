@@ -1,10 +1,10 @@
 ---
 id: TASK-52
 title: M6.5 yfinance fundamentals and news adapters
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-25T08:17:58Z'
-updated_date: '2026-11-26T00:41:15Z'
+updated_date: '2026-11-26T00:48:48Z'
 labels:
   - finance
 milestone: m-5
@@ -104,3 +104,9 @@ Out of scope: quarterly statements; EDGAR (M6.4); analyst recommendations or pri
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_b5e3a004af37, worktree task-52
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker: YFStatementsPayload/payload_from_ticker_statements/normalise_fundamentals and YFNewsPayload/normalise_news, both datasets wired into YFinanceProvider (pit_reliable false), recorder and canary extended (fundamentals invariants), 9 fundamentals + 9 news fixtures recorded live once (--only), canary run live once (exit 0; capex>=0, 4 annual periods, financialCurrency present on all nine), README and finance.md findings (capex negative on all nine; statements carry no currency; HSBA.L no operating income; oldest of 5 columns 85-98% NaN; netIncomeToCommon is TTM). Review: 0 rounds, no findings. Commit: 97478e7 (29 files, ~900 lines excluding fixtures). pytest 1049 passed, ruff and pyright clean. Verdict: approve. Open points / rulings to check: (1) rows rejected for no_currency carry currency 'XXX' (ISO 4217 no-currency) because the schema requires a major ISO code; (2) a period sparse in any statement is dropped from all three; (3) scale_mismatch and no_currency reject every row, balance_mismatch is per period; (4) an unrecognised financialCurrency code (to_major ValueError) is also reported as no_currency; (5) news items missing id, pubDate or title are skipped, duplicate ids keep the first; (6) process: the worker implemented before the red test run, so TDD was not followed for this task.
+<!-- SECTION:FINAL_SUMMARY:END -->
