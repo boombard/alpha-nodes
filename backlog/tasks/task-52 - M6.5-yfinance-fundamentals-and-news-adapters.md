@@ -1,10 +1,10 @@
 ---
 id: TASK-52
 title: M6.5 yfinance fundamentals and news adapters
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-25T08:17:58Z'
-updated_date: '2026-11-26T01:03:10Z'
+updated_date: '2026-11-26T01:05:53Z'
 labels:
   - finance
 milestone: m-5
@@ -85,18 +85,18 @@ Out of scope: quarterly statements; EDGAR (M6.4); analyst recommendations or pri
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 YFinanceProvider serves fundamentals (annual statements + financialCurrency) and news; pit_reliable false for both
-- [ ] #2 Normalisation merges statements on period_end, drops >70% NaN periods, stores capex positive, converts minor units
-- [ ] #3 Checks: balance_mismatch suspect, scale_mismatch and no_currency rejected; all-empty statements are a transient error
-- [ ] #4 Fixtures recorded for the nine canaries incl. HSBA.L (bank); canary has fundamentals invariants; README findings recorded
+- [x] #1 YFinanceProvider serves fundamentals (annual statements + financialCurrency) and news; pit_reliable false for both
+- [x] #2 Normalisation merges statements on period_end, drops >70% NaN periods, stores capex positive, converts minor units
+- [x] #3 Checks: balance_mismatch suspect, scale_mismatch and no_currency rejected; all-empty statements are a transient error
+- [x] #4 Fixtures recorded for the nine canaries incl. HSBA.L (bank); canary has fundamentals invariants; README findings recorded
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -113,4 +113,6 @@ Human review round 1 resolved in 44ef844: FundamentalsSchema.currency nullable (
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 Worker: YFStatementsPayload/payload_from_ticker_statements/normalise_fundamentals and YFNewsPayload/normalise_news, both datasets wired into YFinanceProvider (pit_reliable false), recorder and canary extended (fundamentals invariants), 9 fundamentals + 9 news fixtures recorded live once (--only), canary run live once (exit 0; capex>=0, 4 annual periods, financialCurrency present on all nine), README and finance.md findings (capex negative on all nine; statements carry no currency; HSBA.L no operating income; oldest of 5 columns 85-98% NaN; netIncomeToCommon is TTM). Review: 0 rounds, no findings. Commit: 97478e7 (29 files, ~900 lines excluding fixtures). pytest 1049 passed, ruff and pyright clean. Verdict: approve. Open points / rulings to check: (1) rows rejected for no_currency carry currency 'XXX' (ISO 4217 no-currency) because the schema requires a major ISO code; (2) a period sparse in any statement is dropped from all three; (3) scale_mismatch and no_currency reject every row, balance_mismatch is per period; (4) an unrecognised financialCurrency code (to_major ValueError) is also reported as no_currency; (5) news items missing id, pubDate or title are skipped, duplicate ids keep the first; (6) process: the worker implemented before the red test run, so TDD was not followed for this task.
+
+Landed 140f729 on main (squashed from 97478e7, 44ef844).
 <!-- SECTION:FINAL_SUMMARY:END -->
