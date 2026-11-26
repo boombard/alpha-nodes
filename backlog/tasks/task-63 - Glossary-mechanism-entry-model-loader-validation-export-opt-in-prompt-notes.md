@@ -3,10 +3,10 @@ id: TASK-63
 title: >-
   Glossary mechanism: entry model, loader, validation, export, opt-in prompt
   notes
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-26T00:27:59Z'
-updated_date: '2026-11-26T00:28:12Z'
+updated_date: '2026-11-26T00:41:16Z'
 labels:
   - core
 milestone: m-5
@@ -179,3 +179,9 @@ reformatting entries):
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_fe7fafeeab27, worktree task-63
+<!-- SECTION:NOTES:END -->
