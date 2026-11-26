@@ -1,10 +1,10 @@
 ---
 id: TASK-66
 title: 'Glossary always on: data dictionary derived from lens inputs'
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-26T03:30:50Z'
-updated_date: '2026-11-26T03:36:52Z'
+updated_date: '2026-11-26T03:46:05Z'
 labels:
   - core
 milestone: m-5
@@ -107,3 +107,9 @@ Expected side effect: every AI lens's rendered prompt changes, so cached AI verd
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_75001e45d79b, worktree task-66
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker (Sonnet, worktree task-66, commits 1a9e4e0 + 5f2be49): Glossary.term_for (MRO walk), whole-model claims, unresolved_claims, dictionary_block replacing prompt_block/by_field; Node.bind_upstream called by build_plan with resolved (replacement-aware) contracts; AINode.glossary is a directory loaded at bind, glossary_concepts, use_glossary=True ablation-only; LLMProfile.glossary removed; unbound AI node with glossary raises. Checks: pytest 1125 passed, ruff and pyright clean (worker-reported). core.md needed no changes. UI fixture toy-run.json regenerated (lens_version/dossier hashes only; AINode source is hashed). Review: 2 rounds. Round 1 fixed: pandera frame fields named by attribute (alias-safe, Index excluded) consistently across model_fields/term_for/unresolved_claims; unknown glossary_concepts error names the lens. Verdict: approve. Rulings: claims match on the class that declares the field (subclass claim on an inherited field is reported stale by unresolved_claims); concept lines '- (kind): **Name**: note' with no paths; toy glossary unchanged (toy AI lens inputs are float + bare list, no fields), tests define GrowthResult/list[ToxNote] nodes locally.
+<!-- SECTION:FINAL_SUMMARY:END -->
