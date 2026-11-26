@@ -26,12 +26,14 @@ Finance declares units (core.md "Units"; finance.md "Units and currency are data
 ## Files
 - Modify: `packages/alpha_nodes/src/alpha_nodes/units.py` (finance units: `MONEY` with `prefix_field="currency"`, `MONEY_PER_SHARE`, `SHARES`, and a trading-currency variant if a result has a trading-currency field; `FieldKind` removed), `datasets.py` (numeric columns `metadata={"unit": ...}`; non-numeric columns lose `kind`), `statements.py` (`AnnualFundamentalsSchema` columns), `metrics.py` (every numeric field, incl. Valuation and CapitalReturns), `lenses/price_behaviour.py` (claim templates use `{signed}` / `{value}`)
 - Modify: glossary entries in `packages/alpha_nodes/src/alpha_nodes/glossary/` (drop unit restatements such as "0.15 means 15%"; keep the meaning of signs and multiples), `documentation/design/finance.md` (only if wording differs)
+- Modify (DRY follow-up from TASK-54 review): one public scalar-helper module for the nan-to-None and scalar-ratio glue (e.g. `packages/alpha_nodes/src/alpha_nodes/scalars.py`: `opt`, `ratio`), used by `nodes/price_calcs.py`, `nodes/fundamental_calcs.py`, `valuation.py` and `nodes/valuation_calcs.py` in place of their private `_opt` / `_ratio` copies (update their `code_deps`); test `packages/alpha_nodes/tests/test_scalars.py`
 - Remove: the `require_units = False  # TASK-69` lines TASK-67 left on the finance lenses
 - Test: `packages/alpha_nodes/tests/test_units.py` (new or extended), `test_datasets.py`, `test_metrics.py`, `test_glossary_finance.py`, `test_price_behaviour*.py`
 
 ## Steps
 - [ ] Failing tests: `test_every_numeric_result_field_has_a_unit` (all metrics models), `test_every_numeric_dataset_column_has_a_unit`, `test_money_fields_prefix_an_existing_currency_field`, `test_ai_lens_plans_build_with_units`, `test_price_behaviour_claim_text` (e.g. "12-1 month total return +15.3%"), `test_prompt_notes_restate_no_units` (no `\d+(\.\d+)? means \d+%`).
 - [ ] Run. Expected: FAIL.
+- [ ] DRY: move `_opt` / `_ratio` into the shared scalar-helper module (tests first in `test_scalars.py`) and switch all four callers to it; no behaviour change.
 - [ ] Implement. Wherever a money field's currency isn't the window's `currency` (trading vs reporting), ask; don't guess.
 - [ ] Run `uv run pytest -q`, `uv run ruff check`, `uv run pyright`. Expected: PASS. Render one quality_value user message from a fixture and paste a short excerpt into the summary.
 - [ ] Commit: `feat(alpha_nodes): finance fields declare units`.
@@ -45,6 +47,7 @@ Expected side effect: the evidence of every finance lens changes, so their verdi
 - [ ] #2 Money fields prefix an existing currency field (trading vs reporting resolved, not guessed)
 - [ ] #3 price_behaviour claims and AI evidence show formatted values
 - [ ] #4 Glossary prompt notes no longer restate units
+- [ ] #5 One shared scalar-helper module replaces the private `_opt` / `_ratio` copies in price_calcs, fundamental_calcs, valuation and valuation_calcs
 <!-- AC:END -->
 
 ## Definition of Done
