@@ -251,6 +251,11 @@ when `period_ending` is missing; first-writer-wins alias collisions.
     so the lens's weight and the dossier's confidence (see core.md, aggregation).
   - A paid deep-history provider can be added later as one adapter.
   - Fundamentals-based *backtests* are US-only. Price-based backtests work for all regions.
+- **EDGAR gaps by industry:** banks, insurers and REITs often lack `total_debt`, `capex` and `interest_expense` under
+  the mapped tags, and banks, insurers and some pharma (JNJ, PFE) report no operating income line. These fields stay
+  None; there is no derivation (revenue minus costs does not reconcile to pre-tax income), so operating margin and
+  interest cover are None for them. Measured on 23 large filers (tests/fixtures/edgar/README.md): in the latest filing
+  operating income is missing for 9, interest expense for 9, capex for 6, total debt for 1.
 - **Survivorship bias**: `screen` lists only currently trading securities. As-of
   universes are biased until a delisted-securities source is added (typically paid).
 - yfinance news covers only recent items. News-dependent lenses can't be backtested (they're AI anyway).
@@ -392,14 +397,35 @@ EPS is computed (`net_income / shares_diluted`), never ingested (data quality pr
   `us-gaap` 10-K filers only. Entities are Yahoo symbols; a symbol with an exchange suffix
   is `empty` without a request, and so is a ticker missing from SEC's ticker map (cached in the
   provider cache dir, 7 days). Annual facts: form 10-K or 10-K/A, `fp == "FY"`, and for flow
-  items a duration of 350–380 days. A curated map gives each canonical item an ordered list of
-  `us-gaap` tags; per (period, filing) the first tag with a value is used, and when a later tag
-  in the list also has a value that differs by more than 1%, the row is `suspect`
+  items a duration of 350–380 days. A curated map gives each canonical item ordered *synonym* `us-gaap` tags (the same quantity under
+  other names or eras) and *fallback* tags (a different scope); per (period, filing) the first synonym with a value is
+  used, and when a later synonym also has a value that differs by more than 1%, the row is `suspect`
   (`tag_conflict:<item>`). Never first-writer-wins silently. User-Agent from
   `ALPHA_NODES_SEC_USER_AGENT` (never committed); the factory fails clearly when it is unset.
   Rate limit: SEC allows 10 requests/s; declare concurrency 2, 5/s. **The empty breaker is off**
   (`max_consecutive_empty=None`): a UK/European universe is all `empty` for EDGAR by design.
   `pit_reliable=true`.
+  *Verified 2026-11-26 on recorded AAPL, KO and LAKE facts (tests/fixtures/edgar/README.md):* the design holds
+  (each 10-K re-reports two to three prior years, so most periods have several filings). Corrections: a 10-K also
+  carries ~90-day `fp == "FY"` quarter facts and off-period instants, so a period exists only where some flow item
+  has a full-year fact; revenue tags change over time (`SalesRevenueNet`/`SalesRevenueGoodsNet` before 2016-18,
+  then `Revenues` or the ASC 606 tag), and some filers never tag `Liabilities` or `CommonStockSharesOutstanding` (KO): `total_liabilities` is then
+  `LiabilitiesAndStockholdersEquity - total_equity` when `total_equity` is the NCI-inclusive tag (`derived:total_liabilities`),
+  else null, and `shares_outstanding` is `CommonStockSharesIssued` minus treasury shares, else the same filing's single
+  `dei` cover-page count (`fallback:shares_outstanding=dei_cover`); several cover counts (share classes) leave it null
+  with reason `multi_class:shares_outstanding` on an otherwise `ok` row. Different tags in one filing are usually different
+  measures, so each item's tags are split into *synonyms* (conflict-checked as above) and *fallbacks* (a different scope,
+  used only when no synonym has a value, never compared, recorded in `repairs` as `fallback:<item>=<tag>`). `total_debt` is composed, not
+  first-tag-wins: `LongTermDebt` (incl. current maturities; else `LongTermDebtNoncurrent` + `LongTermDebtCurrent`; Noncurrent
+  alone marks the row `suspect`, `partial:total_debt`; else the non-current `LongTermDebtAndCapitalLeaseObligations` + its
+  current tag, or alone as `partial:total_debt`, or its `...IncludingCurrentMaturities` twin) plus short-term borrowings
+  (`ShortTermBorrowings`, else `CommercialPaper`, else 0); as a last resort the all-in `DebtAndCapitalLeaseObligations`
+  alone. When a non-current long-term figure is used and `DebtCurrent` (all current debt) is tagged, `DebtCurrent` is its current
+  part and nothing else is added; a complete composition always beats a partial one. Each non-plain path is recorded in `repairs`. This matches Yahoo's "Total Debt"; finance leases are included on the
+  capital-lease paths, operating lease liabilities are excluded. Revenue: `Revenues` (total, incl. leasing and finance income)
+  and `SalesRevenueNet` are synonyms; the narrower ASC 606 contract-revenue tags are fallbacks. A company-facts 404 is `empty`.
+  The ticker map is cached with its fetch time inside `company_tickers.json` in the provider cache dir.
+  10-K text (`filings_text`) is deferred.
 - `YFinanceProvider` adds `fundamentals` (annual income statement, balance sheet and cash
   flow merged on `period_end`, plus `financialCurrency` and `.info` net income for the scale
   check) and `news`. An empty statement set is a transient `error`; an unknown symbol `empty`.

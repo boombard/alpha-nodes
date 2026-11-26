@@ -13,6 +13,7 @@ from alpha_nodes.providers.yfinance.history import YFHistoryPayload
 from lensgraph.sources import FakeClock
 
 if TYPE_CHECKING:
+    from .edgar_replay import EdgarReplay
     from .yf_replay import YFReplay
 
 YF_FIXTURES = Path(__file__).parent / "fixtures" / "yfinance"
@@ -156,3 +157,13 @@ def news_frame() -> pd.DataFrame:
             "summary": ["Profits rose.", None],
         }
     )
+
+
+@pytest.fixture
+def edgar_replay(monkeypatch: pytest.MonkeyPatch) -> "EdgarReplay":
+    """SEC's HTTP API replaced by the recorded fixtures (see edgar_replay.py)."""
+    from .edgar_replay import EdgarReplay
+
+    stub = EdgarReplay()
+    stub.install(monkeypatch)
+    return stub
