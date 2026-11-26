@@ -4,7 +4,7 @@ title: M6.9 price_vs_fundamentals AI lens (divergence check)
 status: In Review
 assignee: []
 created_date: '2026-11-25T08:18:00Z'
-updated_date: '2026-11-26T00:56:13Z'
+updated_date: '2026-11-26T00:57:04Z'
 labels:
   - finance
 milestone: m-5
@@ -83,6 +83,8 @@ Out of scope: registering nodes (M6.10); quarterly trends.
 Worker: dispatch ctx_1bb7f1d2447d, worktree task-56
 
 Human review round 1 sent (dispatch ctx_bcca3f37f72c): fundamentals() helper takes revenue_step; PvF test frame shows falling revenue.
+
+Human review round 1 resolved in 6e2eaea: fundamentals(periods, *, revenue_step=1.0); PvF tests use falling_fundamentals() (step -1). Commits now 559d0e9, 142a4a6, 6e2eaea. Verdict: approve.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

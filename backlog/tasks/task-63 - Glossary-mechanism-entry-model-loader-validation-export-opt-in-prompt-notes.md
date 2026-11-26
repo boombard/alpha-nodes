@@ -6,7 +6,7 @@ title: >-
 status: In Review
 assignee: []
 created_date: '2026-11-26T00:27:59Z'
-updated_date: '2026-11-26T00:56:14Z'
+updated_date: '2026-11-26T00:57:04Z'
 labels:
   - core
 milestone: m-5
@@ -186,6 +186,8 @@ reformatting entries):
 Worker: dispatch ctx_fe7fafeeab27, worktree task-63
 
 Human review round 1 sent (dispatch ctx_622df1bf6fed): prompt_block unescapes \$ to $.
+
+Human review round 1 resolved in 7ec475e: prompt_block unescapes \$ (entries stay verbatim), test_prompt_block_unescapes_dollar, core.md clause. Commits now 4dbf0c0, 45d8c1e, 7ec475e. Verdict: approve. Nit left: the unescape uses chr(92)+'$' instead of reusing _ESCAPED_DOLLAR.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
