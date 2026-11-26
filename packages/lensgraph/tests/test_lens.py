@@ -319,3 +319,101 @@ def test_critical_inputs_settable_per_run(toy_registry: NodeRegistry, toy_candid
 
     base = memo_key({})
     assert memo_key({"toy_lens": {"critical_inputs": ["tox_notes"]}}) != base
+
+
+def _lens_over(node_cls, *, require_units: bool = True):
+    """A lens reading the `culture` input from `node_cls`, as a plan build binds it."""
+    from lensgraph.types import CandidateRef
+
+    class CultureLens(LensNode):
+        name: ClassVar[str] = "culture_lens"
+        lens_name: ClassVar[str] = "culture"
+        inputs: ClassVar[dict[str, str]] = {"culture": "culture"}
+
+        def assess(self, ctx, citables, **inputs: Any) -> LensAssessment:
+            return LensAssessment(
+                status="ok",
+                stance=1,
+                conviction="low",
+                claims=[Claim(text="t", direction=1, cites=["culture.yield_frac", "culture.volume"])],
+            )
+
+    CultureLens.require_units = require_units
+    registry = NodeRegistry()
+    registry.register(node_cls)
+    registry.register(CultureLens)
+    plan_args = (["culture_lens"], registry, [CandidateRef(id="S1")])
+    return CultureLens, registry, plan_args
+
+
+def test_numeric_field_without_unit_fails_plan():
+    from lensgraph.graph import build_plan
+    from lensgraph.units import UnitError
+    from toy.unit_models import BareCultureNode
+
+    _, _, args = _lens_over(BareCultureNode)
+    with pytest.raises(UnitError) as err:
+        build_plan(*args[:3])
+    message = str(err.value)
+    assert "culture_lens" in message and "'culture'" in message and "'doubling'" in message
+    assert "yield_frac" not in message  # the annotated field is fine
+
+
+def test_bool_and_date_fields_need_no_unit():
+    from lensgraph.graph import build_plan
+    from toy.unit_models import CultureNode
+
+    _, _, args = _lens_over(CultureNode)
+    build_plan(*args[:3])  # Culture has bool and str fields without units
+
+
+def test_require_units_false_skips_the_check():
+    from lensgraph.graph import build_plan
+    from toy.unit_models import BareCultureNode
+
+    _, _, args = _lens_over(BareCultureNode, require_units=False)
+    build_plan(*args[:3])
+
+
+def _bound(node_cls):
+    cls, _, _ = _lens_over(node_cls)
+    lens = cls()
+    lens.bind_upstream({"culture": node_cls.contract()})
+    return lens
+
+
+def test_provenance_records_cite_units():
+    import asyncio
+
+    from lensgraph.units import FRACTION
+    from toy.unit_models import Culture, CultureNode
+
+    lens = _bound(CultureNode)
+    ctx = NodeContext(run_id="r", candidate=None, input_hashes={})
+    verdict = asyncio.run(lens.run(ctx, culture=Culture(yield_frac=0.1)))
+    assert set(verdict.provenance.cite_units) == {"culture.yield_frac", "culture.volume"}
+    assert verdict.provenance.cite_units["culture.yield_frac"] == FRACTION
+    # round-trips through JSON so the run view can read it from the index
+    again = LensVerdict.model_validate_json(verdict.model_dump_json())
+    assert again.provenance.cite_units == verdict.provenance.cite_units
+
+
+def test_unit_change_changes_memo_salt():
+    from lensgraph.units import Unit
+    from toy.unit_models import CultureNode
+
+    lens = _bound(CultureNode)
+    before = lens.memo_salt({})
+    lens._units = {**lens._units, "culture.yield_frac": Unit(id="fraction", style="number")}
+    assert lens.memo_salt({}) != before
+
+
+def test_unrelated_unit_change_keeps_memo_salt():
+    from toy.unit_models import CultureNode
+
+    lens = _bound(CultureNode)
+    other = _bound(CultureNode)
+    before = lens.memo_salt({})
+    other._units = {**other._units, "elsewhere.x": next(iter(other._units.values()))}  # another lens's units
+    assert lens.memo_salt({}) == before
+    assert other.memo_salt({}) != before  # ... but a lens that sees them does change

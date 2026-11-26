@@ -73,12 +73,13 @@
                 "as_of": null,
                 "attempts": 0,
                 "backtest_valid": true,
+                "cite_units": {},
                 "glossary_terms": [],
                 "input_hashes": {
                   "growth_rate": "2ffde053d982db220b1c7b5881cc79d08ce963330f02dda2b19e4922f6ab2cfe"
                 },
                 "input_tokens": 0,
-                "lens_version": "68da38e2e264ecaf",
+                "lens_version": "de9aa3dc97d2664c",
                 "model": null,
                 "model_settings": {},
                 "output_tokens": 0,
@@ -116,13 +117,14 @@
                 "as_of": null,
                 "attempts": 1,
                 "backtest_valid": true,
+                "cite_units": {},
                 "glossary_terms": [],
                 "input_hashes": {
                   "growth_rate": "2ffde053d982db220b1c7b5881cc79d08ce963330f02dda2b19e4922f6ab2cfe",
                   "tox_notes": "60290af994e9abf7f8bed9a787b481324432bb09c54d7af5dbdf61804fdbd282"
                 },
                 "input_tokens": 153,
-                "lens_version": "9addff824d6a1f88",
+                "lens_version": "cea26cfb72d3ff7e",
                 "model": "function:_scripted:",
                 "model_settings": {},
                 "output_tokens": 20,
@@ -158,9 +160,10 @@
             "as_of": null,
             "attempts": 1,
             "backtest_valid": true,
+            "cite_units": {},
             "glossary_terms": [],
             "input_hashes": {
-              "dossier": "1c1b3b7c5af5caa059b5aace8a949ac334a3e67904b0a7138d24226db23ee629"
+              "dossier": "ec8ceeab4ed1e8bcf3e790b1108ce3956fd2db091804d716b9764f0b4c98100f"
             },
             "input_tokens": 219,
             "lens_version": "f396f830e279d30e",
@@ -242,12 +245,13 @@
                 "as_of": null,
                 "attempts": 0,
                 "backtest_valid": true,
+                "cite_units": {},
                 "glossary_terms": [],
                 "input_hashes": {
                   "growth_rate": "ba11a289db070b309f4bbdd7151cf2af50703deacbc236f1fd34310fe369a312"
                 },
                 "input_tokens": 0,
-                "lens_version": "68da38e2e264ecaf",
+                "lens_version": "de9aa3dc97d2664c",
                 "model": null,
                 "model_settings": {},
                 "output_tokens": 0,
@@ -277,13 +281,14 @@
                 "as_of": null,
                 "attempts": 0,
                 "backtest_valid": true,
+                "cite_units": {},
                 "glossary_terms": [],
                 "input_hashes": {
                   "growth_rate": "ba11a289db070b309f4bbdd7151cf2af50703deacbc236f1fd34310fe369a312",
                   "tox_notes": "5c28d529a964745c7ba2651b5591b0935543c054e7b00d25ed2139686c4a8ede"
                 },
                 "input_tokens": 0,
-                "lens_version": "9addff824d6a1f88",
+                "lens_version": "cea26cfb72d3ff7e",
                 "model": null,
                 "model_settings": {},
                 "output_tokens": 0,
@@ -319,9 +324,10 @@
             "as_of": null,
             "attempts": 1,
             "backtest_valid": true,
+            "cite_units": {},
             "glossary_terms": [],
             "input_hashes": {
-              "dossier": "5f8a2e22750d85d7a1dab9ed24dd7ed807cab20b37fdbc0d906ea0ed85e29430"
+              "dossier": "43a37a64b75ee6df4a5320ac4539837e81ee5b6c731cef641c885e212076d2f4"
             },
             "input_tokens": 209,
             "lens_version": "f396f830e279d30e",
@@ -383,10 +389,11 @@
                 "as_of": null,
                 "attempts": 0,
                 "backtest_valid": true,
+                "cite_units": {},
                 "glossary_terms": [],
                 "input_hashes": {},
                 "input_tokens": 0,
-                "lens_version": "68da38e2e264ecaf",
+                "lens_version": "de9aa3dc97d2664c",
                 "model": null,
                 "model_settings": {},
                 "output_tokens": 0,
@@ -413,10 +420,11 @@
                 "as_of": null,
                 "attempts": 0,
                 "backtest_valid": true,
+                "cite_units": {},
                 "glossary_terms": [],
                 "input_hashes": {},
                 "input_tokens": 0,
-                "lens_version": "9addff824d6a1f88",
+                "lens_version": "cea26cfb72d3ff7e",
                 "model": null,
                 "model_settings": {},
                 "output_tokens": 0,
@@ -452,9 +460,10 @@
             "as_of": null,
             "attempts": 1,
             "backtest_valid": true,
+            "cite_units": {},
             "glossary_terms": [],
             "input_hashes": {
-              "dossier": "7e57ec2f5e30a5008f15cbe92e53c53d1d0e727a4b7de16fb769209110594e1d"
+              "dossier": "a7e6c3c32fb8ef55b9cdc18b03994c8ef65e08e2edeb34371394274aa75e3361"
             },
             "input_tokens": 208,
             "lens_version": "f396f830e279d30e",

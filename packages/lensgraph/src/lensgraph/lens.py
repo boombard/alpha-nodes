@@ -4,15 +4,27 @@ See documentation/design/core.md, Verdicts and dossiers.
 """
 
 import asyncio
+import functools
 import inspect
+from collections.abc import Mapping
 from typing import Any, ClassVar, Literal, Self
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, PrivateAttr, model_validator
 
+from . import context, units
 from .citations import citable_ids
+from .glossary import contract_model, model_fields
+from .hashing import content_hash
 from .node import Node, NodeContext
 from .types import Absent, ContractViolation, Failed
+from .units import Unit, UnitError, is_numeric_field, unit_of
 from .verdict import Claim, Conviction, Flag, LensVerdict, Provenance, Stance
+
+
+@functools.cache
+def _renderer_fingerprint() -> str:
+    """Hash of the formatter and evidence renderer source, computed once per process."""
+    return content_hash([inspect.getsource(units), inspect.getsource(context)])
 
 
 class DepthRequirement(BaseModel):
@@ -68,6 +80,67 @@ class LensNode(Node):
 
     critical_inputs: frozenset[str] = frozenset()  # input names the lens can't judge without
     min_coverage: float = Field(default=0.0, ge=0.0, le=1.0)  # abstain below this coverage
+
+    # False skips the plan-build unit check (temporary, until a domain annotates its fields).
+    require_units: ClassVar[bool] = True
+
+    _units: dict[str, Unit] = PrivateAttr(default_factory=dict)  # "input.field" -> unit, set by bind_upstream
+
+    def _unit_scope(self) -> set[str] | None:
+        """Paths (`input.field`) that must carry a unit if numeric; None means every field of every input."""
+        return None
+
+    def bind_upstream(self, outputs: Mapping[str, Any]) -> None:
+        """Record the unit of every input field and, if `require_units`, check the numeric ones.
+
+        A numeric field (int or float, not bool) in scope without a unit raises `UnitError` naming
+        this lens, the input and the field. The map feeds claim and evidence formatting, the memo
+        salt and the verdict's `cite_units`. See core.md, Units.
+        """
+        bound: dict[str, Unit] = {}
+        missing: dict[str, str] = {}  # path -> message
+        for input_name, output in outputs.items():
+            model = contract_model(output)
+            if model is None:
+                continue
+            for field in model_fields(model):
+                path = f"{input_name}.{field}"
+                unit = unit_of(model, field)
+                if unit is not None:
+                    bound[path] = unit
+                elif is_numeric_field(model, field):
+                    missing[path] = (
+                        f"{self.name}: input {input_name!r} field {field!r} ({model.__name__}) "
+                        "is numeric but declares no unit"
+                    )
+        self._units = bound
+        if self.require_units:
+            scope = self._unit_scope()
+            errors = [m for p, m in sorted(missing.items()) if scope is None or p in scope]
+            if errors:
+                raise UnitError(errors[0] + (f" (+{len(errors) - 1} more)" if len(errors) > 1 else ""))
+
+    def memo_salt(self, services: Mapping[str, Any]) -> str:
+        """Presentation fingerprint: the bound unit map and the renderer source (core.md, Units).
+
+        Changing a unit this lens sees, or `units`/`context`, reruns it; other lenses keep their cache.
+        """
+        return content_hash(
+            [
+                {path: unit.model_dump() for path, unit in sorted(self._units.items())},
+                _renderer_fingerprint(),
+            ]
+        )
+
+    def _cite_units(self, cites: list[str]) -> dict[str, Unit]:
+        """Units of the cited fields; a cited whole input (or list item) brings all its fields' units."""
+        out: dict[str, Unit] = {}
+        for cite in cites:
+            head = cite.split("[")[0].split(".")[0]
+            for path, unit in self._units.items():
+                if path == cite or ((cite == head or "[" in cite) and path.startswith(f"{head}.")):
+                    out[path] = unit
+        return dict(sorted(out.items()))
 
     @model_validator(mode="after")
     def _check_critical_inputs(self) -> Self:
@@ -139,6 +212,9 @@ class LensNode(Node):
         ]:
             if cite not in citables:
                 raise ContractViolation(f"{self.name}: cites unknown id {cite!r}")
+        cited = [c for claim in assessment.claims for c in claim.cites] + [
+            c for flag in assessment.flags for c in flag.cites
+        ]
         return LensVerdict(
             lens=self.lens_name,
             status=assessment.status,
@@ -156,6 +232,7 @@ class LensNode(Node):
             provenance=Provenance(
                 lens_version=self.code_version(),
                 input_hashes=ctx.input_hashes,
+                cite_units=self._cite_units(cited),
                 **assessment.provenance_extra,
             ),
         )

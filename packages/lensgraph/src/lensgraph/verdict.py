@@ -9,6 +9,7 @@ from typing import Any, Literal, Self
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .types import CandidateRef
+from .units import Unit
 
 Stance = Literal[-2, -1, 0, 1, 2]
 """Ordinal stance; the domain layer supplies the labels (e.g. bearish..bullish)."""
@@ -56,6 +57,9 @@ class Provenance(_Model):
     as_of: date | None = None
     backtest_valid: bool = True  # False if inputs may leak information from after `as_of`
     stance_samples: list[Stance] = []  # AI lenses: the stance of each sampled run, in order
+    # Cited field path (`input.field`; for a cited frame `input.column`) -> its unit, so the run
+    # view formats cited values from the index alone (core.md, Units).
+    cite_units: dict[str, Unit] = {}
     glossary_terms: list[str] = []  # AI lenses: glossary entry ids injected into the prompt, sorted; empty when use_glossary is off
 
 

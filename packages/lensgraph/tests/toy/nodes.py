@@ -11,7 +11,10 @@ import pandas as pd
 import pandera.pandas as pa
 from lensgraph.node import CalcNode, FetchNode, NodeContext, TransformNode
 from lensgraph.types import ContractViolation
+from lensgraph.units import NUMBER
 from pydantic import BaseModel, ConfigDict
+
+from .unit_models import HOURS
 
 
 class ToxNote(BaseModel):
@@ -25,8 +28,8 @@ class ToxNote(BaseModel):
 class AssaySchema(pa.DataFrameModel):
     """Contract for cleaned assay data: non-negative time, positive optical density."""
 
-    time_h: float = pa.Field(ge=0)
-    od600: float = pa.Field(gt=0)
+    time_h: float = pa.Field(ge=0, metadata={"unit": HOURS})
+    od600: float = pa.Field(gt=0, metadata={"unit": NUMBER})
 
 
 class ReferencePanel(FetchNode):

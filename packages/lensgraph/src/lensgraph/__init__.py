@@ -31,6 +31,20 @@ from .sources import (
     build_source_store,
 )
 from .types import Absent, CandidateRef, GlobalFailure
+from .units import (
+    BARS,
+    COUNT,
+    DAYS,
+    FRACTION,
+    FRACTION_PER_YEAR,
+    MULTIPLE,
+    NUMBER,
+    YEARS,
+    Unit,
+    UnitError,
+    format_value,
+    unit_of,
+)
 from .verdict import (
     AssessmentBrief,
     Claim,
@@ -44,6 +58,14 @@ from .verdict import (
 from .view import RunView, build_run_view, write_run_view
 
 __all__ = [
+    "BARS",
+    "COUNT",
+    "DAYS",
+    "FRACTION",
+    "FRACTION_PER_YEAR",
+    "MULTIPLE",
+    "NUMBER",
+    "YEARS",
     "Absent",
     "Aggregator",
     "AssessmentBrief",
@@ -91,6 +113,8 @@ __all__ = [
     "SourcesConfig",
     "SystemClock",
     "TransformNode",
+    "Unit",
+    "UnitError",
     "VetoAggregator",
     "arun",
     "build_plan",
@@ -98,11 +122,13 @@ __all__ = [
     "build_source_store",
     "citable_ids",
     "dossiers",
+    "format_value",
     "input_sufficiency",
     "load_object",
     "panel_registry",
     "render_review_context",
     "review_citables",
     "run",
+    "unit_of",
     "write_run_view",
 ]

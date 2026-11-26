@@ -170,6 +170,7 @@ class AINode(LensNode):
         none; unknown `glossary_concepts` raise too. Runs even when `use_glossary` is off, so
         coverage is still checked; the block depends on classes only, never on values.
         """
+        super().bind_upstream(outputs)
         self._bound = True
         if self.glossary is None:
             return
@@ -205,9 +206,11 @@ class AINode(LensNode):
         return content_hash(self._system_prompt())
 
     def memo_salt(self, services: Mapping[str, Any]) -> str:
-        """Profile fingerprint plus rendered-prompt hash; see core.md, Memoization (AI nodes)."""
+        """Profile fingerprint, rendered-prompt hash and the units fingerprint; core.md, Memoization."""
         registry = _registry(services)
-        return content_hash([registry.fingerprint(self.profile), self._prompt_hash()])
+        return content_hash(
+            [registry.fingerprint(self.profile), self._prompt_hash(), super().memo_salt(services)]
+        )
 
     def _system_prompt(self) -> str:
         """The static system prompt: the rendered template, then the data dictionary unless ablated."""
@@ -234,7 +237,7 @@ class AINode(LensNode):
         """One sampled model run, guard-railed; exhausted retries propagate and fail the node."""
         registry = _registry(ctx.services)
         usable = citables - unavailable_inputs(inputs)
-        user_message = render_context(inputs, self._depth_notes(inputs))
+        user_message = render_context(inputs, self._depth_notes(inputs), units=self._units)
         return await self._sample(registry, usable, user_message)
 
     async def _sample(

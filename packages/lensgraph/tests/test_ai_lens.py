@@ -2,7 +2,7 @@
 
 import shutil
 from pathlib import Path
-from typing import Any, ClassVar
+from typing import Annotated, Any, ClassVar
 
 import pandera.pandas as pa
 import pytest
@@ -10,10 +10,11 @@ from lensgraph import RunSpec, run
 from lensgraph.ai import AIAssessmentOut, AINode
 from lensgraph.glossary import GlossaryError
 from lensgraph.graph import build_plan
-from lensgraph.llm import DEFAULT_PROFILES, LLMProfile
+from lensgraph.llm import DEFAULT_PROFILES, LLMProfile, ProfileRegistry
 from lensgraph.node import CalcNode, FetchNode, NodeContext
 from lensgraph.plan import NodeKey, RunResult
 from lensgraph.sources import DatasetFetch
+from lensgraph.units import NUMBER
 from lensgraph.verdict import LensVerdict
 from pandera.typing import Series
 from pydantic import BaseModel
@@ -268,8 +269,8 @@ TOY_GLOSSARY = Path(__file__).parent / "toy" / "glossary"
 class GrowthResult(BaseModel):
     """Output contract of the test calc node; the toy glossary claims both fields."""
 
-    rate: float
-    doubling_hours: float | None = None
+    rate: Annotated[float, NUMBER]
+    doubling_hours: Annotated[float | None, NUMBER] = None
 
 
 class GrowthResultNode(CalcNode):
@@ -295,7 +296,7 @@ class TypedNotes(FetchNode):
 class OtherResult(BaseModel):
     """A replacement contract with a field the toy glossary does not claim."""
 
-    zzz: float
+    zzz: Annotated[float, NUMBER]
 
 
 class OtherResultNode(GrowthResultNode):
@@ -307,8 +308,8 @@ class OtherResultNode(GrowthResultNode):
 class ObsFrame(pa.DataFrameModel):
     """Canonical columns of the toy observation dataset."""
 
-    temp: Series[float]
-    od: Series[float]
+    temp: Series[float] = pa.Field(metadata={"unit": NUMBER})
+    od: Series[float] = pa.Field(metadata={"unit": NUMBER})
 
 
 class ObsFetch(DatasetFetch):
@@ -564,3 +565,26 @@ def test_fetch_frame_schema_columns_appear_in_the_dictionary(glossary_registry, 
 
 def test_fetch_without_frame_schema_contributes_nothing(glossary_registry, s1):
     _plan(glossary_registry(obs=BareObsFetch), s1)  # no error: no fields to claim
+
+
+def test_ai_evidence_shows_formatted_units(scripted_model, s1, toy_services, tmp_path):
+    """The user message the model sees carries the unit-formatted values (core.md, Units)."""
+    from toy.unit_models import CultureNode
+
+    class CultureSafety(SafetyLens):
+        """SafetyLens reading a unit-annotated `culture` input."""
+
+        inputs: ClassVar[dict[str, str]] = {"growth_rate": "growth_rate", "culture": "culture"}
+
+    registry = build_registry(lenses=(CultureSafety,))
+    registry.register(CultureNode)
+    model = scripted_model(GOOD)
+    profiles = ProfileRegistry(
+        {"test": LLMProfile(name="test", model="test")}, model_overrides={"test": model}
+    )
+    result = _run(registry, s1, toy_services, profiles, tmp_path)
+    assert result.values[_key("S1")].status == "ok"
+    user = next(
+        p.content for m in model.calls[0] for p in m.parts if isinstance(p, UserPromptPart)
+    )
+    assert '"yield_frac": "15.3%"' in user and "0.153" not in user

@@ -12,6 +12,7 @@ from pydantic import BaseModel, ConfigDict, model_validator
 from .lens import LensAssessment, LensNode
 from .node import NodeContext
 from .types import Absent
+from .units import NUMBER, format_value
 from .verdict import Claim, Conviction, Stance
 
 
@@ -49,7 +50,9 @@ class Component(BaseModel):
         1.0  # relative weight; overridable per run via `DeterministicLens.weight_overrides`
     )
     evidence: tuple[str, ...] = ()  # extra citable ids added to the claim's cites when citable
-    claim_template: str = "{name}: {value:.3g}"  # formatted with `name` and the raw `value`
+    # Formatted with `name`, `value` (formatted by the field's unit), `signed` (the same, with a
+    # sign) and `raw` (the float). See core.md, Units.
+    claim_template: str = "{name}: {value}"
 
 
 def _resolve(source: str, inputs: dict[str, Any]) -> float | None:
@@ -105,6 +108,22 @@ class DeterministicLens(LensNode):
             raise ValueError(f"weight_overrides must not be negative: {negative}")
         return self
 
+    def _unit_scope(self) -> set[str] | None:
+        """Only the component sources reach the verdict, so only they need units (core.md, Units)."""
+        return {c.source for c in type(self).components if "." in c.source}
+
+    def _claim_text(self, c: Component, value: float, inputs: dict[str, Any]) -> str:
+        """The component's claim: its template filled with the value formatted by the source's unit."""
+        unit = self._units.get(c.source, NUMBER)
+        holder = inputs.get(c.source.partition(".")[0])
+        row = holder.model_dump() if isinstance(holder, BaseModel) else None
+        return c.claim_template.format(
+            name=c.name,
+            value=format_value(value, unit, row),
+            signed=format_value(value, unit, row, signed=True),
+            raw=value,
+        )
+
     def _stance(self, score: float) -> Stance:
         t = self.thresholds
         if score < t[0]:
@@ -148,7 +167,7 @@ class DeterministicLens(LensNode):
         score = sum(scored[n] * weights[n] for n in scored) / total
         claims = [
             Claim(
-                text=c.claim_template.format(name=c.name, value=v),
+                text=self._claim_text(c, v, inputs),
                 direction=1 if scored[c.name] >= 0 else -1,
                 cites=[c.source, *(e for e in c.evidence if e in citables)],
             )

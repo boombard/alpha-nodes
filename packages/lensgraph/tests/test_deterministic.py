@@ -234,3 +234,56 @@ async def test_evidence_skipped_when_not_citable():
     verdict = await _verdict(EvidenceLens(), x=0.5, chart=Absent(reason="none"))
     assert verdict.status == "ok"
     assert verdict.claims[0].cites == ["x"]
+
+
+def _unit_plan(node_cls, source: str, template: str | None = None):
+    from lensgraph.types import CandidateRef
+
+    kwargs: dict[str, Any] = {"claim_template": template} if template else {}
+
+    class UnitLens(DeterministicLens):
+        name: ClassVar[str] = "unit_lens"
+        lens_name: ClassVar[str] = "unit_lens"
+        inputs: ClassVar[dict[str, str]] = {"culture": "culture"}
+        components: ClassVar[list[Component]] = [
+            Component(name="c", source=source, scorer=LinearScorer(lo=0, hi=1), **kwargs)
+        ]
+
+    registry = NodeRegistry()
+    registry.register(node_cls)
+    registry.register(UnitLens)
+    return registry, [CandidateRef(id="S1")]
+
+
+def test_deterministic_component_source_needs_unit():
+    from lensgraph.units import UnitError
+    from toy.unit_models import BareCultureNode
+
+    registry, candidates = _unit_plan(BareCultureNode, "culture.doubling")
+    with pytest.raises(UnitError, match=r"unit_lens.*'culture'.*'doubling'"):
+        build_plan(["unit_lens"], registry, candidates)
+    # a unitless field that is not a component source is not the lens's business
+    registry, candidates = _unit_plan(BareCultureNode, "culture.yield_frac")
+    build_plan(["unit_lens"], registry, candidates)
+
+
+def test_claim_template_value_signed_raw(tmp_path):
+    from toy.unit_models import CultureNode
+
+    template = "{name}: {value} / {signed} / {raw:.3f}"
+    registry, candidates = _unit_plan(CultureNode, "culture.yield_frac", template)
+    result = run(
+        RunSpec(targets=["unit_lens"], candidates=candidates), registry, store_root=tmp_path
+    )
+    claim = result.values[NodeKey(name="unit_lens", candidate="S1")].claims[0]
+    assert claim.text == "c: 15.3% / +15.3% / 0.153"
+
+
+def test_default_claim_template_uses_the_unit(tmp_path):
+    from toy.unit_models import CultureNode
+
+    registry, candidates = _unit_plan(CultureNode, "culture.volume")
+    result = run(
+        RunSpec(targets=["unit_lens"], candidates=candidates), registry, store_root=tmp_path
+    )
+    assert result.values[NodeKey(name="unit_lens", candidate="S1")].claims[0].text == "c: L 12.3m"

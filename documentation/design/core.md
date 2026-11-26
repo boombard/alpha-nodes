@@ -484,8 +484,11 @@ def unit_of(model: type, field: str) -> Unit | None    # pydantic Annotated meta
   prepends the sibling value ("USD 12.3bn"); None stays None (rendered `null`). `signed` adds "+".
 - **Strict, at plan build.** `LensNode.bind_upstream` records the unit of every numeric field
   (int or float, not bool) of every input contract; one without a unit fails the plan with a
-  `UnitError` naming the lens, the input and the field. Deterministic lenses check their
-  component sources the same way. Non-numeric fields (dates, text, codes) take no unit.
+  `UnitError` naming the lens, the input and the field. AI lenses check every numeric field of
+  every input; deterministic lenses check only their component sources (the only fields that
+  reach their claims). Non-numeric fields (dates, text, codes) take no unit. A bare scalar output
+  contract (e.g. `output = float`) has no field to annotate, so it is not unit-checked and its
+  claims format as `NUMBER`; to give such a number a unit, wrap it in a model.
 - **AI evidence** (`render_context`): a model field with a unit renders as its formatted string
   (`"roe_mean": "15.3%"`); frame cells of a unit column are formatted, with headers left as the
   column names, since they are citable ids. Prompt notes therefore never restate units (Glossary).

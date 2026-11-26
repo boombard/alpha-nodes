@@ -67,3 +67,60 @@ def test_render_context_depth_notes_are_appended():
 @pytest.mark.parametrize("value", [1.5, "plain text", [1, 2, 3]])
 def test_render_context_plain_values(value):
     assert "### [x]" in render_context({"x": value})
+
+
+def _culture_units():
+    from lensgraph.units import unit_of
+    from toy.unit_models import Culture
+
+    return {f"culture.{f}": u for f in Culture.model_fields if (u := unit_of(Culture, f))}
+
+
+def test_evidence_formats_unit_fields():
+    from toy.unit_models import Culture
+
+    culture = Culture(yield_frac=0.153, doubling=3.5, fold=2.0, volume=12_300_000, vessel="L")
+    text = render_context({"culture": culture}, units=_culture_units())
+    assert '"yield_frac": "15.3%"' in text
+    assert '"doubling": "3.5 h"' in text
+    assert '"volume": "L 12.3m"' in text  # prefix_field read from the sibling field
+    assert '"stable": true' in text and '"vessel": "L"' in text
+    assert "### [culture.yield_frac]\n\"15.3%\"" in text
+    assert "0.153" not in text
+
+
+def test_evidence_without_units_is_raw():
+    from toy.unit_models import Culture
+
+    assert "0.153" in render_context({"culture": Culture(yield_frac=0.153)})
+
+
+def test_none_unit_field_stays_null():
+    from toy.unit_models import Culture
+
+    text = render_context({"culture": Culture()}, units=_culture_units())
+    assert '"yield_frac": null' in text
+
+
+def test_frame_cells_formatted_headers_unchanged():
+    from lensgraph.units import FRACTION
+
+    frame = pd.DataFrame({"ret": [0.05, -0.0004], "label": ["a", "b"]})
+    text = render_context({"px": frame}, units={"px.ret": FRACTION})
+    assert text.splitlines()[1] == "ret,label"
+    assert "5%,a" in text and "-0.04%,b" in text
+    assert "0.05" not in text
+    assert frame["ret"].tolist() == [0.05, -0.0004]  # the input frame is not mutated
+
+
+def test_list_items_without_ids_are_formatted():
+    import json
+
+    from lensgraph.units import FRACTION
+    from pydantic import BaseModel
+
+    class Row(BaseModel):
+        ret: float
+
+    text = render_context({"rows": [Row(ret=0.05), Row(ret=0.1)]}, units={"rows.ret": FRACTION})
+    assert json.loads(text.split("\n", 1)[1]) == [{"ret": "5%"}, {"ret": "10%"}]
