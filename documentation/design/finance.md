@@ -336,15 +336,16 @@ cross-candidate ranking in v1) and exposed as params. The backtest is how they g
   - earnings consistency (no losses / volatility)
   - a valuation range: owner-earnings yield vs. a hurdle, plus a simple intrinsic-value band
 - **Text inputs**: profile business summary; recent news. (A 10-K business section for US names waits for `filings_text`, deferred.)
-- **Default prompt**: a rubric that states Buffett's principles faithfully, grounded in
-  primary sources.
-  - Berkshire's published acquisition criteria (consistent earning power; good returns on
-    equity with little or no debt; management in place; simple, understandable businesses;
-    a sensible price).
-  - The shareholder letters' concepts: durable competitive advantage ("moat"), circle of
-    competence, owner earnings, margin of safety.
-  - The rubric file lists each principle with its source (letter/year), so it can be
-    checked. It sits at the start of the prompt for prompt caching.
+- **Default prompt**: a rubric of seven principles stated neutrally and operationally, with
+  no investor, company, letter, year or book names, so the model isn't primed to recall
+  Buffett's holdings or views (several demo names are famous Berkshire holdings) and the
+  comparison with the persona variant stays clean.
+  - The principles: consistent earning power; good returns on equity with little or no
+    debt; management in place; a simple, understandable business; a durable competitive
+    advantage; owner earnings (proxy); a clear discount to a conservative value estimate.
+  - Each principle's primary source (acquisition criteria, shareholder letters by year,
+    Graham) is listed in the `QualityValue` class docstring, so it can be checked.
+  - It sits at the start of the prompt for prompt caching.
 - **Variant `buffett_persona`**: "assess as Warren Buffett would", plus instructions not
   to caricature and not to use knowledge of his actual holdings or comments about this
   company. It's there to compare against the rubric (stance agreement, citation patterns).
