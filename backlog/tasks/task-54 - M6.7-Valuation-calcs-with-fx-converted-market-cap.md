@@ -1,10 +1,10 @@
 ---
 id: TASK-54
 title: M6.7 Valuation calcs with fx-converted market cap
-status: In Review
+status: Done
 assignee: []
 created_date: '2026-11-25T08:17:59Z'
-updated_date: '2026-11-26T05:58:56Z'
+updated_date: '2026-11-26T07:47:08Z'
 labels:
   - finance
 milestone: m-5
@@ -75,19 +75,19 @@ Out of scope: EV/EBIT (needs debt and cash at the price date; later); as-of warn
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Valuation and ValuationChange exist as specified; market cap converts trading to reporting currency through fx on the price date
-- [ ] #2 A missing fx rate gives None money fields, never a silent 1.0; negative earnings give pe None
-- [ ] #3 ValuationChange uses the periods known on each side's own day
-- [ ] #4 close_on and bars_back added to series.py with tests
-- [ ] #5 Valuation glossary entries name their implementing nodes (implemented_by resolves), and the test helper's valuation stand-ins are gone
+- [x] #1 Valuation and ValuationChange exist as specified; market cap converts trading to reporting currency through fx on the price date
+- [x] #2 A missing fx rate gives None money fields, never a silent 1.0; negative earnings give pe None
+- [x] #3 ValuationChange uses the periods known on each side's own day
+- [x] #4 close_on and bars_back added to series.py with tests
+- [x] #5 Valuation glossary entries name their implementing nodes (implemented_by resolves), and the test helper's valuation stand-ins are gone
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 `uv run pytest` passes (whole workspace)
-- [ ] #2 `uv run ruff check` and `uv run pyright` are clean
-- [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
-- [ ] #4 documentation/design updated in the same change if behaviour differs from it
+- [x] #1 `uv run pytest` passes (whole workspace)
+- [x] #2 `uv run ruff check` and `uv run pyright` are clean
+- [x] #3 New tests are pytest functions/fixtures; no network or real LLM calls
+- [x] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -100,4 +100,6 @@ Worker: dispatch ctx_cc124c9a2f02, worktree task-54 (run run_579c5584161b). Runs
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 Worker: close_on/bars_back in series.py; valuation_on adapter (fx-converted market cap, missing fx -> None never 1.0, per-input latest_complete with stale inputs listed in field_periods on every dependent field); Valuation and ValuationChange calc nodes (memoize=False, code_deps; each side uses the periods known on its own day); implemented_by filled on 10 valuation glossary entries; ai_lens_helpers valuation stand-ins removed; one sentence added to the finance.md Valuation bullet. One commit f5416b4; 1219 passed, ruff and pyright clean. Review: 0 rounds; mechanical checks clean (all files in the Files list). Verdict: approve. Open points: (a) ValuationChange imports private _opt/_ratio from alpha_nodes.valuation; _opt is now defined in 3 modules (price_calcs, fundamental_calcs, valuation), a DRY follow-up. (b) Landing alongside TASK-62 conflicts trivially in tests/ai_lens_helpers.py (both add classes to the same tuple) and both touch finance.md in different sections. (c) The value band is computed even without fx (reporting currency only), per finance.md.
+
+Landed eb6f7c6 on main (single commit, clean rebase; 1219 passed on the rebased tree).
 <!-- SECTION:FINAL_SUMMARY:END -->
