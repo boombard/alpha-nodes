@@ -1,10 +1,10 @@
 ---
 id: TASK-69
 title: Finance fields declare units
-status: In Review
+status: In Progress
 assignee: []
 created_date: '2026-11-26T04:35:00Z'
-updated_date: '2026-11-26T08:04:19Z'
+updated_date: '2026-11-26T08:08:38Z'
 labels:
   - finance
 milestone: m-5
@@ -68,6 +68,8 @@ From TASK-68 (user ruling 2026-11-26): once finance fields declare units, click 
 Worker: dispatch ctx_d93667c4110d, worktree task-69
 
 User ruling 2026-11-26: PriceWindow gains a trading-currency `currency` field so TrendResult.close/ma are prefixed money (Files widened). Review round 1 sent (dispatch ctx_e2951e46125b) from head 001b877.
+
+User rulings 2026-11-26 (after the In Review verdict): fix per-share money digits (Unit.decimals, 2 dp) and percentage points for op_margin_change_1y inside TASK-69; review round 3 sent (dispatch ctx_052ab8dddf4d) from head 7bd9248. TASK-68 browser click-through deferred to TASK-57.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

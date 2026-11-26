@@ -6,6 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-11-25T08:18:00Z'
+updated_date: '2026-11-26T08:08:38Z'
 labels:
   - finance
 milestone: m-5
@@ -101,3 +102,9 @@ Out of scope: an AI reviewer in the demo; campaigns (M7); as-of fundamentals bac
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+From TASK-69 (user ruling 2026-11-26): in the real mixed-region run, click through unit-bearing cites in the run report in a browser: field tables show display strings (e.g. 15.3%, USD 12.3bn, GBP 189.20), DataGrid headers carry unit ids, columns sort on raw values.
+<!-- SECTION:NOTES:END -->
