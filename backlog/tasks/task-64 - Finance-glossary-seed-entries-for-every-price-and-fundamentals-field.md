@@ -1,10 +1,10 @@
 ---
 id: TASK-64
 title: 'Finance glossary: seed entries for every price and fundamentals field'
-status: In Progress
+status: In Review
 assignee: []
 created_date: '2026-11-26T00:28:00Z'
-updated_date: '2026-11-26T03:54:41Z'
+updated_date: '2026-11-26T04:05:57Z'
 labels:
   - finance
 milestone: m-5
@@ -118,3 +118,9 @@ Design text for finance.md (write it in this task): the approved draft, copied b
 <!-- SECTION:NOTES:BEGIN -->
 Worker: dispatch ctx_1ed3c5c919f0, worktree task-64 (Orca run run_cce261b5aaf8)
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Worker (ctx_1ed3c5c919f0, follow-up ctx_6584a99a984a): 54 draft finance glossary entries + FINANCE_GLOSSARY_DIR; both AI lenses set glossary and declare no terms; field_periods definition dropped from the 3 prompts (instruction kept); finance.md per-term formulas moved into entries and linked, new Glossary section; README link. Commits b186408, 5821637, b7e9e59 (squash on landing). pytest 1135 passed, ruff clean, pyright 0; the wheel ships 54 glossary .md files (no pyproject change). Review: 1 round, 4 findings, all resolved: (1) the TR-index recursion was lost from finance.md, so a new total-return-index entry claims the TotalReturnSchema columns; (2) the lens test contracts now come from the node classes' outputs, with stand-ins only for valuation/valuation_change until TASK-54; (3) test cleanup; (4) the wheel contents were verified. Accepted outside Files: ai_lens_helpers.py, test_quality_value_lens.py, test_price_vs_fundamentals_lens.py (the lens tests must bind the glossary). Verdict: approve. Open points: (a) a core gap: graph.py:180 binds the fetch nodes' output (bare pd.DataFrame), so in real plans the profile columns are neither checked nor put in the data dictionary; (b) the Valuation/ValuationChange entries have an empty implemented_by, and the test helper's stand-ins are for TASK-54 to fill and drop; (c) both AI lens prompts change, so their verdicts miss the cache once.
+<!-- SECTION:FINAL_SUMMARY:END -->
