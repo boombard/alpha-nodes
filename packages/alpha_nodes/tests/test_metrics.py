@@ -4,6 +4,7 @@ from typing import Any
 import pytest
 from alpha_nodes.metrics import (
     BalanceSheetResult,
+    CapitalReturnsResult,
     CashGenerationResult,
     DrawdownResult,
     FundamentalTrendResult,
@@ -62,6 +63,7 @@ def test_fundamentals_results_allow_none_fields():
 
     for model in (
         ProfitabilityResult,
+        CapitalReturnsResult,
         BalanceSheetResult,
         CashGenerationResult,
         FundamentalTrendResult,
@@ -100,3 +102,16 @@ def test_field_periods_rejects_unknown_field_and_non_older_date():
         BalanceSheetResult(**window, **fields, field_periods={"bogus": date(2023, 12, 31)})
     with pytest.raises(ValidationError, match="older"):
         BalanceSheetResult(**window, **fields, field_periods={"net_debt": date(2024, 12, 31)})
+
+
+def test_capital_returns_result_fields():
+    assert set(CapitalReturnsResult.model_fields) - set(PeriodWindow.model_fields) == {
+        "roic_pretax_mean",
+        "roic_pretax_min",
+        "roic_pretax_std",
+        "incremental_roic_pretax",
+        "op_margin_min",
+        "capex_to_revenue_mean",
+        "capex_to_da_mean",
+    }
+    assert issubclass(CapitalReturnsResult, PeriodWindow)

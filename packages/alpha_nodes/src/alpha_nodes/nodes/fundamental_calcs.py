@@ -24,6 +24,8 @@ from alpha_nodes.kernels import (
     cagr,
     coefficient_of_variation,
     growth,
+    incremental_return,
+    invested_capital,
     mean_std,
     owner_earnings,
     safe_ratio,
@@ -31,6 +33,7 @@ from alpha_nodes.kernels import (
 )
 from alpha_nodes.metrics import (
     BalanceSheetResult,
+    CapitalReturnsResult,
     CashGenerationResult,
     FundamentalTrendResult,
     PeriodWindow,
@@ -52,6 +55,7 @@ _MAX_STEP_YEARS = 1.5  # a "1y" step across more than 18 months is None; finance
 _BASE_TOLERANCE_DAYS = 183  # the 3y base may sit up to 6 months off three years back; finance.md, Fundamentals pinned conventions (Growth)
 _OE_COLUMNS = ("net_income", "depreciation_amortization", "capex")
 _TREND_YEARS = 3  # revenue_cagr_3y base: the period about 3 years before the latest
+_LONG_BASE_YEARS = 5  # incremental ROIC prefers a base this far back, else _TREND_YEARS
 
 
 def _opt(value: float) -> float | None:
@@ -269,6 +273,17 @@ class CashGeneration(CalcNode):
         )
 
 
+def _base_years_back(annual: pd.DataFrame, years: int = _TREND_YEARS) -> int | None:
+    """Position of the earlier period closest to `years` (default three, the trend base) before the latest, or None if none within 6 months."""
+    if len(annual) < 2:
+        return None
+    ends = annual["period_end"]
+    target = ends.iloc[-1] - pd.DateOffset(years=years)
+    gaps = (ends.iloc[:-1] - target).abs()
+    best = int(gaps.to_numpy().argmin())
+    return best if gaps.iloc[best].days <= _BASE_TOLERANCE_DAYS else None
+
+
 class FundamentalTrend(CalcNode):
     """Year-on-year and 3-year growth and margin change, measured on actual period dates.
 
@@ -285,12 +300,12 @@ class FundamentalTrend(CalcNode):
     memoize: ClassVar[bool] = False  # see module docstring
     inputs: ClassVar[dict[str, str]] = {"annual": "annual_fundamentals"}
     output: ClassVar = FundamentalTrendResult
-    code_deps: ClassVar = (growth, cagr, safe_ratio, _fcf, years_between, _opt, *_WINDOW_DEPS)
+    code_deps: ClassVar = (growth, cagr, safe_ratio, _fcf, years_between, _base_years_back, _opt, *_WINDOW_DEPS)
 
     def run(self, ctx: NodeContext, annual: pd.DataFrame) -> FundamentalTrendResult:
         """Compute growth fields from the latest period against the previous one and the one ~3 years back."""
         prev = len(annual) - 2 if len(annual) >= 2 else None
-        base3 = _base_three_years_back(annual)
+        base3 = _base_years_back(annual)
         earliest = min((i for i in (prev, base3) if i is not None), default=len(annual) - 1)
         revenue = _series(annual, "revenue")
         fcf = _fcf(annual) if len(annual) else np.array([])
@@ -307,15 +322,76 @@ class FundamentalTrend(CalcNode):
         )
 
 
-def _base_three_years_back(annual: pd.DataFrame) -> int | None:
-    """Position of the earlier period closest to three years before the latest, or None if none within 6 months."""
-    if len(annual) < 2:
-        return None
-    ends = annual["period_end"]
-    target = ends.iloc[-1] - pd.DateOffset(years=_TREND_YEARS)
-    gaps = (ends.iloc[:-1] - target).abs()
-    best = int(gaps.to_numpy().argmin())
-    return best if gaps.iloc[best].days <= _BASE_TOLERANCE_DAYS else None
+def _ratio_stats(num: np.ndarray, den: np.ndarray) -> tuple[float | None, float | None, float | None]:
+    """Mean, min and sample std (ddof=1, >= 3 periods) of `num / den` over periods with `den > 0`; None where empty."""
+    ratio = safe_ratio(num, den)
+    ratio = ratio[~np.isnan(ratio)]
+    mean, std = mean_std(ratio)
+    return _opt(mean), float(ratio.min()) if ratio.size else None, _opt(std)
+
+
+def _incremental(rows: pd.DataFrame, capital: np.ndarray) -> float | None:
+    """Incremental ROIC of the latest row against its ~5y base (else ~3y); None without a base or capital growth."""
+    for years in (_LONG_BASE_YEARS, _TREND_YEARS):
+        base = _base_years_back(rows, years)
+        if base is not None:
+            op = _col(rows, "operating_income")
+            return _opt(incremental_return(op[base], op[-1], capital[base], capital[-1]))
+    return None
+
+
+class CapitalReturns(CalcNode):
+    """Pre-tax returns on invested capital and the other measurable signatures of a durable advantage.
+
+    ROIC is operating income over invested capital (debt + equity - cash) per period; periods with
+    invested capital <= 0 are skipped, as `Profitability` skips non-positive equity. Incremental
+    ROIC compares the latest period with the one closest to five years back (within 6 months,
+    else the one closest to three years back); None when neither exists or capital did not grow.
+    Banks and insurers lack operating income and get None. The reported window is the widest of
+    the fields' period sets, as in `Profitability`. See documentation/design/finance.md.
+    """
+
+    name: ClassVar[str] = "capital_returns"
+    memoize: ClassVar[bool] = False  # see module docstring
+    inputs: ClassVar[dict[str, str]] = {"annual": "annual_fundamentals"}
+    output: ClassVar = CapitalReturnsResult
+    code_deps: ClassVar = (
+        safe_ratio,
+        mean_std,
+        invested_capital,
+        incremental_return,
+        _base_years_back,
+        _incremental,
+        _ratio_stats,
+        _opt,
+        *_WINDOW_DEPS,
+    )
+
+    def run(self, ctx: NodeContext, annual: pd.DataFrame) -> CapitalReturnsResult:
+        """Compute the capital-returns fields over `annual`."""
+        cap_rows, cap_win = values(
+            annual, "operating_income", "total_debt", "total_equity", "cash"
+        )
+        mgn_rows, mgn_win = values(annual, "operating_income", "revenue")
+        rev_rows, rev_win = values(annual, "capex", "revenue")
+        da_rows, da_win = values(annual, "capex", "depreciation_amortization")
+        capital = invested_capital(
+            _col(cap_rows, "total_debt"), _col(cap_rows, "total_equity"), _col(cap_rows, "cash")
+        )
+        roic_mean, roic_min, roic_std = _ratio_stats(_col(cap_rows, "operating_income"), capital)
+        margin_min = _ratio_stats(_col(mgn_rows, "operating_income"), _col(mgn_rows, "revenue"))[1]
+        capex_rev = _ratio_stats(_col(rev_rows, "capex"), _col(rev_rows, "revenue"))[0]
+        capex_da = _ratio_stats(_col(da_rows, "capex"), _col(da_rows, "depreciation_amortization"))[0]
+        return CapitalReturnsResult(
+            **_widest(cap_win, mgn_win, rev_win, da_win).model_dump(exclude={"field_periods"}),
+            roic_pretax_mean=roic_mean,
+            roic_pretax_min=roic_min,
+            roic_pretax_std=roic_std,
+            incremental_roic_pretax=_incremental(cap_rows, capital),
+            op_margin_min=margin_min,
+            capex_to_revenue_mean=capex_rev,
+            capex_to_da_mean=capex_da,
+        )
 
 
 def _series(annual: pd.DataFrame, column: str) -> np.ndarray:

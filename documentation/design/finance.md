@@ -328,6 +328,7 @@ cross-candidate ranking in v1) and exposed as params. The backtest is how they g
   - FCF conversion
   - share-count trend
   - earnings consistency (no losses / volatility)
+  - `capital_returns`: the measurable signatures of a durable advantage: pre-tax ROIC level and spread, incremental ROIC, the worst-year operating margin, and capex intensity. The lens still judges the advantage; there is no moat score. These are signs, not proof.
   - a valuation range: owner-earnings yield vs. a hurdle, plus a simple intrinsic-value band
 - **Text inputs**: profile business summary; recent news. (A 10-K business section for US names waits for `filings_text`, deferred.)
 - **Default prompt**: a rubric of seven principles stated neutrally and operationally, with
@@ -464,6 +465,11 @@ with no reporting currency (`no_currency`). `tag_conflict` as above.
 - **FCF** (latest point): [`fcf`](../../packages/alpha_nodes/src/alpha_nodes/glossary/fcf.md); capex sign pinned positive (see Providers). [`fcf-conversion`](../../packages/alpha_nodes/src/alpha_nodes/glossary/fcf-conversion.md) sums over
   the window.
 - **Share-count trend:** [`share-count-cagr`](../../packages/alpha_nodes/src/alpha_nodes/glossary/share-count-cagr.md), in years between the `period_end`s (needs ≥ 2 periods).
+- **Capital returns** (`capital_returns`, window = the widest field's periods, as `profitability`): pre-tax, because tax expense is not ingested.
+  [`roic-pretax`](../../packages/alpha_nodes/src/alpha_nodes/glossary/roic-pretax.md) is operating income over invested capital (`total_debt + total_equity - cash`; periods with capital ≤ 0 skipped; spread needs ≥ 3 periods);
+  [`incremental-roic`](../../packages/alpha_nodes/src/alpha_nodes/glossary/incremental-roic.md) compares the latest period with the one closest to five years back (within 6 months; else the one closest to three years back; None when there is none or capital did not grow);
+  [`op-margin-floor`](../../packages/alpha_nodes/src/alpha_nodes/glossary/op-margin-floor.md) is the worst operating margin in the window;
+  [`capex-intensity`](../../packages/alpha_nodes/src/alpha_nodes/glossary/capex-intensity.md) is mean capex over revenue and over D&A. All are None where they do not apply (banks and insurers have no operating income).
 - **Earnings consistency:** [`loss-years`](../../packages/alpha_nodes/src/alpha_nodes/glossary/loss-years.md) and [`net-income-cv`](../../packages/alpha_nodes/src/alpha_nodes/glossary/net-income-cv.md) (None when fewer than 3 periods).
 - **Growth:** [`revenue-growth-1y`](../../packages/alpha_nodes/src/alpha_nodes/glossary/revenue-growth-1y.md), [`revenue-cagr-3y`](../../packages/alpha_nodes/src/alpha_nodes/glossary/revenue-cagr-3y.md), [`eps-growth-1y`](../../packages/alpha_nodes/src/alpha_nodes/glossary/eps-growth-1y.md), [`fcf-growth-1y`](../../packages/alpha_nodes/src/alpha_nodes/glossary/fcf-growth-1y.md) and
   [`op-margin-change-1y`](../../packages/alpha_nodes/src/alpha_nodes/glossary/op-margin-change-1y.md). Spans are measured on `period_end` dates (`years_between` = days / 365.25, also used

@@ -1,4 +1,4 @@
-"""Fundamentals kernels: ratios, growth, CAGR, dispersion, owner earnings, capitalised value.
+"""Fundamentals kernels: ratios, growth, CAGR, dispersion, owner earnings, invested capital, incremental return, capitalised value.
 
 Pure numpy on 1-D float64 arrays and plain floats; non-finite input raises `ValueError`
 and scalars that cannot be computed return `nan`. Pandas adapters and calc nodes build on
@@ -104,3 +104,32 @@ def capitalised_value(earnings: float, rate: float) -> float:
     if earnings <= 0:
         return float("nan")
     return float(earnings / rate)
+
+
+def invested_capital(
+    total_debt: np.ndarray, total_equity: np.ndarray, cash: np.ndarray
+) -> np.ndarray:
+    """Invested capital per period, `total_debt + total_equity - cash`. Equal lengths.
+
+    May be zero or negative; callers (`safe_ratio`) treat those periods as having no return.
+    """
+    total_debt, total_equity = _pair(total_debt, total_equity)
+    cash = as_series(cash, "cash")
+    check_same_length(total_debt, cash, "cash")
+    return total_debt + total_equity - cash
+
+
+def incremental_return(
+    op_income_start: float, op_income_end: float, capital_start: float, capital_end: float
+) -> float:
+    """Return on new capital `(op_end - op_start) / (cap_end - cap_start)`.
+
+    `nan` when the capital did not grow (change <= 0). Raises `ValueError` on non-finite input.
+    """
+    args = (op_income_start, op_income_end, capital_start, capital_end)
+    if not all(math.isfinite(a) for a in args):
+        raise ValueError(f"inputs must be finite, got {args}")
+    change = capital_end - capital_start
+    if change <= 0:
+        return float("nan")
+    return float((op_income_end - op_income_start) / change)

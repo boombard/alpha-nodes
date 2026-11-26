@@ -94,8 +94,8 @@ def lens_input_contracts(lens: Any) -> dict[str, Any]:
     for cls in (
         fundamental_calcs.AnnualFundamentals, fundamental_calcs.Profitability,
         fundamental_calcs.BalanceSheet, fundamental_calcs.CashGeneration,
-        fundamental_calcs.FundamentalTrend, valuation_calcs.Valuation,
-        valuation_calcs.ValuationChange, news.RecentNews,
+        fundamental_calcs.FundamentalTrend, fundamental_calcs.CapitalReturns,
+        valuation_calcs.Valuation, valuation_calcs.ValuationChange, news.RecentNews,
     ):  # fmt: skip
         producers.setdefault(cls.name, cls)
     contracts = {name: node.contract() for name, node in producers.items()}

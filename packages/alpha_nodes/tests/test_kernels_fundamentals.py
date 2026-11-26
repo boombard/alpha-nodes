@@ -9,6 +9,8 @@ from alpha_nodes.kernels.fundamentals import (
     capitalised_value,
     coefficient_of_variation,
     growth,
+    incremental_return,
+    invested_capital,
     mean_std,
     owner_earnings,
     safe_ratio,
@@ -129,3 +131,36 @@ def test_capitalised_value_rejects_nonpositive_rate():
 def test_non_finite_input_raises(call, bad):
     with pytest.raises(ValueError):
         call(np.array([1.0, bad, 3.0]))
+
+
+def test_invested_capital():
+    out = invested_capital(np.array([50.0, 0.0]), np.array([100.0, 20.0]), np.array([10.0, 30.0]))
+    assert out.tolist() == [140.0, -10.0]  # debt + equity - cash, negatives kept for the caller
+
+
+def test_invested_capital_length_mismatch_raises():
+    with pytest.raises(ValueError):
+        invested_capital(np.array([1.0, 2.0]), np.array([1.0]), np.array([1.0, 2.0]))
+
+
+def test_incremental_return_hand_value():
+    assert incremental_return(10.0, 20.0, 100.0, 150.0) == pytest.approx(0.2)
+    assert incremental_return(20.0, 10.0, 100.0, 150.0) == pytest.approx(-0.2)
+
+
+@pytest.mark.parametrize("cap_end", [100.0, 90.0])
+def test_incremental_return_nan_when_capital_shrinks(cap_end):
+    assert math.isnan(incremental_return(10.0, 20.0, 100.0, cap_end))
+
+
+@pytest.mark.parametrize("bad", [np.nan, np.inf])
+def test_kernels_reject_non_finite(bad):
+    ones = np.ones(2)
+    for args in ((np.array([1.0, bad]), ones, ones), (ones, np.array([1.0, bad]), ones), (ones, ones, np.array([1.0, bad]))):
+        with pytest.raises(ValueError):
+            invested_capital(*args)
+    for i in range(4):
+        vals = [1.0, 2.0, 3.0, 4.0]
+        vals[i] = bad
+        with pytest.raises(ValueError):
+            incremental_return(*vals)

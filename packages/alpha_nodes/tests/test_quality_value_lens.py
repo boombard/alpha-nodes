@@ -8,6 +8,7 @@ import pytest
 from alpha_nodes.lenses.quality_value import QUALITY_VALUE_FLAGS, QualityValue
 from alpha_nodes.metrics import (
     BalanceSheetResult,
+    CapitalReturnsResult,
     CashGenerationResult,
     NewsItem,
     ProfitabilityResult,
@@ -72,6 +73,11 @@ def make_inputs(periods: int = 8, **overrides: Any) -> dict[str, Any]:
         "profitability": ProfitabilityResult(
             roe_mean=0.18, roe_min=0.1, roe_std=0.03, op_margin_mean=0.2, op_margin_std=0.02,
             net_income_cv=0.15, loss_years=0, **window(periods),
+        ),
+        "capital_returns": CapitalReturnsResult(
+            roic_pretax_mean=0.2, roic_pretax_min=0.15, roic_pretax_std=0.02,
+            incremental_roic_pretax=0.25, op_margin_min=0.12, capex_to_revenue_mean=0.04,
+            capex_to_da_mean=1.1, **window(periods),
         ),
         "balance_sheet": BalanceSheetResult(
             debt_to_equity=0.3, interest_cover=12.0, net_debt=5.0, **window(periods)
@@ -231,3 +237,22 @@ async def test_field_periods_rendered_in_context(make_model):
     )
     await run_lens(model, balance_sheet=stale)
     assert "2024-12-31" in parts(model, UserPromptPart)
+
+
+async def test_capital_returns_is_an_input_and_citable(make_model):
+    assert QualityValue.inputs["capital_returns"] == "capital_returns"
+    cites = ["capital_returns.roic_pretax_mean", "capital_returns.incremental_roic_pretax"]
+    good = {**GOOD, "claims": [{**GOOD["claims"][0], "cites": cites}]}
+    v = await run_lens(make_model(good))
+    assert v.status == "ok"
+    assert v.claims[0].cites == cites
+
+
+@pytest.mark.parametrize("variant", ["default", "buffett_persona"])
+async def test_prompt_points_advantage_at_capital_returns(make_model, variant):
+    model = make_model(GOOD)
+    await run_lens(model, lens=bound(QualityValue(profile="test", variant=variant)))
+    system = parts(model, SystemPromptPart)
+    assert "`capital_returns`" in system
+    assert "signs, not proof" in system
+    assert "judge the advantage itself from the business description" in system

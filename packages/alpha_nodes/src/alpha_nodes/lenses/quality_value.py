@@ -74,6 +74,7 @@ class QualityValue(AINode):
         "profitability": "profitability",
         "balance_sheet": "balance_sheet",
         "cash_generation": "cash_generation",
+        "capital_returns": "capital_returns",
         "valuation": "valuation",
     }
     optional_inputs: ClassVar[dict[str, str]] = {"profile": "profile", "recent_news": "recent_news"}

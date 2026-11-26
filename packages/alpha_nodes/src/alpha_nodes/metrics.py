@@ -106,6 +106,23 @@ class ProfitabilityResult(PeriodWindow):
     loss_years: int | None
 
 
+class CapitalReturnsResult(PeriodWindow):
+    """Measurable signatures of a durable advantage; see documentation/design/finance.md, 2. quality_value calc inputs.
+
+    All pre-tax (tax expense is not ingested): returns use operating income over invested capital
+    (debt + equity - cash). Fields are None where they do not apply, e.g. no operating income
+    (banks, insurers) or invested capital <= 0.
+    """
+
+    roic_pretax_mean: float | None  # per-period operating income / invested capital, periods with capital <= 0 skipped
+    roic_pretax_min: float | None
+    roic_pretax_std: float | None  # ddof=1, needs >= 3 periods
+    incremental_roic_pretax: float | None  # change in operating income / change in invested capital, latest vs base ~5y (else ~3y) back; None if capital did not grow
+    op_margin_min: float | None  # worst operating margin in the window (pricing power in bad years)
+    capex_to_revenue_mean: float | None
+    capex_to_da_mean: float | None  # > 1 means growth capex beyond maintenance
+
+
 class BalanceSheetResult(PeriodWindow):
     """Leverage and coverage at the latest period."""
 

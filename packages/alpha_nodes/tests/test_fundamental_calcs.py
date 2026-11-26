@@ -11,15 +11,18 @@ from alpha_nodes.kernels import (
     cagr,
     coefficient_of_variation,
     growth,
+    incremental_return,
+    invested_capital,
     mean_std,
     owner_earnings,
     safe_ratio,
     sum_ratio,
 )
-from alpha_nodes.metrics import ProfitabilityResult
+from alpha_nodes.metrics import PeriodWindow, ProfitabilityResult
 from alpha_nodes.nodes.fundamental_calcs import (
     AnnualFundamentals,
     BalanceSheet,
+    CapitalReturns,
     CashGeneration,
     FundamentalTrend,
     Profitability,
@@ -29,7 +32,7 @@ from lensgraph.types import CandidateRef
 
 Rows = Callable[..., pd.DataFrame]
 DAY = date(2030, 1, 1)
-NODES = (AnnualFundamentals, Profitability, BalanceSheet, CashGeneration, FundamentalTrend)
+NODES = (AnnualFundamentals, Profitability, BalanceSheet, CashGeneration, FundamentalTrend, CapitalReturns)
 
 
 @pytest.fixture
@@ -308,7 +311,7 @@ def test_calc_nodes_declare_their_kernels() -> None:
 
 
 def test_fundamental_calc_nodes_are_not_memoized() -> None:
-    assert [n.memoize for n in NODES] == [False] * 5
+    assert [n.memoize for n in NODES] == [False] * 6
 
 
 def _trend_rows(fundamentals_rows: Rows, years: list[int]) -> pd.DataFrame:
@@ -450,3 +453,105 @@ def test_cash_generation_window_spans_first_to_latest_when_only_fcf_stale(
         3,
     )
     assert out.field_periods == {"fcf": date(2021, 12, 31)}
+
+
+def _cr_row(op: float, equity: float, rev: float = 100.0, capex: float = 5.0, da: float = 5.0) -> dict:
+    """A row with debt 50 and cash 10, so invested capital is `equity + 40`."""
+    return {
+        "operating_income": op,
+        "total_debt": 50.0,
+        "total_equity": equity,
+        "cash": 10.0,
+        "revenue": rev,
+        "capex": capex,
+        "depreciation_amortization": da,
+    }
+
+
+def test_capital_returns_hand_values(ctx: NodeContext, annual: Callable[..., pd.DataFrame]) -> None:
+    # invested capital 100 110 120 130 140 150; op income 10 12 14 18 19 21; the 5y base is 2020, the 3y base 2022
+    op = [10.0, 12.0, 14.0, 18.0, 19.0, 21.0]
+    capex = [4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
+    frame = annual(
+        *(
+            _cr_row(o, 60.0 + 10 * i, rev=100.0, capex=c, da=5.0)
+            for i, (o, c) in enumerate(zip(op, capex, strict=True))
+        )
+    )
+    out = CapitalReturns().run(ctx, annual=frame)
+    roic = [o / (100.0 + 10 * i) for i, o in enumerate(op)]
+    assert out.roic_pretax_mean == pytest.approx(statistics.mean(roic))
+    assert out.roic_pretax_min == pytest.approx(0.10)
+    assert out.roic_pretax_std == pytest.approx(statistics.stdev(roic))
+    assert out.incremental_roic_pretax == pytest.approx((21 - 10) / (150 - 100))  # not the 3y (21-18)/(150-130)
+    assert out.op_margin_min == pytest.approx(0.10)
+    assert out.capex_to_revenue_mean == pytest.approx(0.065)
+    assert out.capex_to_da_mean == pytest.approx(statistics.mean(c / 5.0 for c in capex))
+    assert (out.periods, out.currency, out.last_period_end) == (6, "GBP", date(2025, 12, 31))
+
+
+def test_incremental_falls_back_to_3y_base(ctx: NodeContext, annual: Callable[..., pd.DataFrame]) -> None:
+    frame = annual(*(_cr_row(10.0 + 2 * i, 60.0 + 10 * i) for i in range(4)))  # 2020..2023: no 5y base
+    out = CapitalReturns().run(ctx, annual=frame)
+    assert out.incremental_roic_pretax == pytest.approx((16 - 10) / (130 - 100))
+    short = annual(*(_cr_row(10.0 + 2 * i, 60.0 + 10 * i) for i in range(3)))  # no base within 6 months of 3y
+    assert CapitalReturns().run(ctx, annual=short).incremental_roic_pretax is None
+
+
+def test_incremental_none_when_capital_did_not_grow(
+    ctx: NodeContext, annual: Callable[..., pd.DataFrame]
+) -> None:
+    frame = annual(*(_cr_row(10.0 + i, 100.0 - 10 * i) for i in range(4)))
+    out = CapitalReturns().run(ctx, annual=frame)
+    assert out.incremental_roic_pretax is None
+    assert out.roic_pretax_mean is not None
+
+
+def test_roic_none_when_invested_capital_nonpositive(
+    ctx: NodeContext, annual: Callable[..., pd.DataFrame]
+) -> None:
+    negative = annual(*(_cr_row(10.0, -60.0) for _ in range(3)))  # invested capital -10
+    out = CapitalReturns().run(ctx, annual=negative)
+    assert (out.roic_pretax_mean, out.roic_pretax_min, out.roic_pretax_std) == (None, None, None)
+    assert out.incremental_roic_pretax is None
+    assert out.op_margin_min == pytest.approx(0.10)  # the margin does not need capital
+    mixed = annual(_cr_row(10.0, 60.0), _cr_row(10.0, -60.0), _cr_row(30.0, 160.0))  # IC 100, -10, 200
+    out = CapitalReturns().run(ctx, annual=mixed)
+    assert out.roic_pretax_mean == pytest.approx(0.125)  # the non-positive period is skipped, not zeroed
+    assert out.roic_pretax_min == pytest.approx(0.1)
+    assert out.roic_pretax_std is None  # two usable periods < 3
+
+
+def test_bank_without_operating_income_gives_none(
+    ctx: NodeContext, annual: Callable[..., pd.DataFrame]
+) -> None:
+    frame = annual(
+        *({"net_income": 10.0, "total_debt": 50.0, "total_equity": 100.0, "cash": 10.0} for _ in range(4))
+    )
+    out = CapitalReturns().run(ctx, annual=frame)
+    assert all(
+        getattr(out, f) is None
+        for f in CapitalReturns.output.model_fields
+        if f not in PeriodWindow.model_fields
+    )
+
+
+def test_capital_returns_empty_gives_zero_periods(
+    ctx: NodeContext, annual: Callable[..., pd.DataFrame]
+) -> None:
+    out = CapitalReturns().run(ctx, annual=annual())
+    assert (out.periods, out.first_period_end, out.last_period_end, out.currency) == (0, None, None, None)
+    assert all(
+        getattr(out, f) is None
+        for f in CapitalReturns.output.model_fields
+        if f not in PeriodWindow.model_fields
+    )
+
+
+def test_capital_returns_declares_kernels_and_not_memoized() -> None:
+    assert {safe_ratio, mean_std, invested_capital, incremental_return, statements.values} <= set(
+        CapitalReturns.code_deps
+    )
+    assert CapitalReturns.memoize is False
+    assert CapitalReturns.name == "capital_returns"
+    assert CapitalReturns.inputs == {"annual": "annual_fundamentals"}
