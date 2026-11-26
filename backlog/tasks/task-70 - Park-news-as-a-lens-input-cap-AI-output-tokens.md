@@ -1,9 +1,10 @@
 ---
 id: TASK-70
 title: Park news as a lens input; cap AI output tokens
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-11-26T09:25:35Z'
+updated_date: '2026-11-26T09:29:18Z'
 labels:
   - finance
   - core
@@ -59,3 +60,9 @@ Expected side effect: the prompts, output schema and profile fingerprints change
 - [ ] #3 New tests are pytest functions/fixtures; no network or real LLM calls
 - [ ] #4 documentation/design updated in the same change if behaviour differs from it
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Worker: dispatch ctx_ee1f2bee3060, worktree task-70 (Orca run run_5e68c868c3a6). Stale base 7454545 fast-forwarded to ba53f3d at start.
+<!-- SECTION:NOTES:END -->
