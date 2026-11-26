@@ -4,3 +4,4 @@ __pycache__/
 spikes/**/.spike_state/
 node_modules/
 packages/lensgraph-ui/dist/
+.env
