@@ -56,6 +56,7 @@ class Provenance(_Model):
     as_of: date | None = None
     backtest_valid: bool = True  # False if inputs may leak information from after `as_of`
     stance_samples: list[Stance] = []  # AI lenses: the stance of each sampled run, in order
+    glossary_terms: list[str] = []  # AI lenses: glossary entry ids injected into the prompt, sorted; empty when use_glossary is off
 
 
 class LensVerdict(_Model):

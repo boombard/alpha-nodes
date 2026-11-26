@@ -1,13 +1,19 @@
 """AINode: prompt assembly, the citation guard rail, retries, memoization and provenance."""
 
-from typing import Any
+import shutil
+from pathlib import Path
+from typing import Any, ClassVar
 
 import pytest
 from lensgraph import RunSpec, run
 from lensgraph.ai import AIAssessmentOut
+from lensgraph.glossary import Glossary, GlossaryError
+from lensgraph.llm import DEFAULT_PROFILES
 from lensgraph.plan import NodeKey, RunResult
 from lensgraph.verdict import LensVerdict
 from pydantic_ai.messages import ModelRequest, SystemPromptPart, ToolReturnPart, UserPromptPart
+from toy.registry import build_registry
+from toy.safety_lens import SafetyLens
 
 GOOD: dict[str, Any] = {
     "status": "ok",
@@ -247,3 +253,118 @@ def test_ai_lens_abstains_without_model_call(ai_registry, toy_candidates, toy_se
     assert verdict.status == "abstained"
     assert verdict.error == "critical input 'tox_notes' unavailable"
     assert verdict.provenance.model is None
+
+
+TOY_GLOSSARY = Path(__file__).parent / "toy" / "glossary"
+
+
+@pytest.fixture
+def glossary_registry(tmp_path):
+    """Factory: registry whose AI lens declares the term `growth-rate` of a toy glossary copy.
+
+    `edit(entry, old, new)` rewrites one entry of the copy first (the lens then sees the edit).
+    """
+
+    def make(edit: tuple[str, str, str] | None = None):
+        directory = tmp_path / f"glossary-{len(list(tmp_path.glob('glossary-*')))}"
+        shutil.copytree(TOY_GLOSSARY, directory)
+        if edit:
+            path = directory / f"{edit[0]}.md"
+            path.write_text(path.read_text().replace(edit[1], edit[2], 1))
+
+        class GlossarySafety(SafetyLens):
+            """SafetyLens with a toy glossary."""
+
+            glossary: ClassVar[Glossary | None] = Glossary.load(directory)
+            glossary_terms: ClassVar[frozenset[str]] = frozenset({"growth-rate"})
+
+        return build_registry(lenses=(GlossarySafety,))
+
+    return make
+
+
+def _system(profiles) -> str:
+    return "\n".join(_text_parts(profiles.model_for("test").calls[0], SystemPromptPart))
+
+
+def test_glossary_off_by_default_on_dev(
+    glossary_registry, s1, toy_services, scripted_profiles, tmp_path
+):
+    assert [DEFAULT_PROFILES[n].glossary for n in ("dev", "quality", "local")] == [False, False, True]
+    profiles = scripted_profiles(GOOD)
+    result = _run(glossary_registry(), s1, toy_services, profiles, tmp_path)
+    assert "## Terms" not in _system(profiles)
+    assert result.values[_key("S1")].provenance.glossary_terms == []
+
+
+def test_profile_glossary_on_adds_block_after_static_prompt(
+    glossary_registry, s1, toy_services, scripted_profiles, tmp_path
+):
+    profiles = scripted_profiles(GOOD, glossary=True)
+    _run(glossary_registry(), s1, toy_services, profiles, tmp_path)
+    system = _system(profiles)
+    assert system.index("Raise flags only") < system.index("## Terms")
+    assert "**Growth rate (GR)**: A per-hour fractional growth." in system
+    assert "Doubling time" not in system and "Toxicity note" not in system  # undeclared terms
+
+
+def test_node_param_overrides_profile(
+    glossary_registry, s1, toy_services, scripted_profiles, tmp_path
+):
+    on = scripted_profiles(GOOD, glossary=True)
+    _run(glossary_registry(), s1, toy_services, on, tmp_path, use_glossary=False)
+    assert "## Terms" not in _system(on)
+    off = scripted_profiles(GOOD)
+    _run(glossary_registry(), s1, toy_services, off, tmp_path, use_glossary=True)
+    assert "## Terms" in _system(off)
+
+
+def test_glossary_edit_changes_prompt_hash_and_memo_salt(
+    glossary_registry, s1, toy_services, scripted_profiles, tmp_path
+):
+    kwargs = {"use_glossary": True}
+    first = _run(glossary_registry(), s1, toy_services, scripted_profiles(GOOD), tmp_path, **kwargs)
+    edited = ("growth-rate", "Larger means faster", "Bigger means quicker")
+    second = _run(
+        glossary_registry(edited), s1, toy_services, scripted_profiles(GOOD), tmp_path, **kwargs
+    )
+    assert not second.results[_key("S1")].cache_hit
+    assert (
+        first.values[_key("S1")].provenance.prompt_hash
+        != second.values[_key("S1")].provenance.prompt_hash
+    )
+
+
+def test_unused_entry_edit_does_not_change_hash(
+    glossary_registry, s1, toy_services, scripted_profiles, tmp_path
+):
+    kwargs = {"use_glossary": True}
+    first = _run(glossary_registry(), s1, toy_services, scripted_profiles(GOOD), tmp_path, **kwargs)
+    edited = ("toxicity-note", "Weigh the wording", "Judge the wording")
+    second = _run(
+        glossary_registry(edited), s1, toy_services, scripted_profiles(GOOD), tmp_path, **kwargs
+    )
+    assert second.results[_key("S1")].cache_hit
+    assert (
+        first.values[_key("S1")].provenance.prompt_hash
+        == second.values[_key("S1")].provenance.prompt_hash
+    )
+
+
+def test_unknown_glossary_term_rejected_at_class_definition():
+    with pytest.raises(GlossaryError, match="nope"):
+
+        class Bad(SafetyLens):
+            """Declares a term the glossary lacks."""
+
+            glossary: ClassVar[Glossary | None] = Glossary.load(TOY_GLOSSARY)
+            glossary_terms: ClassVar[frozenset[str]] = frozenset({"nope"})
+
+
+def test_provenance_records_glossary_terms(
+    glossary_registry, s1, toy_services, scripted_profiles, tmp_path
+):
+    result = _run(
+        glossary_registry(), s1, toy_services, scripted_profiles(GOOD, glossary=True), tmp_path
+    )
+    assert result.values[_key("S1")].provenance.glossary_terms == ["growth-rate"]

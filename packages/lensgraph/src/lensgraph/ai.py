@@ -16,6 +16,7 @@ from pydantic_ai.exceptions import UnexpectedModelBehavior
 from pydantic_ai.settings import ModelSettings
 
 from .context import render_context, unavailable_inputs
+from .glossary import Glossary, GlossaryError
 from .hashing import content_hash
 from .lens import LensAssessment, LensNode
 from .llm import ProfileRegistry, describe_model
@@ -126,15 +127,30 @@ class AINode(LensNode):
     `flag_codes` (the closed list of flag codes the model may raise, if any). The model and
     settings come from the model profile named by `profile`, looked up in
     `ctx.services["profiles"]` (default: a plain `ProfileRegistry()`).
+
+    Optionally `glossary` plus `glossary_terms` (ids of the entries this lens uses) declare
+    glossary prompt notes; they are inserted into the system prompt, after the template, when
+    `use_glossary` (else the profile's `glossary` default) is on. See core.md, Glossary.
     """
 
     prompt: ClassVar[Path]
     variants: ClassVar[dict[str, Path]] = {}
     flag_codes: ClassVar[frozenset[str] | None] = None
+    glossary: ClassVar[Glossary | None] = None
+    glossary_terms: ClassVar[frozenset[str]] = frozenset()
     resource = "llm"
 
     profile: str = "dev"  # model profile name; see llm.py
     variant: str = "default"  # "default" (the `prompt`) or a key of `variants`; else rejected
+    use_glossary: bool | None = None  # insert glossary notes; None = the profile's default
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        """Reject declared glossary terms that the glossary lacks, at class definition."""
+        super().__init_subclass__(**kwargs)
+        if cls.glossary_terms:
+            if cls.glossary is None:
+                raise GlossaryError(f"{cls.__name__}: glossary_terms declared without a glossary")
+            cls.glossary._select(cls.glossary_terms)  # raises GlossaryError naming unknown ids
 
     @model_validator(mode="after")
     def _check_variant(self) -> Self:
@@ -148,18 +164,29 @@ class AINode(LensNode):
     def _template_path(self) -> Path:
         return self.variants.get(self.variant, self.prompt)
 
-    def _prompt_hash(self) -> str:
-        return content_hash(self._template_path().read_text())
+    def _glossary_ids(self, registry: ProfileRegistry) -> list[str]:
+        """Sorted glossary ids inserted into the prompt: the declared terms when on, else none."""
+        on = self.use_glossary if self.use_glossary is not None else registry.get(self.profile).glossary
+        return sorted(self.glossary_terms) if on and self.glossary is not None else []
+
+    def _prompt_hash(self, registry: ProfileRegistry) -> str:
+        """Hash of the rendered system prompt, so an edit to a used glossary entry changes it."""
+        return content_hash(self._system_prompt(registry))
 
     def memo_salt(self, services: Mapping[str, Any]) -> str:
-        """Profile fingerprint plus prompt-template hash; see core.md, Memoization (AI nodes)."""
+        """Profile fingerprint plus rendered-prompt hash; see core.md, Memoization (AI nodes)."""
         registry = _registry(services)
-        return content_hash([registry.fingerprint(self.profile), self._prompt_hash()])
+        return content_hash([registry.fingerprint(self.profile), self._prompt_hash(registry)])
 
-    def _system_prompt(self) -> str:
+    def _system_prompt(self, registry: ProfileRegistry) -> str:
+        """The static system prompt: the rendered template, then the glossary block when on."""
         template = _JINJA.from_string(self._template_path().read_text())
         codes = sorted(self.flag_codes) if self.flag_codes is not None else None
-        return template.render(lens=self.lens_name, flag_codes=codes)
+        prompt = template.render(lens=self.lens_name, flag_codes=codes)
+        ids = self._glossary_ids(registry)
+        if ids and self.glossary is not None:
+            prompt = f"{prompt.rstrip()}\n\n{self.glossary.prompt_block(ids)}"
+        return prompt
 
     def _depth_notes(self, inputs: Mapping[str, Any]) -> dict[str, str]:
         return {
@@ -187,7 +214,7 @@ class AINode(LensNode):
             registry=registry,
             profile_name=self.profile,
             output_type=AIAssessmentOut,
-            system_prompt=self._system_prompt(),
+            system_prompt=self._system_prompt(registry),
             user_message=user_message,
             validate=lambda out: guard_rail(out, citables, self.flag_codes),
         )
@@ -201,7 +228,8 @@ class AINode(LensNode):
             provenance_extra={
                 "model": extra["model"],
                 "model_settings": extra["model_settings"],
-                "prompt_hash": self._prompt_hash(),
+                "prompt_hash": self._prompt_hash(registry),
+                "glossary_terms": self._glossary_ids(registry),
                 "variant": self.variant,
                 "attempts": extra["attempts"],
                 "input_tokens": extra["input_tokens"],

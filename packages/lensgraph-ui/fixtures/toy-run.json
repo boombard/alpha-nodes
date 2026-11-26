@@ -73,6 +73,7 @@
                 "as_of": null,
                 "attempts": 0,
                 "backtest_valid": true,
+                "glossary_terms": [],
                 "input_hashes": {
                   "growth_rate": "2ffde053d982db220b1c7b5881cc79d08ce963330f02dda2b19e4922f6ab2cfe"
                 },
@@ -115,16 +116,17 @@
                 "as_of": null,
                 "attempts": 1,
                 "backtest_valid": true,
+                "glossary_terms": [],
                 "input_hashes": {
                   "growth_rate": "2ffde053d982db220b1c7b5881cc79d08ce963330f02dda2b19e4922f6ab2cfe",
                   "tox_notes": "60290af994e9abf7f8bed9a787b481324432bb09c54d7af5dbdf61804fdbd282"
                 },
                 "input_tokens": 153,
-                "lens_version": "64b020c809f65675",
+                "lens_version": "99822fde81123376",
                 "model": "function:_scripted:",
                 "model_settings": {},
                 "output_tokens": 20,
-                "prompt_hash": "0685ca927655926aadb2cea2a17a652569c190e79b566d5f12b047073d5827e2",
+                "prompt_hash": "56bbd09bbd3282ae0e0e65ebc28e48cf7ca3691b5892daed8e06f11934827083",
                 "stance_samples": [],
                 "variant": "default"
               },
@@ -156,8 +158,9 @@
             "as_of": null,
             "attempts": 1,
             "backtest_valid": true,
+            "glossary_terms": [],
             "input_hashes": {
-              "dossier": "683901e4286c14c5bab3da90430a6def5651801790998cb139bd7cb9a9e9ba70"
+              "dossier": "17709fc72b91aa7a956faf2927aa37c16d3710f03b5697c48a752175d69ae09d"
             },
             "input_tokens": 219,
             "lens_version": "086350ab594184ce",
@@ -239,6 +242,7 @@
                 "as_of": null,
                 "attempts": 0,
                 "backtest_valid": true,
+                "glossary_terms": [],
                 "input_hashes": {
                   "growth_rate": "ba11a289db070b309f4bbdd7151cf2af50703deacbc236f1fd34310fe369a312"
                 },
@@ -273,12 +277,13 @@
                 "as_of": null,
                 "attempts": 0,
                 "backtest_valid": true,
+                "glossary_terms": [],
                 "input_hashes": {
                   "growth_rate": "ba11a289db070b309f4bbdd7151cf2af50703deacbc236f1fd34310fe369a312",
                   "tox_notes": "5c28d529a964745c7ba2651b5591b0935543c054e7b00d25ed2139686c4a8ede"
                 },
                 "input_tokens": 0,
-                "lens_version": "64b020c809f65675",
+                "lens_version": "99822fde81123376",
                 "model": null,
                 "model_settings": {},
                 "output_tokens": 0,
@@ -314,8 +319,9 @@
             "as_of": null,
             "attempts": 1,
             "backtest_valid": true,
+            "glossary_terms": [],
             "input_hashes": {
-              "dossier": "0838eddf3ee76a950034467346b979c5ace9bdffb8c82c4f9f0174214cb032c4"
+              "dossier": "b1ceae3398d3c119cfb904d06dd54cb64ebdd0b8e096ffbf5829762c7d2d5be1"
             },
             "input_tokens": 209,
             "lens_version": "086350ab594184ce",
@@ -377,6 +383,7 @@
                 "as_of": null,
                 "attempts": 0,
                 "backtest_valid": true,
+                "glossary_terms": [],
                 "input_hashes": {},
                 "input_tokens": 0,
                 "lens_version": "98527bac59210a4e",
@@ -406,9 +413,10 @@
                 "as_of": null,
                 "attempts": 0,
                 "backtest_valid": true,
+                "glossary_terms": [],
                 "input_hashes": {},
                 "input_tokens": 0,
-                "lens_version": "64b020c809f65675",
+                "lens_version": "99822fde81123376",
                 "model": null,
                 "model_settings": {},
                 "output_tokens": 0,
@@ -444,8 +452,9 @@
             "as_of": null,
             "attempts": 1,
             "backtest_valid": true,
+            "glossary_terms": [],
             "input_hashes": {
-              "dossier": "d7cf3cc3e9d8c23f740e407ed3eb1dd1850ec4db9b6122c3b92164ee7a490343"
+              "dossier": "63396aa512b6e24085372b71eaafd3eb91a9dc01c034a369575a20587f72afd8"
             },
             "input_tokens": 208,
             "lens_version": "086350ab594184ce",

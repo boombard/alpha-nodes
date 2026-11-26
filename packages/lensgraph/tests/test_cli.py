@@ -367,3 +367,22 @@ def test_cli_sources_status_lists_attempts_and_suspect(tmp_path, capsys):
 def test_cli_sources_status_without_store_is_config_error(tmp_path):
     result = CliRunner().invoke(main, ["sources", "status", "--store", str(tmp_path)])
     assert result.exit_code == 2
+
+
+def test_glossary_command_lists_drafts_first():
+    result = CliRunner().invoke(main, ["glossary", str(TESTS_DIR / "toy" / "glossary")])
+    assert result.exit_code == 0
+    rows = [line.split() for line in result.stdout.splitlines()]
+    assert [r[:2] for r in rows] == [
+        ["draft", "growth-rate"],
+        ["draft", "toxicity-note"],
+        ["verified", "doubling-time"],
+    ]
+    assert rows[0][2:] == ["GrowthResult.rate"]
+
+
+def test_glossary_command_fails_on_invalid(tmp_path):
+    (tmp_path / "bad.md").write_text("no frontmatter here\n")
+    result = CliRunner().invoke(main, ["glossary", str(tmp_path)])
+    assert result.exit_code == 1
+    assert "bad.md" in result.stderr

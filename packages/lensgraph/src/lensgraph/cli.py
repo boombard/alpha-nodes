@@ -21,6 +21,7 @@ from pydantic import ValidationError
 
 from .config import RunConfig, Settings, load_object
 from .executor.base import RunAborted
+from .glossary import Glossary, GlossaryError
 from .graph import GraphError
 from .plan import RunResult
 from .registry import NodeRegistry
@@ -129,6 +130,23 @@ def report_command(run_id: str, store: Path | None, out: Path | None) -> None:
     if not (root / "index.duckdb").exists():
         raise CliError(f"no run index in {root}")
     click.echo(f"report: {_write_report(root, run_id, out or root / 'reports' / run_id, None)}")
+
+
+@main.command("glossary")
+@click.argument("directory", type=click.Path(path_type=Path, exists=True, file_okay=False))
+def glossary_command(directory: Path) -> None:
+    """Validate the glossary in DIRECTORY and list `status  id  fields`, drafts first.
+
+    Exits 1 with the error on stderr when an entry is invalid (core.md, Glossary).
+    """
+    try:
+        glossary = Glossary.load(directory)
+    except GlossaryError as exc:
+        click.echo(f"error: {exc}", err=True)
+        sys.exit(1)
+    rows = sorted(glossary.entries.values(), key=lambda e: (e.status != "draft", e.id))
+    for entry in rows:
+        click.echo("  ".join(part for part in (entry.status, entry.id, ", ".join(entry.fields)) if part))
 
 
 @main.group("sources")

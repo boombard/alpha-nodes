@@ -145,8 +145,8 @@ Rules:
   declared function or module, in declared order. With `code_deps` empty the hash is unchanged.
   Anything still invisible (undeclared helpers, third-party code) has the escape hatch:
   `--invalidate <node>` (that node and descendants) and `--no-cache`.
-- AI nodes: the key includes model id, prompt template hash, prompt variant, and the
-  rendered context hash. Identical calls are never paid for twice.
+- AI nodes: the key includes model id, hash of the rendered system prompt (template plus the glossary
+  block when on), prompt variant, and the rendered context hash. Identical calls are never paid for twice.
 
 ## Verdicts and dossiers
 
@@ -179,7 +179,8 @@ class LensVerdict(BaseModel):
     error: str | None
     provenance: Provenance                         # model, prompt hash/variant, input hashes,
                                                    # attempts, tokens/cost, as_of, backtest_valid,
-                                                   # stance_samples (AI lenses: one per sampled run)
+                                                   # stance_samples (AI lenses: one per sampled run),
+                                                   # glossary_terms (AI lenses: entry ids in the prompt)
 
 class Dossier(BaseModel):
     candidate: CandidateRef
@@ -307,6 +308,89 @@ in config and are selected per run (`llm_profile: dev`) or per lens.
 - In as-of runs, AI nodes are skipped by default (`ai_in_backtests: false`). If enabled,
   `provenance.backtest_valid = false`.
 - Token usage and cost are recorded per call, and are aggregable per run and per campaign.
+
+## Glossary (user decision, 2026-11-26)
+
+A domain ships a **glossary**: a directory of Markdown files, one per term, each with YAML
+frontmatter. It has two readers:
+
+- **Humans**: what a term means, how we compute it, why it matters, where it misleads.
+- **AI nodes (opt-in)**: a short prompt note per term, inserted into the system prompt to
+  disambiguate terms for weaker models. The note is interpretive guidance only; the model never
+  computes (AI nodes, guard rails).
+
+It is the single home of per-term definitions. Design docs keep policy (why a convention was
+chosen) and link to entries; kernel and field docstrings point to their entry.
+
+**Entry file** `<id>.md` (the file stem is the id, kebab-case):
+
+```yaml
+---
+id: fcf                       # = file stem
+name: Free cash flow
+abbreviations: [FCF]
+aliases: [free cash flow to equity (loosely)]
+kind: money                   # free text, domain-defined (money, ratio, growth, count, date, ...)
+fields: [CashGenerationResult.fcf]     # result-model fields that report this term ("Model.field")
+implemented_by: [alpha_nodes.nodes.fundamental_calcs._fcf]   # dotted paths; must import
+related: [owner-earnings, fcf-conversion]                    # other ids; must exist
+status: draft                 # draft (written from model knowledge) | verified (researched)
+sources: []                   # required non-empty when status is verified
+---
+```
+
+Frontmatter also carries `summary` (one human sentence, at most 30 words: the tooltip text) and
+`category` (navigation group, domain-defined, e.g. profitability, leverage, valuation, price).
+
+Body sections, in this order (`##` headings; required unless marked optional). Each heading maps
+to a fixed section key, which is what code and the browser use; the heading text is display only:
+Definition (`definition`) · How we calculate it (`calculation`) · Why it matters (`relevance`) ·
+Shortcomings and pitfalls (`shortcomings`) · Provider notes (`provider_notes`, optional) ·
+Similar terms (`similar`) · Sources (`sources`, optional while draft) · Prompt note (`prompt_note`).
+The Prompt note is at most 60 words and must not contain a formula to apply (no `$` math).
+
+**Browser-ready format** (so a glossary page and run-view links can be added later without
+reformatting entries):
+- Bodies are CommonMark only: no raw HTML (inside code spans it is fine), no templating, no
+  images for now.
+- Formulas use KaTeX-compatible math: inline `$...$`, display `$$...$$` (readable as plain text in
+  an editor; rendered in the browser). Delimiters must balance (validated). A literal dollar sign is written `\$`.
+- Links between entries are relative Markdown links, `[owner earnings](owner-earnings.md)`: they
+  work in editors and on GitHub, and the browser rewrites `*.md` to its own route. Every link must
+  resolve to an entry (validated).
+- `Glossary.export() -> GlossaryExport` is the contract for the browser, the same pattern as
+  RunView: a pydantic model (`schema_version`, `content_hash`, entries with frontmatter, `summary`,
+  and sections as Markdown strings keyed by section key), serialised to `glossary.json`; its TS
+  types are generated like RunView's when the UI work happens.
+- Field linking needs nothing new: entries list `fields` as `ResultModel.field`
+  (`Glossary.by_field()`), and the run-view builder knows each cited output's model, so it can
+  attach the term id to a field cite.
+- Later (not now): a standalone glossary page in the run view app, term links and tooltips on
+  cited fields, and `run.json` embedding the subset of entries a run cited (with the
+  `content_hash`), so an old report shows the definitions as they were when it ran.
+
+**Mechanics (lensgraph, domain-free):**
+
+- `GlossaryEntry` (pydantic: frontmatter fields + `sections`, keyed by the fixed section keys)
+  and `Glossary.load(directory) -> Glossary` validate everything above: id = stem, required
+  headings present, `related` ids exist, `sources` non-empty for `verified`, no field claimed by
+  two entries, prompt note length, no raw HTML, balanced math, resolvable relative links. Every
+  failure is a `GlossaryError` naming the file. `implemented_by` resolution is checked by
+  `Glossary.check_imports()` (a domain test calls it; loading never imports domain code).
+- `Glossary.prompt_block(ids) -> str`: "## Terms" then, per id in sorted order,
+  `**<name> (<abbreviations>)**: <prompt note>`. Deterministic; escaped dollars (`\$`) are
+  unescaped in the prompt.
+- `AINode` gains `glossary: ClassVar[Glossary | None] = None` and
+  `glossary_terms: ClassVar[frozenset[str]] = frozenset()` (unknown ids raise `GlossaryError` at
+  class definition), and a param `use_glossary: bool | None = None` (None = the profile's
+  default). `LLMProfile` gains `glossary: bool = False` (`local` defaults to true; `dev`,
+  `quality` false). When on, the block is appended to the system prompt after the template's
+  static content, so it stays static per lens and prompt caching still applies.
+- **Hashing:** the prompt hash is the hash of the rendered system prompt (template + glossary
+  block), so editing an entry the lens uses reruns that lens and nothing else. Provenance
+  records `prompt_hash` and `glossary_terms` used (sorted; empty when off).
+- `lensgraph glossary DIR` lists entries as `status  id  fields`, drafts first, and exits
+  non-zero on a validation error.
 
 ## Deterministic lenses
 
